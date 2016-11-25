@@ -30,9 +30,10 @@ Root is also necessary, as these tools need root to work. If you don't grant roo
 
 ##Installation:
 Make sure:
-* you are rooted. SuperSU is required. If you are on CM, install SuperSU.
+* you are on Android 5+
+* you are rooted. SuperSU is required. If you are on CM, install SuperSU
 * have installed busybox (opened and installed the tools)
-* have a firmware to support Monitor Mode.
+* have a firmware to support Monitor Mode
 Run ifconfig to find out the name of your monitor mode interface.
 
 ####Download the latest version [here](https://github.com/chrisk44/Hijacker/releases).
