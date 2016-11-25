@@ -35,6 +35,8 @@ Make sure:
 * have a firmware to support Monitor Mode.
 Run ifconfig to find out the name of your monitor mode interface.
 
+####Download the latest version [here](https://github.com/chrisk44/Hijacker/releases).
+
 Run Hijacker and go to Settings. Here you can configure your interface name (the one you found using ifconfig), commands to run to enable or disable monitor mode (optional, leave them blank if you don't want to use them), directories for the tools (in case you installed them manually and they are not accessible without an absolute path) and many more. You can also test the configuration to make sure everything works correctly.
 After configuring everything, click the "Test tools" option to run a test. If all the tools pass, you are good to go.
 
