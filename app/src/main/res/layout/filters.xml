@@ -1,0 +1,237 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:padding="10dp"
+    android:id="@+id/filterll1">
+
+    <CheckBox
+        android:text="Show Access Points"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:id="@+id/ap_cb"
+        android:layout_weight="1"
+        android:checked="true" />
+
+    <CheckBox
+        android:text="Show Stations"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:id="@+id/st_cb"
+        android:checked="true" />
+
+    <CheckBox
+        android:text="Show non-associated stations"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:id="@+id/st_na_cb"
+        android:checked="true" />
+
+    <TextView
+        android:text="Channels:"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:id="@+id/textView6"
+        android:textColor="@android:color/white"
+        android:textSize="18sp"
+        android:padding="5dp" />
+
+    <LinearLayout
+        android:orientation="horizontal"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
+        <CheckBox
+            android:text="1"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:id="@+id/cb_1"
+            android:layout_weight="1" />
+
+        <CheckBox
+            android:text="2"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:id="@+id/cb_2"
+            android:layout_weight="1" />
+
+        <CheckBox
+            android:text="3"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:id="@+id/cb_3"
+            android:layout_weight="1" />
+
+        <CheckBox
+            android:text="4"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:id="@+id/cb_4"
+            android:layout_weight="1" />
+
+        <CheckBox
+            android:text="5  "
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:id="@+id/cb_5"
+            android:layout_weight="1" />
+    </LinearLayout>
+
+    <LinearLayout
+        android:orientation="horizontal"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
+        <CheckBox
+            android:text="6"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:id="@+id/cb_6"
+            android:layout_weight="1" />
+
+        <CheckBox
+            android:text="7"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:id="@+id/cb_7"
+            android:layout_weight="1" />
+
+        <CheckBox
+            android:text="8"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:id="@+id/cb_8"
+            android:layout_weight="1" />
+
+        <CheckBox
+            android:text="9"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:id="@+id/cb_9"
+            android:layout_weight="1" />
+
+        <CheckBox
+            android:text="10"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:id="@+id/cb_10"
+            android:layout_weight="1" />
+    </LinearLayout>
+
+    <LinearLayout
+        android:orientation="horizontal"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
+        <CheckBox
+            android:text="11"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:id="@+id/cb_11"
+            android:layout_weight="1" />
+
+        <CheckBox
+            android:text="12"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:id="@+id/cb_12"
+            android:layout_weight="1" />
+
+        <CheckBox
+            android:text="13"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:id="@+id/cb_13"
+            android:layout_weight="1" />
+
+        <CheckBox
+            android:text="14"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:id="@+id/cb_14"
+            android:layout_weight="1" />
+
+        <CheckBox
+            android:text="All"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:id="@+id/cb_all"
+            android:layout_weight="1"
+            android:checked="true" />
+    </LinearLayout>
+    <TextView
+        android:text="Security:"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:textColor="@android:color/white"
+        android:textSize="18sp"
+        android:padding="5dp" />
+
+    <LinearLayout
+        android:orientation="horizontal"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
+        <CheckBox
+            android:text="OPN"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:id="@+id/cb_opn"
+            android:layout_weight="1"
+            android:checked="true"  />
+
+        <CheckBox
+            android:text="WEP"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:id="@+id/cb_wep"
+            android:layout_weight="1"
+            android:checked="true"  />
+
+        <CheckBox
+            android:text="WPA/WPA2"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:id="@+id/cb_wpa"
+            android:layout_weight="1"
+            android:checked="true"  />
+
+    </LinearLayout>
+
+    <LinearLayout
+        android:orientation="horizontal"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
+        <TextView
+            android:text="Power:"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textColor="@android:color/white"
+            android:textSize="18sp"
+            android:padding="5dp"
+            android:layout_weight="0" />
+
+        <TextView
+            android:text="-100"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:id="@+id/pwr"
+            android:textSize="18sp"
+            android:textColor="@android:color/white" />
+
+    </LinearLayout>
+    <SeekBar
+        style="@style/Widget.AppCompat.SeekBar"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:max="120"
+        android:progress="1"
+        android:id="@+id/seekBar"
+        android:indeterminate="false"
+        android:layout_weight="1" />
+
+</LinearLayout>

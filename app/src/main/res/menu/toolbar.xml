@@ -1,0 +1,37 @@
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <item
+        android:id="@+id/filter"
+        android:icon="@drawable/filter"
+        android:title="Filter"
+        app:showAsAction="ifRoom"/>
+
+    <item
+        android:id="@+id/stop_run"
+        android:icon="@drawable/stop"
+        android:title="Stop"
+        app:showAsAction="ifRoom"/>
+
+    <item android:id="@+id/reset"
+        android:title="Clear"
+        android:icon="@drawable/clear"
+        app:showAsAction="ifRoom"/>
+
+    <item android:id="@+id/stop_aireplay"
+        android:title="Stop Aireplay"
+        android:icon="@drawable/stop_aireplay"
+        app:showAsAction="ifRoom"/>
+
+    <item android:id="@+id/bf"
+        android:title="Start Beacon Flooding" />
+
+    <item android:id="@+id/ados"
+        android:title="Start Authentication DoS"
+        app:showAsAction="never"/>
+
+    <item android:id="@+id/settings"
+        android:title="Settings"
+        app:showAsAction="never" />
+
+</menu>

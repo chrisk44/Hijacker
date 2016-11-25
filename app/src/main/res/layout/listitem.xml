@@ -1,0 +1,83 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:padding="8dp">
+
+    <ImageView
+        android:layout_width="wrap_content"
+        android:layout_height="match_parent"
+        app:srcCompat="@drawable/ap2"
+        android:id="@+id/iv"
+        android:adjustViewBounds="true"
+        android:maxHeight="100dp"
+        android:maxWidth="50dp"
+        android:paddingBottom="7dp"
+        android:paddingLeft="7dp"
+        android:paddingRight="10dp"
+        android:paddingTop="7dp" />
+
+    <LinearLayout
+        android:orientation="vertical"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+        <LinearLayout
+            android:orientation="horizontal"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent">
+
+            <TextView
+                android:id="@+id/top_left"
+                android:text="Essid"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textColor="?android:attr/textColorPrimary"
+                android:textSize="19sp"
+                android:lines="1"
+                android:layout_gravity="center_vertical" />
+
+            <TextView
+                android:text="Manufacturer"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginRight="5dp"
+                android:id="@+id/top_right"
+                android:gravity="right"
+                android:layout_gravity="right|center_vertical"
+                android:layout_weight="1"
+                android:maxLines="2" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:orientation="horizontal"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layoutDirection="rtl">
+
+            <TextView
+                android:layout_height="wrap_content"
+                android:layout_width="wrap_content"
+                android:id="@+id/bottom_right"
+                android:text="asdfsdfsdfsfsdfsdf"
+                android:layout_marginRight="5dp"
+                android:gravity="right"
+                android:maxLines="2"
+                android:layout_gravity="center_vertical" />
+
+            <TextView
+                android:layout_height="wrap_content"
+                android:layout_width="match_parent"
+                android:id="@+id/bottom_left"
+                android:textSize="14sp"
+                android:text="00:11:22:33:44:55"
+                android:gravity="left"
+                android:maxLines="2"
+                android:layout_gravity="center_vertical" />
+
+        </LinearLayout>
+
+    </LinearLayout>
+
+</LinearLayout>

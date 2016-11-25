@@ -1,0 +1,125 @@
+<resources>
+    <string name="app_name" translatable="false">Hijacker</string>
+
+    <string name="exit_dialog_title">Exit?</string>
+    <string name="exit_dialog_message">Airodump, aireplay and mdk will stop. Are you sure?</string>
+
+    <string name="reset_dialog_title">Reset Preferences?</string>
+
+    <string name="notification_title">Hijacker is running in the background</string>
+    <string name="stop_attacks">Stop attacks</string>
+    <string name="stopped_to_capture">Stopped aireplay to capture handshake…</string>
+    <string name="checking">Checking cap file…</string>
+    <string name="handshake_captured">WPA handshake captured. Saved in file </string>
+
+    <string name="disclaimer">It is extremely illegal to use this application against networks for which you don\'t have permission.
+        You can use it only on YOUR network or a network that you are authorized to.
+        I am not responsible for how you use this application and any damages you may cause.\nConsider yourself warned.</string>
+
+    <string name="first_run">This application is a Graphical User Interface for the wireless auditing tools airodump-ng, aireplay-ng, aircrack-ng and mdk3 and requires a Monitor Mode enabled WiFi interface. Only some android devices support this but none of them natively.
+        You need to use a custom firmware (bcmon, Nexmon) so that your wireless adapter can be used in Monitor Mode. External adapters can also be used.
+        You can configure your interface\'s name in Settings. This app requires root privileges to run the tools.
+        If you don\'t grant them, it will hang. Don\'t ask me why…\nYou can go to Settings and configure the application (such as install the tools), or you can go to the Home Screen and use the defaults.</string>
+
+    <string name="iface">wlan0</string>
+    <string name="prefix">LD_PRELOAD=/vendor/lib/libfakeioctl.so</string>
+    <string name="airodump_dir">airodump-ng</string>
+    <string name="aireplay_dir">aireplay-ng -D</string>
+    <string name="aircrack_dir">aircrack-ng</string>
+    <string name="mdk3_dir">mdk3</string>
+    <string name="cap_dir">/sdcard/cap</string>
+    <string name="enable_monMode">nexutil -m true</string>
+    <string name="disable_monMode">nexutil -m false</string>
+    <string name="deauthWait">20</string>
+    <string name="aireplay_sleep">0</string>
+    <string name="showLog">false</string>
+    <string name="show_notif">true</string>
+    <string name="show_details">true</string>
+    <string name="airOnStartup">true</string>
+    <string name="debug">false</string>
+    <string name="confirm_exit">true</string>
+    <string name="delete_extra">true</string>
+
+    <!-- Strings related to Settings -->
+    <string name="general">General</string>
+    <string name="tools">Tools</string>
+    <string name="other">Other</string>
+
+    <string name="startup_title">Run Airodump on startup</string>
+
+    <string name="iface_title">Interface</string>
+    <string name="iface_sum">Monitor Mode interface</string>
+    <string name="iface_desc">The WiFi interface that is Monitor Mode enabled.</string>
+
+    <string name="mm_title">Enable Monitor Mode</string>
+    <string name="mm_sum">Command to enable monitor mode (leave blank if none)</string>
+    <string name="mm_desc">Command to enable monitor mode specific to your interface. Will be run AS ROOT every time airodump-ng starts.</string>
+
+    <string name="mm2_title">Disable Monitor Mode</string>
+    <string name="mm2_sum">Command to disable monitor mode (leave blank if none)</string>
+    <string name="mm2_desc">Command to disable monitor mode specific to your interface. Will be run AS ROOT when the app is being killed.</string>
+
+    <string name="prefix_title">Prefix</string>
+    <string name="prefix_sum">Prefix for every command</string>
+    <string name="prefix_desc">A prefix for every command that is run and needs monitor mode. (LD_PRELOAD)</string>
+
+    <string name="cap_title">Cap files directory</string>
+    <string name="cap_sum">Directory to save cap files (eg. /sdcard/cap)</string>
+    <string name="cap_desc">The directory to save the cap file when cracking WPA or WEP. This needs to be a directory that you have access to and won\'t be deleted (eg. not a tmp folder). It will be created and written to, and also a \"rm -rf …\" is ran in it as root so be careful what you enter here. Don\'t end it with /</string>
+
+    <string name="delete_extra_title">Delete extra cap files</string>
+    <string name="delete_extra_sum">Delete .csv and .netxml files created by airodump when cracking a network</string>
+
+    <string name="deauthWait_title">WPA Deauth wait (sec)</string>
+    <string name="deauthWait_sum">Time to deauthenticate clients when cracking WPA</string>
+    <string name="deauthWait_desc">How long aireplay-ng --deauth will be run when cracking a WPA network before it stops to capture the handshake.</string>
+
+    <string name="aireplay_title">Aireplay start delay (ms)</string>
+    <string name="aireplay_sum">Time to wait when starting aireplay</string>
+    <string name="aireplay_desc">If the -D option is not used with aireplay-ng (by default it is), then we need to wait for airodump-ng to lock a channel before we start aireplay-ng.</string>
+
+    <string name="notif_title">Notification</string>
+    <string name="notif_sum">Show notification when the app is in the background</string>
+
+    <string name="notif_details_title">Show details</string>
+    <string name="notif_details_sum">Show additional details about aireplay and mdk in notification</string>
+
+    <string name="log">Show Log</string>
+
+    <string name="debug_title">Logcat Messages</string>
+    <string name="debug_sum">Print debugging messages to logcat. Messages about exceptions will be printed anyway.</string>
+
+    <string name="exit_title">Confirm Exit</string>
+    <string name="exit_sum">Show a confirmation dialog when pressing back from the home screen</string>
+
+    <string name="airc_title" translatable="false">Aircrack</string>
+    <string name="airc_sum">aircrack-ng absolute path</string>
+    <string name="airc_desc">If aircrack-ng is not installed somewhere that PATH points to, you need to specify the absolute aircrack-ng filename here. Options can be used too. Make sure the file is executable.</string>
+
+    <string name="aird_title" translatable="false">Airodump</string>
+    <string name="aird_sum">airodump-ng absolute path</string>
+    <string name="aird_desc">If airodump-ng is not installed somewhere that PATH points to, you need to specify the absolute airodump-ng filename here. Options can be used too. Make sure the file is executable.</string>
+
+    <string name="aire_title" translatable="false">Aireplay</string>
+    <string name="aire_sum">aireplay-ng absolute path</string>
+    <string name="aire_desc">If aireplay-ng is not installed somewhere that PATH points to, you need to specify the absolute aireplay-ng filename here. Options can be used too. Make sure the file is executable.</string>
+
+    <string name="mdk_title" translatable="false">MDK3</string>
+    <string name="mdk_sum">mdk3 absolute path</string>
+    <string name="mdk_desc">If mdk3 is not installed somewhere that PATH points to, you need to specify the absolute mdk3 filename here. Options can be used too. Make sure the file is executable.</string>
+
+    <string name="copy_sample_title">Copy test command</string>
+
+    <string name="test_title">Test tools</string>
+    <string name="test_sum">Run all the tools to make sure that the settings are correct. Any running tasks will be stopped.</string>
+
+    <string name="install_tools_title">Install tools</string>
+    <string name="install_tools_sum">Install the required tools (aircrack-ng suite, mdk3, wireless tools</string>
+
+    <string name="install_nexmon_title">Install Nexmon</string>
+    <string name="install_nexmon_sum">Install the Nexmon driver and its management utility (nexutil at /su/xbin)</string>
+
+    <string name="reset_title">Reset Preferences</string>
+    <string name="version_title">Version</string>
+    <string name="version">0.7</string>
+</resources>

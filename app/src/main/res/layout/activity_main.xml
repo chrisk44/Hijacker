@@ -1,0 +1,94 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/activity_main"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context="com.hijacker.MainActivity"
+    android:animateLayoutChanges="true">
+
+
+    <android.support.v7.widget.Toolbar
+        android:id="@+id/my_toolbar"
+        android:layout_width="match_parent"
+        android:layout_height="?attr/actionBarSize"
+        android:background="?attr/colorPrimary"
+        android:elevation="4dp"
+        android:theme="@style/ThemeOverlay.AppCompat.ActionBar"
+        app:popupTheme="@style/ThemeOverlay.AppCompat.Light">
+
+        <ImageView
+            android:layout_height="@android:dimen/app_icon_size"
+            app:srcCompat="@drawable/ap2"
+            android:adjustViewBounds="false"
+            android:layout_width="48dip"
+            android:paddingStart="20dp"
+            android:paddingBottom="10dp"
+            android:paddingTop="10dp"
+            android:paddingEnd="5dp"
+            android:clickable="true"
+            android:onClick="onAPStats" />
+
+        <TextView
+            android:text="0"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:id="@+id/ap_count"
+            android:textColor="@android:color/white"
+            android:textSize="18sp"
+            android:clickable="true"
+            android:onClick="onAPStats"  />
+
+        <ImageView
+            android:layout_height="@android:dimen/app_icon_size"
+            app:srcCompat="@drawable/st2"
+            android:adjustViewBounds="false"
+            android:layout_width="48dip"
+            android:paddingStart="20dp"
+            android:paddingBottom="10dp"
+            android:paddingTop="10dp"
+            android:paddingEnd="5dp" />
+
+        <TextView
+            android:text="0"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:id="@+id/st_count"
+            android:textColor="@android:color/white"
+            android:textSize="18sp" />
+
+    </android.support.v7.widget.Toolbar>
+
+    <ProgressBar
+        style="?android:attr/progressBarStyleHorizontal"
+        android:id="@+id/progressBar"
+        android:layout_width="match_parent"
+        android:progressDrawable="@drawable/progress_horizontal_holo_blue_dark"
+        android:layout_height="wrap_content"
+        android:minHeight="5dp"
+        android:minWidth="0dp"
+        android:layout_below="@+id/my_toolbar"
+        android:maxHeight="5dp" />
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:id="@+id/tv"
+        android:layout_below="@+id/progressBar"
+        android:textSize="12sp"
+        android:clickable="true"
+        android:onClick="onClearLog"
+        android:paddingLeft="5dp"
+        android:paddingRight="5dp" />
+
+    <fragment
+        android:id="@+id/fragment1"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:name="com.hijacker.MyListFragment"
+        android:layout_below="@+id/tv"
+        android:layout_marginTop="3dp" />
+
+</RelativeLayout>
