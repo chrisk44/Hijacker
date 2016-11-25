@@ -33,7 +33,8 @@ Make sure:
 * you are on Android 5+
 * you are rooted. SuperSU is required. If you are on CM, install SuperSU
 * have installed busybox (opened and installed the tools)
-* have a firmware to support Monitor Mode
+* have a firmware to support Monitor Mode on your wireless interface
+
 Run ifconfig to find out the name of your monitor mode interface.
 
 ####Download the latest version [here](https://github.com/chrisk44/Hijacker/releases).
