@@ -23,68 +23,6 @@ import static com.hijacker.MainActivity.shell3_in;
 import static com.hijacker.MainActivity.su_thread;
 
 public class InstallToolsDialog extends DialogFragment {
-    /*@Override
-    public Dialog onCreateDialog(Bundle savedInstanceState) {
-        AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
-        builder.setTitle(R.string.install_tools_title);
-        builder.setNegativeButton("Back", new DialogInterface.OnClickListener() {
-            public void onClick(DialogInterface dialog, int id) {}
-        });
-        builder.setItems(R.array.install_locations, new DialogInterface.OnClickListener() {
-            @Override
-            public void onClick(DialogInterface dialog, int which) {
-                if(shell==null){
-                    su_thread.start();
-                    try{
-                        //Wait for su shells to spawn
-                        su_thread.join();
-                    }catch(InterruptedException ignored){}
-                }
-                String dest = "/su/xbin";
-                switch(which){
-                    case 0:
-                        dest = "/system/bin";
-                        break;
-                    case 1:
-                        dest = "/system/xbin";
-                        break;
-                    case 2:
-                        dest = "/su/bin";
-                        break;
-                    case 3:
-                        dest = "/su/xbin";
-                        break;
-                }
-                shell3_in.print("cd " + path + "\nrm !(oui.txt)\n");
-                shell3_in.flush();
-                shell3_in.print("busybox mount -o rw,remount,rw /system\n");
-                shell3_in.flush();
-                extract("airbase-ng", dest);
-                extract("aircrack-ng", dest);
-                extract("aireplay-ng", dest);
-                extract("airodump-ng", dest);
-                extract("besside-ng", dest);
-                extract("ivstools", dest);
-                extract("iw", dest);
-                extract("iwconfig", dest);
-                extract("iwlist", dest);
-                extract("iwpriv", dest);
-                extract("kstats", dest);
-                extract("makeivs-ng", dest);
-                extract("mdk3", dest);
-                extract("nc", dest);
-                extract("packetforge-ng", dest);
-                extract("wesside-ng", dest);
-                extract("wpaclean", dest);
-                extract("libfakeioctl.so", "/vendor/lib");
-                shell3_in.print("busybox mount -o ro,remount,ro /system\n");
-                shell3_in.flush();
-                dismiss();
-                Toast.makeText(getActivity().getApplicationContext(), "Installed tools at " + dest, Toast.LENGTH_LONG).show();
-            }
-        });
-        return builder.create();
-    }*/
     View view;
     @Override
     public Dialog onCreateDialog(Bundle savedInstanceState) {

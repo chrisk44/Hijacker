@@ -8,10 +8,7 @@ import android.support.v7.app.AlertDialog;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
-import android.widget.CheckBox;
 import android.widget.EditText;
-import android.widget.SeekBar;
-import android.widget.TextView;
 import android.widget.Toast;
 
 import java.io.File;
@@ -20,18 +17,10 @@ import java.io.IOException;
 import java.io.InputStream;
 
 import static com.hijacker.MainActivity.debug;
-import static com.hijacker.MainActivity.opn;
 import static com.hijacker.MainActivity.path;
-import static com.hijacker.MainActivity.pwr_filter;
 import static com.hijacker.MainActivity.shell;
 import static com.hijacker.MainActivity.shell3_in;
-import static com.hijacker.MainActivity.show_ap;
-import static com.hijacker.MainActivity.show_ch;
-import static com.hijacker.MainActivity.show_na_st;
-import static com.hijacker.MainActivity.show_st;
 import static com.hijacker.MainActivity.su_thread;
-import static com.hijacker.MainActivity.wep;
-import static com.hijacker.MainActivity.wpa;
 
 public class InstallFirmwareDialog extends DialogFragment {
     View view;
@@ -54,11 +43,10 @@ public class InstallFirmwareDialog extends DialogFragment {
             public void onClick(DialogInterface dialog, int which) {
                 if(shell==null){
                     su_thread.start();
-                    while(su_thread.isAlive()){}
-                    /*try{
+                    try{
                         //Wait for su shells to spawn
                         su_thread.join();
-                    }catch(InterruptedException ignored){}*/
+                    }catch(InterruptedException ignored){}
                 }
                 String firm_location = ((EditText)view.findViewById(R.id.firm_location)).getText().toString();
                 String util_location = ((EditText)view.findViewById(R.id.util_location)).getText().toString();
