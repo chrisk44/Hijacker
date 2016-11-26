@@ -12,6 +12,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 
+import static com.hijacker.MainActivity.debug;
 import static com.hijacker.MainActivity.inSettings;
 import static com.hijacker.MainActivity.load;
 import static com.hijacker.MainActivity.main;
@@ -71,10 +72,12 @@ public class SettingsFragment extends PreferenceFragment {
                         su_thread.join();
                     }catch(InterruptedException ignored){}
                 }
-                shell3_in.print("cp -n /vendor/firmware/fw_bcmdhd.bin /sdcard/fw_bcmdhd.bin.original\n");
+                shell3_in.print("mount -o rw,remount,rw /system\n");
                 shell3_in.flush();
                 extract("fw_bcmdhd.bin", "/vendor/firmware");
                 extract("nexutil", "/su/xbin");
+                shell3_in.print("mount -o ro,remount,ro /system\n");
+                shell3_in.flush();
                 Toast.makeText(getActivity().getApplicationContext(), "Installed firmware and utility", Toast.LENGTH_LONG).show();
                 return false;
             }

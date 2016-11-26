@@ -13,6 +13,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 
+import static com.hijacker.MainActivity.debug;
 import static com.hijacker.MainActivity.path;
 import static com.hijacker.MainActivity.shell;
 import static com.hijacker.MainActivity.shell3_in;
@@ -53,6 +54,10 @@ public class InstallToolsDialog extends DialogFragment {
                         dest = "/su/xbin";
                         break;
                 }
+                shell3_in.print("cd " + path + "\nrm !(oui.txt)\n");
+                shell3_in.flush();
+                shell3_in.print("mount -o rw,remount,rw /system\n");
+                shell3_in.flush();
                 extract("airbase-ng", dest);
                 extract("aircrack-ng", dest);
                 extract("aireplay-ng", dest);
@@ -71,6 +76,8 @@ public class InstallToolsDialog extends DialogFragment {
                 extract("wesside-ng", dest);
                 extract("wpaclean", dest);
                 extract("libfakeioctl.so", "/vendor/lib");
+                shell3_in.print("mount -o ro,remount,ro /system\n");
+                shell3_in.flush();
                 dismiss();
                 Toast.makeText(getActivity().getApplicationContext(), "Installed tools at " + dest, Toast.LENGTH_LONG).show();
             }
@@ -81,6 +88,7 @@ public class InstallToolsDialog extends DialogFragment {
         File f = new File(path, filename);      //no permissions to write at dest
         dest = dest + '/' + filename;
         if(!f.exists()){
+            if(debug) Log.d("InstallTools-extract", "Extracting " + filename);
             try{
                 InputStream in = getResources().getAssets().open(filename);
                 FileOutputStream out = new FileOutputStream(f);

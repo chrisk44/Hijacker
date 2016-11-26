@@ -36,7 +36,7 @@
     <string name="show_notif">true</string>
     <string name="show_details">true</string>
     <string name="airOnStartup">true</string>
-    <string name="debug">false</string>
+    <string name="debug">true</string>
     <string name="confirm_exit">true</string>
     <string name="delete_extra">true</string>
 
@@ -114,7 +114,7 @@
     <string name="test_sum">Run all the tools to make sure that the settings are correct. Any running tasks will be stopped.</string>
 
     <string name="install_tools_title">Install tools</string>
-    <string name="install_tools_sum">Install the required tools (aircrack-ng suite, mdk3, wireless tools</string>
+    <string name="install_tools_sum">Install the required tools (aircrack-ng suite, mdk3, wireless tools)</string>
 
     <string name="install_nexmon_title">Install Nexmon</string>
     <string name="install_nexmon_sum">Install the Nexmon driver and its management utility (nexutil at /su/xbin)</string>
