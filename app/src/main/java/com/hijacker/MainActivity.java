@@ -303,6 +303,12 @@ public class MainActivity extends AppCompatActivity{
 
         path = getFilesDir().getAbsolutePath();
         if(debug) Log.d("Main", "path is " + path);
+        if(!(new File(path).exists())){
+            Log.e("onCreate", "App file directory doesn't exist");
+            ErrorDialog dialog = new ErrorDialog();
+            dialog.setMessage("App file directory doesn't exist: " + path + ". Reinstall the app.");
+            dialog.show(fm, "ErrorDialog");
+        }
 
         extract("oui.txt", false);
 
