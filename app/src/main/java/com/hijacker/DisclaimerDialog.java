@@ -20,7 +20,12 @@ public class DisclaimerDialog extends DialogFragment {
         builder.setMessage(R.string.disclaimer);
         builder.setTitle("Disclaimer");
         builder.setPositiveButton("I agree", new DialogInterface.OnClickListener() {
-            public void onClick(DialogInterface dialog, int id) {}
+            public void onClick(DialogInterface dialog, int id) {
+                pref_edit.putBoolean("disclaimer", true);
+                pref_edit.commit();
+                new FirstRunDialog().show(getFragmentManager(), "FirstRunDialog");
+                dismiss();
+            }
         });
         builder.setNegativeButton("I don't agree", new DialogInterface.OnClickListener() {
             public void onClick(DialogInterface dialog, int id) {
@@ -30,7 +35,7 @@ public class DisclaimerDialog extends DialogFragment {
         });
         return builder.create();
     }
-    @Override
+    /*@Override
     public void onStart() {
         super.onStart();
         AlertDialog d = (AlertDialog)getDialog();
@@ -55,5 +60,5 @@ public class DisclaimerDialog extends DialogFragment {
                 }
             });
         }
-    }
+    }*/
 }
