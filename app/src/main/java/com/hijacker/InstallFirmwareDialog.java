@@ -6,6 +6,12 @@ import android.content.DialogInterface;
 import android.os.Bundle;
 import android.support.v7.app.AlertDialog;
 import android.util.Log;
+import android.view.LayoutInflater;
+import android.view.View;
+import android.widget.CheckBox;
+import android.widget.EditText;
+import android.widget.SeekBar;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import java.io.File;
@@ -14,20 +20,36 @@ import java.io.IOException;
 import java.io.InputStream;
 
 import static com.hijacker.MainActivity.debug;
+import static com.hijacker.MainActivity.opn;
 import static com.hijacker.MainActivity.path;
+import static com.hijacker.MainActivity.pwr_filter;
 import static com.hijacker.MainActivity.shell;
 import static com.hijacker.MainActivity.shell3_in;
+import static com.hijacker.MainActivity.show_ap;
+import static com.hijacker.MainActivity.show_ch;
+import static com.hijacker.MainActivity.show_na_st;
+import static com.hijacker.MainActivity.show_st;
 import static com.hijacker.MainActivity.su_thread;
+import static com.hijacker.MainActivity.wep;
+import static com.hijacker.MainActivity.wpa;
 
-public class InstallToolsDialog extends DialogFragment {
+public class InstallFirmwareDialog extends DialogFragment {
+    View view;
     @Override
     public Dialog onCreateDialog(Bundle savedInstanceState) {
         AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
-        builder.setTitle(R.string.install_tools_title);
-        builder.setNegativeButton("Back", new DialogInterface.OnClickListener() {
-            public void onClick(DialogInterface dialog, int id) {}
+        LayoutInflater inflater = getActivity().getLayoutInflater();
+        view = inflater.inflate(R.layout.install_firmware, null);
+
+        builder.setView(view);
+        builder.setTitle(R.string.install_nexmon_title);
+        builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                //close
+            }
         });
-        builder.setItems(R.array.install_locations, new DialogInterface.OnClickListener() {
+        builder.setPositiveButton("Install", new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int which) {
                 if(shell==null){
@@ -37,47 +59,19 @@ public class InstallToolsDialog extends DialogFragment {
                         su_thread.join();
                     }catch(InterruptedException ignored){}
                 }
-                String dest = "/su/xbin";
-                switch(which){
-                    case 0:
-                        dest = "/system/bin";
-                        break;
-                    case 1:
-                        dest = "/system/xbin";
-                        break;
-                    case 2:
-                        dest = "/su/bin";
-                        break;
-                    case 3:
-                        dest = "/su/xbin";
-                        break;
+                String firm_location = ((EditText)view.findViewById(R.id.firm_location)).getText().toString();
+                String util_location = ((EditText)view.findViewById(R.id.util_location)).getText().toString();
+                if(debug){
+                    Log.d("InstallToolsDialog", "Installing Firmware in " + firm_location);
+                    Log.d("InstallToolsDialog", "Installing Utility in " + util_location);
                 }
-                shell3_in.print("cd " + path + "\nrm !(oui.txt)\n");
-                shell3_in.flush();
                 shell3_in.print("mount -o rw,remount,rw /system\n");
                 shell3_in.flush();
-                extract("airbase-ng", dest);
-                extract("aircrack-ng", dest);
-                extract("aireplay-ng", dest);
-                extract("airodump-ng", dest);
-                extract("besside-ng", dest);
-                extract("ivstools", dest);
-                extract("iw", dest);
-                extract("iwconfig", dest);
-                extract("iwlist", dest);
-                extract("iwpriv", dest);
-                extract("kstats", dest);
-                extract("makeivs-ng", dest);
-                extract("mdk3", dest);
-                extract("nc", dest);
-                extract("packetforge-ng", dest);
-                extract("wesside-ng", dest);
-                extract("wpaclean", dest);
-                extract("libfakeioctl.so", "/vendor/lib");
+                extract("fw_bcmdhd.bin", firm_location);
+                extract("nexutil", util_location);
                 shell3_in.print("mount -o ro,remount,ro /system\n");
                 shell3_in.flush();
-                dismiss();
-                Toast.makeText(getActivity().getApplicationContext(), "Installed tools at " + dest, Toast.LENGTH_LONG).show();
+                Toast.makeText(getActivity().getApplicationContext(), "Installed firmware and utility", Toast.LENGTH_LONG).show();
             }
         });
         return builder.create();
@@ -86,7 +80,6 @@ public class InstallToolsDialog extends DialogFragment {
         File f = new File(path, filename);      //no permissions to write at dest
         dest = dest + '/' + filename;
         if(!f.exists()){
-            if(debug) Log.d("InstallTools-extract", "Extracting " + filename);
             try{
                 InputStream in = getResources().getAssets().open(filename);
                 FileOutputStream out = new FileOutputStream(f);

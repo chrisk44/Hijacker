@@ -65,20 +65,7 @@ public class SettingsFragment extends PreferenceFragment {
         findPreference("install_nexmon").setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
             @Override
             public boolean onPreferenceClick(Preference preference) {
-                if(shell==null){
-                    su_thread.start();
-                    try{
-                        //Wait for su shells to spawn
-                        su_thread.join();
-                    }catch(InterruptedException ignored){}
-                }
-                shell3_in.print("mount -o rw,remount,rw /system\n");
-                shell3_in.flush();
-                extract("fw_bcmdhd.bin", "/vendor/firmware");
-                extract("nexutil", "/su/xbin");
-                shell3_in.print("mount -o ro,remount,ro /system\n");
-                shell3_in.flush();
-                Toast.makeText(getActivity().getApplicationContext(), "Installed firmware and utility", Toast.LENGTH_LONG).show();
+                new InstallFirmwareDialog().show(getFragmentManager(), "InstallFirmwareDialog");
                 return false;
             }
         });
@@ -105,27 +92,5 @@ public class SettingsFragment extends PreferenceFragment {
     public void onPause() {
         getPreferenceManager().getSharedPreferences().unregisterOnSharedPreferenceChangeListener(listener);
         super.onPause();
-    }
-    void extract(String filename, String dest){
-        File f = new File(path, filename);      //no permissions to write at dest
-        dest = dest + '/' + filename;
-        if(!f.exists()){
-            try{
-                InputStream in = getResources().getAssets().open(filename);
-                FileOutputStream out = new FileOutputStream(f);
-                byte[] buf = new byte[1024];
-                int len;
-                while((len = in.read(buf))>0){
-                    out.write(buf, 0, len);
-                }
-                in.close();
-                out.close();
-                shell3_in.print("mv " + path + '/' + filename + " " + dest + '\n');
-                shell3_in.print("chmod 755 " + dest + '\n');
-                shell3_in.flush();
-            }catch(IOException e){
-                Log.e("FileProvider", "Exception copying from assets", e);
-            }
-        }
     }
 }
