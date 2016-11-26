@@ -81,6 +81,7 @@ public class MainActivity extends AppCompatActivity{
     static Locale locale;
     static FragmentManager fm;
     static String path;             //Path for oui.txt
+    static boolean init=false;      //True on first run to swap the dialogs for initialization
     private GoogleApiClient client;
     //Preferences - Defaults are in strings.xml
     static String iface, prefix, airodump_dir, aireplay_dir, aircrack_dir, mdk3_dir, cap_dir, enable_monMode, disable_monMode;

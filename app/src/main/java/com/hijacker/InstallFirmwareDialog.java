@@ -149,10 +149,11 @@ public class InstallFirmwareDialog extends DialogFragment {
                 }
             });
         }
-    }@Override
+    }
+    @Override
     public void onDismiss(final DialogInterface dialog) {
         super.onDismiss(dialog);
-
+        if(MainActivity.init) new InstallToolsDialog().show(getFragmentManager(), "InstallToolsDialog");
     }
     void extract(String filename, String dest){
         File f = new File(path, filename);      //no permissions to write at dest so extract at local directory and then move to target

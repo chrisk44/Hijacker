@@ -2,7 +2,6 @@ package com.hijacker;
 
 import android.app.Dialog;
 import android.app.DialogFragment;
-import android.app.FragmentTransaction;
 import android.content.DialogInterface;
 import android.os.Bundle;
 import android.support.v7.app.AlertDialog;
@@ -17,14 +16,11 @@ public class FirstRunDialog extends DialogFragment {
         AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
         builder.setMessage(R.string.first_run);
         builder.setTitle("Set up tools");
-        builder.setPositiveButton("Go to Settings", new DialogInterface.OnClickListener() {
+        builder.setPositiveButton("Set up", new DialogInterface.OnClickListener() {
             public void onClick(DialogInterface dialog, int id) {
                 su_thread.start();
-                FragmentTransaction ft = getFragmentManager().beginTransaction();
-                ft.replace(R.id.fragment1, new SettingsFragment());
-                ft.setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN);
-                ft.addToBackStack(null);
-                ft.commit();
+                MainActivity.init = true;
+                new InstallFirmwareDialog().show(getFragmentManager(), "InstallFirmwareDialog");
             }
         });
         builder.setNegativeButton("Home", new DialogInterface.OnClickListener() {
