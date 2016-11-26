@@ -34,12 +34,8 @@ public class InstallFirmwareDialog extends DialogFragment {
         LayoutInflater inflater = getActivity().getLayoutInflater();
         view = inflater.inflate(R.layout.install_firmware, null);
 
-        if(!(new File("/vendor").exists())){
-            if(new File("/su").exists()){
-                ((EditText)view.findViewById(R.id.util_location)).setText("/su/xbin");
-            }else{
-                ((EditText)view.findViewById(R.id.util_location)).setText("/system/xbin");
-            }
+        if(!(new File("/su").exists())){
+            ((EditText)view.findViewById(R.id.util_location)).setText("/system/xbin");
         }
 
         builder.setView(view);
@@ -147,12 +143,16 @@ public class InstallFirmwareDialog extends DialogFragment {
                             ((EditText)view.findViewById(R.id.firm_location)).setText(lastline);
                         }
                     }catch(IOException ignored){}
-                    progress.setIndeterminate(false);
 
+                    progress.setIndeterminate(false);
                     positiveButton.setActivated(true);
                 }
             });
         }
+    }@Override
+    public void onDismiss(final DialogInterface dialog) {
+        super.onDismiss(dialog);
+
     }
     void extract(String filename, String dest){
         File f = new File(path, filename);      //no permissions to write at dest so extract at local directory and then move to target
