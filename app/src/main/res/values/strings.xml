@@ -126,5 +126,5 @@
 
     <string name="reset_title">Reset Preferences</string>
     <string name="version_title">Version</string>
-    <string name="version">0.7</string>
+    <string name="version">0.8</string>
 </resources>
