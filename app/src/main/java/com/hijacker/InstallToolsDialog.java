@@ -18,7 +18,9 @@ import java.io.IOException;
 import java.io.InputStream;
 
 import static com.hijacker.MainActivity.debug;
+import static com.hijacker.MainActivity.load;
 import static com.hijacker.MainActivity.path;
+import static com.hijacker.MainActivity.pref_edit;
 import static com.hijacker.MainActivity.shell;
 import static com.hijacker.MainActivity.shell3_in;
 import static com.hijacker.MainActivity.su_thread;
@@ -100,6 +102,10 @@ public class InstallToolsDialog extends DialogFragment {
                         shell3_in.print("busybox mount -o ro,remount,ro /system\n");
                         shell3_in.flush();
                         Toast.makeText(getActivity().getApplicationContext(), "Installed tools and lib", Toast.LENGTH_LONG).show();
+                        pref_edit.putString("prefix", "LD_PRELOAD=" + lib_location + "/libfakeioctl.so");
+                        pref_edit.commit();
+                        load();
+                        Toast.makeText(getActivity().getApplicationContext(), "Command Prefix adjusted for library path", Toast.LENGTH_LONG).show();
                         dismiss();
                     }
                 }
