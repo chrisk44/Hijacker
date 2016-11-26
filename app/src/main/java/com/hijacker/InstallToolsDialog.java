@@ -33,6 +33,17 @@ public class InstallToolsDialog extends DialogFragment {
         LayoutInflater inflater = getActivity().getLayoutInflater();
         view = inflater.inflate(R.layout.install_tools, null);
 
+        if(!(new File("/su").exists())){
+            ((EditText)view.findViewById(R.id.tools_location)).setText("/system/xbin");
+        }
+        if(!(new File("/vendor").exists())){
+            if(new File("/su").exists()){
+                ((EditText) view.findViewById(R.id.lib_location)).setText("/su/lib");
+            }else{
+                ((EditText)view.findViewById(R.id.util_location)).setText("/system/lib");
+            }
+        }
+
         builder.setView(view);
         builder.setTitle(R.string.install_tools_title);
         builder.setMessage(R.string.install_message);
@@ -102,7 +113,7 @@ public class InstallToolsDialog extends DialogFragment {
                         extract("libfakeioctl.so", lib_location);
                         shell3_in.print("busybox mount -o ro,remount,ro /system\n");
                         shell3_in.flush();
-                        Toast.makeText(getActivity().getApplicationContext(), "Installed tools and lib", Toast.LENGTH_LONG).show();
+                        Toast.makeText(getActivity().getApplicationContext(), "Installed tools and lib", Toast.LENGTH_SHORT).show();
                         pref_edit.putString("prefix", "LD_PRELOAD=" + lib_location + "/libfakeioctl.so");
                         pref_edit.commit();
                         load();

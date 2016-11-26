@@ -130,6 +130,8 @@
     <string name="tools_location_default">/su/xbin</string>
     <string name="lib_location_default">/vendor/lib</string>
 
+    <string name="restore_firmware">Restore firmware</string>
+    <string name="no_backup">There is no backup. It is created when you install the tools through the app.</string>
     <string name="reset_title">Reset Preferences</string>
     <string name="version_title">Version</string>
     <string name="version">0.8</string>

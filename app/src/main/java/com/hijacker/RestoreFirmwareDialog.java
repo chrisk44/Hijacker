@@ -9,15 +9,12 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.Button;
-import android.widget.CheckBox;
 import android.widget.EditText;
 import android.widget.ProgressBar;
 import android.widget.Toast;
 
 import java.io.File;
-import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.InputStream;
 
 import static com.hijacker.MainActivity.debug;
 import static com.hijacker.MainActivity.path;
@@ -26,32 +23,23 @@ import static com.hijacker.MainActivity.shell3_in;
 import static com.hijacker.MainActivity.shell3_out;
 import static com.hijacker.MainActivity.su_thread;
 
-public class InstallFirmwareDialog extends DialogFragment {
+public class RestoreFirmwareDialog extends DialogFragment {
     View view;
     @Override
     public Dialog onCreateDialog(Bundle savedInstanceState) {
         AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
         LayoutInflater inflater = getActivity().getLayoutInflater();
-        view = inflater.inflate(R.layout.install_firmware, null);
-
-        if(!(new File("/vendor").exists())){
-            if(new File("/su").exists()){
-                ((EditText)view.findViewById(R.id.util_location)).setText("/su/xbin");
-            }else{
-                ((EditText)view.findViewById(R.id.util_location)).setText("/system/xbin");
-            }
-        }
+        view = inflater.inflate(R.layout.restore_firmware, null);
 
         builder.setView(view);
-        builder.setTitle(R.string.install_nexmon_title);
-        builder.setMessage(R.string.install_message);
+        builder.setTitle(R.string.restore_firmware);
         builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int which) {
                 //close
             }
         });
-        builder.setPositiveButton("Install", new DialogInterface.OnClickListener() {
+        builder.setPositiveButton("Restore", new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int which) {}
         });
@@ -80,37 +68,30 @@ public class InstallFirmwareDialog extends DialogFragment {
                         }catch(InterruptedException ignored){}
                     }
                     String firm_location = ((EditText)view.findViewById(R.id.firm_location)).getText().toString();
-                    String util_location = ((EditText)view.findViewById(R.id.util_location)).getText().toString();
 
                     File firm = new File(firm_location);
-                    File util = new File(util_location);
                     if(!firm.exists()){
                         Toast.makeText(getActivity().getApplicationContext(), "Directory for Firmware doesn't exist", Toast.LENGTH_SHORT).show();
                     }else if(!(new File(firm_location + "/fw_bcmdhd.bin").exists())){
                         Toast.makeText(getActivity().getApplicationContext(), "There is no fw_bcmdhd.bin in there", Toast.LENGTH_SHORT).show();
-                    }else if(!util.exists()){
-                        Toast.makeText(getActivity().getApplicationContext(), "Directory for utility doesn't exist", Toast.LENGTH_SHORT).show();
                     }else{
                         if(debug){
-                            Log.d("InstallFirmwareDialog", "Installing firmware in " + firm_location);
-                            Log.d("InstallFirmwareDialog", "Installing utility in " + util_location);
+                            Log.d("RestoreFirmwareDialog", "Restoring firmware in " + firm_location);
                         }
                         shell3_in.print("busybox mount -o rw,remount,rw /system\n");
                         shell3_in.flush();
-                        if(((CheckBox)view.findViewById(R.id.backup)).isChecked()){
-                            if(new File(path + "/fw_bcmdhd.orig.bin").exists()){
-                                Toast.makeText(getActivity().getApplicationContext(), "A backup already exists", Toast.LENGTH_SHORT).show();
-                            }else{
-                                shell3_in.print("cp -n " + firm_location + "/fw_bcmdhd.bin " + path + "/fw_bcmdhd.orig.bin\n");
-                                shell3_in.flush();
-                                Toast.makeText(getActivity().getApplicationContext(), "Backup created", Toast.LENGTH_SHORT).show();
-                            }
+
+                        File origFirm = new File(path + "/fw_bcmdhd.orig.bin");
+                        if(!origFirm.exists()){
+                            Toast.makeText(getActivity().getApplicationContext(), "There is no backup", Toast.LENGTH_SHORT).show();
+                        }else{
+                            shell3_in.print("cp " + path + "/fw_bcmdhd.orig.bin " + firm_location + "/fw_bcmdhd.bin\n");
+                            shell3_in.flush();
+                            Toast.makeText(getActivity().getApplicationContext(), "Backup restored", Toast.LENGTH_SHORT).show();
                         }
-                        extract("fw_bcmdhd.bin", firm_location);
-                        extract("nexutil", util_location);
+
                         shell3_in.print("busybox mount -o ro,remount,ro /system\n");
                         shell3_in.flush();
-                        Toast.makeText(getActivity().getApplicationContext(), "Installed firmware and utility", Toast.LENGTH_SHORT).show();
                         dismiss();
                     }
                 }
@@ -152,28 +133,6 @@ public class InstallFirmwareDialog extends DialogFragment {
                     positiveButton.setActivated(true);
                 }
             });
-        }
-    }
-    void extract(String filename, String dest){
-        File f = new File(path, filename);      //no permissions to write at dest so extract at local directory and then move to target
-        dest = dest + '/' + filename;
-        if(!f.exists()){
-            try{
-                InputStream in = getResources().getAssets().open(filename);
-                FileOutputStream out = new FileOutputStream(f);
-                byte[] buf = new byte[1024];
-                int len;
-                while((len = in.read(buf))>0){
-                    out.write(buf, 0, len);
-                }
-                in.close();
-                out.close();
-                shell3_in.print("mv " + path + '/' + filename + " " + dest + '\n');
-                shell3_in.print("chmod 755 " + dest + '\n');
-                shell3_in.flush();
-            }catch(IOException e){
-                Log.e("FileProvider", "Exception copying from assets", e);
-            }
         }
     }
 }

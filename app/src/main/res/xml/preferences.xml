@@ -162,6 +162,9 @@
     </PreferenceCategory>
     <PreferenceCategory android:title="@string/other">
         <Preference
+            android:title="@string/restore_firmware"
+            android:key="restore_firmware" />
+        <Preference
             android:title="@string/reset_title"
             android:key="reset_pref" />
         <Preference

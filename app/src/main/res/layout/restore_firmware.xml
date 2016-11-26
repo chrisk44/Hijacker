@@ -3,7 +3,8 @@
     xmlns:android="http://schemas.android.com/apk/res/android"
     android:orientation="vertical"
     android:layout_width="match_parent"
-    android:layout_height="match_parent" >
+    android:layout_height="match_parent"
+    android:paddingTop="15dp">
 
     <ProgressBar
         style="?android:attr/progressBarStyleHorizontal"
@@ -34,33 +35,6 @@
         android:text="@string/firm_location_default"
         android:ems="10"
         android:id="@+id/firm_location"
-        android:inputType="text"
-        android:paddingEnd="8dp"
-        android:paddingStart="8dp"/>
-
-    <CheckBox
-        android:text="Create backup"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:id="@+id/backup"
-        android:layout_marginBottom="10dp"/>
-
-    <TextView
-        android:text="@string/util_location_text"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:textColor="@android:color/white"
-        android:textSize="18sp"
-        android:labelFor="@+id/util_location"
-        android:paddingEnd="8dp"
-        android:paddingStart="8dp"/>
-
-    <EditText
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="@string/util_location_default"
-        android:ems="10"
-        android:id="@+id/util_location"
         android:inputType="text"
         android:paddingEnd="8dp"
         android:paddingStart="8dp"/>

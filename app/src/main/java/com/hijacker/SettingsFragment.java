@@ -69,6 +69,16 @@ public class SettingsFragment extends PreferenceFragment {
                 return false;
             }
         });
+        findPreference("restore_firmware").setOnPreferenceClickListener(new Preference.OnPreferenceClickListener(){
+            @Override
+            public boolean onPreferenceClick(Preference preference){
+                File origFirm = new File(path + "/fw_bcmdhd.orig.bin");
+                if(!origFirm.exists()){
+                    Toast.makeText(getActivity().getApplicationContext(), R.string.no_backup, Toast.LENGTH_SHORT).show();
+                }else new RestoreFirmwareDialog().show(getFragmentManager(), "RestoreFragmentDialog");
+                return false;
+            }
+        });
     }
     @Override
     public void onDestroy(){
