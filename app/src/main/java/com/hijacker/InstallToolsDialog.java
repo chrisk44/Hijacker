@@ -54,7 +54,7 @@ public class InstallToolsDialog extends DialogFragment {
                 }
                 shell3_in.print("cd " + path + "\nrm !(oui.txt)\n");
                 shell3_in.flush();
-                shell3_in.print("mount -o rw,remount,rw /system\n");
+                shell3_in.print("busybox mount -o rw,remount,rw /system\n");
                 shell3_in.flush();
                 extract("airbase-ng", dest);
                 extract("aircrack-ng", dest);
@@ -74,7 +74,7 @@ public class InstallToolsDialog extends DialogFragment {
                 extract("wesside-ng", dest);
                 extract("wpaclean", dest);
                 extract("libfakeioctl.so", "/vendor/lib");
-                shell3_in.print("mount -o ro,remount,ro /system\n");
+                shell3_in.print("busybox mount -o ro,remount,ro /system\n");
                 shell3_in.flush();
                 dismiss();
                 Toast.makeText(getActivity().getApplicationContext(), "Installed tools at " + dest, Toast.LENGTH_LONG).show();

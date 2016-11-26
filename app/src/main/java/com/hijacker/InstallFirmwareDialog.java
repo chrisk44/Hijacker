@@ -65,11 +65,11 @@ public class InstallFirmwareDialog extends DialogFragment {
                     Log.d("InstallToolsDialog", "Installing Firmware in " + firm_location);
                     Log.d("InstallToolsDialog", "Installing Utility in " + util_location);
                 }
-                shell3_in.print("mount -o rw,remount,rw /system\n");
+                shell3_in.print("busybox mount -o rw,remount,rw /system\n");
                 shell3_in.flush();
                 extract("fw_bcmdhd.bin", firm_location);
                 extract("nexutil", util_location);
-                shell3_in.print("mount -o ro,remount,ro /system\n");
+                shell3_in.print("busybox mount -o ro,remount,ro /system\n");
                 shell3_in.flush();
                 Toast.makeText(getActivity().getApplicationContext(), "Installed firmware and utility", Toast.LENGTH_LONG).show();
             }
