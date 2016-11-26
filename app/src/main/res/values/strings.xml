@@ -124,6 +124,11 @@
     <string name="firm_location_default">/vendor/firmware</string>
     <string name="util_location_default">/su/xbin</string>
 
+    <string name="tools_location_text">Tools Location</string>
+    <string name="lib_location_text">Library Location</string>
+    <string name="tools_location_default">/su/xbin</string>
+    <string name="lib_location_default">/vendor/lib</string>
+
     <string name="reset_title">Reset Preferences</string>
     <string name="version_title">Version</string>
     <string name="version">0.8</string>

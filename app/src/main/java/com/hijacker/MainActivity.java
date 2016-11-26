@@ -302,6 +302,7 @@ public class MainActivity extends AppCompatActivity{
         });
 
         path = getFilesDir().getAbsolutePath();
+        if(debug) Log.d("Main", "path is " + path);
 
         extract("oui.txt", false);
 
@@ -325,7 +326,7 @@ public class MainActivity extends AppCompatActivity{
                 in.close();
                 out.close();
                 if(chmod){
-                    Runtime.getRuntime().exec("run-as com.hijacker chmod 755 ./files/" + filename);
+                    Runtime.getRuntime().exec("run-as com.hijacker chmod 755 ./files/" + filename); //TODO: change this
                 }
             }catch(IOException e){
                 Log.e("FileProvider", "Exception copying from assets", e);

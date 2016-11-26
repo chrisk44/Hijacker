@@ -54,16 +54,17 @@ public class InstallFirmwareDialog extends DialogFragment {
             public void onClick(DialogInterface dialog, int which) {
                 if(shell==null){
                     su_thread.start();
-                    try{
+                    while(su_thread.isAlive()){}
+                    /*try{
                         //Wait for su shells to spawn
                         su_thread.join();
-                    }catch(InterruptedException ignored){}
+                    }catch(InterruptedException ignored){}*/
                 }
                 String firm_location = ((EditText)view.findViewById(R.id.firm_location)).getText().toString();
                 String util_location = ((EditText)view.findViewById(R.id.util_location)).getText().toString();
                 if(debug){
-                    Log.d("InstallToolsDialog", "Installing Firmware in " + firm_location);
-                    Log.d("InstallToolsDialog", "Installing Utility in " + util_location);
+                    Log.d("InstallFirmwareDialog", "Installing Firmware in " + firm_location);
+                    Log.d("InstallFirmwareDialog", "Installing Utility in " + util_location);
                 }
                 shell3_in.print("busybox mount -o rw,remount,rw /system\n");
                 shell3_in.flush();
