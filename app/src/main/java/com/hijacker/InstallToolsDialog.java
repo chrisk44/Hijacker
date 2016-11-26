@@ -35,6 +35,7 @@ public class InstallToolsDialog extends DialogFragment {
 
         builder.setView(view);
         builder.setTitle(R.string.install_tools_title);
+        builder.setMessage(R.string.install_message);
         builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int which) {

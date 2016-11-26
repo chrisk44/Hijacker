@@ -10,6 +10,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ProgressBar;
 import android.widget.Toast;
 
 import java.io.File;
@@ -21,6 +22,7 @@ import static com.hijacker.MainActivity.debug;
 import static com.hijacker.MainActivity.path;
 import static com.hijacker.MainActivity.shell;
 import static com.hijacker.MainActivity.shell3_in;
+import static com.hijacker.MainActivity.shell3_out;
 import static com.hijacker.MainActivity.su_thread;
 
 public class InstallFirmwareDialog extends DialogFragment {
@@ -33,6 +35,7 @@ public class InstallFirmwareDialog extends DialogFragment {
 
         builder.setView(view);
         builder.setTitle(R.string.install_nexmon_title);
+        builder.setMessage(R.string.install_message);
         builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int which) {
@@ -43,6 +46,10 @@ public class InstallFirmwareDialog extends DialogFragment {
             @Override
             public void onClick(DialogInterface dialog, int which) {}
         });
+        builder.setNeutralButton("Find firmware", new DialogInterface.OnClickListener(){
+            @Override
+            public void onClick(DialogInterface dialogInterface, int i){}
+        });
         return builder.create();
     }
     @Override
@@ -51,7 +58,45 @@ public class InstallFirmwareDialog extends DialogFragment {
         //Override positiveButton action to dismiss the fragment only when the directories exist, not on error
         AlertDialog d = (AlertDialog)getDialog();
         if(d != null) {
-            Button positiveButton = d.getButton(Dialog.BUTTON_POSITIVE);
+            final Button positiveButton = d.getButton(Dialog.BUTTON_POSITIVE);
+            Button neutralButton = d.getButton(Dialog.BUTTON_NEUTRAL);
+            neutralButton.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    positiveButton.setActivated(false);
+                    if(shell==null){
+                        su_thread.start();
+                        try{
+                            //Wait for su shells to spawn
+                            su_thread.join();
+                        }catch(InterruptedException ignored){}
+                    }
+                    ProgressBar progress = (ProgressBar)view.findViewById(R.id.install_firm_progress);
+                    progress.setIndeterminate(true);
+                    shell3_in.print("find /system/ -type f -name \"fw_bcmdhd.bin\"; echo ENDOFFIND\n");
+                    shell3_in.flush();
+                    try{
+                        String buffer = null, lastline;
+                        while(buffer==null){
+                            buffer = shell3_out.readLine();
+                        }
+                        lastline = buffer;
+                        while(!buffer.equals("ENDOFFIND")){
+                            lastline = buffer;
+                            buffer = shell3_out.readLine();
+                        }
+                        if(lastline.equals("ENDOFFIND")){
+                            Toast.makeText(getActivity().getApplicationContext(), "Firmware not found. Are you sure you have BCM4339?", Toast.LENGTH_LONG).show();
+                        }else{
+                            lastline = lastline.substring(0, lastline.length()-14);
+                            ((EditText)view.findViewById(R.id.firm_location)).setText(lastline);
+                        }
+                    }catch(IOException ignored){}
+                    progress.setIndeterminate(false);
+
+                    positiveButton.setActivated(true);
+                }
+            });
             positiveButton.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {

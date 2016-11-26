@@ -118,6 +118,7 @@
 
     <string name="install_nexmon_title">Install Nexmon</string>
     <string name="install_nexmon_sum">Install the Nexmon driver and its management utility (nexutil at /su/xbin)</string>
+    <string name="install_message">Don\'t end the directories with /</string>
 
     <string name="firm_location_text">Firmware Location</string>
     <string name="util_location_text">Management Utility Location</string>
