@@ -19,7 +19,7 @@
     <string name="first_run">This application is a Graphical User Interface for the wireless auditing tools airodump-ng, aireplay-ng, aircrack-ng and mdk3 and requires a Monitor Mode enabled WiFi interface. Only some android devices support this but none of them natively.
         You need to use a custom firmware (bcmon, Nexmon) so that your wireless adapter can be used in Monitor Mode. External adapters can also be used.
         You can configure your interface\'s name in Settings. This app requires root privileges to run the tools.
-        If you don\'t grant them, it will hang. Don\'t ask me why…\nYou can go to Settings and configure the application (such as install the tools), or you can go to the Home Screen and use the defaults.</string>
+        If you don\'t grant them, it will hang. Don\'t ask me why…\nYou can install the tools and firmware (only nexmon) now, or you can go to the Home Screen and use the defaults.</string>
 
     <string name="iface">wlan0</string>
     <string name="prefix">LD_PRELOAD=/vendor/lib/libfakeioctl.so</string>
