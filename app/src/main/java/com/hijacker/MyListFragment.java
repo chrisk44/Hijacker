@@ -8,12 +8,15 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ListView;
 import android.widget.PopupMenu;
+
 import static com.hijacker.AP.WEP;
 import static com.hijacker.AP.WPA;
 import static com.hijacker.AP.WPA2;
+import static com.hijacker.MainActivity.FRAGMENT_AIRODUMP;
 import static com.hijacker.MainActivity.aireplay_dir;
 import static com.hijacker.MainActivity.airodump_dir;
 import static com.hijacker.MainActivity.copy;
+import static com.hijacker.MainActivity.currentFragment;
 import static com.hijacker.MainActivity.debug;
 import static com.hijacker.MainActivity.iface;
 import static com.hijacker.MainActivity.prefix;
@@ -23,6 +26,7 @@ import static com.hijacker.MainActivity.stop;
 
 public class MyListFragment extends ListFragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+        Log.d("MyListFragment", "onCreateView");
         View ret = inflater.inflate(R.layout.list_fragment, container, false);
         setListAdapter(MainActivity.adapter);
         return ret;
@@ -166,5 +170,10 @@ public class MyListFragment extends ListFragment {
             });
             popup.show();
         }
+    }
+    @Override
+    public void onResume(){
+        super.onResume();
+        currentFragment = FRAGMENT_AIRODUMP;
     }
 }

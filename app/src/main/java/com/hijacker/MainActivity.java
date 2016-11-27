@@ -17,6 +17,7 @@ import android.os.Handler;
 import android.os.Message;
 import android.preference.PreferenceManager;
 import android.support.design.widget.Snackbar;
+import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.app.NotificationCompat;
 import android.support.v7.widget.Toolbar;
@@ -26,8 +27,10 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.ImageView;
+import android.widget.ListView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 
@@ -49,9 +52,11 @@ import java.util.Locale;
 
 public class MainActivity extends AppCompatActivity{
     static final int AIREPLAY_DEAUTH = 1, AIREPLAY_WEP = 2;
+    static final int FRAGMENT_AIRODUMP = 0, FRAGMENT_MDK = 1, FRAGMENT_CRACKWPA = 2,
+            FRAGMENT_CRACKWEP = 3, FRAGMENT_REAVER = 4, FRAGMENT_SETTINGS = 5;
     //State variables
-    static boolean cont = false, wpacheckcont = false, test_wait, maincalled = false, done = true, notif_on = false, inSettings = false;      //done: for calling refreshHandler only when it has stopped
-    static int airodump_running = 0, aireplay_running = 0;
+    static boolean cont = false, wpacheckcont = false, test_wait, maincalled = false, done = true, notif_on = false;  //done: for calling refreshHandler only when it has stopped
+    static int airodump_running = 0, aireplay_running = 0, currentFragment;         //Set currentFragment in onResume of each Fragment
     static boolean bf = false, ados = false;                                                //mdk3 beacon flooding and authentication dos
     //Filters
     static boolean show_ap = true, show_st = true, show_na_st = true, wpa = true, wep = true, opn = true;
@@ -83,6 +88,9 @@ public class MainActivity extends AppCompatActivity{
     static String path;             //Path for oui.txt
     static boolean init=false;      //True on first run to swap the dialogs for initialization
     private GoogleApiClient client;
+    private String[] mPlanetTitles;
+    private DrawerLayout mDrawerLayout;
+    protected ListView mDrawerList;
     //Preferences - Defaults are in strings.xml
     static String iface, prefix, airodump_dir, aireplay_dir, aircrack_dir, mdk3_dir, cap_dir, enable_monMode, disable_monMode;
     static int deauthWait, aireplay_sleep;
@@ -315,8 +323,43 @@ public class MainActivity extends AppCompatActivity{
 
         if(!pref.getBoolean("disclaimer", false)) new DisclaimerDialog().show(fm, "Disclaimer");
         else main();
-
-        client = new GoogleApiClient.Builder(this).addApi(AppIndex.API).build();
+    }
+    private class DrawerItemClickListener implements ListView.OnItemClickListener {
+        @Override
+        public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+            if(currentFragment!=position){
+                FragmentTransaction ft = fm.beginTransaction();
+                switch(position){
+                    case 0:
+                        //Airodump
+                        ft.replace(R.id.fragment1, new MyListFragment());
+                        break;
+                    case 1:
+                        //MDK3
+                        break;
+                    case 2:
+                        //Crack WPA
+                        break;
+                    case 3:
+                        //Crack WEP
+                        break;
+                    case 4:
+                        //Reaver
+                        break;
+                    case 5:
+                        //Settings
+                        ft.replace(R.id.fragment1, new SettingsFragment());
+                        break;
+                }
+                ft.setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN);
+                ft.addToBackStack(null);
+                ft.commit();
+                // Highlight the selected item, update the title, and close the drawer
+                mDrawerList.setItemChecked(position, true);
+                getSupportActionBar().setTitle(mPlanetTitles[position]);
+            }
+            mDrawerLayout.closeDrawer(mDrawerList);
+        }
     }
     void extract(String filename, boolean chmod){
         File f = new File(getFilesDir(), filename);
@@ -803,12 +846,26 @@ public class MainActivity extends AppCompatActivity{
 
         ST.not_connected = getString(R.string.not_connected);
         ST.paired = getString(R.string.paired);
+
+        mPlanetTitles = getResources().getStringArray(R.array.planets_array);
+        mDrawerLayout = (DrawerLayout) findViewById(R.id.drawer_layout);
+        mDrawerList = (ListView) findViewById(R.id.left_drawer);
+        mDrawerList.setAdapter(new ArrayAdapter<String>(this, R.layout.drawer_list_item, R.id.navDrawerTv, mPlanetTitles));
+        mDrawerList.setOnItemClickListener(new DrawerItemClickListener());
+
+        FragmentTransaction ft = fm.beginTransaction();
+        ft.replace(R.id.fragment1, new MyListFragment());
+        ft.setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN);
+        ft.addToBackStack(null);
+        ft.commit();
+
+        client = new GoogleApiClient.Builder(this).addApi(AppIndex.API).build();
     }
     static void load(){
         //Load Preferences
         if(debug) Log.d("Main", "Loading preferences...");
         showLog = pref.getBoolean("showLog", showLog);
-        if(showLog && !inSettings) tv.setMaxHeight(999999);
+        if(showLog && currentFragment!=FRAGMENT_SETTINGS) tv.setMaxHeight(999999);
         else tv.setMaxHeight(0);
 
         iface = pref.getString("iface", iface);
@@ -871,8 +928,8 @@ public class MainActivity extends AppCompatActivity{
                 else startMdk(1, null);
                 return true;
 
-            case R.id.settings:
-                if(!inSettings){
+            case R.id.settings:                             //To be removed
+                if(currentFragment!=FRAGMENT_SETTINGS){
                     FragmentTransaction ft = fm.beginTransaction();
                     ft.replace(R.id.fragment1, new SettingsFragment());
                     ft.setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN);
@@ -926,21 +983,26 @@ public class MainActivity extends AppCompatActivity{
     }
     @Override
     public boolean onKeyDown(int keyCode, KeyEvent event){
-        switch(keyCode){
-            case KeyEvent.KEYCODE_BACK:
-                if(inSettings){
-                    inSettings = false;
-                }else if(is_ap!=null){
-                    stop(0);
-                    if(wpa_thread.isAlive()) stop(1);
-                    isolate(null);
-                    startAirodump(null);
-                    return true;
-                }else if(confirm_exit){
-                    new ExitDialog().show(fm, "ExitDialog");
-                    return true;
-                }
-                return super.onKeyDown(keyCode, event);
+        if(keyCode==KeyEvent.KEYCODE_BACK){
+            if(mDrawerLayout.isDrawerOpen(mDrawerList)){
+                mDrawerLayout.closeDrawer(mDrawerList);
+                return true;
+            }else if(getFragmentManager().getBackStackEntryCount()>1){
+                getFragmentManager().popBackStack();                                //currentFragment hasn't changed when this returns
+                getSupportActionBar().setTitle(mPlanetTitles[currentFragment]);     //Works
+                mDrawerList.setItemChecked(currentFragment, true);                  //Doesn't work
+                return true;
+            }else if(is_ap!=null){
+                //Use back button to return from isolated ap
+                stop(0);
+                if(wpa_thread.isAlive()) stop(1);
+                isolate(null);
+                startAirodump(null);
+                return true;
+            }else if(confirm_exit){
+                new ExitDialog().show(fm, "ExitDialog");
+                return true;
+            }
         }
         return super.onKeyDown(keyCode, event);
     }
@@ -1076,8 +1138,6 @@ public class MainActivity extends AppCompatActivity{
             else manuf = manuf.substring(22);
         }catch(IOException ignored){
         }
-
-        if(debug) Log.d("getManuf", temp + ": " + manuf);
         return manuf;
     }
 

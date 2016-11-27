@@ -8,7 +8,8 @@ import android.widget.Toast;
 
 import java.io.File;
 
-import static com.hijacker.MainActivity.inSettings;
+import static com.hijacker.MainActivity.FRAGMENT_SETTINGS;
+import static com.hijacker.MainActivity.currentFragment;
 import static com.hijacker.MainActivity.load;
 import static com.hijacker.MainActivity.main;
 import static com.hijacker.MainActivity.maincalled;
@@ -20,7 +21,6 @@ public class SettingsFragment extends PreferenceFragment {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        inSettings = true;
         // Load the preferences from an XML resource
         addPreferencesFromResource(R.xml.preferences);
 
@@ -85,13 +85,13 @@ public class SettingsFragment extends PreferenceFragment {
     @Override
     public void onDestroy(){
         super.onDestroy();
-        inSettings = false;
         load();
         if(!maincalled) main();
     }
     @Override
     public void onResume() {
         super.onResume();
+        currentFragment = FRAGMENT_SETTINGS;
         listener = new SharedPreferences.OnSharedPreferenceChangeListener() {
             @Override
             public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key) {
