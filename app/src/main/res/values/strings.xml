@@ -126,24 +126,24 @@
     <string name="not_connected">Not Connected</string>
 
     <!-- Default Preferences -->
-    <string name="iface">wlan0</string>
-    <string name="prefix">LD_PRELOAD=/vendor/lib/libfakeioctl.so</string>
-    <string name="airodump_dir">airodump-ng</string>
-    <string name="aireplay_dir">aireplay-ng -D</string>
-    <string name="aircrack_dir">aircrack-ng</string>
-    <string name="mdk3_dir">mdk3</string>
-    <string name="cap_dir">/sdcard/cap</string>
-    <string name="enable_monMode">nexutil -m true</string>
-    <string name="disable_monMode">nexutil -m false</string>
-    <string name="deauthWait">20</string>
-    <string name="aireplay_sleep">0</string>
-    <string name="showLog">false</string>
-    <string name="show_notif">true</string>
-    <string name="show_details">true</string>
-    <string name="airOnStartup">true</string>
-    <string name="debug">true</string>
-    <string name="confirm_exit">true</string>
-    <string name="delete_extra">true</string>
+    <string name="iface" translatable="false">wlan0</string>
+    <string name="prefix" translatable="false">LD_PRELOAD=/vendor/lib/libfakeioctl.so</string>
+    <string name="airodump_dir" translatable="false">airodump-ng</string>
+    <string name="aireplay_dir" translatable="false">aireplay-ng -D</string>
+    <string name="aircrack_dir" translatable="false">aircrack-ng</string>
+    <string name="mdk3_dir" translatable="false">mdk3</string>
+    <string name="cap_dir" translatable="false">/sdcard/cap</string>
+    <string name="enable_monMode" translatable="false">nexutil -m true</string>
+    <string name="disable_monMode" translatable="false">nexutil -m false</string>
+    <string name="deauthWait" translatable="false">20</string>
+    <string name="aireplay_sleep" translatable="false">0</string>
+    <string name="showLog" translatable="false">false</string>
+    <string name="show_notif" translatable="false">true</string>
+    <string name="show_details" translatable="false">true</string>
+    <string name="airOnStartup" translatable="false">true</string>
+    <string name="debug" translatable="false">true</string>
+    <string name="confirm_exit" translatable="false">true</string>
+    <string name="delete_extra" translatable="false">true</string>
 
     <!-- Settings -->
     <string name="general">General</string>
@@ -239,5 +239,5 @@
     <string name="no_backup">There is no backup. It is created when you install the tools through the app.</string>
     <string name="reset_title">Reset Preferences</string>
     <string name="version_title">Version</string>
-    <string name="version">0.9</string>
+    <string name="version" translatable="false">0.9</string>
 </resources>
