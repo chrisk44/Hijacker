@@ -33,6 +33,18 @@ public class SettingsFragment extends PreferenceFragment {
         inSettings = true;
         // Load the preferences from an XML resource
         addPreferencesFromResource(R.xml.preferences);
+
+        String arch = System.getProperty("os.arch");
+        if(!arch.equals("armv7l")){
+            Preference temp;
+            String options[] = {"install_tools", "install_nexmon", "restore_firmware"};
+            for(int i=0;i<3;i++){
+                temp = findPreference(options[i]);
+                temp.setSummary("Available only on armv7l, this is " + arch);
+                temp.setEnabled(false);
+            }
+        }
+
         tv.setMaxHeight(0);
         findPreference("test_tools").setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
             @Override
