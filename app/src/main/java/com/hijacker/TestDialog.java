@@ -48,9 +48,9 @@ public class TestDialog extends DialogFragment {
         test_thread.start();
 
         builder.setView(view);
-        builder.setTitle("Testing tools...");
-        builder.setMessage("Make sure that WiFi is enabled.");
-        builder.setNegativeButton("Back", new DialogInterface.OnClickListener() {
+        builder.setTitle(R.string.testing);
+        builder.setMessage(R.string.make_sure_wifi);
+        builder.setNegativeButton(R.string.back, new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int which) {
                 //close

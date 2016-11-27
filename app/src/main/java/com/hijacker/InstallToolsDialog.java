@@ -47,13 +47,13 @@ public class InstallToolsDialog extends DialogFragment {
         builder.setView(view);
         builder.setTitle(R.string.install_tools_title);
         builder.setMessage(R.string.install_message);
-        builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+        builder.setNegativeButton(R.string.cancel, new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int which) {
                 //close
             }
         });
-        builder.setPositiveButton("Install", new DialogInterface.OnClickListener() {
+        builder.setPositiveButton(R.string.install, new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int which) {}
         });
@@ -81,9 +81,9 @@ public class InstallToolsDialog extends DialogFragment {
                     File tools = new File(tools_location);
                     File lib = new File(lib_location);
                     if(!tools.exists()){
-                        Toast.makeText(getActivity().getApplicationContext(), "Directory for tools doesn't exist", Toast.LENGTH_SHORT).show();
+                        Toast.makeText(getActivity().getApplicationContext(), R.string.dir_notfound_tools, Toast.LENGTH_SHORT).show();
                     }else if(!lib.exists()){
-                        Toast.makeText(getActivity().getApplicationContext(), "Directory for library doesn't exist", Toast.LENGTH_SHORT).show();
+                        Toast.makeText(getActivity().getApplicationContext(), R.string.dir_notfound_lib, Toast.LENGTH_SHORT).show();
                     }else{
                         if(debug){
                             Log.d("InstallToolsDialog", "Installing Tools in " + tools_location);
@@ -113,11 +113,11 @@ public class InstallToolsDialog extends DialogFragment {
                         extract("libfakeioctl.so", lib_location);
                         shell3_in.print("busybox mount -o ro,remount,ro /system\n");
                         shell3_in.flush();
-                        Toast.makeText(getActivity().getApplicationContext(), "Installed tools and lib", Toast.LENGTH_SHORT).show();
+                        Toast.makeText(getActivity().getApplicationContext(), R.string.installed_tools_lib, Toast.LENGTH_SHORT).show();
                         pref_edit.putString("prefix", "LD_PRELOAD=" + lib_location + "/libfakeioctl.so");
                         pref_edit.commit();
                         load();
-                        Toast.makeText(getActivity().getApplicationContext(), "Command Prefix adjusted for library path", Toast.LENGTH_LONG).show();
+                        Toast.makeText(getActivity().getApplicationContext(), R.string.prefix_adjusted, Toast.LENGTH_LONG).show();
                         dismiss();
                     }
                 }

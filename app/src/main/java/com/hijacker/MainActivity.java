@@ -136,9 +136,9 @@ public class MainActivity extends AppCompatActivity{
                             Log.d("wpa_thread", "cap file not found, airodump is probably not running...");
                             Log.d("wpa_thread", "Returning...");
                         }
-                        tv.append("cap file not found, airodump is probably not running...\n");
+                        tv.append(getString(R.string.cap_notfound));
                     }else{
-                        if(!showLog) Snackbar.make(getCurrentFocus(), "Cap file is " + lastfile, Snackbar.LENGTH_LONG).show();
+                        if(!showLog) Snackbar.make(getCurrentFocus(), getString(R.string.cap_is) + lastfile, Snackbar.LENGTH_LONG).show();
                         progress_int = 0;
                         wpacheckcont = true;
                         wpa_subthread.start();
@@ -251,7 +251,7 @@ public class MainActivity extends AppCompatActivity{
                     shell.exitValue();
                     Log.e("onCreate", "Error opening su shell");
                     ErrorDialog dialog = new ErrorDialog();
-                    dialog.setMessage("Error opening su shell");
+                    dialog.setMessage(getString(R.string.error_opening_shell));
                     dialog.show(fm, "ErrorDialog");
                     return;
                 }catch(IllegalThreadStateException ignored){
@@ -260,7 +260,7 @@ public class MainActivity extends AppCompatActivity{
                     shell2.exitValue();
                     Log.e("onCreate", "Error opening su shell");
                     ErrorDialog dialog = new ErrorDialog();
-                    dialog.setMessage("Error opening su shell");
+                    dialog.setMessage(getString(R.string.error_opening_shell));
                     dialog.show(fm, "ErrorDialog");
                     return;
                 }catch(IllegalThreadStateException ignored){
@@ -269,7 +269,7 @@ public class MainActivity extends AppCompatActivity{
                     shell3.exitValue();
                     Log.e("onCreate", "Error opening su shell");
                     ErrorDialog dialog = new ErrorDialog();
-                    dialog.setMessage("Error opening su shell");
+                    dialog.setMessage(getString(R.string.error_opening_shell));
                     dialog.show(fm, "ErrorDialog");
                     return;
                 }catch(IllegalThreadStateException ignored){
@@ -278,7 +278,7 @@ public class MainActivity extends AppCompatActivity{
                     shell4.exitValue();
                     Log.e("onCreate", "Error opening su shell");
                     ErrorDialog dialog = new ErrorDialog();
-                    dialog.setMessage("Error opening su shell");
+                    dialog.setMessage(getString(R.string.error_opening_shell));
                     dialog.show(fm, "ErrorDialog");
                     return;
                 }catch(IllegalThreadStateException ignored){
@@ -296,7 +296,7 @@ public class MainActivity extends AppCompatActivity{
                         shell3_in==null || shell3_out==null || shell4_in==null || shell4_out==null){
                     if(debug) Log.e("onCreate", "Error opening shell_in/shell_out");
                     ErrorDialog dialog = new ErrorDialog();
-                    dialog.setMessage("Error opening su shell_in/shell_out");
+                    dialog.setMessage(getString(R.string.error_opening_shell));
                     dialog.show(fm, "ErrorDialog");
                 }
             }
@@ -307,7 +307,7 @@ public class MainActivity extends AppCompatActivity{
         if(!(new File(path).exists())){
             Log.e("onCreate", "App file directory doesn't exist");
             ErrorDialog dialog = new ErrorDialog();
-            dialog.setMessage("App file directory doesn't exist: " + path + ". Reinstall the app.");
+            dialog.setMessage(getString(R.string.app_dir_notfound1) + path + getString(R.string.app_dir_notfound2));
             dialog.show(fm, "ErrorDialog");
         }
 
@@ -465,7 +465,7 @@ public class MainActivity extends AppCompatActivity{
                 if(bf){
                     if(debug) Log.d("StartMdk", "Bf already running");
                 }else{
-                    menu.getItem(4).setTitle("Stop Beacon Flooding");
+                    menu.getItem(4).setTitle(R.string.stop_bf);
                     bf = true;
                     new Thread(new Runnable(){
                         @Override
@@ -495,7 +495,7 @@ public class MainActivity extends AppCompatActivity{
                 if(ados){
                     if(debug) Log.d("StartMdk", "ados already running");
                 }else{
-                    menu.getItem(5).setTitle("Stop Authentication DoS");
+                    menu.getItem(5).setTitle(R.string.stop_ados);
                     ados = true;
                     new Thread(new Runnable(){
                         @Override
@@ -581,8 +581,8 @@ public class MainActivity extends AppCompatActivity{
                 bf = false;
                 ados = false;
                 if(menu!=null){
-                    menu.getItem(4).setTitle("Start Beacon Flooding");
-                    menu.getItem(5).setTitle("Start Authentication DoS");
+                    menu.getItem(4).setTitle(R.string.start_bf);
+                    menu.getItem(5).setTitle(R.string.start_ados);
                 }
                 tv.append("Stopping mdk3\n");
                 break;
@@ -800,6 +800,9 @@ public class MainActivity extends AppCompatActivity{
         load();
         progress.setProgress(deauthWait);
         progress.setMax(deauthWait);
+
+        ST.not_connected = getString(R.string.not_connected);
+        ST.paired = getString(R.string.paired);
     }
     static void load(){
         //Load Preferences
@@ -913,15 +916,12 @@ public class MainActivity extends AppCompatActivity{
     }
     @Override
     protected void onStop(){
-        super.onStop();// ATTENTION: This was auto-generated to implement the App Indexing API.
-// See https://g.co/AppIndexing/AndroidStudio for more information.
+        super.onStop();
         AppIndex.AppIndexApi.end(client, getIndexApiAction());
         if(show_notif){
             notif_on = true;
             notification();
         }
-        // ATTENTION: This was auto-generated to implement the App Indexing API.
-        // See https://g.co/AppIndexing/AndroidStudio for more information.
         client.disconnect();
     }
     @Override

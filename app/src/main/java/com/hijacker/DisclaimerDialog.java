@@ -16,8 +16,8 @@ public class DisclaimerDialog extends DialogFragment {
         openTime = System.currentTimeMillis();
         AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
         builder.setMessage(R.string.disclaimer);
-        builder.setTitle("Disclaimer");
-        builder.setPositiveButton("I agree", new DialogInterface.OnClickListener() {
+        builder.setTitle(R.string.disclaimer_title);
+        builder.setPositiveButton(R.string.agree, new DialogInterface.OnClickListener() {
             public void onClick(DialogInterface dialog, int id) {
                 pref_edit.putBoolean("disclaimer", true);
                 pref_edit.commit();
@@ -25,7 +25,7 @@ public class DisclaimerDialog extends DialogFragment {
                 dismiss();
             }
         });
-        builder.setNegativeButton("I don't agree", new DialogInterface.OnClickListener() {
+        builder.setNegativeButton(R.string.not_agree, new DialogInterface.OnClickListener() {
             public void onClick(DialogInterface dialog, int id) {
                 //return
                 getActivity().finish();

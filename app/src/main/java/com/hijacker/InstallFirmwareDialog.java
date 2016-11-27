@@ -41,17 +41,17 @@ public class InstallFirmwareDialog extends DialogFragment {
         builder.setView(view);
         builder.setTitle(R.string.install_nexmon_title);
         builder.setMessage(R.string.install_message);
-        builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+        builder.setNegativeButton(R.string.cancel, new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int which) {
                 //close
             }
         });
-        builder.setPositiveButton("Install", new DialogInterface.OnClickListener() {
+        builder.setPositiveButton(R.string.install, new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int which) {}
         });
-        builder.setNeutralButton("Find firmware", new DialogInterface.OnClickListener(){
+        builder.setNeutralButton(R.string.find_firmware, new DialogInterface.OnClickListener(){
             @Override
             public void onClick(DialogInterface dialogInterface, int i){}
         });
@@ -81,11 +81,11 @@ public class InstallFirmwareDialog extends DialogFragment {
                     File firm = new File(firm_location);
                     File util = new File(util_location);
                     if(!firm.exists()){
-                        Toast.makeText(getActivity().getApplicationContext(), "Directory for Firmware doesn't exist", Toast.LENGTH_SHORT).show();
+                        Toast.makeText(getActivity().getApplicationContext(), R.string.dir_notfound_firm, Toast.LENGTH_SHORT).show();
                     }else if(!(new File(firm_location + "/fw_bcmdhd.bin").exists())){
-                        Toast.makeText(getActivity().getApplicationContext(), "There is no fw_bcmdhd.bin in there", Toast.LENGTH_SHORT).show();
+                        Toast.makeText(getActivity().getApplicationContext(), R.string.firm_notfound, Toast.LENGTH_SHORT).show();
                     }else if(!util.exists()){
-                        Toast.makeText(getActivity().getApplicationContext(), "Directory for utility doesn't exist", Toast.LENGTH_SHORT).show();
+                        Toast.makeText(getActivity().getApplicationContext(), R.string.dir_notfound_util, Toast.LENGTH_SHORT).show();
                     }else{
                         if(debug){
                             Log.d("InstallFirmwareDialog", "Installing firmware in " + firm_location);
@@ -95,18 +95,18 @@ public class InstallFirmwareDialog extends DialogFragment {
                         shell3_in.flush();
                         if(((CheckBox)view.findViewById(R.id.backup)).isChecked()){
                             if(new File(path + "/fw_bcmdhd.orig.bin").exists()){
-                                Toast.makeText(getActivity().getApplicationContext(), "A backup already exists", Toast.LENGTH_SHORT).show();
+                                Toast.makeText(getActivity().getApplicationContext(), R.string.backup_exists, Toast.LENGTH_SHORT).show();
                             }else{
                                 shell3_in.print("cp -n " + firm_location + "/fw_bcmdhd.bin " + path + "/fw_bcmdhd.orig.bin\n");
                                 shell3_in.flush();
-                                Toast.makeText(getActivity().getApplicationContext(), "Backup created", Toast.LENGTH_SHORT).show();
+                                Toast.makeText(getActivity().getApplicationContext(), R.string.backup_created, Toast.LENGTH_SHORT).show();
                             }
                         }
                         extract("fw_bcmdhd.bin", firm_location);
                         extract("nexutil", util_location);
                         shell3_in.print("busybox mount -o ro,remount,ro /system\n");
                         shell3_in.flush();
-                        Toast.makeText(getActivity().getApplicationContext(), "Installed firmware and utility", Toast.LENGTH_SHORT).show();
+                        Toast.makeText(getActivity().getApplicationContext(), R.string.installed_firm_util, Toast.LENGTH_SHORT).show();
                         dismiss();
                     }
                 }
@@ -137,7 +137,7 @@ public class InstallFirmwareDialog extends DialogFragment {
                             buffer = shell3_out.readLine();
                         }
                         if(lastline.equals("ENDOFFIND")){
-                            Toast.makeText(getActivity().getApplicationContext(), "Firmware not found. Are you sure you have BCM4339?", Toast.LENGTH_LONG).show();
+                            Toast.makeText(getActivity().getApplicationContext(), R.string.firm_notfound_bcm, Toast.LENGTH_LONG).show();
                         }else{
                             lastline = lastline.substring(0, lastline.length()-14);
                             ((EditText)view.findViewById(R.id.firm_location)).setText(lastline);

@@ -16,7 +16,7 @@
         android:gravity="end">
 
         <TextView
-            android:text="MAC:"
+            android:text="@string/mac"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:padding="5dp"
@@ -24,7 +24,7 @@
             android:textSize="16sp" />
 
         <TextView
-            android:text="Channel:"
+            android:text="@string/channel"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:padding="5dp"
@@ -32,7 +32,7 @@
             android:textSize="16sp" />
 
         <TextView
-            android:text="Power:"
+            android:text="@string/power"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:padding="5dp"
@@ -40,7 +40,7 @@
             android:textSize="16sp" />
 
         <TextView
-            android:text="Encryption:"
+            android:text="@string/enc"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:padding="5dp"
@@ -48,7 +48,7 @@
             android:textSize="16sp" />
 
         <TextView
-            android:text="Authentication:"
+            android:text="@string/auth"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:padding="5dp"
@@ -56,7 +56,7 @@
             android:textSize="16sp" />
 
         <TextView
-            android:text="Cipher:"
+            android:text="@string/cipher"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:padding="5dp"
@@ -64,7 +64,7 @@
             android:textSize="16sp" />
 
         <TextView
-            android:text="Beacons:"
+            android:text="@string/beacons"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:padding="5dp"
@@ -72,7 +72,7 @@
             android:textSize="16sp" />
 
         <TextView
-            android:text="Data:"
+            android:text="@string/data"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:padding="5dp"
@@ -80,7 +80,7 @@
             android:textSize="16sp" />
 
         <TextView
-            android:text="#s:"
+            android:text="@string/ivs"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:padding="5dp"
@@ -88,7 +88,7 @@
             android:textSize="16sp" />
 
         <TextView
-            android:text="Clients:"
+            android:text="@string/clients"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:padding="5dp"
@@ -96,7 +96,7 @@
             android:textSize="16sp" />
 
         <TextView
-            android:text="ESSID:"
+            android:text="@string/essid"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:padding="5dp"
@@ -104,7 +104,7 @@
             android:textSize="16sp" />
 
         <TextView
-            android:text="Manufacturer:"
+            android:text="@string/manuf"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:padding="5dp"

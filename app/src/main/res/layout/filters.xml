@@ -8,7 +8,7 @@
     android:id="@+id/filterll1">
 
     <CheckBox
-        android:text="Show Access Points"
+        android:text="@string/show_ap"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:id="@+id/ap_cb"
@@ -16,21 +16,21 @@
         android:checked="true" />
 
     <CheckBox
-        android:text="Show Stations"
+        android:text="@string/show_st"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:id="@+id/st_cb"
         android:checked="true" />
 
     <CheckBox
-        android:text="Show non-associated stations"
+        android:text="@string/show_st_na"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:id="@+id/st_na_cb"
         android:checked="true" />
 
     <TextView
-        android:text="Channels:"
+        android:text="@string/channels"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:id="@+id/textView6"
@@ -154,7 +154,7 @@
             android:layout_weight="1" />
 
         <CheckBox
-            android:text="All"
+            android:text="@string/all"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:id="@+id/cb_all"
@@ -162,7 +162,7 @@
             android:checked="true" />
     </LinearLayout>
     <TextView
-        android:text="Security:"
+        android:text="@string/security"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:textColor="@android:color/white"
@@ -175,7 +175,7 @@
         android:layout_height="match_parent">
 
         <CheckBox
-            android:text="OPN"
+            android:text="@string/opn"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:id="@+id/cb_opn"
@@ -206,7 +206,7 @@
         android:layout_height="match_parent">
 
         <TextView
-            android:text="Power:"
+            android:text="@string/power"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:textColor="@android:color/white"
@@ -215,7 +215,6 @@
             android:layout_weight="0" />
 
         <TextView
-            android:text="-100"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_weight="1"

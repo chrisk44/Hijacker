@@ -20,7 +20,7 @@ public class CopySampleDialog extends DialogFragment {
     public Dialog onCreateDialog(Bundle savedInstanceState) {
         AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
         builder.setTitle(R.string.copy_sample_title);
-        builder.setNegativeButton("Back", new DialogInterface.OnClickListener() {
+        builder.setNegativeButton(R.string.back, new DialogInterface.OnClickListener() {
             public void onClick(DialogInterface dialog, int id) {
                 //return
             }

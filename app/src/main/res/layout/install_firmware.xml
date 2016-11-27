@@ -39,7 +39,7 @@
         android:paddingStart="8dp"/>
 
     <CheckBox
-        android:text="Create backup"
+        android:text="@string/create_backup"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:id="@+id/backup"

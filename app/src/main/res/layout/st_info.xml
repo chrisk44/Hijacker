@@ -15,7 +15,7 @@
         android:gravity="end">
 
         <TextView
-            android:text="MAC:"
+            android:text="@string/mac"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:padding="5dp"
@@ -23,7 +23,7 @@
             android:textSize="16sp" />
 
         <TextView
-            android:text="Power:"
+            android:text="@string/power"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:padding="5dp"
@@ -31,7 +31,7 @@
             android:textSize="16sp" />
 
         <TextView
-            android:text="Frames:"
+            android:text="@string/frames"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:padding="5dp"
@@ -39,7 +39,7 @@
             android:textSize="16sp" />
 
         <TextView
-            android:text="Lost:"
+            android:text="@string/lost"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:padding="5dp"
@@ -47,7 +47,7 @@
             android:textSize="16sp" />
 
         <TextView
-            android:text="Connected To:"
+            android:text="@string/connected_to"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:padding="5dp"
@@ -55,7 +55,7 @@
             android:textSize="16sp" />
 
         <TextView
-            android:text="Manufacturer:"
+            android:text="@string/manuf"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:padding="5dp"
@@ -81,7 +81,6 @@
             android:textSize="16sp" />
 
         <TextView
-            android:text="TextView"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:id="@+id/pwr_st"

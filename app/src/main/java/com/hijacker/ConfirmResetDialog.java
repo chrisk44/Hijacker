@@ -14,7 +14,7 @@ public class ConfirmResetDialog extends DialogFragment {
     public Dialog onCreateDialog(Bundle savedInstanceState) {
         AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
         builder.setTitle(R.string.reset_dialog_title);
-        builder.setPositiveButton("Yes", new DialogInterface.OnClickListener() {
+        builder.setPositiveButton(R.string.yes, new DialogInterface.OnClickListener() {
             public void onClick(DialogInterface dialog, int id) {
                 pref_edit.putString("iface", getString(R.string.iface));
                 pref_edit.putString("prefix", getString(R.string.prefix));
@@ -39,7 +39,7 @@ public class ConfirmResetDialog extends DialogFragment {
                 dismiss();
             }
         });
-        builder.setNegativeButton("No", new DialogInterface.OnClickListener() {
+        builder.setNegativeButton(R.string.no, new DialogInterface.OnClickListener() {
             public void onClick(DialogInterface dialog, int id) {
                 //return
             }

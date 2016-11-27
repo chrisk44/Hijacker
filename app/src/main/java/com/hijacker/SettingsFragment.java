@@ -4,25 +4,15 @@ import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.preference.Preference;
 import android.preference.PreferenceFragment;
-import android.util.Log;
 import android.widget.Toast;
 
 import java.io.File;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
 
-import static com.hijacker.MainActivity.debug;
 import static com.hijacker.MainActivity.inSettings;
 import static com.hijacker.MainActivity.load;
 import static com.hijacker.MainActivity.main;
 import static com.hijacker.MainActivity.maincalled;
 import static com.hijacker.MainActivity.path;
-import static com.hijacker.MainActivity.pref;
-import static com.hijacker.MainActivity.pref_edit;
-import static com.hijacker.MainActivity.shell;
-import static com.hijacker.MainActivity.shell3_in;
-import static com.hijacker.MainActivity.su_thread;
 import static com.hijacker.MainActivity.tv;
 
 public class SettingsFragment extends PreferenceFragment {
@@ -40,7 +30,7 @@ public class SettingsFragment extends PreferenceFragment {
             String options[] = {"install_tools", "install_nexmon", "restore_firmware"};
             for(int i=0;i<3;i++){
                 temp = findPreference(options[i]);
-                temp.setSummary("Available only on armv7l, this is " + arch);
+                temp.setSummary(R.string.incorrect_arch + arch);
                 temp.setEnabled(false);
             }
         }

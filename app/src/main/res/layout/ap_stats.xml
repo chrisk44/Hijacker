@@ -15,7 +15,7 @@
         android:gravity="end">
 
         <TextView
-            android:text="Security:"
+            android:text="@string/security"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:padding="5dp"
@@ -48,7 +48,7 @@
             android:textSize="16sp" />
 
         <TextView
-            android:text="OPEN:"
+            android:text="@string/open"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:padding="5dp"
@@ -71,7 +71,6 @@
             android:textColor="@android:color/white"
             android:textSize="16sp" />
         <TextView
-            android:text="TextView"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:id="@+id/wpa_count"
@@ -79,7 +78,6 @@
             android:textColor="@android:color/white"
             android:textSize="16sp" />
         <TextView
-            android:text="TextView"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:id="@+id/wpa2_count"
@@ -87,7 +85,6 @@
             android:textColor="@android:color/white"
             android:textSize="16sp" />
         <TextView
-            android:text="TextView"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:id="@+id/wep_count"
@@ -95,7 +92,6 @@
             android:textColor="@android:color/white"
             android:textSize="16sp" />
         <TextView
-            android:text="TextView"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:id="@+id/opn_count"

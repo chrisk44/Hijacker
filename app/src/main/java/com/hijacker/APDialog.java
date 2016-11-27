@@ -49,13 +49,13 @@ public class APDialog extends DialogFragment {
 
         builder.setView(view);
         builder.setTitle(info_ap.essid);
-        builder.setNegativeButton("Close", new DialogInterface.OnClickListener() {
+        builder.setNegativeButton(R.string.close, new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int which) {
                 //close
             }
         });
-        builder.setNeutralButton("Refresh", new DialogInterface.OnClickListener() {
+        builder.setNeutralButton(R.string.refresh, new DialogInterface.OnClickListener() {
             public void onClick(DialogInterface dialog, int id) {}
         });
         return builder.create();

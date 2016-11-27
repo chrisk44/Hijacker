@@ -9,16 +9,16 @@ import android.util.Log;
 
 public class ErrorDialog extends DialogFragment {
     String message;
-    String title = "Error";
+    String title = getString(R.string.error);
     boolean showExit = true;
     @Override
     public Dialog onCreateDialog(Bundle savedInstanceState) {
         AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
-        builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
+        builder.setPositiveButton(R.string.ok, new DialogInterface.OnClickListener() {
             public void onClick(DialogInterface dialog, int id) {}
         });
         if(showExit) {
-            builder.setNeutralButton("Exit", new DialogInterface.OnClickListener() {
+            builder.setNeutralButton(R.string.exit, new DialogInterface.OnClickListener() {
                 @Override
                 public void onClick(DialogInterface dialog, int which) {
                     getActivity().finish();
@@ -30,8 +30,8 @@ public class ErrorDialog extends DialogFragment {
             builder.setMessage(this.message);
         }else{
             Log.d("ErrorDialog", "Message not set");
-            builder.setTitle("Error on ErrorDialog");
-            builder.setMessage("Yes, this is an ErrorDialog saying that there was an error displaying a previous ErrorDialog. -_-");
+            builder.setTitle(R.string.eoe_title);
+            builder.setMessage(R.string.eoe_message);
         }
         return builder.create();
     }
@@ -42,5 +42,5 @@ public class ErrorDialog extends DialogFragment {
     }
     public void setMessage(String msg){ this.message = msg; }
     public void setTitle(String title){ this.title = title; }
-    public void setShowExit(boolean show){this.showExit = show; }
+    public void setShowExit(boolean show){ this.showExit = show; }
 }

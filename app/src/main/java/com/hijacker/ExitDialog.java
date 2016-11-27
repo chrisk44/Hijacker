@@ -14,13 +14,13 @@ public class ExitDialog extends DialogFragment {
         AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
         builder.setMessage(R.string.exit_dialog_message);
         builder.setTitle(R.string.exit_dialog_title);
-        builder.setPositiveButton("Exit", new DialogInterface.OnClickListener() {
+        builder.setPositiveButton(R.string.exit, new DialogInterface.OnClickListener() {
             public void onClick(DialogInterface dialog, int id) {
                 show_notif = false;
                 getActivity().finish();
             }
         });
-        builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+        builder.setNegativeButton(R.string.cancel, new DialogInterface.OnClickListener() {
             public void onClick(DialogInterface dialog, int id) {
                 //return
             }

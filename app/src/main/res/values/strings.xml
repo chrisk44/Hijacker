@@ -1,26 +1,131 @@
 <resources>
     <string name="app_name" translatable="false">Hijacker</string>
 
+    <!-- ExitDialog -->
     <string name="exit_dialog_title">Exit?</string>
     <string name="exit_dialog_message">Airodump, aireplay and mdk will stop. Are you sure?</string>
 
+    <!-- ConfirmResetDialog -->
     <string name="reset_dialog_title">Reset Preferences?</string>
 
+    <!-- Notification -->
     <string name="notification_title">Hijacker is running in the background</string>
     <string name="stop_attacks">Stop attacks</string>
+
+    <!-- Main -->
+    <string name="cap_notfound">cap file not found, airodump is probably not running…\n</string>
+    <string name="cap_is">Cap file is </string>
+    <string name="error_opening_shell">Error opening su shell</string>
+    <string name="app_dir_notfound1">App file directory doesn\'t exist: </string>
+    <string name="app_dir_notfound2">. Reinstall the app.</string>
+    <string name="stop_bf">Stop Beacon Flooding</string>
+    <string name="stop_ados">Stop Authentication DoS</string>
+    <string name="start_bf">Start Beacon Flooding</string>
+    <string name="start_ados">Start Authentication DoS</string>
+
+    <!-- wpa_thread -->
     <string name="stopped_to_capture">Stopped aireplay to capture handshake…</string>
     <string name="checking">Checking cap file…</string>
     <string name="handshake_captured">WPA handshake captured. Saved in file </string>
 
+    <!-- DisclaimerDialog -->
+    <string name="disclaimer_title">Disclaimer</string>
     <string name="disclaimer">It is extremely illegal to use this application against networks for which you don\'t have permission.
         You can use it only on YOUR network or a network that you are authorized to.
         I am not responsible for how you use this application and any damages you may cause.\nConsider yourself warned.</string>
+    <string name="agree">I agree</string>
+    <string name="not_agree">I don\'t agree</string>
 
+    <!-- FirstRunDialog -->
+    <string name="first_run_title">Set up tools</string>
     <string name="first_run">This application is a Graphical User Interface for the wireless auditing tools airodump-ng, aireplay-ng, aircrack-ng and mdk3 and requires a Monitor Mode enabled WiFi interface. Only some android devices support this but none of them natively.
         You need to use a custom firmware (bcmon, Nexmon) so that your wireless adapter can be used in Monitor Mode. External adapters can also be used.
         You can configure your interface\'s name in Settings. This app requires root privileges to run the tools.
         If you don\'t grant them, it will hang. Don\'t ask me why…\nYou can install the tools and firmware (only nexmon) now, or you can go to the Home Screen and use the defaults.</string>
 
+    <!-- Generic text -->
+    <string name="incorrect_arch">Available only on armv7l, this is </string>
+    <string name="close">Close</string>
+    <string name="cancel">Cancel</string>
+    <string name="back">Back</string>
+    <string name="install">Install</string>
+    <string name="refresh">Refresh</string>
+    <string name="find_firmware">Find Firmware</string>
+    <string name="yes">Yes</string>
+    <string name="no">No</string>
+    <string name="error">Error</string>
+    <string name="ok">OK</string>
+    <string name="exit">Exit</string>
+    <string name="filters">Filters</string>
+    <string name="apply">Apply</string>
+    <string name="setup">Set up</string>
+    <string name="home">Home</string>
+
+    <!-- InstallFirmwareDialog -->
+    <string name="dir_notfound_firm">Directory for Firmware doesn\'t exist</string>
+    <string name="dir_notfound_util">Directory for Utility doesn\'t exist</string>
+    <string name="firm_notfound">There is no fw_bcmdhd.bin in there</string>
+    <string name="backup_exists">A backup already exists</string>
+    <string name="backup_created">Backup created</string>
+    <string name="installed_firm_util">Installed firmware and utility</string>
+    <string name="firm_notfound_bcm">Firmware not found. Are you sure you have BCM4339?</string>
+    <string name="create_backup">Create Backup</string>
+
+    <!-- InstallToolsDialog -->
+    <string name="dir_notfound_tools">Directory for tools doesn\'t exist</string>
+    <string name="dir_notfound_lib">Directory for library doesn\'t exist</string>
+    <string name="installed_tools_lib">Installed Tools and Library</string>
+    <string name="prefix_adjusted">Command Prefix adjusted for library path</string>
+
+    <!-- RestoreFirmwareDialog -->
+    <string name="restore">Restore</string>
+    <string name="restored">Backup restored</string>
+
+    <!-- ErrorDialog -->
+    <string name="eoe_title">Error on ErrorDialog</string>
+    <string name="eoe_message">Yes, this is an ErrorDialog saying that there was an error displaying a previous ErrorDialog.</string>
+
+    <!-- StatsDialog -->
+    <string name="ap_stats">Access Point Stats</string>
+    <string name="security">Security:</string>
+    <string name="open">OPEN:</string>
+
+    <!-- APDialog (xml) -->
+    <string name="mac">MAC:</string>
+    <string name="channel">Channel:</string>
+    <string name="power">Power:</string>
+    <string name="enc">Encryption:</string>
+    <string name="auth">Authentication:</string>
+    <string name="cipher">Cipher:</string>
+    <string name="beacons">Beacons:</string>
+    <string name="data">Data:</string>
+    <string name="ivs">#s:</string>
+    <string name="clients">Clients:</string>
+    <string name="essid">ESSID:</string>
+    <string name="manuf">Manufacturer:</string>
+
+    <!-- STDialog (xml) -->
+    <string name="frames">Frames:</string>
+    <string name="lost">Lost:</string>
+    <string name="connected_to">Connected To:</string>
+
+    <!-- FiltersDialog (xml) -->
+    <string name="show_ap">Show Access Points</string>
+    <string name="show_st">Show Stations</string>
+    <string name="show_st_na">Show non-associated stations</string>
+    <string name="channels">Channels:</string>
+    <string name="all">All</string>
+    <string name="opn">OPN</string>
+
+    <!-- TestDialog -->
+    <string name="testing">Testing tools…</string>
+    <string name="make_sure_wifi">Make sure that WiFi is enabled</string>
+
+    <!-- ST -->
+    <string name="paired">Paired: </string>
+    <string name="not_connected">Not Connected</string>
+
+    <!-- Default Preferences -->
     <string name="iface">wlan0</string>
     <string name="prefix">LD_PRELOAD=/vendor/lib/libfakeioctl.so</string>
     <string name="airodump_dir">airodump-ng</string>
@@ -40,7 +145,7 @@
     <string name="confirm_exit">true</string>
     <string name="delete_extra">true</string>
 
-    <!-- Strings related to Settings -->
+    <!-- Settings -->
     <string name="general">General</string>
     <string name="tools">Tools</string>
     <string name="other">Other</string>

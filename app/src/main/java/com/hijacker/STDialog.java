@@ -31,7 +31,7 @@ public class STDialog extends DialogFragment {
 
         st[0].setText(info_st.mac);
 
-        if(info_st.bssid==null) st[1].setText("Not Connected");
+        if(info_st.bssid==null) st[1].setText(R.string.not_connected);
         else if(AP.getAPByMac(info_st.bssid)!=null) st[1].setText(info_st.bssid + " (" + AP.getAPByMac(info_st.bssid).essid + ")");
         else st[1].setText(info_st.bssid);
 
@@ -42,13 +42,13 @@ public class STDialog extends DialogFragment {
 
         builder.setView(view);
         builder.setTitle(info_st.mac);
-        builder.setNegativeButton("Close", new DialogInterface.OnClickListener() {
+        builder.setNegativeButton(R.string.close, new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int which) {
                 //close
             }
         });
-        builder.setNeutralButton("Refresh", new DialogInterface.OnClickListener() {
+        builder.setNeutralButton(R.string.refresh, new DialogInterface.OnClickListener() {
             public void onClick(DialogInterface dialog, int id) {}
         });
         return builder.create();
@@ -64,7 +64,7 @@ public class STDialog extends DialogFragment {
                 public void onClick(View v) {
                     st[0].setText(info_st.mac);
 
-                    if(info_st.bssid==null) st[1].setText("Not Connected");
+                    if(info_st.bssid==null) st[1].setText(R.string.not_connected);
                     else if(AP.getAPByMac(info_st.bssid)!=null) st[1].setText(info_st.bssid + " (" + AP.getAPByMac(info_st.bssid).essid + ")");
                     else st[1].setText(info_st.bssid);
 

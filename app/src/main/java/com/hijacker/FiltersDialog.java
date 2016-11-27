@@ -67,14 +67,14 @@ public class FiltersDialog extends DialogFragment {
         ((TextView)view.findViewById(R.id.pwr)).setText("-" + pwr_filter);
 
         builder.setView(view);
-        builder.setTitle("Filters");
-        builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+        builder.setTitle(R.string.filters);
+        builder.setNegativeButton(R.string.cancel, new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int which) {
                 //close
             }
         });
-        builder.setPositiveButton("Apply", new DialogInterface.OnClickListener() {
+        builder.setPositiveButton(R.string.apply, new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int which) {
                 show_ap = ((CheckBox)view.findViewById(R.id.ap_cb)).isChecked();

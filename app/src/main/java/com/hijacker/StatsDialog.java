@@ -30,8 +30,8 @@ public class StatsDialog extends DialogFragment {
         opn_count.setText(Integer.toString(AP.opn));
 
         builder.setView(view);
-        builder.setTitle("Access Points Stats");
-        builder.setNegativeButton("Close", new DialogInterface.OnClickListener() {
+        builder.setTitle(R.string.ap_stats);
+        builder.setNegativeButton(R.string.close, new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int which) {
                 //close

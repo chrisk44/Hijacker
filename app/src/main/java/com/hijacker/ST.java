@@ -8,6 +8,7 @@ import static com.hijacker.MainActivity.is_ap;
 
 class ST {
     static List <ST>STs = new ArrayList<>();
+    static String paired, not_connected;
     int pwr, lost, frames, id;
     boolean added_as_client = false;
     Item item;
@@ -50,9 +51,9 @@ class ST {
 
         String b, c;
         if (bssid != null){
-            if(AP.getAPByMac(bssid) != null) b = "Paired: " + bssid + " (" + AP.getAPByMac(bssid).essid + ")";
-            else b = "Paired: " + bssid;
-        } else b = "Not connected";
+            if(AP.getAPByMac(bssid) != null) b = paired + bssid + " (" + AP.getAPByMac(bssid).essid + ")";
+            else b = paired + bssid;
+        } else b = not_connected;
         c = "PWR: " + this.pwr + " | Frames: " + this.frames;
         if(item!=null) item.update(this.mac, b, c, this.manuf);
         else item = new Item(AP.APs.size() + id, this.mac, b, c, this.manuf, false, null, this);
