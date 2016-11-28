@@ -23,13 +23,6 @@
         android:icon="@drawable/stop_aireplay"
         app:showAsAction="ifRoom"/>
 
-    <item android:id="@+id/bf"
-        android:title="Start Beacon Flooding" />
-
-    <item android:id="@+id/ados"
-        android:title="Start Authentication DoS"
-        app:showAsAction="never"/>
-
     <item android:id="@+id/settings"
         android:title="Settings"
         app:showAsAction="never" />

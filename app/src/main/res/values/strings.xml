@@ -22,6 +22,8 @@
     <string name="stop_ados">Stop Authentication DoS</string>
     <string name="start_bf">Start Beacon Flooding</string>
     <string name="start_ados">Start Authentication DoS</string>
+    <string name="drawer_open">Open Drawer</string>
+    <string name="drawer_close">Close Drawer</string>
 
     <!-- wpa_thread -->
     <string name="stopped_to_capture">Stopped aireplay to capture handshake…</string>
@@ -124,6 +126,10 @@
     <!-- ST -->
     <string name="paired">Paired: </string>
     <string name="not_connected">Not Connected</string>
+
+    <!-- MDKFragment -->
+    <string name="bf_title">Beacon Flooding</string>
+    <string name="ados_title">Authentication DoS</string>
 
     <!-- Default Preferences -->
     <string name="iface" translatable="false">wlan0</string>

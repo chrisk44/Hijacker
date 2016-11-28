@@ -57,7 +57,6 @@ public class MainActivity extends AppCompatActivity{
     //State variables
     static boolean cont = false, wpacheckcont = false, test_wait, maincalled = false, done = true, notif_on = false;  //done: for calling refreshHandler only when it has stopped
     static int airodump_running = 0, aireplay_running = 0, currentFragment=FRAGMENT_AIRODUMP;         //Set currentFragment in onResume of each Fragment
-    static boolean bf = false, ados = false;                                                //mdk3 beacon flooding and authentication dos
     //Filters
     static boolean show_ap = true, show_st = true, show_na_st = true, wpa = true, wep = true, opn = true;
     static boolean show_ch[] = {true, false, false, false, false, false, false, false, false, false, false, false, false, false, false};
@@ -328,6 +327,7 @@ public class MainActivity extends AppCompatActivity{
         @Override
         public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
             if(currentFragment!=position){
+                mDrawerList.getChildAt(currentFragment).setBackgroundResource(R.color.colorPrimary);
                 FragmentTransaction ft = fm.beginTransaction();
                 switch(position){
                     case 0:
@@ -336,6 +336,7 @@ public class MainActivity extends AppCompatActivity{
                         break;
                     case 1:
                         //MDK3
+                        ft.replace(R.id.fragment1, new MDKFragment());
                         break;
                     case 2:
                         //Crack WPA
@@ -354,8 +355,10 @@ public class MainActivity extends AppCompatActivity{
                 ft.setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN);
                 ft.addToBackStack(null);
                 ft.commit();
+                fm.executePendingTransactions();
 
                 getSupportActionBar().setTitle(mPlanetTitles[position]);
+                mDrawerList.getChildAt(currentFragment).setBackgroundResource(R.color.colorAccent);
             }
             mDrawerLayout.closeDrawer(mDrawerList);
         }
@@ -504,61 +507,35 @@ public class MainActivity extends AppCompatActivity{
             case 0:
                 //beacon flood mode
                 tv.append("Beacon Flood\n");
-                if(bf){
-                    if(debug) Log.d("StartMdk", "Bf already running");
-                }else{
-                    menu.getItem(4).setTitle(R.string.stop_bf);
-                    bf = true;
-                    new Thread(new Runnable(){
-                        @Override
-                        public void run(){
-                            //Process dc=null;
-                            try{
-                                String cmd = "su -c " + prefix + " " + mdk3_dir + " " + iface + " b -m";
-                                if(debug) Log.d("MDK3", cmd);
-                                //dc = Runtime.getRuntime().exec(cmd);
-                                Runtime.getRuntime().exec(cmd);
-                            }catch(IOException e){
-                                Log.e("Exception", "Caught Exception in startMdk(0) start block: " + e.toString());
-                            }
-                            /*BufferedReader in = new BufferedReader(new InputStreamReader(dc.getInputStream()));
-                            String buffer;
-                            try{ while (cont){ if ((buffer = in.readLine()) != null){
-                                        if(debug) Log.d("MDK3", buffer);
-                                    }}} catch (IOException e){}*/
+                new Thread(new Runnable(){
+                    @Override
+                    public void run(){
+                        try{
+                            String cmd = "su -c " + prefix + " " + mdk3_dir + " " + iface + " b -m";
+                            if(debug) Log.d("MDK3", cmd);
+                            Runtime.getRuntime().exec(cmd);
+                        }catch(IOException e){
+                            Log.e("Exception", "Caught Exception in startMdk(0) start block: " + e.toString());
                         }
-                    }).start();
-                }
+                    }
+                }).start();
                 break;
             case 1:
                 //Authentication DoS mode
                 temp_string = ap==null ? " " : "-i " + ap;
                 tv.append("Authentication DoS" + temp_string + "\n");
-                if(ados){
-                    if(debug) Log.d("StartMdk", "ados already running");
-                }else{
-                    menu.getItem(5).setTitle(R.string.stop_ados);
-                    ados = true;
-                    new Thread(new Runnable(){
-                        @Override
-                        public void run(){
-                            //Process dc=null;
-                            try{
-                                String cmd = "su -c " + prefix + " " + mdk3_dir + " " + iface + " a -m " + temp_string;
-                                if(debug) Log.d("MDK3", cmd);
-                                //dc = Runtime.getRuntime().exec(cmd);
-                                Runtime.getRuntime().exec(cmd);
-                            }catch(IOException e){
-                                Log.e("Exception", "Caught Exception in startMdk(1) start block: " + e.toString());
-                            }
-                            /*BufferedReader in = new BufferedReader(new InputStreamReader(dc.getInputStream()));
-                            String buffer;
-                            try{ while (cont){ if ((buffer = in.readLine()) != null){
-                                        if(debug) Log.d("MDK3", buffer);
-                                    }}} catch (IOException e){}*/
+                new Thread(new Runnable(){
+                    @Override
+                    public void run(){
+                        try{
+                            String cmd = "su -c " + prefix + " " + mdk3_dir + " " + iface + " a -m " + temp_string;
+                            if(debug) Log.d("MDK3", cmd);
+                            Runtime.getRuntime().exec(cmd);
+                        }catch(IOException e){
+                            Log.e("Exception", "Caught Exception in startMdk(1) start block: " + e.toString());
                         }
-                    }).start();
-                }
+                    }
+                }).start();
                 break;
         }
         refreshState();
@@ -594,7 +571,9 @@ public class MainActivity extends AppCompatActivity{
         return list;
     }
     public static void stop(int pr){
-        //0 for airodump-ng, 1 for aireplay-ng, 2 for mdk
+        //0 for airodump-ng, 1 for aireplay-ng, 2 for mdk, everything else is considered pid and we kill it
+        ArrayList<Integer> pids = new ArrayList<>();
+        if(pr<=2) pids = getPIDs(pr);
         switch(pr){
             case 0:
                 //Airodump
@@ -620,16 +599,12 @@ public class MainActivity extends AppCompatActivity{
                 break;
             case 2:
                 //MDK
-                bf = false;
-                ados = false;
-                if(menu!=null){
-                    menu.getItem(4).setTitle(R.string.start_bf);
-                    menu.getItem(5).setTitle(R.string.start_ados);
-                }
                 tv.append("Stopping mdk3\n");
                 break;
+            default:
+                pids.add(pr);
+                break;
         }
-        ArrayList<Integer> pids = getPIDs(pr);
         if(pids.isEmpty()){
             if(debug) Log.d("stop", "Nothing found for " + pr);
         }else{
@@ -918,16 +893,6 @@ public class MainActivity extends AppCompatActivity{
                 new FiltersDialog().show(fm, "asdTAG");
                 return true;
 
-            case R.id.bf:
-                if(bf) stop(2);
-                else startMdk(0, null);
-                return true;
-
-            case R.id.ados:
-                if(ados) stop(2);
-                else startMdk(1, null);
-                return true;
-
             case R.id.settings:                             //To be removed
                 if(currentFragment!=FRAGMENT_SETTINGS){
                     FragmentTransaction ft = fm.beginTransaction();
@@ -939,8 +904,6 @@ public class MainActivity extends AppCompatActivity{
                 return true;
 
             default:
-                // If we got here, the user's action was not recognized.
-                // Invoke the superclass to handle it.
                 return super.onOptionsItemSelected(item);
         }
     }
@@ -1089,7 +1052,7 @@ public class MainActivity extends AppCompatActivity{
         if(view!=null) Snackbar.make(view, "\"" + str + "\" copied to clipboard", Snackbar.LENGTH_SHORT).show();
     }
     static void notification(){
-        if(notif_on && show_notif && !(airodump_running==0 && aireplay_running==0 && !bf && !ados)){
+        if(notif_on && show_notif && !(airodump_running==0 && aireplay_running==0 && !MDKFragment.bf && !MDKFragment.ados)){
             Log.d("notification", "in notification()");
             String str = "APs: " + Item.i + " | STs: " + (Item.items.size() - Item.i);
 
@@ -1097,8 +1060,8 @@ public class MainActivity extends AppCompatActivity{
                 if(aireplay_running==AIREPLAY_DEAUTH) str += " | Aireplay deauthenticating...";
                 else if(aireplay_running==AIREPLAY_WEP) str += " | Aireplay replaying for wep...";
                 if(wpa_thread.isAlive()) str += " | WPA cracking...";
-                if(bf) str += " | MDK3 Beacon Flooding...";
-                if(ados) str += " | MDK3 Authentication DoS...";
+                if(MDKFragment.bf) str += " | MDK3 Beacon Flooding...";
+                if(MDKFragment.ados) str += " | MDK3 Authentication DoS...";
             }
 
             notif.setContentText(str);
@@ -1117,7 +1080,7 @@ public class MainActivity extends AppCompatActivity{
         //refresh overflow icon to show what is running
         int state = airodump_running;
         if(aireplay_running!=0) state += 2;
-        if(bf || ados) state += 4;
+        if(MDKFragment.bf || MDKFragment.ados) state += 4;
         toolbar.setOverflowIcon(overflow[state]);
     }
     static String getManuf(String mac){
