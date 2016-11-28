@@ -56,7 +56,7 @@ public class MainActivity extends AppCompatActivity{
             FRAGMENT_CRACKWEP = 3, FRAGMENT_REAVER = 4, FRAGMENT_SETTINGS = 5;
     //State variables
     static boolean cont = false, wpacheckcont = false, test_wait, maincalled = false, done = true, notif_on = false;  //done: for calling refreshHandler only when it has stopped
-    static int airodump_running = 0, aireplay_running = 0, currentFragment;         //Set currentFragment in onResume of each Fragment
+    static int airodump_running = 0, aireplay_running = 0, currentFragment=FRAGMENT_AIRODUMP;         //Set currentFragment in onResume of each Fragment
     static boolean bf = false, ados = false;                                                //mdk3 beacon flooding and authentication dos
     //Filters
     static boolean show_ap = true, show_st = true, show_na_st = true, wpa = true, wep = true, opn = true;
@@ -354,8 +354,7 @@ public class MainActivity extends AppCompatActivity{
                 ft.setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN);
                 ft.addToBackStack(null);
                 ft.commit();
-                // Highlight the selected item, update the title, and close the drawer
-                mDrawerList.setItemChecked(position, true);
+
                 getSupportActionBar().setTitle(mPlanetTitles[position]);
             }
             mDrawerLayout.closeDrawer(mDrawerList);
@@ -858,6 +857,7 @@ public class MainActivity extends AppCompatActivity{
         ft.setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN);
         ft.addToBackStack(null);
         ft.commit();
+        getSupportActionBar().setTitle(mPlanetTitles[currentFragment]);
 
         client = new GoogleApiClient.Builder(this).addApi(AppIndex.API).build();
     }
@@ -988,9 +988,11 @@ public class MainActivity extends AppCompatActivity{
                 mDrawerLayout.closeDrawer(mDrawerList);
                 return true;
             }else if(getFragmentManager().getBackStackEntryCount()>1){
-                getFragmentManager().popBackStack();                                //currentFragment hasn't changed when this returns
-                getSupportActionBar().setTitle(mPlanetTitles[currentFragment]);     //Works
-                mDrawerList.setItemChecked(currentFragment, true);                  //Doesn't work
+                mDrawerList.getChildAt(currentFragment).setBackgroundResource(R.color.colorPrimary);
+                getFragmentManager().popBackStack();
+                getFragmentManager().executePendingTransactions();                  //need to wait for currentFragment to update
+                getSupportActionBar().setTitle(mPlanetTitles[currentFragment]);
+                mDrawerList.getChildAt(currentFragment).setBackgroundResource(R.color.colorAccent);
                 return true;
             }else if(is_ap!=null){
                 //Use back button to return from isolated ap
