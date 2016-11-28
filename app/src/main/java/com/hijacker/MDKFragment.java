@@ -14,6 +14,8 @@ import static com.hijacker.MainActivity.FRAGMENT_MDK;
 import static com.hijacker.MainActivity.currentFragment;
 import static com.hijacker.MainActivity.debug;
 import static com.hijacker.MainActivity.getPIDs;
+import static com.hijacker.MainActivity.notification;
+import static com.hijacker.MainActivity.refreshState;
 import static com.hijacker.MainActivity.startMdk;
 import static com.hijacker.MainActivity.stop;
 
@@ -40,6 +42,8 @@ public class MDKFragment extends Fragment{
                 }else{
                     stop(bf_pid);
                     bf = false;
+                    refreshState();
+                    notification();
                 }
             }
         });
@@ -60,6 +64,8 @@ public class MDKFragment extends Fragment{
                 }else{
                     stop(ados_pid);
                     ados = false;
+                    refreshState();
+                    notification();
                 }
             }
         });
