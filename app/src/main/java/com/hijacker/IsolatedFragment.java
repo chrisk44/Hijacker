@@ -14,6 +14,8 @@ import android.widget.PopupMenu;
 import android.widget.TextView;
 
 import static com.hijacker.MainActivity.FRAGMENT_AIRODUMP;
+import static com.hijacker.MainActivity.PROCESS_AIREPLAY;
+import static com.hijacker.MainActivity.PROCESS_AIRODUMP;
 import static com.hijacker.MainActivity.aireplay_dir;
 import static com.hijacker.MainActivity.copy;
 import static com.hijacker.MainActivity.currentFragment;
@@ -141,8 +143,8 @@ public class IsolatedFragment extends Fragment{
         cont = false;
         if(times_opened==0){
             isolate(null);
-            stop(0);
-            stop(1);
+            stop(PROCESS_AIRODUMP);
+            stop(PROCESS_AIREPLAY);
             startAirodump(null);
         }
     }

@@ -145,6 +145,14 @@
     <string name="disconnect_all">Disconnect All</string>
     <string name="dos">DoS</string>
 
+    <!-- CrackFragment -->
+    <string name="path_to_cap">Path to .cap file</string>
+    <string name="path_to_wordlist">Path to wordlist</string>
+    <string name="start">Start</string>
+    <string name="capfile_notfound">.cap file not found</string>
+    <string name="wordlist_notfound">Wordlist not found</string>
+    <string name="select_wpa_wep">Please select WPA/WEP</string>
+
     <!-- Default Preferences -->
     <string name="iface" translatable="false">wlan0</string>
     <string name="prefix" translatable="false">LD_PRELOAD=/vendor/lib/libfakeioctl.so</string>

@@ -13,6 +13,7 @@ import static com.hijacker.AP.WEP;
 import static com.hijacker.AP.WPA;
 import static com.hijacker.AP.WPA2;
 import static com.hijacker.MainActivity.FRAGMENT_AIRODUMP;
+import static com.hijacker.MainActivity.PROCESS_AIRODUMP;
 import static com.hijacker.MainActivity.aireplay_dir;
 import static com.hijacker.MainActivity.airodump_dir;
 import static com.hijacker.MainActivity.copy;
@@ -66,7 +67,7 @@ public class MyListFragment extends ListFragment {
                             break;
                         case 2:
                             //Disconnect
-                            stop(0);
+                            stop(PROCESS_AIRODUMP);
                             if (debug) Log.d("MyListFragment", "Starting airodump for channel " + clicked.ap.ch);
                             startAirodump("--channel " + clicked.ap.ch);
                             if(debug) {
@@ -78,7 +79,7 @@ public class MyListFragment extends ListFragment {
                         case 3:
                             //Watch
                             MainActivity.isolate(clicked.ap.mac);
-                            startAirodump("--channel " + clicked.ap.ch);
+                            startAirodump("--channel " + clicked.ap.ch + " --bssid " + clicked.ap.mac);
                             break;
                         case 5:
                             //Disconnect client

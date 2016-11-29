@@ -55,8 +55,9 @@ import static com.hijacker.IsolatedFragment.is_ap;
 
 public class MainActivity extends AppCompatActivity{
     static final int AIREPLAY_DEAUTH = 1, AIREPLAY_WEP = 2;
-    static final int FRAGMENT_AIRODUMP = 0, FRAGMENT_MDK = 1, FRAGMENT_CRACKWPA = 2,
-            FRAGMENT_CRACKWEP = 3, FRAGMENT_REAVER = 4, FRAGMENT_SETTINGS = 5;
+    static final int FRAGMENT_AIRODUMP = 0, FRAGMENT_MDK = 1, FRAGMENT_CRACK = 2,
+            FRAGMENT_REAVER = 3, FRAGMENT_SETTINGS = 4;
+    static final int PROCESS_AIRODUMP=0, PROCESS_AIREPLAY=1, PROCESS_MDK=2, PROCESS_AIRCRACK=3;
     //State variables
     static boolean cont = false, wpacheckcont = false, test_wait, maincalled = false, done = true, notif_on = false;  //done: for calling refreshHandler only when it has stopped
     static int airodump_running = 0, aireplay_running = 0, currentFragment=FRAGMENT_AIRODUMP;         //Set currentFragment in onResume of each Fragment
@@ -127,35 +128,30 @@ public class MainActivity extends AppCompatActivity{
             @Override
             public void run(){
                 if(debug) Log.d("wpa_thread", "Started wpa_thread");
-                shell2_in.print("ls " + cap_dir + "/wpa.cap-*.cap && echo ENDOFLS\n");
-                shell2_in.flush();
-                String lastfile, buffer = null;
+                String capfile, buffer = null;
                 int result = 0;
                 try{
-                    while(buffer==null){
-                        buffer = shell2_out.readLine();
-                    }
-                    lastfile = buffer;
-                    while(!buffer.equals("ENDOFLS")){
-                        lastfile = buffer;
-                        buffer = shell2_out.readLine();
-                    }
-                    if(debug) Log.d("wpa_thread", lastfile);
-                    if(lastfile.equals("ENDOFLS")){
+                    Thread.sleep(1000);
+                    shell2_in.print("ls -1 " + cap_dir + "/wpa.cap-*.cap; echo ENDOFLS\n");
+                    shell2_in.flush();
+                    capfile = getLastLine(shell2_out, "ENDOFLS");
+
+                    if(debug) Log.d("wpa_thread", capfile);
+                    if(capfile.equals("ENDOFLS")){
                         if(debug){
                             Log.d("wpa_thread", "cap file not found, airodump is probably not running...");
                             Log.d("wpa_thread", "Returning...");
                         }
                         tv.append(getString(R.string.cap_notfound));
                     }else{
-                        if(!showLog) Snackbar.make(getCurrentFocus(), getString(R.string.cap_is) + lastfile, Snackbar.LENGTH_LONG).show();
+                        if(!showLog) Snackbar.make(getCurrentFocus(), getString(R.string.cap_is) + capfile, Snackbar.LENGTH_LONG).show();
                         progress_int = 0;
                         wpacheckcont = true;
                         wpa_subthread.start();
                         while(result!=1 && wpacheckcont){
                             if(debug) Log.d("wpa_thread", "Checking cap file...");
                             if(progress_int>deauthWait) appendDot.obtainMessage().sendToTarget();
-                            shell2_in.print(aircrack_dir + " " + lastfile + " && echo ENDOFAIR\n");
+                            shell2_in.print(aircrack_dir + " " + capfile + " && echo ENDOFAIR\n");
                             shell2_in.flush();
                             buffer = shell2_out.readLine();
                             if(buffer==null) wpacheckcont = false;
@@ -172,7 +168,7 @@ public class MainActivity extends AppCompatActivity{
                     }
                     if(result==1){
                         Message msg = new Message();
-                        msg.obj = lastfile;
+                        msg.obj = capfile;
                         MainActivity.this.handshakeCaptured.sendMessage(msg);
                     }else stopIndeterminate.obtainMessage().sendToTarget();
                 }catch(IOException | InterruptedException e){
@@ -363,9 +359,10 @@ public class MainActivity extends AppCompatActivity{
         shell_in.print("mkdir " + cap_dir + "\n");
         shell_in.flush();
 
-        stop(0);
-        stop(1);
-        stop(2);
+        stop(PROCESS_AIRODUMP);
+        stop(PROCESS_AIREPLAY);
+        stop(PROCESS_MDK);
+        stop(PROCESS_AIRCRACK);
         if(airOnStartup) startAirodump(null);
         else if(menu!=null) menu.getItem(1).setIcon(R.drawable.run);
     }
@@ -380,7 +377,7 @@ public class MainActivity extends AppCompatActivity{
         }
         shell_in.print(enable_monMode + "\n");
         shell_in.flush();
-        stop(0);
+        stop(PROCESS_AIRODUMP);
         cont = true;
         new Thread(new Runnable(){
             @Override
@@ -507,20 +504,23 @@ public class MainActivity extends AppCompatActivity{
     }
 
     public static ArrayList<Integer> getPIDs(int pr){
-        //0 for airodump-ng, 1 for aireplay-ng, 2 for mdk
         ArrayList<Integer> list = new ArrayList<>();
         try{
             int pid;
             String s = null;
             switch(pr){
-                case 0:
+                case PROCESS_AIRODUMP:
                     shell_in.print("ps | grep airo; echo ENDOFPS\n");
                     break;
-                case 1:
+                case PROCESS_AIREPLAY:
                     shell_in.print("ps | grep aire; echo ENDOFPS\n");
                     break;
-                case 2:
+                case PROCESS_MDK:
                     shell_in.print("ps | grep mdk3; echo ENDOFPS\n");
+                    break;
+                case PROCESS_AIRCRACK:
+                    shell_in.print("ps | grep airc; echo ENDOFPS\n");
+                    break;
             }
             shell_in.flush();
             while(s==null){ s = shell_out.readLine(); } //for some reason sometimes s remains null
@@ -535,12 +535,11 @@ public class MainActivity extends AppCompatActivity{
         return list;
     }
     public static void stop(int pr){
-        //0 for airodump-ng, 1 for aireplay-ng, 2 for mdk, everything else is considered pid and we kill it
+        //0 for airodump-ng, 1 for aireplay-ng, 2 for mdk, 3 for aircrack, everything else is considered pid and we kill it
         ArrayList<Integer> pids = new ArrayList<>();
-        if(pr<=2) pids = getPIDs(pr);
+        if(pr<=3) pids = getPIDs(pr);
         switch(pr){
-            case 0:
-                //Airodump
+            case PROCESS_AIRODUMP:
                 progress.setIndeterminate(false);
                 progress.setProgress(deauthWait);
                 if(menu!=null) menu.getItem(1).setIcon(R.drawable.run);
@@ -554,16 +553,17 @@ public class MainActivity extends AppCompatActivity{
                 airodump_running = 0;
                 Item.filter();
                 break;
-            case 1:
-                //Aireplay
+            case PROCESS_AIREPLAY:
                 tv.append("Stopping aireplay\n");
                 if(menu!=null) menu.getItem(3).setEnabled(false);
                 aireplay_running = 0;
                 progress_int = deauthWait;
                 break;
-            case 2:
-                //MDK
+            case PROCESS_MDK:
                 tv.append("Stopping mdk3\n");
+                break;
+            case PROCESS_AIRCRACK:
+                tv.append("Stopping aircrack\n");
                 break;
             default:
                 pids.add(pr);
@@ -585,8 +585,8 @@ public class MainActivity extends AppCompatActivity{
     //Handlers used for tasks that require the Main thread to update the view, but need to be run by other threads
     public Handler handshakeCaptured = new Handler(){
         public void handleMessage(Message msg){
-            stop(0);
-            stop(1);
+            stop(PROCESS_AIRODUMP);
+            stop(PROCESS_AIREPLAY);
             tv.setText(getString(R.string.handshake_captured) + msg.obj + '\n');
             if(!showLog){
                 Snackbar snackbar = Snackbar.make(getCurrentFocus(), getString(R.string.handshake_captured) + msg.obj + '\n', Snackbar.LENGTH_LONG);
@@ -597,7 +597,7 @@ public class MainActivity extends AppCompatActivity{
     };
     public Handler stopAireplayForHandshake = new Handler(){
         public void handleMessage(Message msg){
-            stop(1);
+            stop(PROCESS_AIREPLAY);
             tv.append(getString(R.string.stopped_to_capture) + '\n');
             tv.append(getString(R.string.checking));
             if(!showLog){
@@ -643,9 +643,9 @@ public class MainActivity extends AppCompatActivity{
                 String cmd;
                 switch(msg.arg1){
                     case 3:
-                        stop(0);
-                        stop(1);
-                        stop(2);
+                        stop(PROCESS_AIRODUMP);
+                        stop(PROCESS_AIREPLAY);
+                        stop(PROCESS_MDK);
                         cmd = enable_monMode + '\n';
                         Log.d("test_thread", cmd);
                         shell3_in.print(cmd);
@@ -664,7 +664,7 @@ public class MainActivity extends AppCompatActivity{
                         Thread.sleep(2000);
                         if(getPIDs(0).size()==0) status[0].setImageResource(R.drawable.failed);
                         else{
-                            stop(0);
+                            stop(PROCESS_AIRODUMP);
                             status[0].setImageResource(R.drawable.passed);
                         }
                         test_progress.setProgress(1);
@@ -681,7 +681,7 @@ public class MainActivity extends AppCompatActivity{
                         Thread.sleep(2000);
                         if(getPIDs(1).size()==0) status[1].setImageResource(R.drawable.failed);
                         else{
-                            stop(1);
+                            stop(PROCESS_AIREPLAY);
                             status[1].setImageResource(R.drawable.passed);
                         }
                         test_progress.setProgress(2);
@@ -698,15 +698,15 @@ public class MainActivity extends AppCompatActivity{
                         Thread.sleep(2000);
                         if(getPIDs(2).size()==0) status[2].setImageResource(R.drawable.failed);
                         else{
-                            stop(2);
+                            stop(PROCESS_MDK);
                             status[2].setImageResource(R.drawable.passed);
                         }
                         test_progress.setProgress(3);
                         test_cur_cmd.setText("");
 
-                        stop(0);
-                        stop(1);
-                        stop(2);
+                        stop(PROCESS_AIRODUMP);
+                        stop(PROCESS_AIREPLAY);
+                        stop(PROCESS_MDK);
                         test_progress.setProgress(4);
                         test_wait = false;
                         break;
@@ -718,7 +718,7 @@ public class MainActivity extends AppCompatActivity{
     };
     public static Handler stop1 = new Handler(){
         public void handleMessage(Message msg){
-            stop(1);
+            stop(PROCESS_AIREPLAY);
         }
     };
 
@@ -790,6 +790,9 @@ public class MainActivity extends AppCompatActivity{
 
         ST.not_connected = getString(R.string.not_connected);
         ST.paired = getString(R.string.paired);
+        CrackFragment.cap_notfound = getString(R.string.cap_notfound);
+        CrackFragment.wordlist_notfound = getString(R.string.wordlist_notfound);
+        CrackFragment.select_wpa_wep = getString(R.string.select_wpa_wep);
 
         mPlanetTitles = getResources().getStringArray(R.array.planets_array);
         mDrawerLayout = (DrawerLayout) findViewById(R.id.drawer_layout);
@@ -842,21 +845,24 @@ public class MainActivity extends AppCompatActivity{
                 tv.setText("");
                 ap_count.setText("0");
                 st_count.setText("0");
-                stop(0);
+                stop(PROCESS_AIRODUMP);
                 startAirodump(null);
                 return true;
 
             case R.id.stop_run:
                 if(cont){
                     //Running
-                    stop(0);
-                    stop(1);
-                    stop(2);
-                }else startAirodump(null);
+                    stop(PROCESS_AIRODUMP);
+                    stop(PROCESS_AIREPLAY);
+                    stop(PROCESS_MDK);
+                }else{
+                    if(is_ap==null) startAirodump(null);
+                    else startAirodump("--channel " + is_ap.ch + " --bssid " + is_ap.mac);
+                }
                 return true;
 
             case R.id.stop_aireplay:
-                stop(1);
+                stop(PROCESS_AIREPLAY);
                 return true;
 
             case R.id.filter:
@@ -882,9 +888,10 @@ public class MainActivity extends AppCompatActivity{
         notif_on = false;
         nm.cancelAll();
         if(shell!=null){
-            stop(0);
-            stop(1);
-            stop(2);
+            stop(PROCESS_AIRODUMP);
+            stop(PROCESS_AIREPLAY);
+            stop(PROCESS_MDK);
+            stop(PROCESS_AIRCRACK);
             shell_in.print(disable_monMode + "\n");
             shell_in.print("exit\n");
             shell_in.flush();
@@ -929,8 +936,8 @@ public class MainActivity extends AppCompatActivity{
                 return true;
             }else if(is_ap!=null){
                 //Use back button to return from isolated ap
-                stop(0);
-                if(wpa_thread.isAlive()) stop(1);
+                stop(PROCESS_AIRODUMP);
+                if(wpa_thread.isAlive()) stop(PROCESS_AIREPLAY);
                 isolate(null);
                 startAirodump(null);
                 return true;
@@ -971,24 +978,22 @@ public class MainActivity extends AppCompatActivity{
                 mDrawerList.getChildAt(currentFragment).setBackgroundResource(R.color.colorPrimary);
                 FragmentTransaction ft = fm.beginTransaction();
                 switch(position){
-                    case 0:
+                    case FRAGMENT_AIRODUMP:
                         //Airodump
                         ft.replace(R.id.fragment1, is_ap==null ? new MyListFragment() : new IsolatedFragment());
                         break;
-                    case 1:
+                    case FRAGMENT_MDK:
                         //MDK3
                         ft.replace(R.id.fragment1, new MDKFragment());
                         break;
-                    case 2:
+                    case FRAGMENT_CRACK:
                         //Crack WPA
+                        ft.replace(R.id.fragment1, new CrackFragment());
                         break;
-                    case 3:
-                        //Crack WEP
-                        break;
-                    case 4:
+                    case FRAGMENT_REAVER:
                         //Reaver
                         break;
-                    case 5:
+                    case FRAGMENT_SETTINGS:
                         //Settings
                         ft.replace(R.id.fragment1, new SettingsFragment());
                         break;
@@ -1060,8 +1065,8 @@ public class MainActivity extends AppCompatActivity{
     public void onCrack(View v){
         //Clicked crack with isolated ap
         if(wpa_thread.isAlive()){
-            stop(0);
-            stop(1);
+            stop(PROCESS_AIRODUMP);
+            stop(PROCESS_AIREPLAY);
             ((TextView)v).setText(R.string.crack);
         }else{
             is_ap.crack();
@@ -1070,7 +1075,7 @@ public class MainActivity extends AppCompatActivity{
     }
     public void onDisconnect(View v){
         //Clicked disconnect all with isolated ap
-        stop(1);
+        stop(PROCESS_AIREPLAY);
         startAireplay(is_ap.mac);
         Toast.makeText(this, R.string.disconnect_started, Toast.LENGTH_SHORT).show();
     }
@@ -1138,23 +1143,28 @@ public class MainActivity extends AppCompatActivity{
         String temp = mac.subSequence(0, 2).toString() + mac.subSequence(3, 5).toString() + mac.subSequence(6, 8).toString();
         shell4_in.print("grep -i " + temp + " " + path + "/oui.txt; echo ENDOFGREP\n");
         shell4_in.flush();
-        String manuf = null;
-        try{
-            String buffer = null;
-            while(buffer==null){
-                buffer = shell4_out.readLine();
-            }
-            manuf = buffer;
-            while(!buffer.equals("ENDOFGREP")){
-                manuf = buffer;
-                buffer = shell4_out.readLine();
-            }
+        String manuf = getLastLine(shell4_out, "ENDOFGREP");
 
-            if(manuf=="ENDOFGREP" || manuf.length()<23) manuf = "Unknown Manufacturer";
-            else manuf = manuf.substring(22);
-        }catch(IOException ignored){
-        }
+        if(manuf=="ENDOFGREP" || manuf.length()<23) manuf = "Unknown Manufacturer";
+        else manuf = manuf.substring(22);
         return manuf;
+    }
+    static String getLastLine(BufferedReader out, String end){
+        String lastline=null, buffer = null;
+        try{
+            while(buffer==null){
+                buffer = out.readLine();
+            }
+            lastline = buffer;
+            Log.d("getLastLine-out", buffer);
+            while(!end.equals(buffer)){
+                Log.d("getLastLine", buffer);
+                lastline = buffer;
+                buffer = out.readLine();
+            }
+        }catch(IOException e){ Log.e("Exception", "Exception in getLastLine: " + e); }
+
+        return lastline;
     }
 
     static{

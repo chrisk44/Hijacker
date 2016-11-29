@@ -5,6 +5,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 import static com.hijacker.IsolatedFragment.is_ap;
+import static com.hijacker.MainActivity.PROCESS_AIREPLAY;
+import static com.hijacker.MainActivity.PROCESS_AIRODUMP;
 import static com.hijacker.MainActivity.adapter;
 import static com.hijacker.MainActivity.cap_dir;
 import static com.hijacker.MainActivity.debug;
@@ -112,8 +114,8 @@ class AP {
         this.beacons=0;
         this.data=0;
         this.ivs=0;
-        stop(0);
-        stop(1);
+        stop(PROCESS_AIRODUMP);
+        stop(PROCESS_AIREPLAY);
         adapter.notifyDataSetChanged();
         if(this.sec == WEP){
             //wep

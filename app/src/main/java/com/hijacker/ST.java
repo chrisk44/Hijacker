@@ -4,7 +4,12 @@ import java.util.ArrayList;
 import java.util.List;
 
 import static com.hijacker.IsolatedFragment.is_ap;
+import static com.hijacker.MainActivity.PROCESS_AIREPLAY;
+import static com.hijacker.MainActivity.PROCESS_AIRODUMP;
 import static com.hijacker.MainActivity.getManuf;
+import static com.hijacker.MainActivity.startAireplay;
+import static com.hijacker.MainActivity.startAirodump;
+import static com.hijacker.MainActivity.stop;
 
 class ST {
     static List <ST>STs = new ArrayList<>();
@@ -23,11 +28,11 @@ class ST {
     void disconnect(){
         if(is_ap==null){
             //need to switch channel only if there is no isolated ap
-            MainActivity.stop(0);
-            MainActivity.startAirodump("--channel " + AP.getAPByMac(this.bssid).ch);
+            stop(PROCESS_AIRODUMP);
+            startAirodump("--channel " + AP.getAPByMac(this.bssid).ch);
         }
-        MainActivity.stop(1);
-        MainActivity.startAireplay(this.bssid, this.mac);
+        stop(PROCESS_AIREPLAY);
+        startAireplay(this.bssid, this.mac);
     }
     void update(String bssid, int pwr, int lost, int frames){
         if(bssid=="na") bssid=null;
