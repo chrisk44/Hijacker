@@ -1,0 +1,145 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+              android:orientation="vertical"
+              android:layout_width="match_parent"
+              android:layout_height="match_parent"
+              android:padding="5dp">
+
+    <LinearLayout
+        android:orientation="vertical"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:paddingBottom="5dp">
+
+        <LinearLayout
+            android:orientation="horizontal"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent">
+
+            <TextView
+                android:id="@+id/essid"
+                android:text="Chris"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textColor="?android:attr/textColorPrimary"
+                android:textSize="15sp"
+                android:lines="1"
+                android:layout_gravity="center_vertical"
+                android:clickable="true"
+                android:onClick="onCopy"/>
+
+            <TextView
+                android:text="00:11:22:33:44:55"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:textColor="?android:attr/textColorPrimary"
+                android:textSize="15sp"
+                android:id="@+id/mac"
+                android:layout_weight="1"
+                android:maxLines="2"
+                android:gravity="end"
+                android:clickable="true"
+                android:onClick="onCopy"/>
+        </LinearLayout>
+
+        <LinearLayout
+            android:orientation="horizontal"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent">
+
+            <TextView
+                android:layout_height="wrap_content"
+                android:layout_width="wrap_content"
+                android:id="@+id/manuf"
+                android:textSize="10sp"
+                android:text="ZTE Corporation"
+                android:maxLines="2"/>
+
+            <TextView
+                android:layout_height="wrap_content"
+                android:layout_width="0dp"
+                android:id="@+id/sec1"
+                android:text="Enc: WPA2 | Auth: PSK"
+                android:maxLines="1"
+                android:layout_weight="1"
+                android:gravity="end"
+                android:textSize="10sp"/>
+
+        </LinearLayout>
+        <LinearLayout
+            android:orientation="horizontal"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent">
+
+            <TextView
+                android:layout_height="wrap_content"
+                android:layout_width="wrap_content"
+                android:id="@+id/numbers"
+                android:textSize="10sp"
+                android:text="B: 20000 | D: 20000 | #s: 20000"
+                android:maxLines="2"/>
+
+            <TextView
+                android:layout_height="wrap_content"
+                android:layout_width="0dp"
+                android:id="@+id/sec2"
+                android:text="Cipher: TKIP"
+                android:maxLines="1"
+                android:layout_weight="1"
+                android:gravity="end"
+                android:textSize="10sp"/>
+
+        </LinearLayout>
+
+        <TextView
+            android:text="@string/clients"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:textSize="14sp"
+            android:textColor="?android:attr/textColorPrimary"/>
+
+    </LinearLayout>
+
+    <ListView
+        android:id="@+id/listview"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1">
+
+    </ListView>
+
+    <LinearLayout
+        android:orientation="horizontal"
+        style="?android:attr/buttonBarStyle"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+        <Button
+            style="?android:attr/buttonBarButtonStyle"
+            android:text="@string/crack"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:id="@+id/crack"
+            android:layout_weight="1"
+            android:onClick="onCrack"/>
+
+        <Button
+            style="?android:attr/buttonBarButtonStyle"
+            android:text="@string/disconnect_all"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:id="@+id/disconnect"
+            android:layout_weight="1"
+            android:onClick="onDisconnect"/>
+
+        <Button
+            style="?android:attr/buttonBarButtonStyle"
+            android:text="@string/dos"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:id="@+id/dos"
+            android:layout_weight="1"
+            android:onClick="onDos"/>
+    </LinearLayout>
+
+</LinearLayout>

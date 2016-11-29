@@ -3,8 +3,8 @@ package com.hijacker;
 import java.util.ArrayList;
 import java.util.List;
 
+import static com.hijacker.IsolatedFragment.is_ap;
 import static com.hijacker.MainActivity.getManuf;
-import static com.hijacker.MainActivity.is_ap;
 
 class ST {
     static List <ST>STs = new ArrayList<>();

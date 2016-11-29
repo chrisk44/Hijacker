@@ -8,6 +8,7 @@ import static com.hijacker.AP.UNKNOWN;
 import static com.hijacker.AP.WEP;
 import static com.hijacker.AP.WPA;
 import static com.hijacker.AP.WPA2;
+import static com.hijacker.IsolatedFragment.is_ap;
 import static com.hijacker.MainActivity.adapter;
 import static com.hijacker.MainActivity.opn;
 import static com.hijacker.MainActivity.pwr_filter;
@@ -69,7 +70,7 @@ class Item {
         }
     }
     void check(){
-        if(MainActivity.is_ap==null) {
+        if(is_ap==null) {
             if(type){
                 //ap
                 this.show = show_ap && (show_ch[0] || show_ch[this.ap.ch]) && this.ap.pwr>=pwr_filter*(-1) &&
@@ -77,13 +78,13 @@ class Item {
             } else this.show = show_st && (show_na_st || this.st.bssid != null) && this.st.pwr>=pwr_filter*(-1); //st
         }else{
             if(type){
-                this.show = false; //this.ap==MainActivity.is_ap;
+                this.show = false;
             }else{
-                this.show = MainActivity.is_ap.mac.equals(this.st.bssid);
+                this.show = is_ap.mac.equals(this.st.bssid);
             }
         }
     }
-    public static void clear(){
+    static void clear(){
         allItems.clear();
         items.clear();
         adapter.clear();

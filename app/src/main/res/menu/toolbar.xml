@@ -4,27 +4,27 @@
     <item
         android:id="@+id/filter"
         android:icon="@drawable/filter"
-        android:title="Filter"
+        android:title="@string/filter"
         app:showAsAction="ifRoom"/>
 
     <item
         android:id="@+id/stop_run"
         android:icon="@drawable/stop"
-        android:title="Stop"
+        android:title="@string/stop"
         app:showAsAction="ifRoom"/>
 
     <item android:id="@+id/reset"
-        android:title="Clear"
+        android:title="@string/clear"
         android:icon="@drawable/clear"
         app:showAsAction="ifRoom"/>
 
     <item android:id="@+id/stop_aireplay"
-        android:title="Stop Aireplay"
+        android:title="@string/stop_aireplay"
         android:icon="@drawable/stop_aireplay"
         app:showAsAction="ifRoom"/>
 
     <item android:id="@+id/settings"
-        android:title="Settings"
+        android:title="@string/settings"
         app:showAsAction="never" />
 
 </menu>

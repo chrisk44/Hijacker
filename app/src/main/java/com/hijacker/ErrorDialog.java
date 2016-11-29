@@ -10,21 +10,18 @@ import android.util.Log;
 public class ErrorDialog extends DialogFragment {
     String message;
     String title = getString(R.string.error);
-    boolean showExit = true;
     @Override
     public Dialog onCreateDialog(Bundle savedInstanceState) {
         AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
         builder.setPositiveButton(R.string.ok, new DialogInterface.OnClickListener() {
             public void onClick(DialogInterface dialog, int id) {}
         });
-        if(showExit) {
-            builder.setNeutralButton(R.string.exit, new DialogInterface.OnClickListener() {
-                @Override
-                public void onClick(DialogInterface dialog, int which) {
-                    getActivity().finish();
-                }
-            });
-        }
+        builder.setNeutralButton(R.string.exit, new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                getActivity().finish();
+            }
+        });
         if(message!=null) {
             builder.setTitle(title);
             builder.setMessage(this.message);
@@ -42,5 +39,4 @@ public class ErrorDialog extends DialogFragment {
     }
     public void setMessage(String msg){ this.message = msg; }
     public void setTitle(String title){ this.title = title; }
-    public void setShowExit(boolean show){ this.showExit = show; }
 }

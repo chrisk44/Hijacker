@@ -4,11 +4,11 @@ import android.util.Log;
 import java.util.ArrayList;
 import java.util.List;
 
+import static com.hijacker.IsolatedFragment.is_ap;
 import static com.hijacker.MainActivity.adapter;
 import static com.hijacker.MainActivity.cap_dir;
 import static com.hijacker.MainActivity.debug;
 import static com.hijacker.MainActivity.getManuf;
-import static com.hijacker.MainActivity.is_ap;
 import static com.hijacker.MainActivity.isolate;
 import static com.hijacker.MainActivity.startAireplay;
 import static com.hijacker.MainActivity.startAireplayWEP;

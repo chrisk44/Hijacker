@@ -18,7 +18,7 @@
         <item>Crack WPA (not yet)</item>
         <item>Crack WEP (not yet)</item>
         <item>Reaver (not even close)</item>
-        <item>Settings</item>
+        <item>@string/settings</item>
     </array>
 
 </resources>

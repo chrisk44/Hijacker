@@ -51,6 +51,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 
+import static com.hijacker.IsolatedFragment.is_ap;
+
 public class MainActivity extends AppCompatActivity{
     static final int AIREPLAY_DEAUTH = 1, AIREPLAY_WEP = 2;
     static final int FRAGMENT_AIRODUMP = 0, FRAGMENT_MDK = 1, FRAGMENT_CRACKWPA = 2,
@@ -65,7 +67,7 @@ public class MainActivity extends AppCompatActivity{
     static TextView tv, ap_count, st_count, test_cur_cmd;                               //Log textview, AP and ST count textviews in toolbar
     static ProgressBar progress, test_progress;
     static Toolbar toolbar;
-    static AP is_ap;                                                                    //isolated AP
+    //static AP is_ap;                                                                    //isolated AP
     static Drawable overflow[] = {null, null, null, null, null, null, null, null};      //Drawables to use for overflow button icon
     static ImageView[] status = {null, null, null};                                     //Icons in TestDialog, set in TestDialog class
     static int progress_int;
@@ -325,46 +327,6 @@ public class MainActivity extends AppCompatActivity{
         if(!pref.getBoolean("disclaimer", false)) new DisclaimerDialog().show(fm, "Disclaimer");
         else main();
     }
-    private class DrawerItemClickListener implements ListView.OnItemClickListener {
-        @Override
-        public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-            if(currentFragment!=position){
-                mDrawerList.getChildAt(currentFragment).setBackgroundResource(R.color.colorPrimary);
-                FragmentTransaction ft = fm.beginTransaction();
-                switch(position){
-                    case 0:
-                        //Airodump
-                        ft.replace(R.id.fragment1, is_ap==null ? new MyListFragment() : new IsolatedFragment());
-                        break;
-                    case 1:
-                        //MDK3
-                        ft.replace(R.id.fragment1, new MDKFragment());
-                        break;
-                    case 2:
-                        //Crack WPA
-                        break;
-                    case 3:
-                        //Crack WEP
-                        break;
-                    case 4:
-                        //Reaver
-                        break;
-                    case 5:
-                        //Settings
-                        ft.replace(R.id.fragment1, new SettingsFragment());
-                        break;
-                }
-                ft.setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN);
-                ft.addToBackStack(null);
-                ft.commit();
-                fm.executePendingTransactions();
-
-                getSupportActionBar().setTitle(mPlanetTitles[position]);
-                mDrawerList.getChildAt(currentFragment).setBackgroundResource(R.color.colorAccent);
-            }
-            mDrawerLayout.closeDrawer(mDrawerList);
-        }
-    }
     void extract(String filename, boolean chmod){
         File f = new File(getFilesDir(), filename);
         if(!f.exists()){
@@ -620,6 +582,7 @@ public class MainActivity extends AppCompatActivity{
         notification();
     }
 
+    //Handlers used for tasks that require the Main thread to update the view, but need to be run by other threads
     public Handler handshakeCaptured = new Handler(){
         public void handleMessage(Message msg){
             stop(0);
@@ -1001,6 +964,46 @@ public class MainActivity extends AppCompatActivity{
         return new Action.Builder(Action.TYPE_VIEW).setObject(object).setActionStatus(Action.STATUS_TYPE_COMPLETED).build();
     }
 
+    private class DrawerItemClickListener implements ListView.OnItemClickListener {
+        @Override
+        public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+            if(currentFragment!=position){
+                mDrawerList.getChildAt(currentFragment).setBackgroundResource(R.color.colorPrimary);
+                FragmentTransaction ft = fm.beginTransaction();
+                switch(position){
+                    case 0:
+                        //Airodump
+                        ft.replace(R.id.fragment1, is_ap==null ? new MyListFragment() : new IsolatedFragment());
+                        break;
+                    case 1:
+                        //MDK3
+                        ft.replace(R.id.fragment1, new MDKFragment());
+                        break;
+                    case 2:
+                        //Crack WPA
+                        break;
+                    case 3:
+                        //Crack WEP
+                        break;
+                    case 4:
+                        //Reaver
+                        break;
+                    case 5:
+                        //Settings
+                        ft.replace(R.id.fragment1, new SettingsFragment());
+                        break;
+                }
+                ft.setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN);
+                ft.addToBackStack(null);
+                ft.commit();
+                fm.executePendingTransactions();
+
+                getSupportActionBar().setTitle(mPlanetTitles[position]);
+                mDrawerList.getChildAt(currentFragment).setBackgroundResource(R.color.colorAccent);
+            }
+            mDrawerLayout.closeDrawer(mDrawerList);
+        }
+    }
     class MyListAdapter extends ArrayAdapter<Item>{
         MyListAdapter(){
             super(MainActivity.this, R.layout.listitem);
@@ -1054,6 +1057,40 @@ public class MainActivity extends AppCompatActivity{
     }
     public void onAPStats(View v){ new StatsDialog().show(fm, "asdTAG4"); }
     public void onClearLog(View v){ tv.setText(""); }
+    public void onCrack(View v){
+        //Clicked crack with isolated ap
+        if(wpa_thread.isAlive()){
+            stop(0);
+            stop(1);
+            ((TextView)v).setText(R.string.crack);
+        }else{
+            is_ap.crack();
+            ((TextView)v).setText(R.string.stop);
+        }
+    }
+    public void onDisconnect(View v){
+        //Clicked disconnect all with isolated ap
+        stop(1);
+        startAireplay(is_ap.mac);
+        Toast.makeText(this, R.string.disconnect_started, Toast.LENGTH_SHORT).show();
+    }
+    public void onDos(View v){
+        //Clicked dos with isolated ap
+        if(MDKFragment.ados) Toast.makeText(this, R.string.ados_running, Toast.LENGTH_SHORT).show();
+        else{
+            if(IsolatedFragment.ados_pid==0){
+                startMdk(1, is_ap.mac);
+                IsolatedFragment.ados_pid = getPIDs(2).get(0);
+                MDKFragment.ados_pid = IsolatedFragment.ados_pid;
+                MDKFragment.ados = true;
+                refreshState();
+                notification();
+            }
+        }
+    }
+    public void onCopy(View v){
+        copy(((TextView)v).getText().toString(), v);
+    }
     static void copy(String str, View view){
         clipboard.setPrimaryClip(ClipData.newPlainText("label", str));
         if(view!=null) Snackbar.make(view, "\"" + str + "\" copied to clipboard", Snackbar.LENGTH_SHORT).show();
@@ -1118,38 +1155,6 @@ public class MainActivity extends AppCompatActivity{
         }catch(IOException ignored){
         }
         return manuf;
-    }
-    public void onCrack(View v){
-        //Clicked crack with isolated ap
-        if(wpa_thread.isAlive()){
-            stop(0);
-            stop(1);
-            ((TextView)v).setText(R.string.crack);
-        }else{
-            is_ap.crack();
-            ((TextView)v).setText(R.string.stop);
-        }
-    }
-    public void onDisconnect(View v){
-        //Clicked disconnect all with isolated ap
-        stop(1);
-        startAireplay(is_ap.mac);
-        Toast.makeText(this, R.string.disconnect_started, Toast.LENGTH_SHORT).show();
-    }
-    public void onDos(View v){
-        //Clicked dos with isolated ap
-        if(MDKFragment.ados) Toast.makeText(this, R.string.ados_running, Toast.LENGTH_SHORT).show();
-        else{
-            if(IsolatedFragment.ados_pid==0){
-                startMdk(1, is_ap.mac);
-                IsolatedFragment.ados_pid = getPIDs(2).get(0);
-                MDKFragment.ados_pid = IsolatedFragment.ados_pid;
-                MDKFragment.ados = true;
-            }
-        }
-    }
-    public void onCopy(View v){
-        copy(((TextView)v).getText().toString(), v);
     }
 
     static{

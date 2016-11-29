@@ -47,6 +47,9 @@
         You can configure your interface\'s name in Settings. This app requires root privileges to run the tools.
         If you don\'t grant them, it will hang. Don\'t ask me why…\nYou can install the tools and firmware (only nexmon) now, or you can go to the Home Screen and use the defaults.</string>
 
+    <!-- Toolbar -->
+    <string name="stop_aireplay">Stop Aireplay</string>
+
     <!-- Generic text -->
     <string name="incorrect_arch">Available only on armv7l, this is </string>
     <string name="close">Close</string>
@@ -64,6 +67,9 @@
     <string name="apply">Apply</string>
     <string name="setup">Set up</string>
     <string name="home">Home</string>
+    <string name="filter">Filter</string>
+    <string name="clear">Clear</string>
+    <string name="settings">Settings</string>
 
     <!-- InstallFirmwareDialog -->
     <string name="dir_notfound_firm">Directory for Firmware doesn\'t exist</string>
@@ -253,5 +259,5 @@
     <string name="no_backup">There is no backup. It is created when you install the tools through the app.</string>
     <string name="reset_title">Reset Preferences</string>
     <string name="version_title">Version</string>
-    <string name="version" translatable="false">0.11</string>
+    <string name="version" translatable="false">0.12</string>
 </resources>

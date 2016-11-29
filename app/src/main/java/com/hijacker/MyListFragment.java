@@ -43,8 +43,7 @@ public class MyListFragment extends ListFragment {
             popup.getMenu().add(0, 1, 1, "Copy MAC");
             popup.getMenu().add(0, 9, 2, "Copy disconnect command");
             popup.getMenu().add(0, 2, 3, "Disconnect...");
-            if(clicked.ap == MainActivity.is_ap) popup.getMenu().add(0, 4, 5, "Stop Watching");
-            else popup.getMenu().add(0, 3, 5, "Watch");
+            popup.getMenu().add(0, 3, 5, "Watch");
             if(clicked.ap.clients.size()>0) popup.getMenu().add(0, 5, 4 , "Disconnect Client");
             popup.getMenu().add(0, 6, 6, "DoS");
             if(clicked.ap.sec==WPA || clicked.ap.sec==WPA2 || clicked.ap.sec==WEP){
@@ -80,11 +79,6 @@ public class MyListFragment extends ListFragment {
                             //Watch
                             MainActivity.isolate(clicked.ap.mac);
                             startAirodump("--channel " + clicked.ap.ch);
-                            break;
-                        case 4:
-                            //Stop watching                 //Not used with IsolatedFragment
-                            MainActivity.isolate(null);
-                            startAirodump(null);
                             break;
                         case 5:
                             //Disconnect client

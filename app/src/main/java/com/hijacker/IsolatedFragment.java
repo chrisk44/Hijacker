@@ -17,9 +17,7 @@ import static com.hijacker.MainActivity.FRAGMENT_AIRODUMP;
 import static com.hijacker.MainActivity.aireplay_dir;
 import static com.hijacker.MainActivity.copy;
 import static com.hijacker.MainActivity.currentFragment;
-import static com.hijacker.MainActivity.fm;
 import static com.hijacker.MainActivity.iface;
-import static com.hijacker.MainActivity.is_ap;
 import static com.hijacker.MainActivity.isolate;
 import static com.hijacker.MainActivity.prefix;
 import static com.hijacker.MainActivity.startAirodump;
@@ -28,6 +26,7 @@ import static com.hijacker.MainActivity.wpa_thread;
 
 public class IsolatedFragment extends Fragment{
     View view;
+    static AP is_ap;
     static TextView essid, manuf, mac, sec1, numbers, sec2;
     static Thread thread;
     static boolean cont = true;
