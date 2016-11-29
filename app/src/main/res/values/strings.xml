@@ -24,6 +24,8 @@
     <string name="start_ados">Start Authentication DoS</string>
     <string name="drawer_open">Open Drawer</string>
     <string name="drawer_close">Close Drawer</string>
+    <string name="ados_running">Authentication DoS is already running</string>
+    <string name="disconnect_started">Disconnect All started</string>
 
     <!-- wpa_thread -->
     <string name="stopped_to_capture">Stopped aireplay to capture handshake…</string>
@@ -130,6 +132,12 @@
     <!-- MDKFragment -->
     <string name="bf_title">Beacon Flooding</string>
     <string name="ados_title">Authentication DoS</string>
+
+    <!-- IsolatedFragment (xml) -->
+    <string name="crack">Crack</string>
+    <string name="stop">Stop</string>
+    <string name="disconnect_all">Disconnect All</string>
+    <string name="dos">DoS</string>
 
     <!-- Default Preferences -->
     <string name="iface" translatable="false">wlan0</string>

@@ -33,6 +33,7 @@ import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.google.android.gms.appindexing.Action;
 import com.google.android.gms.appindexing.AppIndex;
@@ -174,6 +175,7 @@ public class MainActivity extends AppCompatActivity{
                     }else stopIndeterminate.obtainMessage().sendToTarget();
                 }catch(IOException | InterruptedException e){
                     Log.e("Exception", "Caught Exception in wpa_thread: " + e.toString());
+                    stop1.obtainMessage().sendToTarget();
                 }
                 wpa_subthread.interrupt();
                 if(delete_extra){
@@ -332,7 +334,7 @@ public class MainActivity extends AppCompatActivity{
                 switch(position){
                     case 0:
                         //Airodump
-                        ft.replace(R.id.fragment1, new MyListFragment());
+                        ft.replace(R.id.fragment1, is_ap==null ? new MyListFragment() : new IsolatedFragment());
                         break;
                     case 1:
                         //MDK3
@@ -582,9 +584,9 @@ public class MainActivity extends AppCompatActivity{
                 if(menu!=null) menu.getItem(1).setIcon(R.drawable.run);
                 cont = false;
                 if(wpa_thread.isAlive()){
+                    IsolatedFragment.cont = false;
                     wpacheckcont = false;
                     wpa_thread.interrupt();
-                    isolate(null);
                 }
                 tv.append("Stopping airodump\n");
                 airodump_running = 0;
@@ -749,6 +751,11 @@ public class MainActivity extends AppCompatActivity{
             }catch(InterruptedException e){
                 Log.e("Exception", "Caught Exception in runTest Handler: " + e.toString());
             }
+        }
+    };
+    public static Handler stop1 = new Handler(){
+        public void handleMessage(Message msg){
+            stop(1);
         }
     };
 
@@ -1070,6 +1077,13 @@ public class MainActivity extends AppCompatActivity{
     }
     static void isolate(String mac){
         is_ap = AP.getAPByMac(mac);
+        if(is_ap!=null){
+            FragmentTransaction ft = fm.beginTransaction();
+            ft.replace(R.id.fragment1, new IsolatedFragment());
+            ft.setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN);
+            ft.addToBackStack(null);
+            ft.commit();
+        }
         Item.filter();
         if(debug){
             if(is_ap==null) Log.d("Main", "No AP isolated");
@@ -1104,6 +1118,38 @@ public class MainActivity extends AppCompatActivity{
         }catch(IOException ignored){
         }
         return manuf;
+    }
+    public void onCrack(View v){
+        //Clicked crack with isolated ap
+        if(wpa_thread.isAlive()){
+            stop(0);
+            stop(1);
+            ((TextView)v).setText(R.string.crack);
+        }else{
+            is_ap.crack();
+            ((TextView)v).setText(R.string.stop);
+        }
+    }
+    public void onDisconnect(View v){
+        //Clicked disconnect all with isolated ap
+        stop(1);
+        startAireplay(is_ap.mac);
+        Toast.makeText(this, R.string.disconnect_started, Toast.LENGTH_SHORT).show();
+    }
+    public void onDos(View v){
+        //Clicked dos with isolated ap
+        if(MDKFragment.ados) Toast.makeText(this, R.string.ados_running, Toast.LENGTH_SHORT).show();
+        else{
+            if(IsolatedFragment.ados_pid==0){
+                startMdk(1, is_ap.mac);
+                IsolatedFragment.ados_pid = getPIDs(2).get(0);
+                MDKFragment.ados_pid = IsolatedFragment.ados_pid;
+                MDKFragment.ados = true;
+            }
+        }
+    }
+    public void onCopy(View v){
+        copy(((TextView)v).getText().toString(), v);
     }
 
     static{

@@ -8,6 +8,7 @@ import static com.hijacker.MainActivity.adapter;
 import static com.hijacker.MainActivity.cap_dir;
 import static com.hijacker.MainActivity.debug;
 import static com.hijacker.MainActivity.getManuf;
+import static com.hijacker.MainActivity.is_ap;
 import static com.hijacker.MainActivity.isolate;
 import static com.hijacker.MainActivity.startAireplay;
 import static com.hijacker.MainActivity.startAireplayWEP;
@@ -130,7 +131,7 @@ class AP {
             startAireplay(this.mac);
             wpa_thread.start();
         }
-        isolate(this.mac);
+        if(is_ap==null) isolate(this.mac);
     }
     static void clear(){
         APs.clear();

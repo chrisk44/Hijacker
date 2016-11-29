@@ -70,14 +70,14 @@ class Item {
     }
     void check(){
         if(MainActivity.is_ap==null) {
-            if (type) {
+            if(type){
                 //ap
                 this.show = show_ap && (show_ch[0] || show_ch[this.ap.ch]) && this.ap.pwr>=pwr_filter*(-1) &&
                         ((wpa && (this.ap.sec == WPA || this.ap.sec == WPA2)) || (wep && this.ap.sec == WEP) || (opn && this.ap.sec == OPN) || this.ap.sec==UNKNOWN);
             } else this.show = show_st && (show_na_st || this.st.bssid != null) && this.st.pwr>=pwr_filter*(-1); //st
         }else{
             if(type){
-                this.show = this.ap==MainActivity.is_ap;
+                this.show = false; //this.ap==MainActivity.is_ap;
             }else{
                 this.show = MainActivity.is_ap.mac.equals(this.st.bssid);
             }

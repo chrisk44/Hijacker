@@ -37,7 +37,7 @@ public class MDKFragment extends Fragment{
                         Thread.sleep(500);
                     }catch(InterruptedException ignored){}
                     //If ADoS is running, then the bf pid is the second mdk3 process, otherwise it's the first
-                    bf_pid = getPIDs(2).get(ados ? 1 : 0);
+                    bf_pid = getPIDs(2).get(ados ? 1 : 0);          //TODO: This is not correct. If the system reaches very high pids, it will start assigning small ones again so the new process will have lower pid
                     if(debug) Log.d("MDKFragment", "bf_pid is " + bf_pid);
                 }else{
                     stop(bf_pid);

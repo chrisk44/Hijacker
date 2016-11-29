@@ -26,7 +26,6 @@ import static com.hijacker.MainActivity.stop;
 
 public class MyListFragment extends ListFragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        Log.d("MyListFragment", "onCreateView");
         View ret = inflater.inflate(R.layout.list_fragment, container, false);
         setListAdapter(MainActivity.adapter);
         return ret;
@@ -83,7 +82,7 @@ public class MyListFragment extends ListFragment {
                             startAirodump("--channel " + clicked.ap.ch);
                             break;
                         case 4:
-                            //Stop watching
+                            //Stop watching                 //Not used with IsolatedFragment
                             MainActivity.isolate(null);
                             startAirodump(null);
                             break;
