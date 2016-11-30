@@ -152,6 +152,10 @@
     <string name="capfile_notfound">.cap file not found</string>
     <string name="wordlist_notfound">Wordlist not found</string>
     <string name="select_wpa_wep">Please select WPA/WEP</string>
+    <string name="select_wep_bits">Select how many bits the key is</string>
+
+    <!-- ReaverFragment -->
+    <string name="select_ap">Select AP</string>
 
     <!-- Default Preferences -->
     <string name="iface" translatable="false">wlan0</string>
@@ -160,6 +164,7 @@
     <string name="aireplay_dir" translatable="false">aireplay-ng -D</string>
     <string name="aircrack_dir" translatable="false">aircrack-ng</string>
     <string name="mdk3_dir" translatable="false">mdk3</string>
+    <string name="reaver_dir" translatable="false">reaver</string>
     <string name="cap_dir" translatable="false">/sdcard/cap</string>
     <string name="enable_monMode" translatable="false">nexutil -m true</string>
     <string name="disable_monMode" translatable="false">nexutil -m false</string>
@@ -244,6 +249,10 @@
     <string name="mdk_title" translatable="false">MDK3</string>
     <string name="mdk_sum">mdk3 absolute path</string>
     <string name="mdk_desc">If mdk3 is not installed somewhere that PATH points to, you need to specify the absolute mdk3 filename here. Options can be used too. Make sure the file is executable.</string>
+
+    <string name="reaver_title" translatable="false">Reaver</string>
+    <string name="reaver_sum">Reaver absolute path</string>
+    <string name="reaver_desc">If reaver is not installed somewhere that PATH points to, you need to specify the absolute reaver filename here. Options can be used too. Make sure the file is executable.</string>
 
     <string name="copy_sample_title">Copy test command</string>
 

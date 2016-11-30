@@ -55,7 +55,45 @@
             android:layout_height="wrap_content"
             android:id="@+id/wep_rb"
             android:layout_weight="1"
-            android:enabled="false"/>
+            />
+    </RadioGroup>
+
+    <RadioGroup
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:id="@+id/wep_rg">
+
+        <RadioButton
+            android:text="64"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:id="@+id/wep_64"
+            android:layout_weight="1"/>
+        <RadioButton
+            android:text="128"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:id="@+id/wep_128"
+            android:layout_weight="1"/>
+        <RadioButton
+            android:text="152"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:id="@+id/wep_152"
+            android:layout_weight="1"/>
+        <RadioButton
+            android:text="256"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:id="@+id/wep_256"
+            android:layout_weight="1"/>
+        <RadioButton
+            android:text="512"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:id="@+id/wep_512"
+            android:layout_weight="1"/>
     </RadioGroup>
 
     <TextView
@@ -70,15 +108,13 @@
         android:text="asdgasjdfglasdkjfhlasdkfjglasdkfjhlasdkjfh"
         android:textSize="10sp"
         android:layout_weight="1"
-        android:scrollHorizontally="true"
-        />
+        android:scrollHorizontally="true"/>
 
     <Button
         style="?android:attr/buttonBarButtonStyle"
         android:text="@string/start"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:id="@+id/start"
-        />
+        android:id="@+id/start"/>
 
 </LinearLayout>
