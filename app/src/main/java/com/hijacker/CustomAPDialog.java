@@ -7,12 +7,10 @@ import android.os.Bundle;
 import android.support.v7.app.AlertDialog;
 import android.view.LayoutInflater;
 import android.view.View;
-import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
 
 public class CustomAPDialog extends DialogFragment {
-    AP info_ap;
     TextView ap[] = {null, null, null, null, null, null, null, null, null, null, null, null};
     @Override
     public Dialog onCreateDialog(Bundle savedInstanceState) {

@@ -215,10 +215,6 @@
     <string name="deauthWait_sum">Time to deauthenticate clients when cracking WPA</string>
     <string name="deauthWait_desc">How long aireplay-ng --deauth will be run when cracking a WPA network before it stops to capture the handshake.</string>
 
-    <string name="aireplay_title">Aireplay start delay (ms)</string>
-    <string name="aireplay_sum">Time to wait when starting aireplay</string>
-    <string name="aireplay_desc">If the -D option is not used with aireplay-ng (by default it is), then we need to wait for airodump-ng to lock a channel before we start aireplay-ng.</string>
-
     <string name="manuf_while_ados_title">Look up manufacturer while ADoS is running</string>
     <string name="manuf_while_ados_sum">This will cause the app to lag (even cause anr) because each lookup takes about a second</string>
 
@@ -282,5 +278,5 @@
     <string name="no_backup">There is no backup. It is created when you install the tools through the app.</string>
     <string name="reset_title">Reset Preferences</string>
     <string name="version_title">Version</string>
-    <string name="version" translatable="false">0.13</string>
+    <string name="version" translatable="false">0.14</string>
 </resources>

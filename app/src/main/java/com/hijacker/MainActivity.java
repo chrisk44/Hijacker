@@ -101,7 +101,7 @@ public class MainActivity extends AppCompatActivity{
     protected ListView mDrawerList;
     //Preferences - Defaults are in strings.xml
     static String iface, prefix, airodump_dir, aireplay_dir, aircrack_dir, mdk3_dir, reaver_dir, cap_dir, enable_monMode, disable_monMode;
-    static int deauthWait, aireplay_sleep;
+    static int deauthWait;
     static boolean showLog, show_notif, show_details, airOnStartup, debug, confirm_exit, delete_extra, manuf_while_ados;
 
     @Override
@@ -417,33 +417,17 @@ public class MainActivity extends AppCompatActivity{
 }
 
     public static void _startAireplay(String str){
-        try{
-            //just to make sure that airodump started and locked the channel
-            //if not, aireplay will exit if not started with -D
-            Thread.sleep(aireplay_sleep);
-        }catch(InterruptedException e){
-            Log.e("Exception", "Caught Exception in _startAireplay() sleep block: " + e.toString());
-        }
         temp_string = str;
         new Thread(new Runnable(){
             @Override
             public void run(){
-                //Process dc = null;
                 try{
                     String cmd = "su -c " + prefix + " " + aireplay_dir + " --ignore-negative-one " + temp_string + " " + iface;
                     if(debug) Log.d("_startAireplay", cmd);
-                    //dc = Runtime.getRuntime().exec(cmd);
                     Runtime.getRuntime().exec(cmd);
                 }catch(IOException e){
                     Log.e("Exception", "Caught Exception in _startAireplay() start block: " + e.toString());
                 }
-                /*BufferedReader in = new BufferedReader(new InputStreamReader(dc.getInputStream()));
-                String buffer;
-                try{  while (cont){ if ((buffer = in.readLine()) != null) {
-                            if(debug) Log.d("_startAireplay", buffer);
-                            //if(aireplay(buffer)) Log.d("Aireplay", "Broadcasting...");
-                            //else Log.d("_startAireplay", "Waiting for beacon...");
-                        }}} catch (IOException e){ Log.e("Exception", "Caught Exception in _startAireplay() read block: " + e.toString()); }*/
             }
         }).start();
         tv.append("Aireplay: " + str + "\n");
@@ -461,15 +445,13 @@ public class MainActivity extends AppCompatActivity{
     }
     public static void startAireplayWEP(String mac){
         aireplay_running = AIREPLAY_WEP;
-        int temp = aireplay_sleep;
         _startAireplay("--fakeauth 0 -a " + mac);
-        aireplay_sleep = 0;
         _startAireplay("--arpreplay -b " + mac);
         _startAireplay("--caffe-latte -b " + mac);
-        aireplay_sleep = temp;
     }
 
     public static void startMdk(int mode, String ap){
+        int ps_before = getPIDs(2).size();
         switch(mode){
             case MDK_BF:
                 //beacon flood mode
@@ -481,7 +463,7 @@ public class MainActivity extends AppCompatActivity{
                     Thread.sleep(500);
                 }catch(IOException | InterruptedException e){ Log.e("Exception", "Caught Exception in startMdk(MDK_BF) start block: " + e.toString()); }
                 bf = true;
-                bf_pid = getPIDs(2).get(ados ? 1 : 0); //TODO: This is not correct. If the system reaches very high pids, it will start assigning small ones again so the new process will have lower pid
+                bf_pid = getPIDs(2).get(ps_before);
                 break;
             case MDK_ADOS:
                 //Authentication DoS mode
@@ -494,7 +476,7 @@ public class MainActivity extends AppCompatActivity{
                     Thread.sleep(500);
                 }catch(IOException | InterruptedException e){ Log.e("Exception", "Caught Exception in startMdk(MDK_ADOS) start block: " + e.toString()); }
                 ados = true;
-                ados_pid = getPIDs(2).get(bf ? 1 : 0);
+                ados_pid = getPIDs(2).get(ps_before);
                 break;
         }
         refreshState();
@@ -762,7 +744,6 @@ public class MainActivity extends AppCompatActivity{
         enable_monMode = getString(R.string.enable_monMode);
         disable_monMode = getString(R.string.disable_monMode);
         deauthWait = Integer.parseInt(getString(R.string.deauthWait));
-        aireplay_sleep = Integer.parseInt(getString(R.string.aireplay_sleep));
         showLog = Boolean.parseBoolean(getString(R.string.showLog));
         show_notif = Boolean.parseBoolean(getString(R.string.show_notif));
         show_details = Boolean.parseBoolean(getString(R.string.show_details));
@@ -833,7 +814,6 @@ public class MainActivity extends AppCompatActivity{
         iface = pref.getString("iface", iface);
         prefix = pref.getString("prefix", prefix);
         deauthWait = Integer.parseInt(pref.getString("deauthWait", Integer.toString(deauthWait)));
-        aireplay_sleep = Integer.parseInt(pref.getString("aireplay_sleep", Integer.toString(aireplay_sleep)));
         airodump_dir = pref.getString("airodump_dir", airodump_dir);
         aireplay_dir = pref.getString("aireplay_dir", aireplay_dir);
         aircrack_dir = pref.getString("aircrack_dir", aircrack_dir);

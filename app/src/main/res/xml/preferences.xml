@@ -39,16 +39,6 @@
             android:inputType="number"
             android:dialogTitle="@string/deauthWait_title"
             android:dialogMessage="@string/deauthWait_desc" />
-        <EditTextPreference
-            android:defaultValue="@string/aireplay_sleep"
-            android:selectAllOnFocus="true"
-            android:singleLine="true"
-            android:title="@string/aireplay_title"
-            android:key="aireplay_sleep"
-            android:summary="@string/aireplay_sum"
-            android:inputType="number"
-            android:dialogMessage="@string/aireplay_desc"
-            android:dialogTitle="@string/aireplay_title" />
         <SwitchPreference
             android:defaultValue="false"
             android:title="@string/manuf_while_ados_title"

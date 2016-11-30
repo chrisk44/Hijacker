@@ -120,7 +120,7 @@ public class CrackFragment extends Fragment{
                 }else if(!word.exists() && word.isFile()){
                     Snackbar.make(v, wordlist_notfound, Snackbar.LENGTH_LONG).show();
                 }else if(thread.isAlive()){
-                    stop.obtainMessage().sendToTarget();
+                    cont = false;
                 }else{
                     RadioGroup temp = (RadioGroup)v.findViewById(R.id.radio_group);
                     if(temp.getCheckedRadioButtonId()==-1){
