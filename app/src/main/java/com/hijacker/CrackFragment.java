@@ -83,7 +83,7 @@ public class CrackFragment extends Fragment{
                     stop.obtainMessage().sendToTarget();
                 }else{
                     switch(((RadioGroup)v.findViewById(R.id.radio_group)).getCheckedRadioButtonId()){
-                        case 0:
+                        case R.id.wpa_rb:
                             //WPA
 
                             button.setText(R.string.stop);
@@ -91,7 +91,7 @@ public class CrackFragment extends Fragment{
                             progress.setIndeterminate(true);
                             thread.start();
                             break;
-                        case 1:
+                        case R.id.wep_rb:
                             //WEP
                             break;
                         default:

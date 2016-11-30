@@ -13,6 +13,7 @@ import static com.hijacker.AP.WEP;
 import static com.hijacker.AP.WPA;
 import static com.hijacker.AP.WPA2;
 import static com.hijacker.MainActivity.FRAGMENT_AIRODUMP;
+import static com.hijacker.MainActivity.MDK_ADOS;
 import static com.hijacker.MainActivity.PROCESS_AIRODUMP;
 import static com.hijacker.MainActivity.aireplay_dir;
 import static com.hijacker.MainActivity.airodump_dir;
@@ -23,6 +24,7 @@ import static com.hijacker.MainActivity.iface;
 import static com.hijacker.MainActivity.prefix;
 import static com.hijacker.MainActivity.startAireplay;
 import static com.hijacker.MainActivity.startAirodump;
+import static com.hijacker.MainActivity.startMdk;
 import static com.hijacker.MainActivity.stop;
 
 public class MyListFragment extends ListFragment {
@@ -100,7 +102,7 @@ public class MyListFragment extends ListFragment {
                             break;
                         case 6:
                             //DoS
-                            MainActivity.startMdk(1, clicked.ap.mac);
+                            startMdk(MDK_ADOS, clicked.ap.mac);
                             break;
                         case 7:
                             //Crack

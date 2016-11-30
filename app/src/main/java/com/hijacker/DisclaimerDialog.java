@@ -9,11 +9,9 @@ import android.support.v7.app.AlertDialog;
 import static com.hijacker.MainActivity.pref_edit;
 
 public class DisclaimerDialog extends DialogFragment {
-    static long openTime;
     @Override
     public Dialog onCreateDialog(Bundle savedInstanceState) {
         setCancelable(false);
-        openTime = System.currentTimeMillis();
         AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
         builder.setMessage(R.string.disclaimer);
         builder.setTitle(R.string.disclaimer_title);

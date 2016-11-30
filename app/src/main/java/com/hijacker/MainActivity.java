@@ -52,12 +52,17 @@ import java.util.List;
 import java.util.Locale;
 
 import static com.hijacker.IsolatedFragment.is_ap;
+import static com.hijacker.MDKFragment.ados;
+import static com.hijacker.MDKFragment.ados_pid;
+import static com.hijacker.MDKFragment.bf;
+import static com.hijacker.MDKFragment.bf_pid;
 
 public class MainActivity extends AppCompatActivity{
     static final int AIREPLAY_DEAUTH = 1, AIREPLAY_WEP = 2;
     static final int FRAGMENT_AIRODUMP = 0, FRAGMENT_MDK = 1, FRAGMENT_CRACK = 2,
-            FRAGMENT_REAVER = 3, FRAGMENT_SETTINGS = 4;
+            FRAGMENT_REAVER = 3, FRAGMENT_SETTINGS = 4;                     //These need to correspond to the items in the drawer
     static final int PROCESS_AIRODUMP=0, PROCESS_AIREPLAY=1, PROCESS_MDK=2, PROCESS_AIRCRACK=3;
+    static final int MDK_BF=0, MDK_ADOS=1;
     //State variables
     static boolean cont = false, wpacheckcont = false, test_wait, maincalled = false, done = true, notif_on = false;  //done: for calling refreshHandler only when it has stopped
     static int airodump_running = 0, aireplay_running = 0, currentFragment=FRAGMENT_AIRODUMP;         //Set currentFragment in onResume of each Fragment
@@ -97,7 +102,7 @@ public class MainActivity extends AppCompatActivity{
     //Preferences - Defaults are in strings.xml
     static String iface, prefix, airodump_dir, aireplay_dir, aircrack_dir, mdk3_dir, cap_dir, enable_monMode, disable_monMode;
     static int deauthWait, aireplay_sleep;
-    static boolean showLog, show_notif, show_details, airOnStartup, debug, confirm_exit, delete_extra;
+    static boolean showLog, show_notif, show_details, airOnStartup, debug, confirm_exit, delete_extra, manuf_while_ados;
 
     @Override
     protected void onCreate(Bundle savedInstanceState){
@@ -128,7 +133,7 @@ public class MainActivity extends AppCompatActivity{
             @Override
             public void run(){
                 if(debug) Log.d("wpa_thread", "Started wpa_thread");
-                String capfile, buffer = null;
+                String capfile, buffer;
                 int result = 0;
                 try{
                     Thread.sleep(1000);
@@ -465,38 +470,30 @@ public class MainActivity extends AppCompatActivity{
 
     public static void startMdk(int mode, String ap){
         switch(mode){
-            case 0:
+            case MDK_BF:
                 //beacon flood mode
                 tv.append("Beacon Flood\n");
-                new Thread(new Runnable(){
-                    @Override
-                    public void run(){
-                        try{
-                            String cmd = "su -c " + prefix + " " + mdk3_dir + " " + iface + " b -m";
-                            if(debug) Log.d("MDK3", cmd);
-                            Runtime.getRuntime().exec(cmd);
-                        }catch(IOException e){
-                            Log.e("Exception", "Caught Exception in startMdk(0) start block: " + e.toString());
-                        }
-                    }
-                }).start();
+                try{
+                    String cmd = "su -c " + prefix + " " + mdk3_dir + " " + iface + " b -m";
+                    if(debug) Log.d("MDK3", cmd);
+                    Runtime.getRuntime().exec(cmd);
+                    Thread.sleep(500);
+                }catch(IOException | InterruptedException e){ Log.e("Exception", "Caught Exception in startMdk(MDK_BF) start block: " + e.toString()); }
+                bf = true;
+                bf_pid = getPIDs(2).get(ados ? 1 : 0); //TODO: This is not correct. If the system reaches very high pids, it will start assigning small ones again so the new process will have lower pid
                 break;
-            case 1:
+            case MDK_ADOS:
                 //Authentication DoS mode
                 temp_string = ap==null ? " " : "-i " + ap;
                 tv.append("Authentication DoS" + temp_string + "\n");
-                new Thread(new Runnable(){
-                    @Override
-                    public void run(){
-                        try{
-                            String cmd = "su -c " + prefix + " " + mdk3_dir + " " + iface + " a -m " + temp_string;
-                            if(debug) Log.d("MDK3", cmd);
-                            Runtime.getRuntime().exec(cmd);
-                        }catch(IOException e){
-                            Log.e("Exception", "Caught Exception in startMdk(1) start block: " + e.toString());
-                        }
-                    }
-                }).start();
+                try{
+                    String cmd = "su -c " + prefix + " " + mdk3_dir + " " + iface + " a -m " + temp_string;
+                    if(debug) Log.d("MDK3", cmd);
+                    Runtime.getRuntime().exec(cmd);
+                    Thread.sleep(500);
+                }catch(IOException | InterruptedException e){ Log.e("Exception", "Caught Exception in startMdk(MDK_ADOS) start block: " + e.toString()); }
+                ados = true;
+                ados_pid = getPIDs(2).get(bf ? 1 : 0);
                 break;
         }
         refreshState();
@@ -561,6 +558,8 @@ public class MainActivity extends AppCompatActivity{
                 break;
             case PROCESS_MDK:
                 tv.append("Stopping mdk3\n");
+                ados = false;
+                bf = false;
                 break;
             case PROCESS_AIRCRACK:
                 tv.append("Stopping aircrack\n");
@@ -626,7 +625,7 @@ public class MainActivity extends AppCompatActivity{
                 adapter.notifyDataSetChanged();             //for when data is changed, no new data added
                 fifo.remove(0);
             }
-            ap_count.setText(String.format(locale, "%d", Item.i));
+            ap_count.setText(String.format(locale, "%d", is_ap==null ? Item.i : 1));
             st_count.setText(String.format(locale, "%d", Item.items.size() - Item.i));
             notification();
             done = true;
@@ -762,6 +761,7 @@ public class MainActivity extends AppCompatActivity{
         debug = Boolean.parseBoolean(getString(R.string.debug));
         confirm_exit = Boolean.parseBoolean(getString(R.string.confirm_exit));
         delete_extra = Boolean.parseBoolean(getString(R.string.delete_extra));
+        manuf_while_ados = Boolean.parseBoolean(getString(R.string.manuf_while_ados));
 
         notif = new NotificationCompat.Builder(this);
         notif.setContentTitle(getString(R.string.notification_title));
@@ -797,7 +797,7 @@ public class MainActivity extends AppCompatActivity{
         mPlanetTitles = getResources().getStringArray(R.array.planets_array);
         mDrawerLayout = (DrawerLayout) findViewById(R.id.drawer_layout);
         mDrawerList = (ListView) findViewById(R.id.left_drawer);
-        mDrawerList.setAdapter(new ArrayAdapter<String>(this, R.layout.drawer_list_item, R.id.navDrawerTv, mPlanetTitles));
+        mDrawerList.setAdapter(new ArrayAdapter<>(this, R.layout.drawer_list_item, R.id.navDrawerTv, mPlanetTitles));
         mDrawerList.setOnItemClickListener(new DrawerItemClickListener());
 
         FragmentTransaction ft = fm.beginTransaction();
@@ -833,6 +833,7 @@ public class MainActivity extends AppCompatActivity{
         debug = pref.getBoolean("debug", debug);
         confirm_exit = pref.getBoolean("confirm_exit", confirm_exit);
         delete_extra = pref.getBoolean("delete_extra", delete_extra);
+        manuf_while_ados = pref.getBoolean("manuf_while_ados", manuf_while_ados);
         progress.setMax(deauthWait);
         progress.setProgress(deauthWait);
     }
@@ -934,13 +935,6 @@ public class MainActivity extends AppCompatActivity{
                 getSupportActionBar().setTitle(mPlanetTitles[currentFragment]);
                 mDrawerList.getChildAt(currentFragment).setBackgroundResource(R.color.colorAccent);
                 return true;
-            }else if(is_ap!=null){
-                //Use back button to return from isolated ap
-                stop(PROCESS_AIRODUMP);
-                if(wpa_thread.isAlive()) stop(PROCESS_AIREPLAY);
-                isolate(null);
-                startAirodump(null);
-                return true;
             }else if(confirm_exit){
                 new ExitDialog().show(fm, "ExitDialog");
                 return true;
@@ -967,7 +961,7 @@ public class MainActivity extends AppCompatActivity{
     }
     public Action getIndexApiAction(){
         Thing object = new Thing.Builder().setName("Home Screen")
-                .setUrl(Uri.parse("http://forum.xda-developers.com/android/apps-games/app-hijacker-gui-aircrack-ng-suite-t3499599")).build();
+                .setUrl(Uri.parse("https://github.com/chrisk44/Hijacker")).build();
         return new Action.Builder(Action.TYPE_VIEW).setObject(object).setActionStatus(Action.STATUS_TYPE_COMPLETED).build();
     }
 
@@ -1081,16 +1075,13 @@ public class MainActivity extends AppCompatActivity{
     }
     public void onDos(View v){
         //Clicked dos with isolated ap
-        if(MDKFragment.ados) Toast.makeText(this, R.string.ados_running, Toast.LENGTH_SHORT).show();
-        else{
-            if(IsolatedFragment.ados_pid==0){
-                startMdk(1, is_ap.mac);
-                IsolatedFragment.ados_pid = getPIDs(2).get(0);
-                MDKFragment.ados_pid = IsolatedFragment.ados_pid;
-                MDKFragment.ados = true;
-                refreshState();
-                notification();
-            }
+        if(ados){
+            ((TextView)v).setText(R.string.dos);
+            stop(ados_pid);
+            ados = false;
+        }else{
+            ((TextView)v).setText(R.string.stop);
+            startMdk(MDK_ADOS, is_ap.mac);
         }
     }
     public void onCopy(View v){
@@ -1101,7 +1092,7 @@ public class MainActivity extends AppCompatActivity{
         if(view!=null) Snackbar.make(view, "\"" + str + "\" copied to clipboard", Snackbar.LENGTH_SHORT).show();
     }
     static void notification(){
-        if(notif_on && show_notif && !(airodump_running==0 && aireplay_running==0 && !MDKFragment.bf && !MDKFragment.ados)){
+        if(notif_on && show_notif && !(airodump_running==0 && aireplay_running==0 && !bf && !ados)){
             Log.d("notification", "in notification()");
             String str = "APs: " + Item.i + " | STs: " + (Item.items.size() - Item.i);
 
@@ -1109,8 +1100,8 @@ public class MainActivity extends AppCompatActivity{
                 if(aireplay_running==AIREPLAY_DEAUTH) str += " | Aireplay deauthenticating...";
                 else if(aireplay_running==AIREPLAY_WEP) str += " | Aireplay replaying for wep...";
                 if(wpa_thread.isAlive()) str += " | WPA cracking...";
-                if(MDKFragment.bf) str += " | MDK3 Beacon Flooding...";
-                if(MDKFragment.ados) str += " | MDK3 Authentication DoS...";
+                if(bf) str += " | MDK3 Beacon Flooding...";
+                if(ados) str += " | MDK3 Authentication DoS...";
             }
 
             notif.setContentText(str);
@@ -1120,6 +1111,7 @@ public class MainActivity extends AppCompatActivity{
     static void isolate(String mac){
         is_ap = AP.getAPByMac(mac);
         if(is_ap!=null){
+            IsolatedFragment.exit_on = fm.getBackStackEntryCount();
             FragmentTransaction ft = fm.beginTransaction();
             ft.replace(R.id.fragment1, new IsolatedFragment());
             ft.setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN);
@@ -1136,10 +1128,12 @@ public class MainActivity extends AppCompatActivity{
         //refresh overflow icon to show what is running
         int state = airodump_running;
         if(aireplay_running!=0) state += 2;
-        if(MDKFragment.bf || MDKFragment.ados) state += 4;
+        if(bf || ados) state += 4;
         toolbar.setOverflowIcon(overflow[state]);
     }
     static String getManuf(String mac){
+        if(ados && !manuf_while_ados) return "ADoS running";
+
         String temp = mac.subSequence(0, 2).toString() + mac.subSequence(3, 5).toString() + mac.subSequence(6, 8).toString();
         shell4_in.print("grep -i " + temp + " " + path + "/oui.txt; echo ENDOFGREP\n");
         shell4_in.flush();
@@ -1156,9 +1150,7 @@ public class MainActivity extends AppCompatActivity{
                 buffer = out.readLine();
             }
             lastline = buffer;
-            Log.d("getLastLine-out", buffer);
             while(!end.equals(buffer)){
-                Log.d("getLastLine", buffer);
                 lastline = buffer;
                 buffer = out.readLine();
             }

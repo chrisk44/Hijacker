@@ -35,7 +35,6 @@ public class ErrorDialog extends DialogFragment {
     @Override
     public void onDismiss(final DialogInterface dialog) {
         super.onDismiss(dialog);
-        DisclaimerDialog.openTime = System.currentTimeMillis();
     }
     public void setMessage(String msg){ this.message = msg; }
     public void setTitle(String title){ this.title = title; }

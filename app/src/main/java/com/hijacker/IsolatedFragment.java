@@ -32,11 +32,9 @@ public class IsolatedFragment extends Fragment{
     static TextView essid, manuf, mac, sec1, numbers, sec2;
     static Thread thread;
     static boolean cont = true;
-    static int ados_pid=0;
-    static int times_opened=0;
+    static int exit_on;
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState){
-        times_opened++;
         view = inflater.inflate(R.layout.isolated_fragment, container, false);
 
         thread = new Thread(new Runnable(){
@@ -127,7 +125,7 @@ public class IsolatedFragment extends Fragment{
         currentFragment = FRAGMENT_AIRODUMP;
         thread.start();
         ((Button)view.findViewById(R.id.crack)).setText(wpa_thread.isAlive() ? R.string.stop : R.string.crack);
-        ((Button)view.findViewById(R.id.dos)).setText(MDKFragment.ados ? R.string.dos : R.string.stop);
+        ((Button)view.findViewById(R.id.dos)).setText(MDKFragment.ados ? R.string.stop : R.string.dos);
         refresh.obtainMessage().sendToTarget();
     }
     @Override
@@ -139,9 +137,8 @@ public class IsolatedFragment extends Fragment{
     @Override
     public void onDestroy(){
         super.onDestroy();
-        times_opened--;
         cont = false;
-        if(times_opened==0){
+        if(getFragmentManager().getBackStackEntryCount()==exit_on){
             isolate(null);
             stop(PROCESS_AIRODUMP);
             stop(PROCESS_AIREPLAY);

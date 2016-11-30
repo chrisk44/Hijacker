@@ -10,12 +10,10 @@ import android.widget.CompoundButton;
 import android.widget.Switch;
 
 import static com.hijacker.MainActivity.FRAGMENT_MDK;
-import static com.hijacker.MainActivity.PROCESS_MDK;
+import static com.hijacker.MainActivity.MDK_ADOS;
+import static com.hijacker.MainActivity.MDK_BF;
 import static com.hijacker.MainActivity.currentFragment;
 import static com.hijacker.MainActivity.debug;
-import static com.hijacker.MainActivity.getPIDs;
-import static com.hijacker.MainActivity.notification;
-import static com.hijacker.MainActivity.refreshState;
 import static com.hijacker.MainActivity.startMdk;
 import static com.hijacker.MainActivity.stop;
 
@@ -27,49 +25,33 @@ public class MDKFragment extends Fragment{
         View view = inflater.inflate(R.layout.mdk_fragment, container, false);
 
         Switch temp = (Switch)view.findViewById(R.id.bf_switch);
+        temp.setChecked(bf);
         temp.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener(){
             @Override
             public void onCheckedChanged(CompoundButton compoundButton, boolean b){
                 if(b){
-                    startMdk(0, null);
-                    bf = true;
-                    try{
-                        Thread.sleep(500);
-                    }catch(InterruptedException ignored){}
-                    //If ADoS is running, then the bf pid is the second mdk3 process, otherwise it's the first
-                    bf_pid = getPIDs(PROCESS_MDK).get(ados ? 1 : 0);          //TODO: This is not correct. If the system reaches very high pids, it will start assigning small ones again so the new process will have lower pid
+                    startMdk(MDK_BF, null);
                     if(debug) Log.d("MDKFragment", "bf_pid is " + bf_pid);
                 }else{
-                    stop(bf_pid);
                     bf = false;
-                    refreshState();
-                    notification();
+                    stop(bf_pid);
                 }
             }
         });
-        temp.setChecked(bf);
         temp = (Switch)view.findViewById(R.id.ados_switch);
+        temp.setChecked(ados);
         temp.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener(){
             @Override
             public void onCheckedChanged(CompoundButton compoundButton, boolean b){
                 if(b){
-                    startMdk(1, null);
-                    ados = true;
-                    try{
-                        Thread.sleep(500);
-                    }catch(InterruptedException ignored){}
-                    //If bf is running, then the ados pid is the second mdk3 process, otherwise it's the first
-                    ados_pid = getPIDs(PROCESS_MDK).get(bf ? 1 : 0);
+                    startMdk(MDK_ADOS, null);
                     if(debug) Log.d("MDKFragment", "ados_pid is " + ados_pid);
                 }else{
-                    stop(ados_pid);
                     ados = false;
-                    refreshState();
-                    notification();
+                    stop(ados_pid);
                 }
             }
         });
-        temp.setChecked(ados);
 
         return view;
     }

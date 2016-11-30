@@ -13,6 +13,5 @@
         <item name="colorAccent">@android:color/holo_blue_dark</item>
         <item name="android:windowBackground">?android:attr/colorBackground</item>
     </style>
-    <style name="myPopupStyle" parent="Widget.AppCompat.Light.PopupMenu"></style>
 
 </resources>
