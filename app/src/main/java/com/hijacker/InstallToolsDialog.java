@@ -110,6 +110,8 @@ public class InstallToolsDialog extends DialogFragment {
                         extract("packetforge-ng", tools_location);
                         extract("wesside-ng", tools_location);
                         extract("wpaclean", tools_location);
+                        extract("reaver", tools_location);
+                        extract("reaver-wash", tools_location);
                         extract("libfakeioctl.so", lib_location);
                         shell3_in.print("busybox mount -o ro,remount,ro /system\n");
                         shell3_in.flush();

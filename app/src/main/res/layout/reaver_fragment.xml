@@ -1,0 +1,101 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+              android:orientation="vertical"
+              android:layout_width="match_parent"
+              android:layout_height="match_parent"
+              android:padding="5dp">
+
+    <Button
+        style="?android:attr/buttonBarButtonStyle"
+        android:text="@string/select_ap"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:id="@+id/select_ap"/>
+
+    <LinearLayout
+        android:orientation="horizontal"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        >
+
+        <TextView
+            android:text="PIN delay"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:textColor="?android:attr/textColorPrimary"
+            android:textSize="18sp"/>
+
+        <EditText
+            android:layout_height="wrap_content"
+            android:id="@+id/pin_delay"
+            android:inputType="number"
+            android:text="1"
+            android:layout_width="200dp"/>
+
+    </LinearLayout>
+
+    <LinearLayout
+        android:orientation="horizontal"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        >
+
+        <TextView
+            android:text="Locked Delay"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:textColor="?android:attr/textColorPrimary"
+            android:textSize="18sp"/>
+
+        <EditText
+            android:layout_height="wrap_content"
+            android:id="@+id/locked_delay"
+            android:inputType="number"
+            android:text="60"
+            android:layout_width="200dp"/>
+
+    </LinearLayout>
+
+    <CheckBox
+        android:text="Ignore Locked State reported by the AP"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:id="@+id/ignore_locked"/>
+
+    <CheckBox
+        android:text="Terminate each session with EAP FAIL"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:id="@+id/eap_fail"/>
+
+    <CheckBox
+        android:text="Use small DH keys to improve crack speed"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:id="@+id/small_dh"/>
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:id="@+id/console"
+        android:background="@color/colorPrimary"
+        android:textColor="?android:attr/textColorPrimary"
+        android:nestedScrollingEnabled="true"
+        android:layout_marginTop="5dp"
+        android:padding="3dp"
+        android:textSize="10sp"
+        android:layout_weight="1"
+        android:scrollHorizontally="true"
+        android:saveEnabled="true"
+        android:gravity="bottom"/>
+
+    <Button
+        style="?android:attr/buttonBarButtonStyle"
+        android:text="@string/start"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:id="@+id/start_button"/>
+
+</LinearLayout>

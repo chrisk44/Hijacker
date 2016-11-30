@@ -157,6 +157,15 @@
             android:summary="@string/mdk_sum"
             android:dialogMessage="@string/mdk_desc"
             android:dialogTitle="@string/mdk_title" />
+        <EditTextPreference
+            android:defaultValue="@string/reaver_dir"
+            android:selectAllOnFocus="true"
+            android:singleLine="true"
+            android:title="@string/reaver_title"
+            android:summary="@string/reaver_sum"
+            android:dialogMessage="@string/reaver_desc"
+            android:dialogTitle="@string/reaver_title"
+            android:key="reaver_dir"/>
         <Preference
             android:title="@string/copy_sample_title"
             android:key="copy_sample_button" />

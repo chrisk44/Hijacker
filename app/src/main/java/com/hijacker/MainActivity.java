@@ -61,7 +61,7 @@ public class MainActivity extends AppCompatActivity{
     static final int AIREPLAY_DEAUTH = 1, AIREPLAY_WEP = 2;
     static final int FRAGMENT_AIRODUMP = 0, FRAGMENT_MDK = 1, FRAGMENT_CRACK = 2,
             FRAGMENT_REAVER = 3, FRAGMENT_SETTINGS = 4;                     //These need to correspond to the items in the drawer
-    static final int PROCESS_AIRODUMP=0, PROCESS_AIREPLAY=1, PROCESS_MDK=2, PROCESS_AIRCRACK=3;
+    static final int PROCESS_AIRODUMP=0, PROCESS_AIREPLAY=1, PROCESS_MDK=2, PROCESS_AIRCRACK=3, PROCESS_REAVER=4;
     static final int MDK_BF=0, MDK_ADOS=1;
     //State variables
     static boolean cont = false, wpacheckcont = false, test_wait, maincalled = false, done = true, notif_on = false;  //done: for calling refreshHandler only when it has stopped
@@ -100,7 +100,7 @@ public class MainActivity extends AppCompatActivity{
     private DrawerLayout mDrawerLayout;
     protected ListView mDrawerList;
     //Preferences - Defaults are in strings.xml
-    static String iface, prefix, airodump_dir, aireplay_dir, aircrack_dir, mdk3_dir, cap_dir, enable_monMode, disable_monMode;
+    static String iface, prefix, airodump_dir, aireplay_dir, aircrack_dir, mdk3_dir, reaver_dir, cap_dir, enable_monMode, disable_monMode;
     static int deauthWait, aireplay_sleep;
     static boolean showLog, show_notif, show_details, airOnStartup, debug, confirm_exit, delete_extra, manuf_while_ados;
 
@@ -368,6 +368,7 @@ public class MainActivity extends AppCompatActivity{
         stop(PROCESS_AIREPLAY);
         stop(PROCESS_MDK);
         stop(PROCESS_AIRCRACK);
+        stop(PROCESS_REAVER);
         if(airOnStartup) startAirodump(null);
         else if(menu!=null) menu.getItem(1).setIcon(R.drawable.run);
     }
@@ -518,6 +519,9 @@ public class MainActivity extends AppCompatActivity{
                 case PROCESS_AIRCRACK:
                     shell_in.print("ps | grep airc; echo ENDOFPS\n");
                     break;
+                case PROCESS_REAVER:
+                    shell_in.print("ps | grep reav; echo ENDOFPS\n");
+                    break;
             }
             shell_in.flush();
             while(s==null){ s = shell_out.readLine(); } //for some reason sometimes s remains null
@@ -532,9 +536,9 @@ public class MainActivity extends AppCompatActivity{
         return list;
     }
     public static void stop(int pr){
-        //0 for airodump-ng, 1 for aireplay-ng, 2 for mdk, 3 for aircrack, everything else is considered pid and we kill it
+        //0 for airodump-ng, 1 for aireplay-ng, 2 for mdk, 3 for aircrack, 4 for reaver, everything else is considered pid and we kill it
         ArrayList<Integer> pids = new ArrayList<>();
-        if(pr<=3) pids = getPIDs(pr);
+        if(pr<=4) pids = getPIDs(pr);
         switch(pr){
             case PROCESS_AIRODUMP:
                 progress.setIndeterminate(false);
@@ -563,6 +567,9 @@ public class MainActivity extends AppCompatActivity{
                 break;
             case PROCESS_AIRCRACK:
                 tv.append("Stopping aircrack\n");
+                break;
+            case PROCESS_REAVER:
+                tv.append("Stopping reaver\n");
                 break;
             default:
                 pids.add(pr);
@@ -743,12 +750,14 @@ public class MainActivity extends AppCompatActivity{
         overflow[7] = getDrawable(R.drawable.overflow7);
         toolbar.setOverflowIcon(overflow[0]);
 
+        //Load defaults
         iface = getString(R.string.iface);
         prefix = getString(R.string.prefix);
         aircrack_dir = getString(R.string.aircrack_dir);
         airodump_dir = getString(R.string.airodump_dir);
         aireplay_dir = getString(R.string.aireplay_dir);
         mdk3_dir = getString(R.string.mdk3_dir);
+        reaver_dir = getString(R.string.reaver_dir);
         cap_dir = getString(R.string.cap_dir);
         enable_monMode = getString(R.string.enable_monMode);
         disable_monMode = getString(R.string.disable_monMode);
@@ -763,6 +772,7 @@ public class MainActivity extends AppCompatActivity{
         delete_extra = Boolean.parseBoolean(getString(R.string.delete_extra));
         manuf_while_ados = Boolean.parseBoolean(getString(R.string.manuf_while_ados));
 
+        //Initialize notification
         notif = new NotificationCompat.Builder(this);
         notif.setContentTitle(getString(R.string.notification_title));
         notif.setContentText(" ");
@@ -788,12 +798,15 @@ public class MainActivity extends AppCompatActivity{
         progress.setProgress(deauthWait);
         progress.setMax(deauthWait);
 
+        //Load strings for when they cannot be retrived with getString or R.string...
         ST.not_connected = getString(R.string.not_connected);
         ST.paired = getString(R.string.paired);
         CrackFragment.cap_notfound = getString(R.string.cap_notfound);
         CrackFragment.wordlist_notfound = getString(R.string.wordlist_notfound);
         CrackFragment.select_wpa_wep = getString(R.string.select_wpa_wep);
+        CrackFragment.select_wep_bits = getString(R.string.select_wep_bits);
 
+        //Initialize the drawer
         mPlanetTitles = getResources().getStringArray(R.array.planets_array);
         mDrawerLayout = (DrawerLayout) findViewById(R.id.drawer_layout);
         mDrawerList = (ListView) findViewById(R.id.left_drawer);
@@ -807,6 +820,7 @@ public class MainActivity extends AppCompatActivity{
         ft.commit();
         getSupportActionBar().setTitle(mPlanetTitles[currentFragment]);
 
+        //Google AppIndex
         client = new GoogleApiClient.Builder(this).addApi(AppIndex.API).build();
     }
     static void load(){
@@ -824,6 +838,7 @@ public class MainActivity extends AppCompatActivity{
         aireplay_dir = pref.getString("aireplay_dir", aireplay_dir);
         aircrack_dir = pref.getString("aircrack_dir", aircrack_dir);
         mdk3_dir = pref.getString("mdk3_dir", mdk3_dir);
+        reaver_dir = pref.getString("reaver_dir", reaver_dir);
         cap_dir = pref.getString("cap_dir", cap_dir);
         enable_monMode = pref.getString("enable_monMode", enable_monMode);
         disable_monMode = pref.getString("disable_monMode", disable_monMode);
@@ -893,6 +908,7 @@ public class MainActivity extends AppCompatActivity{
             stop(PROCESS_AIREPLAY);
             stop(PROCESS_MDK);
             stop(PROCESS_AIRCRACK);
+            stop(PROCESS_REAVER);
             shell_in.print(disable_monMode + "\n");
             shell_in.print("exit\n");
             shell_in.flush();
@@ -985,6 +1001,7 @@ public class MainActivity extends AppCompatActivity{
                         ft.replace(R.id.fragment1, new CrackFragment());
                         break;
                     case FRAGMENT_REAVER:
+                        ft.replace(R.id.fragment1, new ReaverFragment());
                         //Reaver
                         break;
                     case FRAGMENT_SETTINGS:
