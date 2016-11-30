@@ -7,6 +7,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.CompoundButton;
+import android.widget.EditText;
 import android.widget.Switch;
 
 import static com.hijacker.MainActivity.FRAGMENT_MDK;
@@ -22,15 +23,21 @@ public class MDKFragment extends Fragment{
     static int bf_pid, ados_pid;
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState){
-        View view = inflater.inflate(R.layout.mdk_fragment, container, false);
+        final View view = inflater.inflate(R.layout.mdk_fragment, container, false);
 
         Switch temp = (Switch)view.findViewById(R.id.bf_switch);
         temp.setChecked(bf);
         temp.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener(){
             @Override
             public void onCheckedChanged(CompoundButton compoundButton, boolean b){
+                //Beacon Flooding
                 if(b){
-                    startMdk(MDK_BF, null);
+                    String ssid_file = ((EditText)view.findViewById(R.id.ssid_file)).getText().toString();
+                    if(ssid_file.equals("")){
+                        startMdk(MDK_BF, null);
+                    }else{
+                        startMdk(MDK_BF, ssid_file);
+                    }
                     if(debug) Log.d("MDKFragment", "bf_pid is " + bf_pid);
                 }else{
                     bf = false;
@@ -43,6 +50,7 @@ public class MDKFragment extends Fragment{
         temp.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener(){
             @Override
             public void onCheckedChanged(CompoundButton compoundButton, boolean b){
+                //Authentication DoS
                 if(b){
                     startMdk(MDK_ADOS, null);
                     if(debug) Log.d("MDKFragment", "ados_pid is " + ados_pid);

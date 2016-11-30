@@ -5,7 +5,6 @@ import android.app.DialogFragment;
 import android.content.DialogInterface;
 import android.os.Bundle;
 import android.support.v7.app.AlertDialog;
-import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
@@ -16,8 +15,7 @@ public class APDialog extends DialogFragment {
     @Override
     public Dialog onCreateDialog(Bundle savedInstanceState) {
         AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
-        LayoutInflater inflater = getActivity().getLayoutInflater();
-        View view = inflater.inflate(R.layout.ap_info, null);
+        View view = getActivity().getLayoutInflater().inflate(R.layout.ap_info, null);
 
         if(ap[0]==null) {
             ap[0] = (TextView) view.findViewById(R.id.essid);

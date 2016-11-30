@@ -5,7 +5,6 @@ import android.app.DialogFragment;
 import android.content.DialogInterface;
 import android.os.Bundle;
 import android.support.v7.app.AlertDialog;
-import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.EditText;
 import android.widget.TextView;
@@ -15,8 +14,7 @@ public class CustomAPDialog extends DialogFragment {
     @Override
     public Dialog onCreateDialog(Bundle savedInstanceState) {
         AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
-        LayoutInflater inflater = getActivity().getLayoutInflater();
-        final View view = inflater.inflate(R.layout.custom_ap_dialog, null);
+        final View view = getActivity().getLayoutInflater().inflate(R.layout.custom_ap_dialog, null);
 
         builder.setView(view);
         builder.setTitle(R.string.custom_ap_title);

@@ -5,7 +5,6 @@ import android.app.DialogFragment;
 import android.content.DialogInterface;
 import android.os.Bundle;
 import android.support.v7.app.AlertDialog;
-import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.ProgressBar;
@@ -25,8 +24,7 @@ public class TestDialog extends DialogFragment {
         setCancelable(false);
         load();
         AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
-        LayoutInflater inflater = getActivity().getLayoutInflater();
-        View view = inflater.inflate(R.layout.test, null);
+        View view = getActivity().getLayoutInflater().inflate(R.layout.test, null);
 
         test_progress = (ProgressBar)view.findViewById(R.id.test_progress);
         test_progress.setProgress(0);

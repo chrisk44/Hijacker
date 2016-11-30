@@ -73,14 +73,11 @@ public class MainActivity extends AppCompatActivity{
     static TextView tv, ap_count, st_count, test_cur_cmd;                               //Log textview, AP and ST count textviews in toolbar
     static ProgressBar progress, test_progress;
     static Toolbar toolbar;
-    //static AP is_ap;                                                                    //isolated AP
     static Drawable overflow[] = {null, null, null, null, null, null, null, null};      //Drawables to use for overflow button icon
     static ImageView[] status = {null, null, null};                                     //Icons in TestDialog, set in TestDialog class
     static int progress_int;
     static Thread refresh_thread, wpa_thread, wpa_subthread, test_thread, su_thread;
     static Menu menu;
-    static String temp_string;
-    static int temp_int;              //set in startAirodump, to be used in c++ main() to know if there is an extra column in Airodump output
     static Process shell, shell2, shell3, shell4;
     static PrintWriter shell_in, shell2_in, shell3_in, shell4_in;
     static BufferedReader shell_out, shell2_out, shell3_out, shell4_out;
@@ -374,12 +371,14 @@ public class MainActivity extends AppCompatActivity{
     }
 
     public static void startAirodump(String params){
+        final String temp;
+        final int mode;
         if(params==null){
-            temp_string = "";
-            temp_int = 0;
+            temp = "";
+            mode = 0;
         }else{
-            temp_string = params;
-            temp_int = 1;
+            temp = params;
+            mode = 1;
         }
         shell_in.print(enable_monMode + "\n");
         shell_in.flush();
@@ -390,7 +389,7 @@ public class MainActivity extends AppCompatActivity{
             public void run(){
                 Process airodump = null;
                 try{
-                    String cmd = "su -c " + prefix + " " + airodump_dir + " --update 1 " + temp_string + " " + iface;
+                    String cmd = "su -c " + prefix + " " + airodump_dir + " --update 1 " + temp + " " + iface;
                     if(debug) Log.d("startAirodump", cmd);
                     airodump = Runtime.getRuntime().exec(cmd);
                 }catch(IOException e){
@@ -399,35 +398,28 @@ public class MainActivity extends AppCompatActivity{
                 BufferedReader in = new BufferedReader(new InputStreamReader(airodump.getErrorStream()));
                 String buffer;
                 try{
-                    while(cont){
-                        if((buffer = in.readLine())!=null){
-                            main(buffer, temp_int);
-                        }
+                    while(cont && (buffer = in.readLine())!=null){
+                        main(buffer, mode);
                     }
-                }catch(IOException e){
-                    Log.e("Exception", "Caught Exception in startAirodump() read block: " + e.toString());
-                }
+                }catch(IOException e){ Log.e("Exception", "Caught Exception in startAirodump() read block: " + e.toString()); }
             }
         }).start();
         refresh_thread.start();
-        tv.append("Airodump: " + temp_string + "\n");
+        tv.append("Airodump: " + temp + "\n");
         airodump_running = 1;
         refreshState();
         if(menu!=null) menu.getItem(1).setIcon(R.drawable.stop);
 }
 
-    public static void _startAireplay(String str){
-        temp_string = str;
+    public static void _startAireplay(final String str){
         new Thread(new Runnable(){
             @Override
             public void run(){
                 try{
-                    String cmd = "su -c " + prefix + " " + aireplay_dir + " --ignore-negative-one " + temp_string + " " + iface;
+                    String cmd = "su -c " + prefix + " " + aireplay_dir + " --ignore-negative-one " + str + " " + iface;
                     if(debug) Log.d("_startAireplay", cmd);
                     Runtime.getRuntime().exec(cmd);
-                }catch(IOException e){
-                    Log.e("Exception", "Caught Exception in _startAireplay() start block: " + e.toString());
-                }
+                }catch(IOException e){ Log.e("Exception", "Caught Exception in _startAireplay() start block: " + e.toString()); }
             }
         }).start();
         tv.append("Aireplay: " + str + "\n");
@@ -450,7 +442,7 @@ public class MainActivity extends AppCompatActivity{
         _startAireplay("--caffe-latte -b " + mac);
     }
 
-    public static void startMdk(int mode, String ap){
+    public static void startMdk(int mode, String str){
         int ps_before = getPIDs(2).size();
         switch(mode){
             case MDK_BF:
@@ -458,6 +450,7 @@ public class MainActivity extends AppCompatActivity{
                 tv.append("Beacon Flood\n");
                 try{
                     String cmd = "su -c " + prefix + " " + mdk3_dir + " " + iface + " b -m";
+                    if(str!=null) cmd += " -f " + str;
                     if(debug) Log.d("MDK3", cmd);
                     Runtime.getRuntime().exec(cmd);
                     Thread.sleep(500);
@@ -467,10 +460,10 @@ public class MainActivity extends AppCompatActivity{
                 break;
             case MDK_ADOS:
                 //Authentication DoS mode
-                temp_string = ap==null ? " " : "-i " + ap;
-                tv.append("Authentication DoS" + temp_string + "\n");
+                tv.append("Authentication DoS" + str + "\n");
                 try{
-                    String cmd = "su -c " + prefix + " " + mdk3_dir + " " + iface + " a -m " + temp_string;
+                    String cmd = "su -c " + prefix + " " + mdk3_dir + " " + iface + " a -m";
+                    cmd += str==null ? "" : " -i " + str;
                     if(debug) Log.d("MDK3", cmd);
                     Runtime.getRuntime().exec(cmd);
                     Thread.sleep(500);
@@ -1089,9 +1082,12 @@ public class MainActivity extends AppCompatActivity{
         if(view!=null) Snackbar.make(view, "\"" + str + "\" copied to clipboard", Snackbar.LENGTH_SHORT).show();
     }
     static void notification(){
-        if(notif_on && show_notif && !(airodump_running==0 && aireplay_running==0 && !bf && !ados)){
+        if(notif_on && show_notif && !(airodump_running==0 && aireplay_running==0 &&
+                !bf && !ados && !CrackFragment.cont && !ReaverFragment.cont)){
             Log.d("notification", "in notification()");
-            String str = "APs: " + Item.i + " | STs: " + (Item.items.size() - Item.i);
+            String str;
+            if(is_ap==null) str = "APs: " + Item.i + " | STs: " + (Item.items.size() - Item.i);
+            else str = is_ap.essid + " | STs: " + (Item.items.size() - Item.i);
 
             if(show_details){
                 if(aireplay_running==AIREPLAY_DEAUTH) str += " | Aireplay deauthenticating...";
@@ -1099,6 +1095,8 @@ public class MainActivity extends AppCompatActivity{
                 if(wpa_thread.isAlive()) str += " | WPA cracking...";
                 if(bf) str += " | MDK3 Beacon Flooding...";
                 if(ados) str += " | MDK3 Authentication DoS...";
+                if(ReaverFragment.cont) str += " | Reaver running...";
+                if(CrackFragment.cont) str += " | Cracking .cap file...";
             }
 
             notif.setContentText(str);

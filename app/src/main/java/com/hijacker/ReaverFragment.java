@@ -36,8 +36,8 @@ public class ReaverFragment extends Fragment{
     static Button start_button, select_button;
     static TextView console;
     static Thread thread;
-    static boolean cont;
-    static String console_text = null, pin_delay="1", locked_delay="60", custom_mac=null;
+    static boolean cont=false;
+    static String console_text = null, pin_delay="1", locked_delay="60", custom_mac=null;       //delays are always used as strings
     static boolean ignore_locked, eap_fail, small_dh;
     static AP ap=null;
     @Override

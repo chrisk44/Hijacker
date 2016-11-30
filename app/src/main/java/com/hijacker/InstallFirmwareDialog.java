@@ -6,7 +6,6 @@ import android.content.DialogInterface;
 import android.os.Bundle;
 import android.support.v7.app.AlertDialog;
 import android.util.Log;
-import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.Button;
 import android.widget.CheckBox;
@@ -31,8 +30,7 @@ public class InstallFirmwareDialog extends DialogFragment {
     @Override
     public Dialog onCreateDialog(Bundle savedInstanceState) {
         AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
-        LayoutInflater inflater = getActivity().getLayoutInflater();
-        view = inflater.inflate(R.layout.install_firmware, null);
+        view = getActivity().getLayoutInflater().inflate(R.layout.install_firmware, null);
 
         if(!(new File("/su").exists())){
             ((EditText)view.findViewById(R.id.util_location)).setText("/system/xbin");

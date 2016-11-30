@@ -138,6 +138,7 @@
     <!-- MDKFragment -->
     <string name="bf_title">Beacon Flooding</string>
     <string name="ados_title">Authentication DoS</string>
+    <string name="ssid_file">SSID file</string>
 
     <!-- IsolatedFragment (xml) -->
     <string name="crack">Crack</string>

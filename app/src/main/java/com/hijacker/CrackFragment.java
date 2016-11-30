@@ -40,7 +40,7 @@ public class CrackFragment extends Fragment{
     static View v;
     static int mode;
     static Thread thread;
-    static boolean cont;
+    static boolean cont=false;
     static String capfile, wordlist, console_text;
     static String cap_notfound, wordlist_notfound, select_wpa_wep, select_wep_bits;
     @Override
@@ -115,12 +115,12 @@ public class CrackFragment extends Fragment{
                 wordlist = ((EditText)v.findViewById(R.id.wordlist)).getText().toString();
                 File cap = new File(capfile);
                 File word = new File(wordlist);
-                if(!cap.exists() && cap.isFile()){
+                if(thread.isAlive()){
+                    cont = false;
+                }else if(!cap.exists() && cap.isFile()){
                     Snackbar.make(v, cap_notfound, Snackbar.LENGTH_LONG).show();
                 }else if(!word.exists() && word.isFile()){
                     Snackbar.make(v, wordlist_notfound, Snackbar.LENGTH_LONG).show();
-                }else if(thread.isAlive()){
-                    cont = false;
                 }else{
                     RadioGroup temp = (RadioGroup)v.findViewById(R.id.radio_group);
                     if(temp.getCheckedRadioButtonId()==-1){

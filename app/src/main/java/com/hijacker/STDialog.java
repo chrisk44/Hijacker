@@ -16,9 +16,7 @@ public class STDialog extends DialogFragment {
     @Override
     public Dialog onCreateDialog(Bundle savedInstanceState) {
         AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
-        // Get the layout inflater
-        LayoutInflater inflater = getActivity().getLayoutInflater();
-        View view = inflater.inflate(R.layout.st_info, null);
+        View view = getActivity().getLayoutInflater().inflate(R.layout.st_info, null);
 
         if(st[0]==null) {
             st[0] = (TextView)view.findViewById(R.id.mac_st);
