@@ -1,5 +1,6 @@
 package com.hijacker;
 
+import android.app.FragmentTransaction;
 import android.app.ListFragment;
 import android.os.Bundle;
 import android.util.Log;
@@ -42,6 +43,7 @@ public class MyListFragment extends ListFragment {
             PopupMenu popup = new PopupMenu(getActivity(), v);
             popup.getMenuInflater().inflate(R.menu.popup_menu, popup.getMenu());
 
+            //add(groupId, itemId, order, title)
             popup.getMenu().add(0, 0, 0, "Info");
             popup.getMenu().add(0, 1, 1, "Copy MAC");
             popup.getMenu().add(0, 9, 2, "Copy disconnect command");
@@ -53,6 +55,7 @@ public class MyListFragment extends ListFragment {
                 popup.getMenu().add(0, 7, 7, "Crack");
                 popup.getMenu().add(0, 8, 8, "Copy crack command");
             }
+            popup.getMenu().add(0, 10, 9, "Crack with Reaver");
 
             popup.setOnMenuItemClickListener(new PopupMenu.OnMenuItemClickListener() {
                 public boolean onMenuItemClick(android.view.MenuItem item) {
@@ -120,6 +123,17 @@ public class MyListFragment extends ListFragment {
                             //copy disconnect command to clipboard
                             String str2 = prefix + " " + airodump_dir + " --channel " + clicked.ap.ch + " " + iface;
                             copy(str2, v);
+                            break;
+                        case 10:
+                            //crack with reaver
+                            ReaverFragment.ap = clicked.ap;
+                            FragmentTransaction ft = getFragmentManager().beginTransaction();
+                            ft.replace(R.id.fragment1, new ReaverFragment());
+                            ft.setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN);
+                            ft.addToBackStack(null);
+                            ft.commit();
+                            getFragmentManager().executePendingTransactions();      //Wait for everything to be set up
+                            ReaverFragment.start_button.performClick();             //Click start to run reaver
                             break;
                     }
                     return true;

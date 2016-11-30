@@ -37,7 +37,7 @@ public class ReaverFragment extends Fragment{
     static TextView console;
     static Thread thread;
     static boolean cont;
-    static String console_text = null, pin_delay="1", locked_delay="60";
+    static String console_text = null, pin_delay="1", locked_delay="60", custom_mac=null;
     static boolean ignore_locked, eap_fail, small_dh;
     static AP ap=null;
     @Override
@@ -49,24 +49,32 @@ public class ReaverFragment extends Fragment{
 
         select_button = (Button)v.findViewById(R.id.select_ap);
         if(ap!=null) select_button.setText(ap.essid + " (" + ap.mac + ')');
+        else if(custom_mac!=null) select_button.setText(custom_mac);
         select_button.setOnClickListener(new View.OnClickListener(){
             @Override
             public void onClick(View view){
                 PopupMenu popup = new PopupMenu(getActivity(), view);
 
                 popup.getMenuInflater().inflate(R.menu.popup_menu, popup.getMenu());
-                for (int i = 0; i < AP.APs.size(); i++) {
+                int i;
+                for (i = 0; i < AP.APs.size(); i++) {
                     popup.getMenu().add(0, i, i, AP.APs.get(i).essid + " (" + AP.APs.get(i).mac + ')');
                 }
+                popup.getMenu().add(1, i, i, "Custom");
                 popup.setOnMenuItemClickListener(new PopupMenu.OnMenuItemClickListener() {
                     public boolean onMenuItemClick(android.view.MenuItem item) {
                         //ItemId = i in for()
-                        AP temp = AP.APs.get(item.getItemId());
-                        if(ap!=temp){
-                            ap = temp;
-                            stop.obtainMessage().sendToTarget();
+                        if(item.getGroupId()==0){
+                            AP temp = AP.APs.get(item.getItemId());
+                            if(ap!=temp){
+                                ap = temp;
+                                stop.obtainMessage().sendToTarget();
+                            }
+                            select_button.setText(ap.essid + " (" + ap.mac + ')');
+                        }else{
+                            //Clcked custom
+                            new CustomAPDialog().show(getFragmentManager(), "CustomAPDialog");
                         }
-                        select_button.setText(ap.essid + " (" + ap.mac + ')');
                         return true;
                     }
                 });
@@ -80,7 +88,8 @@ public class ReaverFragment extends Fragment{
                 public void run(){
                     Log.d("ReaverFragment", "in thread");
                     try{
-                        String cmd = "su -c " + prefix + " " + reaver_dir + " -i " + iface + " --channel " + ap.ch + " -b " + ap.mac + " -vvv";
+                        String cmd = "su -c " + prefix + " " + reaver_dir + " -i " + iface + " -vvv";
+                        cmd += ap==null ? " -b " + custom_mac : " -b " + ap.mac + " --channel " + ap.ch;
                         cmd += " -d " + ((EditText)v.findViewById(R.id.pin_delay)).getText();
                         cmd += " -l " + ((EditText)v.findViewById(R.id.locked_delay)).getText();
                         if(((CheckBox)v.findViewById(R.id.ignore_locked)).isChecked()) cmd += " -L";
@@ -111,7 +120,7 @@ public class ReaverFragment extends Fragment{
             @Override
             public void onClick(View view){
                 if(!thread.isAlive()){
-                    if(ap==null){
+                    if(ap==null && custom_mac==null){
                         Snackbar.make(v, select_button.getText(), Snackbar.LENGTH_LONG).show();
                     }else{
                         start_button.setText(R.string.stop);

@@ -156,6 +156,8 @@
 
     <!-- ReaverFragment -->
     <string name="select_ap">Select AP</string>
+    <!-- CustomAPDialog -->
+    <string name="custom_ap_title">Custom AP</string>
 
     <!-- Default Preferences -->
     <string name="iface" translatable="false">wlan0</string>
