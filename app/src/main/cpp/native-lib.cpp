@@ -3,6 +3,23 @@
 #include <stdlib.h>
 #include <android/log.h>
 
+/*
+    Copyright (C) 2016  Christos Kyriakopoylos
+
+    This program is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with this program.  If not, see <http://www.gnu.org/licenses/>
+ */
+
 void logd(char* str){
     __android_log_write(ANDROID_LOG_INFO, "CPP", str);
 }
@@ -40,31 +57,6 @@ extern "C" jint Java_com_hijacker_MainActivity_ps(JNIEnv* env, jobject obj, jstr
     strncpy(pid, buffer+10, 6);
     pid[6] = '\0';
     return atoi(pid);
-    /*char app[5];          //buffer for reading the app
-    strncpy(app, buffer+57, 4);
-    app[4] = '\0';
-    if(pr==0){
-        //airodump
-        if (!strcmp(app, "airo")){
-            strncpy(pid, buffer+10, 6);
-            pid[6] = '\0';
-            return atoi(pid);
-        }else return 0;
-    }else if (pr==1){
-        //aireplay
-        if (!strcmp(app, "aire")){
-            strncpy(pid, buffer+10, 6);
-            pid[6] = '\0';
-            return atoi(pid);
-        }else return 0;
-    }else{
-        //mdk
-        if (!strcmp(app, "mdk3")){
-            strncpy(pid, buffer+10, 6);
-            pid[6] = '\0';
-            return atoi(pid);
-        }else return 0;
-    }*/
 }
 
 extern "C" jint Java_com_hijacker_MainActivity_main(JNIEnv* env, jobject obj, jstring str, jint off){
