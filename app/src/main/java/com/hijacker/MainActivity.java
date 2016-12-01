@@ -91,7 +91,7 @@ public class MainActivity extends AppCompatActivity{
     static ProgressBar progress, test_progress;
     static Toolbar toolbar;
     static Drawable overflow[] = {null, null, null, null, null, null, null, null};      //Drawables to use for overflow button icon
-    static ImageView[] status = {null, null, null};                                     //Icons in TestDialog, set in TestDialog class
+    static ImageView[] status = {null, null, null, null};                                     //Icons in TestDialog, set in TestDialog class
     static int progress_int;
     static Thread refresh_thread, wpa_thread, wpa_subthread, test_thread, su_thread;
     static Menu menu;
@@ -236,17 +236,9 @@ public class MainActivity extends AppCompatActivity{
             @Override
             public void run(){
                 try{
-                    Thread.sleep(1000);
+                    Thread.sleep(500);
                     //Separate calls so the UI can be refreshed, otherwise it gets blocked.
                     Message msg = new Message();
-                    msg.arg1 = 3;
-                    test_wait = true;
-                    runTest.sendMessage(msg);
-                    while(test_wait){
-                        Thread.sleep(100);
-                    }
-
-                    msg = new Message();
                     msg.arg1 = 0;
                     test_wait = true;
                     runTest.sendMessage(msg);
@@ -264,6 +256,22 @@ public class MainActivity extends AppCompatActivity{
 
                     msg = new Message();
                     msg.arg1 = 2;
+                    test_wait = true;
+                    runTest.sendMessage(msg);
+                    while(test_wait){
+                        Thread.sleep(100);
+                    }
+
+                    msg = new Message();
+                    msg.arg1 = 3;
+                    test_wait = true;
+                    runTest.sendMessage(msg);
+                    while(test_wait){
+                        Thread.sleep(100);
+                    }
+
+                    msg = new Message();
+                    msg.arg1 = 4;
                     test_wait = true;
                     runTest.sendMessage(msg);
                     while(test_wait){
@@ -470,7 +478,7 @@ public class MainActivity extends AppCompatActivity{
     }
 
     public static void startMdk(int mode, String str){
-        int ps_before = getPIDs(2).size();
+        int ps_before = getPIDs(PROCESS_MDK).size();
         switch(mode){
             case MDK_BF:
                 //beacon flood mode
@@ -483,7 +491,7 @@ public class MainActivity extends AppCompatActivity{
                     Thread.sleep(500);
                 }catch(IOException | InterruptedException e){ Log.e("Exception", "Caught Exception in startMdk(MDK_BF) start block: " + e.toString()); }
                 bf = true;
-                bf_pid = getPIDs(2).get(ps_before);
+                bf_pid = getPIDs(PROCESS_MDK).get(ps_before);
                 break;
             case MDK_ADOS:
                 //Authentication DoS mode
@@ -496,7 +504,7 @@ public class MainActivity extends AppCompatActivity{
                     Thread.sleep(500);
                 }catch(IOException | InterruptedException e){ Log.e("Exception", "Caught Exception in startMdk(MDK_ADOS) start block: " + e.toString()); }
                 ados = true;
-                ados_pid = getPIDs(2).get(ps_before);
+                ados_pid = getPIDs(PROCESS_MDK).get(ps_before);
                 break;
         }
         refreshState();
@@ -650,7 +658,7 @@ public class MainActivity extends AppCompatActivity{
             try{
                 String cmd;
                 switch(msg.arg1){
-                    case 3:
+                    case 0:
                         stop(PROCESS_AIRODUMP);
                         stop(PROCESS_AIREPLAY);
                         stop(PROCESS_MDK);
@@ -664,13 +672,13 @@ public class MainActivity extends AppCompatActivity{
                         test_wait = false;
                         break;
 
-                    case 0:
+                    case 1:
                         cmd = prefix + " " + airodump_dir + " " + iface + '\n';
                         Log.d("test_thread", cmd);
                         shell3_in.print(cmd);
                         shell3_in.flush();
-                        Thread.sleep(2000);
-                        if(getPIDs(0).size()==0) status[0].setImageResource(R.drawable.failed);
+                        Thread.sleep(1000);
+                        if(getPIDs(PROCESS_AIRODUMP).size()==0) status[0].setImageResource(R.drawable.failed);
                         else{
                             stop(PROCESS_AIRODUMP);
                             status[0].setImageResource(R.drawable.passed);
@@ -681,13 +689,13 @@ public class MainActivity extends AppCompatActivity{
                         test_wait = false;
                         break;
 
-                    case 1:
+                    case 2:
                         cmd = prefix + " " + aireplay_dir + " --deauth 0 -a 11:22:33:44:55:66 " + iface + '\n';
                         Log.d("test_thread", cmd);
                         shell3_in.print(cmd);
                         shell3_in.flush();
-                        Thread.sleep(2000);
-                        if(getPIDs(1).size()==0) status[1].setImageResource(R.drawable.failed);
+                        Thread.sleep(1000);
+                        if(getPIDs(PROCESS_AIREPLAY).size()==0) status[1].setImageResource(R.drawable.failed);
                         else{
                             stop(PROCESS_AIREPLAY);
                             status[1].setImageResource(R.drawable.passed);
@@ -698,24 +706,42 @@ public class MainActivity extends AppCompatActivity{
                         test_wait = false;
                         break;
 
-                    case 2:
+                    case 3:
                         cmd = prefix + " " + mdk3_dir + " " + iface + " b -m\n";
                         Log.d("test_thread", cmd);
                         shell3_in.print(cmd);
                         shell3_in.flush();
-                        Thread.sleep(2000);
-                        if(getPIDs(2).size()==0) status[2].setImageResource(R.drawable.failed);
+                        Thread.sleep(1000);
+                        if(getPIDs(PROCESS_MDK).size()==0) status[2].setImageResource(R.drawable.failed);
                         else{
                             stop(PROCESS_MDK);
                             status[2].setImageResource(R.drawable.passed);
                         }
                         test_progress.setProgress(3);
+                        status[3].setImageResource(R.drawable.testing);
+                        test_cur_cmd.setText(prefix + " " + reaver_dir + " -i " + iface + " -b 00:11:22:33:44:55 -c 2");
+                        test_wait = false;
+                        break;
+
+                    case 4:
+                        cmd = prefix + " " + reaver_dir + " -i " + iface + " -b 00:11:22:33:44:55 -c 2\n";
+                        Log.d("test_thread", cmd);
+                        shell3_in.print(cmd);
+                        shell3_in.flush();
+                        Thread.sleep(1000);
+                        if(getPIDs(PROCESS_REAVER).size()==0) status[3].setImageResource(R.drawable.failed);
+                        else{
+                            stop(PROCESS_REAVER);
+                            status[3].setImageResource(R.drawable.passed);
+                        }
+                        test_progress.setProgress(4);
                         test_cur_cmd.setText("");
 
                         stop(PROCESS_AIRODUMP);
                         stop(PROCESS_AIREPLAY);
                         stop(PROCESS_MDK);
-                        test_progress.setProgress(4);
+                        stop(PROCESS_REAVER);
+                        test_progress.setProgress(5);
                         test_wait = false;
                         break;
                 }

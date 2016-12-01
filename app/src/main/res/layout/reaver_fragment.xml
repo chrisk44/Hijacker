@@ -57,19 +57,27 @@
     </LinearLayout>
 
     <CheckBox
-        android:text="Ignore Locked State reported by the AP"
+        android:text="@string/pixie_dust"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:id="@+id/pixie_dust"
+        android:checked="false"
+        android:enabled="false"/>
+
+    <CheckBox
+        android:text="@string/ignore_locked"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:id="@+id/ignore_locked"/>
 
     <CheckBox
-        android:text="Terminate each session with EAP FAIL"
+        android:text="@string/eap_fail"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:id="@+id/eap_fail"/>
 
     <CheckBox
-        android:text="Use small DH keys to improve crack speed"
+        android:text="@string/small_dh"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:id="@+id/small_dh"/>

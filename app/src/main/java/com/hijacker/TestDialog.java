@@ -48,9 +48,11 @@ public class TestDialog extends DialogFragment {
         status[0] = (ImageView)view.findViewById(R.id.imageView1);
         status[1] = (ImageView)view.findViewById(R.id.imageView2);
         status[2] = (ImageView)view.findViewById(R.id.imageView3);
+        status[3] = (ImageView)view.findViewById(R.id.imageView4);
         status[0].setImageResource(android.R.color.transparent);
         status[1].setImageResource(android.R.color.transparent);
         status[2].setImageResource(android.R.color.transparent);
+        status[3].setImageResource(android.R.color.transparent);
         test_cur_cmd = (TextView)view.findViewById(R.id.current_cmd);
         test_cur_cmd.setText(enable_monMode);
         if(shell==null){

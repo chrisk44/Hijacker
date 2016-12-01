@@ -158,6 +158,10 @@
 
     <!-- ReaverFragment -->
     <string name="select_ap">Select AP</string>
+    <string name="pixie_dust">Use pixie-dust</string>
+    <string name="ignore_locked">Ignore Locked State reported by the AP</string>
+    <string name="eap_fail">Terminate each session with EAP FAIL</string>
+    <string name="small_dh">Use small DH keys to improve crack speed</string>
     <!-- CustomAPDialog -->
     <string name="custom_ap_title">Custom AP</string>
 

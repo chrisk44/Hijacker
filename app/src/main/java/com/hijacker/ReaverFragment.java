@@ -112,6 +112,7 @@ public class ReaverFragment extends Fragment{
                         if(((CheckBox)v.findViewById(R.id.ignore_locked)).isChecked()) cmd += " -L";
                         if(((CheckBox)v.findViewById(R.id.eap_fail)).isChecked()) cmd += " -E";
                         if(((CheckBox)v.findViewById(R.id.small_dh)).isChecked()) cmd += " -S";
+                        if(((CheckBox)v.findViewById(R.id.pixie_dust)).isChecked()) cmd += " -K 1";
                         if(debug) Log.d("ReaverFragment", cmd);
                         Process dc = Runtime.getRuntime().exec(cmd);
                         BufferedReader in = new BufferedReader(new InputStreamReader(dc.getInputStream()));
