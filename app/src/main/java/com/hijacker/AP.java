@@ -141,10 +141,10 @@ class AP {
             startAireplayWEP(this.mac);
         }else if(this.sec == WPA || this.sec == WPA2){
             //wpa/wpa2
-            wpacheckcont = false;
+            wpacheckcont = false;           //Make sure wpa threads are not running from previous cracking
             wpa_thread.interrupt();
             MainActivity.tv.setText("");
-            while(wpa_thread.isAlive() || wpa_subthread.isAlive())
+            while(wpa_thread.isAlive() || wpa_subthread.isAlive())      //Wait for everything to shutdown
             if(debug) Log.d("AP", "Cracking WPA/WPA2");
             startAirodump("--channel " + this.ch + " --bssid " + this.mac + " -w " + cap_dir + "/wpa.cap");
             startAireplay(this.mac);

@@ -34,7 +34,9 @@ import java.io.IOException;
 import java.io.InputStream;
 
 import static com.hijacker.MainActivity.debug;
+import static com.hijacker.MainActivity.init;
 import static com.hijacker.MainActivity.load;
+import static com.hijacker.MainActivity.main;
 import static com.hijacker.MainActivity.path;
 import static com.hijacker.MainActivity.pref_edit;
 import static com.hijacker.MainActivity.shell;
@@ -144,7 +146,10 @@ public class InstallToolsDialog extends DialogFragment {
     @Override
     public void onDismiss(final DialogInterface dialog) {
         super.onDismiss(dialog);
-        MainActivity.init = false;
+        if(init){
+            init = false;
+            main();
+        }
     }
     void extract(String filename, String dest){
         File f = new File(path, filename);      //no permissions to write at dest so extract at local directory and then move to target

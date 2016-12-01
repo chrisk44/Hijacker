@@ -52,9 +52,8 @@ import static com.hijacker.MainActivity.stop;
 
 public class CrackFragment extends Fragment{
     static final int WPA=2, WEP=1;
-    static TextView console;
-    static Button button;
-    static View v;
+    TextView console;
+    Button button;
     static int mode;
     static Thread thread;
     static boolean cont=false;
@@ -62,7 +61,7 @@ public class CrackFragment extends Fragment{
     static String cap_notfound, wordlist_notfound, select_wpa_wep, select_wep_bits;
     @Override
     public View onCreateView(LayoutInflater inflater, final ViewGroup container, Bundle savedInstanceState){
-        v = inflater.inflate(R.layout.crack_fragment, container, false);
+        final View v = inflater.inflate(R.layout.crack_fragment, container, false);
         console = (TextView)v.findViewById(R.id.console);
         console.setText("");
         console.setMovementMethod(new ScrollingMovementMethod());
@@ -112,8 +111,6 @@ public class CrackFragment extends Fragment{
                 stop.obtainMessage().sendToTarget();
             }
         });
-
-
 
         ((RadioButton)v.findViewById(R.id.wep_rb)).setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener(){
             @Override
@@ -169,7 +166,7 @@ public class CrackFragment extends Fragment{
 
         return v;
     }
-    public static Handler stop = new Handler(){
+    public Handler stop = new Handler(){
         public void handleMessage(Message msg){
             button.setText(R.string.start);
             cont = false;
@@ -187,7 +184,6 @@ public class CrackFragment extends Fragment{
                 console.append("Key not found\n");
                 if(mode==WEP) console.append("Try with different wep bit selection or more IVs\n");
             }
-
         }
     };
     @Override

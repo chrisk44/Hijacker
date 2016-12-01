@@ -49,9 +49,9 @@ import static com.hijacker.MainActivity.reaver_dir;
 import static com.hijacker.MainActivity.stop;
 
 public class ReaverFragment extends Fragment{
-    static View v;
+    View v;
     static Button start_button, select_button;
-    static TextView console;
+    TextView console;
     static Thread thread;
     static boolean cont=false;
     static String console_text = null, pin_delay="1", locked_delay="60", custom_mac=null;       //delays are always used as strings
@@ -152,7 +152,7 @@ public class ReaverFragment extends Fragment{
         });
         return v;
     }
-    public static Handler stop = new Handler(){
+    public Handler stop = new Handler(){
         public void handleMessage(Message msg){
             start_button.setText(R.string.start);
             cont = false;
@@ -160,7 +160,7 @@ public class ReaverFragment extends Fragment{
             stop(PROCESS_REAVER);
         }
     };
-    public static Handler refresh = new Handler(){
+    public Handler refresh = new Handler(){
         public void handleMessage(Message msg){
             console.append((String)msg.obj + '\n');
         }

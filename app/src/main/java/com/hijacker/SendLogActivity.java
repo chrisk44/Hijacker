@@ -51,10 +51,10 @@ import static com.hijacker.MainActivity.PROCESS_REAVER;
 import static com.hijacker.MainActivity.ps;
 
 public class SendLogActivity extends AppCompatActivity{
-    static String filename;
-    static Process shell;
-    static PrintWriter shell_in;
-    static BufferedReader shell_out;
+    String filename;
+    Process shell;
+    PrintWriter shell_in;
+    BufferedReader shell_out;
     @Override
     protected void onCreate(Bundle savedInstanceState){
         super.onCreate(savedInstanceState);

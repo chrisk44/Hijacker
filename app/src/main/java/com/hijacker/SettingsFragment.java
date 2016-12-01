@@ -28,8 +28,6 @@ import java.io.File;
 import static com.hijacker.MainActivity.FRAGMENT_SETTINGS;
 import static com.hijacker.MainActivity.currentFragment;
 import static com.hijacker.MainActivity.load;
-import static com.hijacker.MainActivity.main;
-import static com.hijacker.MainActivity.maincalled;
 import static com.hijacker.MainActivity.path;
 import static com.hijacker.MainActivity.tv;
 
@@ -103,7 +101,6 @@ public class SettingsFragment extends PreferenceFragment {
     public void onDestroy(){
         super.onDestroy();
         load();
-        if(!maincalled) main();
     }
     @Override
     public void onResume() {

@@ -81,7 +81,7 @@ public class MainActivity extends AppCompatActivity{
     static final int PROCESS_AIRODUMP=0, PROCESS_AIREPLAY=1, PROCESS_MDK=2, PROCESS_AIRCRACK=3, PROCESS_REAVER=4;
     static final int MDK_BF=0, MDK_ADOS=1;
     //State variables
-    static boolean cont = false, wpacheckcont = false, test_wait, maincalled = false, done = true, notif_on = false;  //done: for calling refreshHandler only when it has stopped
+    static boolean cont = false, wpacheckcont = false, test_wait, done = true, notif_on = false;  //done: for calling refreshHandler only when it has stopped
     static int airodump_running = 0, aireplay_running = 0, currentFragment=FRAGMENT_AIRODUMP;         //Set currentFragment in onResume of each Fragment
     //Filters
     static boolean show_ap = true, show_st = true, show_na_st = true, wpa = true, wep = true, opn = true;
@@ -126,7 +126,7 @@ public class MainActivity extends AppCompatActivity{
             public void uncaughtException(Thread thread, Throwable throwable){
                 throwable.printStackTrace();
 
-                Intent intent = new Intent ();
+                Intent intent = new Intent();
                 intent.setAction("com.hijacker.SendLogActivity");
                 intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
                 startActivity(intent);
@@ -378,7 +378,6 @@ public class MainActivity extends AppCompatActivity{
         }
     }
     public static void main(){
-        maincalled = true;
         if(shell==null){
             su_thread.start();
             try{
@@ -442,30 +441,28 @@ public class MainActivity extends AppCompatActivity{
 }
 
     public static void _startAireplay(final String str){
-        new Thread(new Runnable(){
-            @Override
-            public void run(){
-                try{
-                    String cmd = "su -c " + prefix + " " + aireplay_dir + " --ignore-negative-one " + str + " " + iface;
-                    if(debug) Log.d("_startAireplay", cmd);
-                    Runtime.getRuntime().exec(cmd);
-                }catch(IOException e){ Log.e("Exception", "Caught Exception in _startAireplay() start block: " + e.toString()); }
-            }
-        }).start();
+        try{
+            String cmd = "su -c " + prefix + " " + aireplay_dir + " --ignore-negative-one " + str + " " + iface;
+            if(debug) Log.d("_startAireplay", cmd);
+            Runtime.getRuntime().exec(cmd);
+        }catch(IOException e){ Log.e("Exception", "Caught Exception in _startAireplay() start block: " + e.toString()); }
         tv.append("Aireplay: " + str + "\n");
-        menu.getItem(3).setEnabled(true);
+        menu.getItem(3).setEnabled(true);       //Enable 'Stop aireplay' button
         refreshState();
         notification();
     }
-    public static void startAireplay(String str){
+    public static void startAireplay(String mac){
+        //Disconnect all clients from mac
         aireplay_running = AIREPLAY_DEAUTH;
-        _startAireplay("--deauth 0 -a " + str);
+        _startAireplay("--deauth 0 -a " + mac);
     }
-    public static void startAireplay(String str1, String str2){
+    public static void startAireplay(String mac1, String mac2){
+        //Disconnect client mac2 from ap mac1
         aireplay_running = AIREPLAY_DEAUTH;
-        _startAireplay("--deauth 0 -a " + str1 + " -c " + str2);
+        _startAireplay("--deauth 0 -a " + mac1 + " -c " + mac2);
     }
     public static void startAireplayWEP(String mac){
+        //Increase IV generation from ap mac to crack a wep network
         aireplay_running = AIREPLAY_WEP;
         _startAireplay("--fakeauth 0 -a " + mac);
         _startAireplay("--arpreplay -b " + mac);
@@ -946,18 +943,16 @@ public class MainActivity extends AppCompatActivity{
         if(keyCode==KeyEvent.KEYCODE_BACK){
             if(mDrawerLayout.isDrawerOpen(mDrawerList)){
                 mDrawerLayout.closeDrawer(mDrawerList);
-                return true;
             }else if(getFragmentManager().getBackStackEntryCount()>1){
                 mDrawerList.getChildAt(currentFragment).setBackgroundResource(R.color.colorPrimary);
                 getFragmentManager().popBackStack();
                 getFragmentManager().executePendingTransactions();                  //need to wait for currentFragment to update
                 getSupportActionBar().setTitle(mPlanetTitles[currentFragment]);
                 mDrawerList.getChildAt(currentFragment).setBackgroundResource(R.color.colorAccent);
-                return true;
             }else if(confirm_exit){
                 new ExitDialog().show(fm, "ExitDialog");
-                return true;
             }
+            return true;
         }
         return super.onKeyDown(keyCode, event);
     }

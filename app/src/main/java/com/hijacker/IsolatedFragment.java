@@ -46,7 +46,7 @@ import static com.hijacker.MainActivity.wpa_thread;
 public class IsolatedFragment extends Fragment{
     View view;
     static AP is_ap;
-    static TextView essid, manuf, mac, sec1, numbers, sec2;
+    TextView essid, manuf, mac, sec1, numbers, sec2;
     static Thread thread;
     static boolean cont = true;
     static int exit_on;
@@ -124,7 +124,7 @@ public class IsolatedFragment extends Fragment{
 
         return view;
     }
-    public static Handler refresh = new Handler(){
+    public Handler refresh = new Handler(){
         public void handleMessage(Message msg){
             if(cont && is_ap !=null){
                 essid.setText(is_ap.essid);
