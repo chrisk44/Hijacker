@@ -49,10 +49,6 @@ public class ErrorDialog extends DialogFragment {
         }
         return builder.create();
     }
-    @Override
-    public void onDismiss(final DialogInterface dialog) {
-        super.onDismiss(dialog);
-    }
     public void setMessage(String msg){ this.message = msg; }
     public void setTitle(String title){ this.title = title; }
 }
