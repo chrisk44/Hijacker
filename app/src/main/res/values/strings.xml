@@ -16,6 +16,7 @@
     <string name="cap_notfound">cap file not found, airodump is probably not running…\n</string>
     <string name="cap_is">Cap file is </string>
     <string name="error_opening_shell">Error opening su shell</string>
+    <string name="error_opening_shell2">Error opening su shell to kill remaining processes</string>
     <string name="app_dir_notfound1">App file directory doesn\'t exist: </string>
     <string name="app_dir_notfound2">. Reinstall the app.</string>
     <string name="stop_bf">Stop Beacon Flooding</string>
@@ -159,6 +160,13 @@
     <string name="select_ap">Select AP</string>
     <!-- CustomAPDialog -->
     <string name="custom_ap_title">Custom AP</string>
+
+    <!-- SendLogActivity -->
+    <string name="unexpected_error_title">Unexpected Error</string>
+    <string name="unexpected_error_message">An unexpected error has occurred. A report \"report.txt\" has been generated in your external storage directory.
+        It contains the app version, the Android version, the model of your device, and a Logcat to help troubleshoot the problem.
+        Click below to report the problem.</string>
+    <string name="send_report">Send report</string>
 
     <!-- Default Preferences -->
     <string name="iface" translatable="false">wlan0</string>
