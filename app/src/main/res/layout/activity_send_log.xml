@@ -27,6 +27,23 @@
         android:layout_height="wrap_content"
         android:id="@+id/textView2"/>
 
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:id="@+id/console"
+        android:background="@color/colorPrimary"
+        android:textColor="?android:attr/textColorPrimary"
+        android:nestedScrollingEnabled="true"
+        android:layout_marginTop="8dp"
+        android:textSize="10sp"
+        android:layout_weight="1"
+        android:scrollHorizontally="true"
+        android:saveEnabled="true"
+        android:padding="3dp"
+        android:scrollIndicators="right"
+        android:scrollbarAlwaysDrawVerticalTrack="true"
+        android:scrollbars="vertical"/>
+
     <Button
         style="?android:attr/buttonBarButtonStyle"
         android:text="@string/send_report"

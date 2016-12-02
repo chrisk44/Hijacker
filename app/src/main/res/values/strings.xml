@@ -173,8 +173,8 @@
     <!-- SendLogActivity -->
     <string name="unexpected_error_title">Unexpected Error</string>
     <string name="unexpected_error_message">An unexpected error has occurred. A report has been generated in your external storage directory.
-        It contains the app version, the Android version, the model of your device, and a Logcat to help troubleshoot the problem.
-        Click below to report the problem.</string>
+        It contains the app version, the Android version, the model of your device, and a Logcat to help troubleshoot the problem. Below is the report.txt that will be sent.
+        Click \"Send report\" to report the problem.</string>
     <string name="send_report">Send report</string>
 
     <!-- Default Preferences -->
