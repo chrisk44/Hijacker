@@ -156,6 +156,14 @@
             android:dialogMessage="@string/reaver_desc"
             android:dialogTitle="@string/reaver_title"
             android:key="reaver_dir"/>
+        <EditTextPreference
+            android:defaultValue="@string/chroot_dir"
+            android:selectAllOnFocus="true"
+            android:singleLine="true"
+            android:dialogMessage="@string/chroot_desc"
+            android:dialogTitle="@string/chroot_title"
+            android:title="@string/chroot_title"
+            android:key="chroot_dir"/>
         <Preference
             android:title="@string/copy_sample_title"
             android:key="copy_sample_button" />

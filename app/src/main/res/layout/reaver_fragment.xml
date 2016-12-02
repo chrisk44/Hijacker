@@ -62,7 +62,7 @@
         android:layout_height="wrap_content"
         android:id="@+id/pixie_dust"
         android:checked="false"
-        android:enabled="false"/>
+        />
 
     <CheckBox
         android:text="@string/ignore_locked"

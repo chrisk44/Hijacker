@@ -91,7 +91,7 @@ public class MainActivity extends AppCompatActivity{
     static ProgressBar progress, test_progress;
     static Toolbar toolbar;
     static Drawable overflow[] = {null, null, null, null, null, null, null, null};      //Drawables to use for overflow button icon
-    static ImageView[] status = {null, null, null, null};                                     //Icons in TestDialog, set in TestDialog class
+    static ImageView[] status = {null, null, null, null, null};                                     //Icons in TestDialog, set in TestDialog class
     static int progress_int;
     static Thread refresh_thread, wpa_thread, wpa_subthread, test_thread, su_thread;
     static Menu menu;
@@ -114,7 +114,7 @@ public class MainActivity extends AppCompatActivity{
     private DrawerLayout mDrawerLayout;
     protected ListView mDrawerList;
     //Preferences - Defaults are in strings.xml
-    static String iface, prefix, airodump_dir, aireplay_dir, aircrack_dir, mdk3_dir, reaver_dir, cap_dir, enable_monMode, disable_monMode;
+    static String iface, prefix, airodump_dir, aireplay_dir, aircrack_dir, mdk3_dir, reaver_dir, cap_dir, chroot_dir, enable_monMode, disable_monMode;
     static int deauthWait;
     static boolean showLog, show_notif, show_details, airOnStartup, debug, confirm_exit, delete_extra, manuf_while_ados;
 
@@ -272,6 +272,14 @@ public class MainActivity extends AppCompatActivity{
 
                     msg = new Message();
                     msg.arg1 = 4;
+                    test_wait = true;
+                    runTest.sendMessage(msg);
+                    while(test_wait){
+                        Thread.sleep(100);
+                    }
+
+                    msg = new Message();
+                    msg.arg1 = 5;
                     test_wait = true;
                     runTest.sendMessage(msg);
                     while(test_wait){
@@ -478,7 +486,7 @@ public class MainActivity extends AppCompatActivity{
     }
 
     public static void startMdk(int mode, String str){
-        int ps_before = getPIDs(PROCESS_MDK).size();
+        ArrayList<Integer> ps_before = getPIDs(PROCESS_MDK);
         switch(mode){
             case MDK_BF:
                 //beacon flood mode
@@ -491,7 +499,6 @@ public class MainActivity extends AppCompatActivity{
                     Thread.sleep(500);
                 }catch(IOException | InterruptedException e){ Log.e("Exception", "Caught Exception in startMdk(MDK_BF) start block: " + e.toString()); }
                 bf = true;
-                bf_pid = getPIDs(PROCESS_MDK).get(ps_before);
                 break;
             case MDK_ADOS:
                 //Authentication DoS mode
@@ -504,7 +511,24 @@ public class MainActivity extends AppCompatActivity{
                     Thread.sleep(500);
                 }catch(IOException | InterruptedException e){ Log.e("Exception", "Caught Exception in startMdk(MDK_ADOS) start block: " + e.toString()); }
                 ados = true;
-                ados_pid = getPIDs(PROCESS_MDK).get(ps_before);
+                break;
+        }
+        ArrayList<Integer> ps_after = getPIDs(PROCESS_MDK);
+        int pid=0;
+        if(ps_before.size()!=ps_after.size()){
+            for(int i=0;i<ps_before.size();i++){
+                if(!ps_before.get(i).equals(ps_after.get(i))){
+                    pid = ps_after.get(i);
+                }
+            }
+            if(pid==0) pid = ps_after.get(ps_after.size()-1);
+        }
+        switch(mode){
+            case MDK_BF:
+                bf_pid = pid;
+                break;
+            case MDK_ADOS:
+                ados_pid = pid;
                 break;
         }
         refreshState();
@@ -735,14 +759,37 @@ public class MainActivity extends AppCompatActivity{
                             status[3].setImageResource(R.drawable.passed);
                         }
                         test_progress.setProgress(4);
-                        test_cur_cmd.setText("");
+                        status[4].setImageResource(R.drawable.testing);
+                        test_cur_cmd.setText(R.string.checking_chroot);
+                        test_wait = false;
+                        break;
+
+                    case 5:
+                        File chroot_dir = new File(MainActivity.chroot_dir);
+                        boolean kali_init = false;
+                        try{
+                            Process dc = Runtime.getRuntime().exec("ls /system/bin -1 | grep bootkali_init");
+                            BufferedReader out = new BufferedReader(new InputStreamReader(dc.getInputStream()));
+                            kali_init = out.readLine()!=null;
+                        }catch(IOException ignored){}
+                        Log.d("test_thread", "chroot_dir is " + Boolean.toString(chroot_dir.exists()));
+                        Log.d("test_thread", "kali_init is " + Boolean.toString(kali_init));
+                        if(!chroot_dir.exists() || !kali_init){
+                            status[4].setImageResource(R.drawable.failed);
+                            if(!chroot_dir.exists()) test_cur_cmd.setText(R.string.chroot_notfound);
+                            if(!kali_init) test_cur_cmd.setText(R.string.kali_notfound);
+                        }else{
+                            test_cur_cmd.setText(R.string.done);
+                            status[4].setImageResource(R.drawable.passed);
+                        }
+                        test_progress.setProgress(5);
+                        test_wait = false;
 
                         stop(PROCESS_AIRODUMP);
                         stop(PROCESS_AIREPLAY);
                         stop(PROCESS_MDK);
                         stop(PROCESS_REAVER);
-                        test_progress.setProgress(5);
-                        test_wait = false;
+                        test_progress.setProgress(6);
                         break;
                 }
             }catch(InterruptedException e){
@@ -786,6 +833,7 @@ public class MainActivity extends AppCompatActivity{
         aireplay_dir = getString(R.string.aireplay_dir);
         mdk3_dir = getString(R.string.mdk3_dir);
         reaver_dir = getString(R.string.reaver_dir);
+        chroot_dir = getString(R.string.chroot_dir);
         cap_dir = getString(R.string.cap_dir);
         enable_monMode = getString(R.string.enable_monMode);
         disable_monMode = getString(R.string.disable_monMode);
@@ -865,6 +913,7 @@ public class MainActivity extends AppCompatActivity{
         aircrack_dir = pref.getString("aircrack_dir", aircrack_dir);
         mdk3_dir = pref.getString("mdk3_dir", mdk3_dir);
         reaver_dir = pref.getString("reaver_dir", reaver_dir);
+        chroot_dir = pref.getString("chroot_dir", chroot_dir);
         cap_dir = pref.getString("cap_dir", cap_dir);
         enable_monMode = pref.getString("enable_monMode", enable_monMode);
         disable_monMode = pref.getString("disable_monMode", disable_monMode);

@@ -131,6 +131,8 @@
     <!-- TestDialog -->
     <string name="testing">Testing tools…</string>
     <string name="make_sure_wifi">Make sure that WiFi is enabled</string>
+    <string name="checking_chroot">Checking chroot...</string>
+    <string name="done">Done</string>
 
     <!-- ST -->
     <string name="paired">Paired: </string>
@@ -158,10 +160,13 @@
 
     <!-- ReaverFragment -->
     <string name="select_ap">Select AP</string>
-    <string name="pixie_dust">Use pixie-dust</string>
+    <string name="pixie_dust">Use pixie-dust (requires NetHunter chroot)</string>
     <string name="ignore_locked">Ignore Locked State reported by the AP</string>
     <string name="eap_fail">Terminate each session with EAP FAIL</string>
     <string name="small_dh">Use small DH keys to improve crack speed</string>
+    <string name="chroot_notfound">Chroot directory not found</string>
+    <string name="kali_notfound">bootkali_init not found</string>
+    <string name="chroot_warning">!!!!!!  Kali chroot doesn\'t currently support monitor mode through the internal wireless interface. Use only with external adapter which you are sure that it works in kali chroot. !!!!!!</string>
     <!-- CustomAPDialog -->
     <string name="custom_ap_title">Custom AP</string>
 
@@ -180,6 +185,7 @@
     <string name="aircrack_dir" translatable="false">aircrack-ng</string>
     <string name="mdk3_dir" translatable="false">mdk3</string>
     <string name="reaver_dir" translatable="false">reaver</string>
+    <string name="chroot_dir" translatable="false">/data/local/nhsystem/kali-armhf</string>
     <string name="cap_dir" translatable="false">/sdcard/cap</string>
     <string name="enable_monMode" translatable="false">nexutil -m true</string>
     <string name="disable_monMode" translatable="false">nexutil -m false</string>
@@ -264,6 +270,9 @@
     <string name="reaver_title" translatable="false">Reaver</string>
     <string name="reaver_sum">Reaver absolute path</string>
     <string name="reaver_desc">If reaver is not installed somewhere that PATH points to, you need to specify the absolute reaver filename here. Options can be used too. Make sure the file is executable.</string>
+
+    <string name="chroot_title">Chroot directory</string>
+    <string name="chroot_desc">Directory where a kali chroot is installed by NetHunter (required only for pixie-dust attack with reaver)</string>
 
     <string name="copy_sample_title">Copy test command</string>
 

@@ -32,11 +32,14 @@ import android.widget.CheckBox;
 import android.widget.EditText;
 import android.widget.PopupMenu;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import java.io.BufferedReader;
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStreamReader;
 
+import static android.widget.Toast.LENGTH_SHORT;
 import static com.hijacker.MainActivity.FRAGMENT_REAVER;
 import static com.hijacker.MainActivity.PROCESS_AIRODUMP;
 import static com.hijacker.MainActivity.PROCESS_REAVER;
@@ -63,6 +66,25 @@ public class ReaverFragment extends Fragment{
         setRetainInstance(true);
         console = (TextView)v.findViewById(R.id.console);
         console.setMovementMethod(new ScrollingMovementMethod());
+
+        File chroot_dir = new File(MainActivity.chroot_dir);
+        boolean kali_init = false;
+        try{
+            Process dc = Runtime.getRuntime().exec("ls /system/bin -1 | grep bootkali_init");
+            BufferedReader out = new BufferedReader(new InputStreamReader(dc.getInputStream()));
+            kali_init = out.readLine()!=null;
+        }catch(IOException ignored){}
+        Log.d("ReaverFragment", "chroot_dir is " + Boolean.toString(chroot_dir.exists()));
+        Log.d("ReaverFragment", "kali_init is " + Boolean.toString(kali_init));
+        if(debug){
+            Log.d("ReaverFragment", "chroot_dir is " + Boolean.toString(chroot_dir.exists()));
+            Log.d("ReaverFragment", "kali_init is " + Boolean.toString(kali_init));
+        }
+        if(!chroot_dir.exists() || !kali_init){
+            v.findViewById(R.id.pixie_dust).setEnabled(false);
+            if(!chroot_dir.exists()) Toast.makeText(getActivity(), getString(R.string.chroot_notfound), LENGTH_SHORT).show();
+            if(!kali_init) Toast.makeText(getActivity(), getString(R.string.kali_notfound), LENGTH_SHORT).show();
+        }
 
         select_button = (Button)v.findViewById(R.id.select_ap);
         if(ap!=null) select_button.setText(ap.essid + " (" + ap.mac + ')');
@@ -105,25 +127,39 @@ public class ReaverFragment extends Fragment{
                 public void run(){
                     Log.d("ReaverFragment", "in thread");
                     try{
-                        String cmd = "su -c " + prefix + " " + reaver_dir + " -i " + iface + " -vvv";
-                        cmd += ap==null ? " -b " + custom_mac : " -b " + ap.mac + " --channel " + ap.ch;
-                        cmd += " -d " + ((EditText)v.findViewById(R.id.pin_delay)).getText();
-                        cmd += " -l " + ((EditText)v.findViewById(R.id.locked_delay)).getText();
-                        if(((CheckBox)v.findViewById(R.id.ignore_locked)).isChecked()) cmd += " -L";
-                        if(((CheckBox)v.findViewById(R.id.eap_fail)).isChecked()) cmd += " -E";
-                        if(((CheckBox)v.findViewById(R.id.small_dh)).isChecked()) cmd += " -S";
-                        if(((CheckBox)v.findViewById(R.id.pixie_dust)).isChecked()) cmd += " -K 1";
+                        String args = "-i " + iface + " -vvv";
+                        args += ap==null ? " -b " + custom_mac : " -b " + ap.mac + " --channel " + ap.ch;
+                        args += " -d " + ((EditText)v.findViewById(R.id.pin_delay)).getText();
+                        args += " -l " + ((EditText)v.findViewById(R.id.locked_delay)).getText();
+                        if(((CheckBox)v.findViewById(R.id.ignore_locked)).isChecked()) args += " -L";
+                        if(((CheckBox)v.findViewById(R.id.eap_fail)).isChecked()) args += " -E";
+                        if(((CheckBox)v.findViewById(R.id.small_dh)).isChecked()) args += " -S";
+                        String cmd;
+                        if(((CheckBox)v.findViewById(R.id.pixie_dust)).isChecked()){
+                            Message msg = new Message();
+                            msg.obj = getString(R.string.chroot_warning);
+                            refresh.sendMessage(msg);
+                            Thread.sleep(2000);
+                            Runtime.getRuntime().exec("su -c bootkali_init");       //Make sure kali has booted
+                            args += " -K 1";
+                            cmd = "su -c chroot /data/local/nhsystem/kali-armhf /bin/bash -c \'" + get_chroot_env() + "reaver " + args + "\'";
+                        }else{
+                            cmd = "su -c " + prefix + " " + reaver_dir + " " + args;
+                        }
+                        Message msg = new Message();
+                        msg.obj = "Running: " + cmd;
+                        refresh.sendMessage(msg);
                         if(debug) Log.d("ReaverFragment", cmd);
                         Process dc = Runtime.getRuntime().exec(cmd);
-                        BufferedReader in = new BufferedReader(new InputStreamReader(dc.getInputStream()));
+                        BufferedReader out = new BufferedReader(new InputStreamReader(dc.getInputStream()));
                         cont = true;
                         String buffer;
-                        while(cont && (buffer = in.readLine())!=null){
-                            Message msg = new Message();
+                        while(cont && (buffer = out.readLine())!=null){
+                            msg = new Message();
                             msg.obj = buffer;
                             refresh.sendMessage(msg);
                         }
-                    }catch(IOException e){
+                    }catch(IOException | InterruptedException e){
                         Log.e("Exception", "Caught Exception in ReaverFragment: " + e.toString());
                     }
 
@@ -186,6 +222,25 @@ public class ReaverFragment extends Fragment{
         ignore_locked = ((CheckBox)v.findViewById(R.id.ignore_locked)).isChecked();
         eap_fail = ((CheckBox)v.findViewById(R.id.eap_fail)).isChecked();
         small_dh = ((CheckBox)v.findViewById(R.id.small_dh)).isChecked();
+    }
+    static String get_chroot_env(){
+        // add strings here , they will be in the kali env
+        String[] ENV = {
+                "USER=root",
+                "SHELL=/bin/bash",
+                "MAIL=/var/mail/root",
+                "PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin",
+                "TERM=linux",
+                "HOME=/root",
+                "LOGNAME=root",
+                "SHLVL=1",
+                "YOU_KNOW_WHAT=THIS_IS_KALI_LINUX_NETHUNER_FROM_JAVA_BINKY"
+        };
+        String ENV_OUT = "";
+        for (String aENV : ENV) {
+            ENV_OUT = ENV_OUT + "export " + aENV + " && ";
+        }
+        return ENV_OUT;
     }
 }
 
