@@ -51,6 +51,7 @@ import static com.hijacker.MainActivity.load;
 import static com.hijacker.MainActivity.status;
 import static com.hijacker.MainActivity.stop;
 import static com.hijacker.Shell.getFreeShell;
+import static com.hijacker.Shell.runOne;
 
 public class TestDialog extends DialogFragment {
     boolean test_wait;
@@ -244,6 +245,7 @@ public class TestDialog extends DialogFragment {
                         break;
 
                     case 5:
+                        runOne("chmod a+r " + MainActivity.chroot_dir);
                         File chroot_dir = new File(MainActivity.chroot_dir);
                         boolean kali_init = false;
                         try{

@@ -50,6 +50,7 @@ import static com.hijacker.MainActivity.prefix;
 import static com.hijacker.MainActivity.progress;
 import static com.hijacker.MainActivity.reaver_dir;
 import static com.hijacker.MainActivity.stop;
+import static com.hijacker.Shell.runOne;
 
 public class ReaverFragment extends Fragment{
     View v;
@@ -67,6 +68,7 @@ public class ReaverFragment extends Fragment{
         console = (TextView)v.findViewById(R.id.console);
         console.setMovementMethod(new ScrollingMovementMethod());
 
+        runOne("chmod a+r " + MainActivity.chroot_dir);
         File chroot_dir = new File(MainActivity.chroot_dir);
         boolean kali_init = false;
         try{
