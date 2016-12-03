@@ -43,7 +43,8 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:id="@+id/backup"
-        android:layout_marginBottom="10dp"/>
+        android:layout_marginBottom="10dp"
+        android:checked="true"/>
 
     <TextView
         android:text="@string/util_location_text"

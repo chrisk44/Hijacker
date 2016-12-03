@@ -95,7 +95,8 @@
         android:layout_weight="1"
         android:scrollHorizontally="true"
         android:saveEnabled="true"
-        android:gravity="bottom"/>
+        android:gravity="bottom"
+        android:fontFamily="serif-monospace"/>
 
     <Button
         style="?android:attr/buttonBarButtonStyle"

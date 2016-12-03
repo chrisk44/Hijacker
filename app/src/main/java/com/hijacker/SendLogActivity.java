@@ -164,12 +164,6 @@ public class SendLogActivity extends AppCompatActivity{
             writer.write("Mdk BF: " + Integer.toString(MDKFragment.bf_pid) + "\n");
             writer.write("Mdk ADoS: " + Integer.toString(MDKFragment.ados_pid) + "\n");
             writer.write("Reaver: " + Boolean.toString(ReaverFragment.cont) + "\n");
-            /*writer.write("shell: " + (shell!=null ? "ok" : "null") + ", " + (shell2!=null ? "ok" : "null") + ", ");
-            writer.write((shell3!=null ? "ok" : "null") + ", " + (shell4!=null ? "ok" : "null") + "\n");
-            writer.write("shell_in: " + (shell_in!=null ? "ok" : "null") + ", " + (shell2_in!=null ? "ok" : "null") + ", ");
-            writer.write((shell3_in!=null ? "ok" : "null") + ", " + (shell4_in!=null ? "ok" : "null") + "\n");
-            writer.write("shell_out: " + (shell_out!=null ? "ok" : "null") + ", " + (shell2_out!=null ? "ok" : "null") + ", ");
-            writer.write((shell3_out!=null ? "ok" : "null") + ", " + (shell4_out!=null ? "ok" : "null") + "\n");*/
             writer.write("path: " + path + '\n');
             writer.write("prefs:\n");
             writer.write("\tiface: " + iface + '\n');

@@ -46,6 +46,7 @@ import static com.hijacker.MainActivity.PROCESS_REAVER;
 import static com.hijacker.MainActivity.currentFragment;
 import static com.hijacker.MainActivity.debug;
 import static com.hijacker.MainActivity.iface;
+import static com.hijacker.MainActivity.monstart;
 import static com.hijacker.MainActivity.prefix;
 import static com.hijacker.MainActivity.progress;
 import static com.hijacker.MainActivity.reaver_dir;
@@ -76,8 +77,6 @@ public class ReaverFragment extends Fragment{
             BufferedReader out = new BufferedReader(new InputStreamReader(dc.getInputStream()));
             kali_init = out.readLine()!=null;
         }catch(IOException ignored){}
-        Log.d("ReaverFragment", "chroot_dir is " + Boolean.toString(chroot_dir.exists()));
-        Log.d("ReaverFragment", "kali_init is " + Boolean.toString(kali_init));
         if(debug){
             Log.d("ReaverFragment", "chroot_dir is " + Boolean.toString(chroot_dir.exists()));
             Log.d("ReaverFragment", "kali_init is " + Boolean.toString(kali_init));
@@ -141,7 +140,7 @@ public class ReaverFragment extends Fragment{
                             Message msg = new Message();
                             msg.obj = getString(R.string.chroot_warning);
                             refresh.sendMessage(msg);
-                            Thread.sleep(2000);
+                            Thread.sleep(3000);
                             Runtime.getRuntime().exec("su -c bootkali_init");       //Make sure kali has booted
                             args += " -K 1";
                             cmd = "su -c chroot /data/local/nhsystem/kali-armhf /bin/bash -c \'" + get_chroot_env() + "reaver " + args + "\'";
@@ -242,7 +241,7 @@ public class ReaverFragment extends Fragment{
         for (String aENV : ENV) {
             ENV_OUT = ENV_OUT + "export " + aENV + " && ";
         }
-        ENV_OUT += "monstart-nh && ";
+        if(monstart) ENV_OUT += "monstart-nh && ";
         return ENV_OUT;
     }
 }

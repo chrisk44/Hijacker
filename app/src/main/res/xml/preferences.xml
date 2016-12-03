@@ -164,6 +164,11 @@
             android:dialogTitle="@string/chroot_title"
             android:title="@string/chroot_title"
             android:key="chroot_dir"/>
+        <SwitchPreference
+            android:defaultValue="@string/monstart"
+            android:title="@string/monstart_title"
+            android:summary="@string/monstart_sum"
+            android:key="monstart"/>
         <Preference
             android:title="@string/copy_sample_title"
             android:key="copy_sample_button" />

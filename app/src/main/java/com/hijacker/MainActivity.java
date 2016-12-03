@@ -111,7 +111,7 @@ public class MainActivity extends AppCompatActivity{
     //Preferences - Defaults are in strings.xml
     static String iface, prefix, airodump_dir, aireplay_dir, aircrack_dir, mdk3_dir, reaver_dir, cap_dir, chroot_dir, enable_monMode, disable_monMode;
     static int deauthWait;
-    static boolean showLog, show_notif, show_details, airOnStartup, debug, confirm_exit, delete_extra, manuf_while_ados;
+    static boolean showLog, show_notif, show_details, airOnStartup, debug, confirm_exit, delete_extra, manuf_while_ados, monstart;
 
     @Override
     protected void onCreate(Bundle savedInstanceState){
@@ -293,7 +293,7 @@ public class MainActivity extends AppCompatActivity{
             temp = params;
             mode = 1;
         }
-        final Shell shell = getFreeShell();
+        final Shell shell = new Shell();
         shell.run(enable_monMode);
         stop(PROCESS_AIRODUMP);
         cont = true;
@@ -580,6 +580,7 @@ public class MainActivity extends AppCompatActivity{
         mdk3_dir = getString(R.string.mdk3_dir);
         reaver_dir = getString(R.string.reaver_dir);
         chroot_dir = getString(R.string.chroot_dir);
+        monstart = Boolean.parseBoolean(getString(R.string.monstart));
         cap_dir = getString(R.string.cap_dir);
         enable_monMode = getString(R.string.enable_monMode);
         disable_monMode = getString(R.string.disable_monMode);
@@ -660,6 +661,7 @@ public class MainActivity extends AppCompatActivity{
         mdk3_dir = pref.getString("mdk3_dir", mdk3_dir);
         reaver_dir = pref.getString("reaver_dir", reaver_dir);
         chroot_dir = pref.getString("chroot_dir", chroot_dir);
+        monstart = pref.getBoolean("monstart", monstart);
         cap_dir = pref.getString("cap_dir", cap_dir);
         enable_monMode = pref.getString("enable_monMode", enable_monMode);
         disable_monMode = pref.getString("disable_monMode", disable_monMode);

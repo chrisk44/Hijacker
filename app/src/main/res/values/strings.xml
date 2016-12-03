@@ -166,7 +166,9 @@
     <string name="small_dh">Use small DH keys to improve crack speed</string>
     <string name="chroot_notfound">Chroot directory not found</string>
     <string name="kali_notfound">bootkali_init not found</string>
-    <string name="chroot_warning">!!!!!!  Kali chroot doesn\'t currently support monitor mode through the internal wireless interface. Use only with external adapter which you are sure that it works in kali chroot. !!!!!!</string>
+    <string name="chroot_warning">!!!!!!  Kali chroot doesn\'t currently support monitor mode through the internal wireless interface.
+        If you are on NetHunterOS it may work, otherwise you have to use an external adapter.
+        The command monstart-nh will be executed in chroot. !!!!!!</string>
     <string name="pin_delay">PIN delay</string>
     <string name="locked_delay">Locked Delay</string>
     <!-- CustomAPDialog -->
@@ -189,6 +191,7 @@
     <string name="mdk3_dir" translatable="false">mdk3</string>
     <string name="reaver_dir" translatable="false">reaver</string>
     <string name="chroot_dir" translatable="false">/data/local/nhsystem/kali-armhf</string>
+    <string name="monstart" translatable="false">true</string>
     <string name="cap_dir" translatable="false">/sdcard/cap</string>
     <string name="enable_monMode" translatable="false">nexutil -m true</string>
     <string name="disable_monMode" translatable="false">nexutil -m false</string>
@@ -277,6 +280,9 @@
     <string name="chroot_title">Chroot directory</string>
     <string name="chroot_desc">Directory where a kali chroot is installed by NetHunter (required only for pixie-dust attack with reaver)</string>
 
+    <string name="monstart_title">monstart-nh</string>
+    <string name="monstart_sum">Run monstart-nh command when running reaver in NetHunter chroot (only in NetHunterOS)</string>
+
     <string name="copy_sample_title">Copy test command</string>
 
     <string name="test_title">Test tools</string>
@@ -303,5 +309,5 @@
     <string name="no_backup">There is no backup. It is created when you install the tools through the app.</string>
     <string name="reset_title">Reset Preferences</string>
     <string name="version_title">Version</string>
-    <string name="version" translatable="false">0.16</string>
+    <string name="version" translatable="false">0.17</string>
 </resources>

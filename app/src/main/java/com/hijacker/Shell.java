@@ -64,7 +64,10 @@ class Shell{
     void done(){
         if(debug) Log.d("Shell", "Freeing shell");
         try{
-            shell_out.reset();
+            run("echo");
+            run("echo ENDOFCLEAR");
+            MainActivity.getLastLine(shell_out, "ENDOFCLEAR");      //This will read up to the last line and stop, effectively clearing shell_out
+            shell_out.reset();                                      //<--- since this doesn't seem to do the job
             shell_out_error.reset();
         }catch(IOException ignored){}
         free.add(this);

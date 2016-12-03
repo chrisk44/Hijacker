@@ -105,7 +105,7 @@
         android:nestedScrollingEnabled="true"
         android:layout_marginTop="5dp"
         android:padding="3dp"
-        android:text="asdgasjdfglasdkjfhlasdkfjglasdkfjhlasdkjfh"
+        android:fontFamily="serif-monospace"
         android:textSize="10sp"
         android:layout_weight="1"
         android:scrollHorizontally="true"/>
