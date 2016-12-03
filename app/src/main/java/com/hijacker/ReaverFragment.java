@@ -242,6 +242,7 @@ public class ReaverFragment extends Fragment{
         for (String aENV : ENV) {
             ENV_OUT = ENV_OUT + "export " + aENV + " && ";
         }
+        ENV_OUT += "monstart-nh && ";
         return ENV_OUT;
     }
 }
