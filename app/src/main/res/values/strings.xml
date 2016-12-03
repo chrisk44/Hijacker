@@ -167,8 +167,11 @@
     <string name="chroot_notfound">Chroot directory not found</string>
     <string name="kali_notfound">bootkali_init not found</string>
     <string name="chroot_warning">!!!!!!  Kali chroot doesn\'t currently support monitor mode through the internal wireless interface. Use only with external adapter which you are sure that it works in kali chroot. !!!!!!</string>
+    <string name="pin_delay">PIN delay</string>
+    <string name="locked_delay">Locked Delay</string>
     <!-- CustomAPDialog -->
     <string name="custom_ap_title">Custom AP</string>
+    <string name="mac_address">MAC Address</string>
 
     <!-- SendLogActivity -->
     <string name="unexpected_error_title">Unexpected Error</string>

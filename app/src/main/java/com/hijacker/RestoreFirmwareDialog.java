@@ -29,20 +29,19 @@ import android.widget.EditText;
 import android.widget.ProgressBar;
 import android.widget.Toast;
 
+import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
 
 import static com.hijacker.MainActivity.debug;
 import static com.hijacker.MainActivity.path;
-import static com.hijacker.MainActivity.shell;
-import static com.hijacker.MainActivity.shell3_in;
-import static com.hijacker.MainActivity.shell3_out;
-import static com.hijacker.MainActivity.su_thread;
 
 public class RestoreFirmwareDialog extends DialogFragment {
     View view;
+    Shell shell;
     @Override
     public Dialog onCreateDialog(Bundle savedInstanceState) {
+        shell = Shell.getFreeShell();
         AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
         view = getActivity().getLayoutInflater().inflate(R.layout.restore_firmware, null);
 
@@ -75,13 +74,6 @@ public class RestoreFirmwareDialog extends DialogFragment {
             positiveButton.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    if(shell==null){
-                        su_thread.start();
-                        try{
-                            //Wait for su shells to spawn
-                            su_thread.join();
-                        }catch(InterruptedException ignored){}
-                    }
                     String firm_location = ((EditText)view.findViewById(R.id.firm_location)).getText().toString();
 
                     File firm = new File(firm_location);
@@ -93,15 +85,12 @@ public class RestoreFirmwareDialog extends DialogFragment {
                         if(debug){
                             Log.d("RestoreFirmwareDialog", "Restoring firmware in " + firm_location);
                         }
-                        shell3_in.print("busybox mount -o rw,remount,rw /system\n");
-                        shell3_in.flush();
+                        shell.run("busybox mount -o rw,remount,rw /system");
 
-                        shell3_in.print("cp " + path + "/fw_bcmdhd.orig.bin " + firm_location + "/fw_bcmdhd.bin\n");
-                        shell3_in.flush();
+                        shell.run("cp " + path + "/fw_bcmdhd.orig.bin " + firm_location + "/fw_bcmdhd.bin");
                         Toast.makeText(getActivity().getApplicationContext(), R.string.restored, Toast.LENGTH_SHORT).show();
 
-                        shell3_in.print("busybox mount -o ro,remount,ro /system\n");
-                        shell3_in.flush();
+                        shell.run("busybox mount -o ro,remount,ro /system");
                         dismiss();
                     }
                 }
@@ -110,26 +99,19 @@ public class RestoreFirmwareDialog extends DialogFragment {
                 @Override
                 public void onClick(View v) {
                     positiveButton.setActivated(false);
-                    if(shell==null){
-                        su_thread.start();
-                        try{
-                            //Wait for su shells to spawn
-                            su_thread.join();
-                        }catch(InterruptedException ignored){}
-                    }
                     ProgressBar progress = (ProgressBar)view.findViewById(R.id.install_firm_progress);
                     progress.setIndeterminate(true);
-                    shell3_in.print("find /system/ -type f -name \"fw_bcmdhd.bin\"; echo ENDOFFIND\n");
-                    shell3_in.flush();
+                    shell.run("find /system/ -type f -name \"fw_bcmdhd.bin\"; echo ENDOFFIND");
+                    BufferedReader out = shell.getShell_out();
                     try{
                         String buffer = null, lastline;
                         while(buffer==null){
-                            buffer = shell3_out.readLine();
+                            buffer = out.readLine();
                         }
                         lastline = buffer;
                         while(!buffer.equals("ENDOFFIND")){
                             lastline = buffer;
-                            buffer = shell3_out.readLine();
+                            buffer = out.readLine();
                         }
                         if(lastline.equals("ENDOFFIND")){
                             Toast.makeText(getActivity().getApplicationContext(), R.string.firm_notfound_bcm, Toast.LENGTH_LONG).show();
@@ -144,5 +126,10 @@ public class RestoreFirmwareDialog extends DialogFragment {
                 }
             });
         }
+    }
+    @Override
+    public void onDismiss(final DialogInterface dialog){
+        super.onDismiss(dialog);
+        shell.done();
     }
 }

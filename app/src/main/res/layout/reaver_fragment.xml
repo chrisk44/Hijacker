@@ -18,8 +18,8 @@
         android:layout_height="wrap_content">
 
         <TextView
-            android:text="PIN delay"
-            android:layout_width="wrap_content"
+            android:text="@string/pin_delay"
+            android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
             android:textColor="?android:attr/textColorPrimary"
@@ -40,8 +40,8 @@
         android:layout_height="wrap_content">
 
         <TextView
-            android:text="Locked Delay"
-            android:layout_width="wrap_content"
+            android:text="@string/locked_delay"
+            android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
             android:textColor="?android:attr/textColorPrimary"

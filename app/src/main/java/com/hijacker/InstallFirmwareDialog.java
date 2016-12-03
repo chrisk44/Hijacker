@@ -30,6 +30,7 @@ import android.widget.EditText;
 import android.widget.ProgressBar;
 import android.widget.Toast;
 
+import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -37,13 +38,10 @@ import java.io.InputStream;
 
 import static com.hijacker.MainActivity.debug;
 import static com.hijacker.MainActivity.path;
-import static com.hijacker.MainActivity.shell;
-import static com.hijacker.MainActivity.shell3_in;
-import static com.hijacker.MainActivity.shell3_out;
-import static com.hijacker.MainActivity.su_thread;
 
 public class InstallFirmwareDialog extends DialogFragment {
     View view;
+    Shell shell;
     @Override
     public Dialog onCreateDialog(Bundle savedInstanceState) {
         AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
@@ -52,6 +50,7 @@ public class InstallFirmwareDialog extends DialogFragment {
         if(!(new File("/su").exists())){
             ((EditText)view.findViewById(R.id.util_location)).setText("/system/xbin");
         }
+        shell = Shell.getFreeShell();
 
         builder.setView(view);
         builder.setTitle(R.string.install_nexmon_title);
@@ -83,13 +82,6 @@ public class InstallFirmwareDialog extends DialogFragment {
             positiveButton.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    if(shell==null){
-                        su_thread.start();
-                        try{
-                            //Wait for su shells to spawn
-                            su_thread.join();
-                        }catch(InterruptedException ignored){}
-                    }
                     String firm_location = ((EditText)view.findViewById(R.id.firm_location)).getText().toString();
                     String util_location = ((EditText)view.findViewById(R.id.util_location)).getText().toString();
 
@@ -106,21 +98,18 @@ public class InstallFirmwareDialog extends DialogFragment {
                             Log.d("InstallFirmwareDialog", "Installing firmware in " + firm_location);
                             Log.d("InstallFirmwareDialog", "Installing utility in " + util_location);
                         }
-                        shell3_in.print("busybox mount -o rw,remount,rw /system\n");
-                        shell3_in.flush();
+                        shell.run("busybox mount -o rw,remount,rw /system");
                         if(((CheckBox)view.findViewById(R.id.backup)).isChecked()){
                             if(new File(path + "/fw_bcmdhd.orig.bin").exists()){
                                 Toast.makeText(getActivity().getApplicationContext(), R.string.backup_exists, Toast.LENGTH_SHORT).show();
                             }else{
-                                shell3_in.print("cp -n " + firm_location + "/fw_bcmdhd.bin " + path + "/fw_bcmdhd.orig.bin\n");
-                                shell3_in.flush();
+                                shell.run("cp -n " + firm_location + "/fw_bcmdhd.bin " + path + "/fw_bcmdhd.orig.bin");
                                 Toast.makeText(getActivity().getApplicationContext(), R.string.backup_created, Toast.LENGTH_SHORT).show();
                             }
                         }
                         extract("fw_bcmdhd.bin", firm_location);
                         extract("nexutil", util_location);
-                        shell3_in.print("busybox mount -o ro,remount,ro /system\n");
-                        shell3_in.flush();
+                        shell.run("busybox mount -o ro,remount,ro /system");
                         Toast.makeText(getActivity().getApplicationContext(), R.string.installed_firm_util, Toast.LENGTH_SHORT).show();
                         dismiss();
                     }
@@ -130,26 +119,19 @@ public class InstallFirmwareDialog extends DialogFragment {
                 @Override
                 public void onClick(View v) {
                     positiveButton.setActivated(false);
-                    if(shell==null){
-                        su_thread.start();
-                        try{
-                            //Wait for su shells to spawn
-                            su_thread.join();
-                        }catch(InterruptedException ignored){}
-                    }
                     ProgressBar progress = (ProgressBar)view.findViewById(R.id.install_firm_progress);
                     progress.setIndeterminate(true);
-                    shell3_in.print("find /system/ -type f -name \"fw_bcmdhd.bin\"; echo ENDOFFIND\n");
-                    shell3_in.flush();
+                    shell.run("find /system/ -type f -name \"fw_bcmdhd.bin\"; echo ENDOFFIND");
+                    BufferedReader out = shell.getShell_out();
                     try{
                         String buffer = null, lastline;
                         while(buffer==null){
-                            buffer = shell3_out.readLine();
+                            buffer = out.readLine();
                         }
                         lastline = buffer;
                         while(!buffer.equals("ENDOFFIND")){
                             lastline = buffer;
-                            buffer = shell3_out.readLine();
+                            buffer = out.readLine();
                         }
                         if(lastline.equals("ENDOFFIND")){
                             Toast.makeText(getActivity().getApplicationContext(), R.string.firm_notfound_bcm, Toast.LENGTH_LONG).show();
@@ -169,6 +151,7 @@ public class InstallFirmwareDialog extends DialogFragment {
     public void onDismiss(final DialogInterface dialog) {
         super.onDismiss(dialog);
         if(MainActivity.init) new InstallToolsDialog().show(getFragmentManager(), "InstallToolsDialog");
+        shell.done();
     }
     void extract(String filename, String dest){
         File f = new File(path, filename);      //no permissions to write at dest so extract at local directory and then move to target
@@ -184,9 +167,8 @@ public class InstallFirmwareDialog extends DialogFragment {
                 }
                 in.close();
                 out.close();
-                shell3_in.print("mv " + path + '/' + filename + " " + dest + '\n');
-                shell3_in.print("chmod 755 " + dest + '\n');
-                shell3_in.flush();
+                shell.run("mv " + path + '/' + filename + " " + dest);
+                shell.run("chmod 755 " + dest);
             }catch(IOException e){
                 Log.e("FileProvider", "Exception copying from assets", e);
             }

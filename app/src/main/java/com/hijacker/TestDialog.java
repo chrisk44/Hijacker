@@ -21,25 +21,113 @@ import android.app.Dialog;
 import android.app.DialogFragment;
 import android.content.DialogInterface;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Message;
 import android.support.v7.app.AlertDialog;
+import android.util.Log;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.IOException;
+import java.io.InputStreamReader;
+
+import static com.hijacker.MainActivity.PROCESS_AIREPLAY;
+import static com.hijacker.MainActivity.PROCESS_AIRODUMP;
+import static com.hijacker.MainActivity.PROCESS_MDK;
+import static com.hijacker.MainActivity.PROCESS_REAVER;
+import static com.hijacker.MainActivity.iface;
+import static com.hijacker.MainActivity.prefix;
+import static com.hijacker.MainActivity.airodump_dir;
+import static com.hijacker.MainActivity.aireplay_dir;
+import static com.hijacker.MainActivity.mdk3_dir;
+import static com.hijacker.MainActivity.reaver_dir;
 import static com.hijacker.MainActivity.enable_monMode;
+import static com.hijacker.MainActivity.getPIDs;
 import static com.hijacker.MainActivity.load;
-import static com.hijacker.MainActivity.shell;
 import static com.hijacker.MainActivity.status;
-import static com.hijacker.MainActivity.su_thread;
-import static com.hijacker.MainActivity.test_cur_cmd;
-import static com.hijacker.MainActivity.test_progress;
-import static com.hijacker.MainActivity.test_thread;
+import static com.hijacker.MainActivity.stop;
+import static com.hijacker.Shell.getFreeShell;
 
 public class TestDialog extends DialogFragment {
+    boolean test_wait;
+    TextView test_cur_cmd;
+    ProgressBar test_progress;
+    Thread thread;
     public Dialog onCreateDialog(Bundle savedInstanceState) {
         setCancelable(false);
         load();
+
+        thread = new Thread(new Runnable(){
+            @Override
+            public void run(){
+                Shell shell = getFreeShell();
+                try{
+                    Thread.sleep(500);
+                    //Separate calls so the UI can be refreshed, otherwise it gets blocked.
+                    Message msg = new Message();
+                    msg.what = 0;
+                    msg.obj = shell;
+                    test_wait = true;
+                    runTest.sendMessage(msg);
+                    while(test_wait){
+                        Thread.sleep(100);
+                    }
+
+                    msg = new Message();
+                    msg.what = 1;
+                    msg.obj = shell;
+                    test_wait = true;
+                    runTest.sendMessage(msg);
+                    while(test_wait){
+                        Thread.sleep(100);
+                    }
+
+                    msg = new Message();
+                    msg.what = 2;
+                    msg.obj = shell;
+                    test_wait = true;
+                    runTest.sendMessage(msg);
+                    while(test_wait){
+                        Thread.sleep(100);
+                    }
+
+                    msg = new Message();
+                    msg.what = 3;
+                    msg.obj = shell;
+                    test_wait = true;
+                    runTest.sendMessage(msg);
+                    while(test_wait){
+                        Thread.sleep(100);
+                    }
+
+                    msg = new Message();
+                    msg.what = 4;
+                    msg.obj = shell;
+                    test_wait = true;
+                    runTest.sendMessage(msg);
+                    while(test_wait){
+                        Thread.sleep(100);
+                    }
+
+                    msg = new Message();
+                    msg.what = 5;
+                    msg.obj = shell;
+                    test_wait = true;
+                    runTest.sendMessage(msg);
+                    while(test_wait){
+                        Thread.sleep(100);
+                    }
+                }catch(InterruptedException e){
+                    Log.d("test_thread", "Interrupted");
+                }finally{
+                    shell.done();
+                }
+            }
+        });
         AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
         View view = getActivity().getLayoutInflater().inflate(R.layout.test, null);
 
@@ -57,14 +145,8 @@ public class TestDialog extends DialogFragment {
         status[4].setImageResource(android.R.color.transparent);
         test_cur_cmd = (TextView)view.findViewById(R.id.current_cmd);
         test_cur_cmd.setText(enable_monMode);
-        if(shell==null){
-            su_thread.start();
-            try{
-                //Wait for su shells to spawn
-                su_thread.join();
-            }catch(InterruptedException ignored){}
-        }
-        test_thread.start();
+
+        thread.start();
 
         builder.setView(view);
         builder.setTitle(R.string.testing);
@@ -73,9 +155,125 @@ public class TestDialog extends DialogFragment {
             @Override
             public void onClick(DialogInterface dialog, int which) {
                 //close
-                test_thread.interrupt();
+                thread.interrupt();
             }
         });
         return builder.create();
     }
+    public Handler runTest = new Handler(){
+        public void handleMessage(Message msg){
+            try{
+                String cmd;
+                Shell shell = (Shell)msg.obj;
+                switch(msg.what){
+                    case 0:
+                        stop(PROCESS_AIRODUMP);
+                        stop(PROCESS_AIREPLAY);
+                        stop(PROCESS_MDK);
+                        cmd = enable_monMode;
+                        Log.d("test_thread", cmd);
+                        shell.run(cmd);
+                        Thread.sleep(1000);
+                        status[0].setImageResource(R.drawable.testing);
+                        test_cur_cmd.setText(prefix + " " + airodump_dir + " " + iface);
+                        test_wait = false;
+                        break;
+
+                    case 1:
+                        cmd = prefix + " " + airodump_dir + " " + iface;
+                        Log.d("test_thread", cmd);
+                        shell.run(cmd);
+                        Thread.sleep(1000);
+                        if(getPIDs(PROCESS_AIRODUMP).size()==0) status[0].setImageResource(R.drawable.failed);
+                        else{
+                            stop(PROCESS_AIRODUMP);
+                            status[0].setImageResource(R.drawable.passed);
+                        }
+                        test_progress.setProgress(1);
+                        status[1].setImageResource(R.drawable.testing);
+                        test_cur_cmd.setText(prefix + " " + aireplay_dir + " --deauth 0 -a 11:22:33:44:55:66 " + iface);
+                        test_wait = false;
+                        break;
+
+                    case 2:
+                        cmd = prefix + " " + aireplay_dir + " --deauth 0 -a 11:22:33:44:55:66 " + iface;
+                        Log.d("test_thread", cmd);
+                        shell.run(cmd);
+                        Thread.sleep(1000);
+                        if(getPIDs(PROCESS_AIREPLAY).size()==0) status[1].setImageResource(R.drawable.failed);
+                        else{
+                            stop(PROCESS_AIREPLAY);
+                            status[1].setImageResource(R.drawable.passed);
+                        }
+                        test_progress.setProgress(2);
+                        status[2].setImageResource(R.drawable.testing);
+                        test_cur_cmd.setText(prefix + " " + mdk3_dir + " " + iface + " b -m");
+                        test_wait = false;
+                        break;
+
+                    case 3:
+                        cmd = prefix + " " + mdk3_dir + " " + iface + " b -m";
+                        Log.d("test_thread", cmd);
+                        shell.run(cmd);
+                        Thread.sleep(1000);
+                        if(getPIDs(PROCESS_MDK).size()==0) status[2].setImageResource(R.drawable.failed);
+                        else{
+                            stop(PROCESS_MDK);
+                            status[2].setImageResource(R.drawable.passed);
+                        }
+                        test_progress.setProgress(3);
+                        status[3].setImageResource(R.drawable.testing);
+                        test_cur_cmd.setText(prefix + " " + reaver_dir + " -i " + iface + " -b 00:11:22:33:44:55 -c 2");
+                        test_wait = false;
+                        break;
+
+                    case 4:
+                        cmd = prefix + " " + reaver_dir + " -i " + iface + " -b 00:11:22:33:44:55 -c 2";
+                        Log.d("test_thread", cmd);
+                        shell.run(cmd);
+                        Thread.sleep(1000);
+                        if(getPIDs(PROCESS_REAVER).size()==0) status[3].setImageResource(R.drawable.failed);
+                        else{
+                            stop(PROCESS_REAVER);
+                            status[3].setImageResource(R.drawable.passed);
+                        }
+                        test_progress.setProgress(4);
+                        status[4].setImageResource(R.drawable.testing);
+                        test_cur_cmd.setText(R.string.checking_chroot);
+                        test_wait = false;
+                        break;
+
+                    case 5:
+                        File chroot_dir = new File(MainActivity.chroot_dir);
+                        boolean kali_init = false;
+                        try{
+                            Process dc = Runtime.getRuntime().exec("ls /system/bin -1 | grep bootkali_init");
+                            BufferedReader out = new BufferedReader(new InputStreamReader(dc.getInputStream()));
+                            kali_init = out.readLine()!=null;
+                        }catch(IOException ignored){}
+                        Log.d("test_thread", "chroot_dir is " + Boolean.toString(chroot_dir.exists()));
+                        Log.d("test_thread", "kali_init is " + Boolean.toString(kali_init));
+                        if(!chroot_dir.exists() || !kali_init){
+                            status[4].setImageResource(R.drawable.failed);
+                            if(!chroot_dir.exists()) test_cur_cmd.setText(R.string.chroot_notfound);
+                            if(!kali_init) test_cur_cmd.setText(R.string.kali_notfound);
+                        }else{
+                            test_cur_cmd.setText(R.string.done);
+                            status[4].setImageResource(R.drawable.passed);
+                        }
+                        test_progress.setProgress(5);
+                        test_wait = false;
+
+                        stop(PROCESS_AIRODUMP);
+                        stop(PROCESS_AIREPLAY);
+                        stop(PROCESS_MDK);
+                        stop(PROCESS_REAVER);
+                        test_progress.setProgress(6);
+                        break;
+                }
+            }catch(InterruptedException e){
+                Log.e("Exception", "Caught Exception in runTest Handler: " + e.toString());
+            }
+        }
+    };
 }

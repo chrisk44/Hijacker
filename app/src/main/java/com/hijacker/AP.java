@@ -33,7 +33,6 @@ import static com.hijacker.MainActivity.startAireplay;
 import static com.hijacker.MainActivity.startAireplayWEP;
 import static com.hijacker.MainActivity.startAirodump;
 import static com.hijacker.MainActivity.stop;
-import static com.hijacker.MainActivity.wpa_subthread;
 import static com.hijacker.MainActivity.wpa_thread;
 import static com.hijacker.MainActivity.wpacheckcont;
 
@@ -144,7 +143,7 @@ class AP {
             wpacheckcont = false;           //Make sure wpa threads are not running from previous cracking
             wpa_thread.interrupt();
             MainActivity.tv.setText("");
-            while(wpa_thread.isAlive() || wpa_subthread.isAlive())      //Wait for everything to shutdown
+            while(wpa_thread.isAlive())      //Wait for everything to shutdown
             if(debug) Log.d("AP", "Cracking WPA/WPA2");
             startAirodump("--channel " + this.ch + " --bssid " + this.mac + " -w " + cap_dir + "/wpa.cap");
             startAireplay(this.mac);

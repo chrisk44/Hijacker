@@ -70,15 +70,6 @@ import static com.hijacker.MainActivity.path;
 import static com.hijacker.MainActivity.prefix;
 import static com.hijacker.MainActivity.ps;
 import static com.hijacker.MainActivity.reaver_dir;
-import static com.hijacker.MainActivity.shell2;
-import static com.hijacker.MainActivity.shell2_in;
-import static com.hijacker.MainActivity.shell2_out;
-import static com.hijacker.MainActivity.shell3;
-import static com.hijacker.MainActivity.shell3_in;
-import static com.hijacker.MainActivity.shell3_out;
-import static com.hijacker.MainActivity.shell4;
-import static com.hijacker.MainActivity.shell4_in;
-import static com.hijacker.MainActivity.shell4_out;
 import static com.hijacker.MainActivity.showLog;
 import static com.hijacker.MainActivity.show_details;
 import static com.hijacker.MainActivity.show_notif;
@@ -124,11 +115,11 @@ public class SendLogActivity extends AppCompatActivity{
                     TextView console = (TextView)findViewById(R.id.console);
                     console.setMovementMethod(ScrollingMovementMethod.getInstance());
                     int i=0;
-                    while((buffer = br.readLine())!=null && i<200){
+                    while((buffer = br.readLine())!=null && i<400){
                         console.append(buffer + '\n');
                         i++;
                     }
-                    if(i==200) console.append("...more logcat not displayed here");
+                    if(i==400) console.append("...more logcat not displayed here");
                 }catch(IOException ignored){}
             }
         }else{
@@ -173,12 +164,12 @@ public class SendLogActivity extends AppCompatActivity{
             writer.write("Mdk BF: " + Integer.toString(MDKFragment.bf_pid) + "\n");
             writer.write("Mdk ADoS: " + Integer.toString(MDKFragment.ados_pid) + "\n");
             writer.write("Reaver: " + Boolean.toString(ReaverFragment.cont) + "\n");
-            writer.write("shell: " + (shell!=null ? "ok" : "null") + ", " + (shell2!=null ? "ok" : "null") + ", ");
+            /*writer.write("shell: " + (shell!=null ? "ok" : "null") + ", " + (shell2!=null ? "ok" : "null") + ", ");
             writer.write((shell3!=null ? "ok" : "null") + ", " + (shell4!=null ? "ok" : "null") + "\n");
             writer.write("shell_in: " + (shell_in!=null ? "ok" : "null") + ", " + (shell2_in!=null ? "ok" : "null") + ", ");
             writer.write((shell3_in!=null ? "ok" : "null") + ", " + (shell4_in!=null ? "ok" : "null") + "\n");
             writer.write("shell_out: " + (shell_out!=null ? "ok" : "null") + ", " + (shell2_out!=null ? "ok" : "null") + ", ");
-            writer.write((shell3_out!=null ? "ok" : "null") + ", " + (shell4_out!=null ? "ok" : "null") + "\n");
+            writer.write((shell3_out!=null ? "ok" : "null") + ", " + (shell4_out!=null ? "ok" : "null") + "\n");*/
             writer.write("path: " + path + '\n');
             writer.write("prefs:\n");
             writer.write("\tiface: " + iface + '\n');

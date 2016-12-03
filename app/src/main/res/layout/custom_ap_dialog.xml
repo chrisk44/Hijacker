@@ -10,5 +10,5 @@
         android:inputType="textPersonName"
         android:ems="10"
         android:id="@+id/custom_mac"
-        android:hint="MAC Address"/>
+        android:hint="@string/mac_address"/>
 </LinearLayout>

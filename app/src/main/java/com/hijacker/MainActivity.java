@@ -62,17 +62,16 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Locale;
 
 import static com.hijacker.IsolatedFragment.is_ap;
 import static com.hijacker.MDKFragment.ados;
 import static com.hijacker.MDKFragment.ados_pid;
 import static com.hijacker.MDKFragment.bf;
 import static com.hijacker.MDKFragment.bf_pid;
+import static com.hijacker.Shell.getFreeShell;
+import static com.hijacker.Shell.runOne;
 
 public class MainActivity extends AppCompatActivity{
     static final int AIREPLAY_DEAUTH = 1, AIREPLAY_WEP = 2;
@@ -81,23 +80,20 @@ public class MainActivity extends AppCompatActivity{
     static final int PROCESS_AIRODUMP=0, PROCESS_AIREPLAY=1, PROCESS_MDK=2, PROCESS_AIRCRACK=3, PROCESS_REAVER=4;
     static final int MDK_BF=0, MDK_ADOS=1;
     //State variables
-    static boolean cont = false, wpacheckcont = false, test_wait, done = true, notif_on = false;  //done: for calling refreshHandler only when it has stopped
+    static boolean cont = false, wpacheckcont = false, done = true, notif_on = false;  //done: for calling refreshHandler only when it has stopped
     static int airodump_running = 0, aireplay_running = 0, currentFragment=FRAGMENT_AIRODUMP;         //Set currentFragment in onResume of each Fragment
     //Filters
     static boolean show_ap = true, show_st = true, show_na_st = true, wpa = true, wep = true, opn = true;
     static boolean show_ch[] = {true, false, false, false, false, false, false, false, false, false, false, false, false, false, false};
     static int pwr_filter = 120;
-    static TextView tv, ap_count, st_count, test_cur_cmd;                               //Log textview, AP and ST count textviews in toolbar
-    static ProgressBar progress, test_progress;
+    static TextView tv, ap_count, st_count;                               //Log textview, AP and ST count textviews in toolbar
+    static ProgressBar progress;
     static Toolbar toolbar;
     static Drawable overflow[] = {null, null, null, null, null, null, null, null};      //Drawables to use for overflow button icon
     static ImageView[] status = {null, null, null, null, null};                                     //Icons in TestDialog, set in TestDialog class
     static int progress_int;
-    static Thread refresh_thread, wpa_thread, wpa_subthread, test_thread, su_thread;
+    static Thread refresh_thread, wpa_thread;
     static Menu menu;
-    static Process shell, shell2, shell3, shell4;
-    static PrintWriter shell_in, shell2_in, shell3_in, shell4_in;
-    static BufferedReader shell_out, shell2_out, shell3_out, shell4_out;
     static List<Item2> fifo;                    //List used as FIFO for handling calls to addAP/addST in an order
     static MyListAdapter adapter;
     static SharedPreferences pref;
@@ -105,7 +101,6 @@ public class MainActivity extends AppCompatActivity{
     static ClipboardManager clipboard;
     static NotificationCompat.Builder notif;
     static NotificationManager nm;
-    static Locale locale;
     static FragmentManager fm;
     static String path;             //Path for oui.txt
     static boolean init=false;      //True on first run to swap the dialogs for initialization
@@ -160,13 +155,31 @@ public class MainActivity extends AppCompatActivity{
             @Override
             public void run(){
                 if(debug) Log.d("wpa_thread", "Started wpa_thread");
+
+                Thread wpa_subthread = new Thread(new Runnable(){
+                    @Override
+                    public void run(){
+                        if(debug) Log.d("wpa_subthread", "wpa_subthread started");
+                        try{
+                            while(progress_int<=deauthWait && wpacheckcont){
+                                Thread.sleep(1000);
+                                progress_int++;
+                                progressHandler.obtainMessage().sendToTarget();
+                            }
+                            if(wpacheckcont) MainActivity.this.stopAireplayForHandshake.obtainMessage().sendToTarget();
+                            else stopIndeterminate.obtainMessage().sendToTarget();
+                        }catch(InterruptedException e){ Log.e("Exception", "Caught Exception in wpa_subthread: " + e.toString()); }
+                        if(debug) Log.d("wpa_subthread", "wpa_subthread finished");
+                    }
+                });
+
                 String capfile, buffer;
                 int result = 0;
+                Shell shell = getFreeShell();
                 try{
                     Thread.sleep(1000);
-                    shell2_in.print("ls -1 " + cap_dir + "/wpa.cap-*.cap; echo ENDOFLS\n");
-                    shell2_in.flush();
-                    capfile = getLastLine(shell2_out, "ENDOFLS");
+                    shell.run("ls -1 " + cap_dir + "/wpa.cap-*.cap; echo ENDOFLS");
+                    capfile = getLastLine(shell.getShell_out(), "ENDOFLS");
 
                     if(debug) Log.d("wpa_thread", capfile);
                     if(capfile.equals("ENDOFLS")){
@@ -183,15 +196,15 @@ public class MainActivity extends AppCompatActivity{
                         while(result!=1 && wpacheckcont){
                             if(debug) Log.d("wpa_thread", "Checking cap file...");
                             if(progress_int>deauthWait) appendDot.obtainMessage().sendToTarget();
-                            shell2_in.print(aircrack_dir + " " + capfile + " && echo ENDOFAIR\n");
-                            shell2_in.flush();
-                            buffer = shell2_out.readLine();
+                            shell.run(aircrack_dir + " " + capfile + " && echo ENDOFAIR");
+                            BufferedReader out = shell.getShell_out();
+                            buffer = out.readLine();
                             if(buffer==null) wpacheckcont = false;
                             else{
                                 while(!buffer.equals("ENDOFAIR")){
                                     if(result!=1) result = checkwpa(buffer);
                                     //if(result==0) Log.d("wpa_check", buffer);
-                                    buffer = shell2_out.readLine();
+                                    buffer = out.readLine();
                                 }
                                 Thread.sleep(700);
                             }
@@ -206,153 +219,14 @@ public class MainActivity extends AppCompatActivity{
                 }catch(IOException | InterruptedException e){
                     Log.e("Exception", "Caught Exception in wpa_thread: " + e.toString());
                     stop1.obtainMessage().sendToTarget();
-                }
-                wpa_subthread.interrupt();
-                if(delete_extra){
-                    shell2_in.print("rm -rf " + cap_dir + "/wpa.cap-*.csv\n");
-                    shell2_in.print("rm -rf " + cap_dir + "/wpa.cap-*.netxml\n");
-                    shell2_in.flush();
-                }
-                if(debug) Log.d("wpa_thread", "wpa_thread finished");
-            }
-        });
-        wpa_subthread = new Thread(new Runnable(){
-            @Override
-            public void run(){
-                if(debug) Log.d("wpa_subthread", "wpa_subthread started");
-                try{
-                    while(progress_int<=deauthWait && wpacheckcont){
-                        Thread.sleep(1000);
-                        progress_int++;
-                        progressHandler.obtainMessage().sendToTarget();
+                }finally{
+                    wpa_subthread.interrupt();
+                    if(delete_extra){
+                        shell.run("rm -rf " + cap_dir + "/wpa.cap-*.csv");
+                        shell.run("rm -rf " + cap_dir + "/wpa.cap-*.netxml");
                     }
-                    if(wpacheckcont) MainActivity.this.stopAireplayForHandshake.obtainMessage().sendToTarget();
-                    else stopIndeterminate.obtainMessage().sendToTarget();
-                }catch(InterruptedException e){ Log.e("Exception", "Caught Exception in wpa_subthread: " + e.toString()); }
-                if(debug) Log.d("wpa_subthread", "wpa_subthread finished");
-            }
-        });
-        test_thread = new Thread(new Runnable(){
-            @Override
-            public void run(){
-                try{
-                    Thread.sleep(500);
-                    //Separate calls so the UI can be refreshed, otherwise it gets blocked.
-                    Message msg = new Message();
-                    msg.arg1 = 0;
-                    test_wait = true;
-                    runTest.sendMessage(msg);
-                    while(test_wait){
-                        Thread.sleep(100);
-                    }
-
-                    msg = new Message();
-                    msg.arg1 = 1;
-                    test_wait = true;
-                    runTest.sendMessage(msg);
-                    while(test_wait){
-                        Thread.sleep(100);
-                    }
-
-                    msg = new Message();
-                    msg.arg1 = 2;
-                    test_wait = true;
-                    runTest.sendMessage(msg);
-                    while(test_wait){
-                        Thread.sleep(100);
-                    }
-
-                    msg = new Message();
-                    msg.arg1 = 3;
-                    test_wait = true;
-                    runTest.sendMessage(msg);
-                    while(test_wait){
-                        Thread.sleep(100);
-                    }
-
-                    msg = new Message();
-                    msg.arg1 = 4;
-                    test_wait = true;
-                    runTest.sendMessage(msg);
-                    while(test_wait){
-                        Thread.sleep(100);
-                    }
-
-                    msg = new Message();
-                    msg.arg1 = 5;
-                    test_wait = true;
-                    runTest.sendMessage(msg);
-                    while(test_wait){
-                        Thread.sleep(100);
-                    }
-                }catch(InterruptedException e){
-                    Log.d("test_thread", "Interrupted");
-                }
-            }
-        });
-        su_thread = new Thread(new Runnable(){
-            @Override
-            public void run(){
-                try{
-                    shell = Runtime.getRuntime().exec("su");
-                    shell2 = Runtime.getRuntime().exec("su");
-                    shell3 = Runtime.getRuntime().exec("su");
-                    shell4 = Runtime.getRuntime().exec("su");
-                }catch(IOException e){
-                    Log.e("onCreate", "Caught Exception in shell start: " + e.toString());
-                }
-
-                try{
-                    shell.exitValue();
-                    Log.e("onCreate", "Error opening su shell");
-                    ErrorDialog dialog = new ErrorDialog();
-                    dialog.setMessage(getString(R.string.error_opening_shell));
-                    dialog.show(fm, "ErrorDialog");
-                    return;
-                }catch(IllegalThreadStateException ignored){
-                }
-                try{
-                    shell2.exitValue();
-                    Log.e("onCreate", "Error opening su shell");
-                    ErrorDialog dialog = new ErrorDialog();
-                    dialog.setMessage(getString(R.string.error_opening_shell));
-                    dialog.show(fm, "ErrorDialog");
-                    return;
-                }catch(IllegalThreadStateException ignored){
-                }
-                try{
-                    shell3.exitValue();
-                    Log.e("onCreate", "Error opening su shell");
-                    ErrorDialog dialog = new ErrorDialog();
-                    dialog.setMessage(getString(R.string.error_opening_shell));
-                    dialog.show(fm, "ErrorDialog");
-                    return;
-                }catch(IllegalThreadStateException ignored){
-                }
-                try{
-                    shell4.exitValue();
-                    Log.e("onCreate", "Error opening su shell");
-                    ErrorDialog dialog = new ErrorDialog();
-                    dialog.setMessage(getString(R.string.error_opening_shell));
-                    dialog.show(fm, "ErrorDialog");
-                    return;
-                }catch(IllegalThreadStateException ignored){
-                }
-
-                shell_in = new PrintWriter(shell.getOutputStream());
-                shell2_in = new PrintWriter(shell2.getOutputStream());
-                shell3_in = new PrintWriter(shell3.getOutputStream());
-                shell4_in = new PrintWriter(shell4.getOutputStream());
-                shell_out = new BufferedReader(new InputStreamReader(shell.getInputStream()));
-                shell2_out = new BufferedReader(new InputStreamReader(shell2.getInputStream()));
-                shell3_out = new BufferedReader(new InputStreamReader(shell3.getInputStream()));
-                shell4_out = new BufferedReader(new InputStreamReader(shell4.getInputStream()));
-                if(shell_in==null || shell_out==null || shell2_in==null || shell2_out==null ||
-                        shell3_in==null || shell3_out==null || shell4_in==null || shell4_out==null){
-                    if(debug) Log.e("onCreate", "Error opening shell_in/shell_out");
-                    ErrorDialog dialog = new ErrorDialog();
-                    dialog.setMessage(getString(R.string.error_opening_shell));
-                    dialog.show(fm, "ErrorDialog");
+                    if(debug) Log.d("wpa_thread", "wpa_thread finished");
+                    shell.done();
                 }
             }
         });
@@ -394,17 +268,11 @@ public class MainActivity extends AppCompatActivity{
         }
     }
     public static void main(){
-        if(shell==null){
-            su_thread.start();
-            try{
-                //Wait for su shells to spawn
-                su_thread.join();
-            }catch(InterruptedException ignored){
-            }
-        }
+        getFreeShell().done();      //Initiazile 3 shells so we won't necessarily need to start them while running
+        getFreeShell().done();
+        getFreeShell().done();
 
-        shell_in.print("mkdir " + cap_dir + "\n");
-        shell_in.flush();
+        runOne("mkdir " + cap_dir);
 
         stop(PROCESS_AIRODUMP);
         stop(PROCESS_AIREPLAY);
@@ -425,28 +293,24 @@ public class MainActivity extends AppCompatActivity{
             temp = params;
             mode = 1;
         }
-        shell_in.print(enable_monMode + "\n");
-        shell_in.flush();
+        final Shell shell = getFreeShell();
+        shell.run(enable_monMode);
         stop(PROCESS_AIRODUMP);
         cont = true;
         new Thread(new Runnable(){
             @Override
             public void run(){
-                Process airodump = null;
-                try{
-                    String cmd = "su -c " + prefix + " " + airodump_dir + " --update 1 " + temp + " " + iface;
-                    if(debug) Log.d("startAirodump", cmd);
-                    airodump = Runtime.getRuntime().exec(cmd);
-                }catch(IOException e){
-                    Log.e("Exception", "Caught Exception in startAirodump() start block: " + e.toString());
-                }
-                BufferedReader in = new BufferedReader(new InputStreamReader(airodump.getErrorStream()));
+                String cmd = "su -c " + prefix + " " + airodump_dir + " --update 1 " + temp + " " + iface;
+                if(debug) Log.d("startAirodump", cmd);
+                shell.run(cmd);
+                BufferedReader in = shell.getShell_out_error();
                 String buffer;
                 try{
                     while(cont && (buffer = in.readLine())!=null){
                         main(buffer, mode);
                     }
                 }catch(IOException e){ Log.e("Exception", "Caught Exception in startAirodump() read block: " + e.toString()); }
+                shell.done();
             }
         }).start();
         refresh_thread.start();
@@ -538,26 +402,27 @@ public class MainActivity extends AppCompatActivity{
     public static ArrayList<Integer> getPIDs(int pr){
         ArrayList<Integer> list = new ArrayList<>();
         try{
+            Shell shell = getFreeShell();
             int pid;
             String s = null;
             switch(pr){
                 case PROCESS_AIRODUMP:
-                    shell_in.print("ps | grep airo; echo ENDOFPS\n");
+                    shell.run("ps | grep airo; echo ENDOFPS");
                     break;
                 case PROCESS_AIREPLAY:
-                    shell_in.print("ps | grep aire; echo ENDOFPS\n");
+                    shell.run("ps | grep aire; echo ENDOFPS");
                     break;
                 case PROCESS_MDK:
-                    shell_in.print("ps | grep mdk3; echo ENDOFPS\n");
+                    shell.run("ps | grep mdk3; echo ENDOFPS");
                     break;
                 case PROCESS_AIRCRACK:
-                    shell_in.print("ps | grep airc; echo ENDOFPS\n");
+                    shell.run("ps | grep airc; echo ENDOFPS");
                     break;
                 case PROCESS_REAVER:
-                    shell_in.print("ps | grep reav; echo ENDOFPS\n");
+                    shell.run("ps | grep reav; echo ENDOFPS");
                     break;
             }
-            shell_in.flush();
+            BufferedReader shell_out = shell.getShell_out();
             while(s==null){ s = shell_out.readLine(); } //for some reason sometimes s remains null
             while(!s.equals("ENDOFPS")){
                 pid = ps(s);
@@ -566,6 +431,7 @@ public class MainActivity extends AppCompatActivity{
                 }
                 s = shell_out.readLine();
             }
+            shell.done();
         }catch(IOException e){ Log.e("Exception", "Caught Exception in getPIDs(pr): " + e.toString()); }
         return list;
     }
@@ -612,11 +478,12 @@ public class MainActivity extends AppCompatActivity{
         if(pids.isEmpty()){
             if(debug) Log.d("stop", "Nothing found for " + pr);
         }else{
+            Shell shell = getFreeShell();
             for(int i = 0; i<pids.size(); i++){
                 if(debug) Log.d("Killing...", Integer.toString(pids.get(i)));
-                shell_in.print("kill " + pids.get(i) + "\n");
-                shell_in.flush();
+                shell.run("kill " + pids.get(i));
             }
+            shell.done();
         }
         refreshState();
         notification();
@@ -666,8 +533,8 @@ public class MainActivity extends AppCompatActivity{
                 adapter.notifyDataSetChanged();             //for when data is changed, no new data added
                 fifo.remove(0);
             }
-            ap_count.setText(String.format(locale, "%d", is_ap==null ? Item.i : 1));
-            st_count.setText(String.format(locale, "%d", Item.items.size() - Item.i));
+            ap_count.setText(Integer.toString(is_ap==null ? Item.i : 1));
+            st_count.setText(Integer.toString(Item.items.size() - Item.i));
             notification();
             done = true;
         }
@@ -675,126 +542,6 @@ public class MainActivity extends AppCompatActivity{
     public static Handler progressHandler = new Handler(){
         public void handleMessage(Message msg){
             progress.setProgress(progress_int);
-        }
-    };
-    public static Handler runTest = new Handler(){
-        public void handleMessage(Message msg){
-            try{
-                String cmd;
-                switch(msg.arg1){
-                    case 0:
-                        stop(PROCESS_AIRODUMP);
-                        stop(PROCESS_AIREPLAY);
-                        stop(PROCESS_MDK);
-                        cmd = enable_monMode + '\n';
-                        Log.d("test_thread", cmd);
-                        shell3_in.print(cmd);
-                        shell3_in.flush();
-                        Thread.sleep(1000);
-                        status[0].setImageResource(R.drawable.testing);
-                        test_cur_cmd.setText(prefix + " " + airodump_dir + " " + iface);
-                        test_wait = false;
-                        break;
-
-                    case 1:
-                        cmd = prefix + " " + airodump_dir + " " + iface + '\n';
-                        Log.d("test_thread", cmd);
-                        shell3_in.print(cmd);
-                        shell3_in.flush();
-                        Thread.sleep(1000);
-                        if(getPIDs(PROCESS_AIRODUMP).size()==0) status[0].setImageResource(R.drawable.failed);
-                        else{
-                            stop(PROCESS_AIRODUMP);
-                            status[0].setImageResource(R.drawable.passed);
-                        }
-                        test_progress.setProgress(1);
-                        status[1].setImageResource(R.drawable.testing);
-                        test_cur_cmd.setText(prefix + " " + aireplay_dir + " --deauth 0 -a 11:22:33:44:55:66 " + iface);
-                        test_wait = false;
-                        break;
-
-                    case 2:
-                        cmd = prefix + " " + aireplay_dir + " --deauth 0 -a 11:22:33:44:55:66 " + iface + '\n';
-                        Log.d("test_thread", cmd);
-                        shell3_in.print(cmd);
-                        shell3_in.flush();
-                        Thread.sleep(1000);
-                        if(getPIDs(PROCESS_AIREPLAY).size()==0) status[1].setImageResource(R.drawable.failed);
-                        else{
-                            stop(PROCESS_AIREPLAY);
-                            status[1].setImageResource(R.drawable.passed);
-                        }
-                        test_progress.setProgress(2);
-                        status[2].setImageResource(R.drawable.testing);
-                        test_cur_cmd.setText(prefix + " " + mdk3_dir + " " + iface + " b -m");
-                        test_wait = false;
-                        break;
-
-                    case 3:
-                        cmd = prefix + " " + mdk3_dir + " " + iface + " b -m\n";
-                        Log.d("test_thread", cmd);
-                        shell3_in.print(cmd);
-                        shell3_in.flush();
-                        Thread.sleep(1000);
-                        if(getPIDs(PROCESS_MDK).size()==0) status[2].setImageResource(R.drawable.failed);
-                        else{
-                            stop(PROCESS_MDK);
-                            status[2].setImageResource(R.drawable.passed);
-                        }
-                        test_progress.setProgress(3);
-                        status[3].setImageResource(R.drawable.testing);
-                        test_cur_cmd.setText(prefix + " " + reaver_dir + " -i " + iface + " -b 00:11:22:33:44:55 -c 2");
-                        test_wait = false;
-                        break;
-
-                    case 4:
-                        cmd = prefix + " " + reaver_dir + " -i " + iface + " -b 00:11:22:33:44:55 -c 2\n";
-                        Log.d("test_thread", cmd);
-                        shell3_in.print(cmd);
-                        shell3_in.flush();
-                        Thread.sleep(1000);
-                        if(getPIDs(PROCESS_REAVER).size()==0) status[3].setImageResource(R.drawable.failed);
-                        else{
-                            stop(PROCESS_REAVER);
-                            status[3].setImageResource(R.drawable.passed);
-                        }
-                        test_progress.setProgress(4);
-                        status[4].setImageResource(R.drawable.testing);
-                        test_cur_cmd.setText(R.string.checking_chroot);
-                        test_wait = false;
-                        break;
-
-                    case 5:
-                        File chroot_dir = new File(MainActivity.chroot_dir);
-                        boolean kali_init = false;
-                        try{
-                            Process dc = Runtime.getRuntime().exec("ls /system/bin -1 | grep bootkali_init");
-                            BufferedReader out = new BufferedReader(new InputStreamReader(dc.getInputStream()));
-                            kali_init = out.readLine()!=null;
-                        }catch(IOException ignored){}
-                        Log.d("test_thread", "chroot_dir is " + Boolean.toString(chroot_dir.exists()));
-                        Log.d("test_thread", "kali_init is " + Boolean.toString(kali_init));
-                        if(!chroot_dir.exists() || !kali_init){
-                            status[4].setImageResource(R.drawable.failed);
-                            if(!chroot_dir.exists()) test_cur_cmd.setText(R.string.chroot_notfound);
-                            if(!kali_init) test_cur_cmd.setText(R.string.kali_notfound);
-                        }else{
-                            test_cur_cmd.setText(R.string.done);
-                            status[4].setImageResource(R.drawable.passed);
-                        }
-                        test_progress.setProgress(5);
-                        test_wait = false;
-
-                        stop(PROCESS_AIRODUMP);
-                        stop(PROCESS_AIREPLAY);
-                        stop(PROCESS_MDK);
-                        stop(PROCESS_REAVER);
-                        test_progress.setProgress(6);
-                        break;
-                }
-            }catch(InterruptedException e){
-                Log.e("Exception", "Caught Exception in runTest Handler: " + e.toString());
-            }
         }
     };
     public static Handler stop1 = new Handler(){
@@ -812,7 +559,6 @@ public class MainActivity extends AppCompatActivity{
         pref = PreferenceManager.getDefaultSharedPreferences(this);
         pref_edit = pref.edit();
         clipboard = (ClipboardManager) getSystemService(CLIPBOARD_SERVICE);
-        locale = getResources().getConfiguration().locale;
         fm = getFragmentManager();
         toolbar = (Toolbar) findViewById(R.id.my_toolbar);
         overflow[0] = getDrawable(R.drawable.overflow0);
@@ -978,22 +724,13 @@ public class MainActivity extends AppCompatActivity{
     protected void onDestroy(){
         notif_on = false;
         nm.cancelAll();
-        if(shell!=null){
-            stop(PROCESS_AIRODUMP);
-            stop(PROCESS_AIREPLAY);
-            stop(PROCESS_MDK);
-            stop(PROCESS_AIRCRACK);
-            stop(PROCESS_REAVER);
-            shell_in.print(disable_monMode + "\n");
-            shell_in.print("exit\n");
-            shell_in.flush();
-            shell2_in.print("exit\n");
-            shell2_in.flush();
-            shell3_in.print("exit\n");
-            shell3_in.flush();
-            shell4_in.print("exit\n");
-            shell4_in.flush();
-        }
+        stop(PROCESS_AIRODUMP);
+        stop(PROCESS_AIREPLAY);
+        stop(PROCESS_MDK);
+        stop(PROCESS_AIRCRACK);
+        stop(PROCESS_REAVER);
+        runOne(disable_monMode);
+        Shell.exitAll();
         super.onDestroy();
         System.exit(0);
     }
@@ -1230,9 +967,9 @@ public class MainActivity extends AppCompatActivity{
         if(ados && !manuf_while_ados) return "ADoS running";
 
         String temp = mac.subSequence(0, 2).toString() + mac.subSequence(3, 5).toString() + mac.subSequence(6, 8).toString();
-        shell4_in.print("grep -i " + temp + " " + path + "/oui.txt; echo ENDOFGREP\n");
-        shell4_in.flush();
-        String manuf = getLastLine(shell4_out, "ENDOFGREP");
+        Shell shell = getFreeShell();
+        shell.run("grep -i " + temp + " " + path + "/oui.txt; echo ENDOFGREP");
+        String manuf = getLastLine(shell.getShell_out(), "ENDOFGREP");
 
         if(manuf=="ENDOFGREP" || manuf.length()<23) manuf = "Unknown Manufacturer";
         else manuf = manuf.substring(22);

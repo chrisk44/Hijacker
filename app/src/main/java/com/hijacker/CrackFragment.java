@@ -46,8 +46,6 @@ import static com.hijacker.MainActivity.currentFragment;
 import static com.hijacker.MainActivity.debug;
 import static com.hijacker.MainActivity.path;
 import static com.hijacker.MainActivity.progress;
-import static com.hijacker.MainActivity.shell3_in;
-import static com.hijacker.MainActivity.shell3_out;
 import static com.hijacker.MainActivity.stop;
 
 public class CrackFragment extends Fragment{
@@ -101,9 +99,9 @@ public class CrackFragment extends Fragment{
                     }
                     if(debug) Log.d("CrackFragment", cmd);
                     Process dc = Runtime.getRuntime().exec(cmd);
-                    BufferedReader in = new BufferedReader(new InputStreamReader(dc.getInputStream()));
+                    BufferedReader out = new BufferedReader(new InputStreamReader(dc.getInputStream()));
                     cont = true;
-                    while(cont && in.readLine()!=null){
+                    while(cont && out.readLine()!=null){
                         Thread.sleep(100);
                     }
                 }catch(IOException | InterruptedException e){ Log.e("Exception", "Caught Exception in CrackFragment: " + e.toString()); }
@@ -173,13 +171,14 @@ public class CrackFragment extends Fragment{
             progress.setIndeterminate(false);
             stop(PROCESS_AIRCRACK);
             if((new File(path + "/aircrack-out.txt")).exists()){
-                shell3_in.print("cat " + path + "/aircrack-out.txt; echo \n");      //No newline at the end of the file, readLine will hang
-                shell3_in.flush();
+                Shell shell = Shell.getFreeShell();
+                BufferedReader out = shell.getShell_out();
+                shell.run("cat " + path + "/aircrack-out.txt; echo ");              //No newline at the end of the file, readLine will hang
                 try{
-                    console.append("Key found: " + shell3_out.readLine() + '\n');
+                    console.append("Key found: " + out.readLine() + '\n');
                 }catch(IOException ignored){}
-                shell3_in.print("rm " + path + "/aircrack-out.txt\n");
-                shell3_in.flush();
+                shell.run("rm " + path + "/aircrack-out.txt");
+                shell.done();
             }else{
                 console.append("Key not found\n");
                 if(mode==WEP) console.append("Try with different wep bit selection or more IVs\n");

@@ -24,7 +24,6 @@ import android.os.Bundle;
 import android.support.v7.app.AlertDialog;
 
 import static com.hijacker.MainActivity.main;
-import static com.hijacker.MainActivity.su_thread;
 
 public class FirstRunDialog extends DialogFragment {
     @Override
@@ -35,7 +34,6 @@ public class FirstRunDialog extends DialogFragment {
         builder.setTitle(R.string.first_run_title);
         builder.setPositiveButton(R.string.setup, new DialogInterface.OnClickListener() {
             public void onClick(DialogInterface dialog, int id) {
-                su_thread.start();
                 MainActivity.init = true;
                 new InstallFirmwareDialog().show(getFragmentManager(), "InstallFirmwareDialog");
             }

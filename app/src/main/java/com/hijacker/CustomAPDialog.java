@@ -24,10 +24,8 @@ import android.os.Bundle;
 import android.support.v7.app.AlertDialog;
 import android.view.View;
 import android.widget.EditText;
-import android.widget.TextView;
 
 public class CustomAPDialog extends DialogFragment {
-    TextView ap[] = {null, null, null, null, null, null, null, null, null, null, null, null};
     @Override
     public Dialog onCreateDialog(Bundle savedInstanceState) {
         AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());

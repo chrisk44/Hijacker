@@ -39,12 +39,10 @@ import static com.hijacker.MainActivity.load;
 import static com.hijacker.MainActivity.main;
 import static com.hijacker.MainActivity.path;
 import static com.hijacker.MainActivity.pref_edit;
-import static com.hijacker.MainActivity.shell;
-import static com.hijacker.MainActivity.shell3_in;
-import static com.hijacker.MainActivity.su_thread;
 
 public class InstallToolsDialog extends DialogFragment {
     View view;
+    Shell shell;
     @Override
     public Dialog onCreateDialog(Bundle savedInstanceState) {
         AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
@@ -86,13 +84,6 @@ public class InstallToolsDialog extends DialogFragment {
             positiveButton.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    if(shell==null){
-                        su_thread.start();
-                        try{
-                            //Wait for su shells to spawn
-                            su_thread.join();
-                        }catch(InterruptedException ignored){}
-                    }
                     String tools_location = ((EditText)view.findViewById(R.id.tools_location)).getText().toString();
                     String lib_location = ((EditText)view.findViewById(R.id.lib_location)).getText().toString();
                     File tools = new File(tools_location);
@@ -106,10 +97,10 @@ public class InstallToolsDialog extends DialogFragment {
                             Log.d("InstallToolsDialog", "Installing Tools in " + tools_location);
                             Log.d("InstallToolsDialog", "Installing Library in " + lib_location);
                         }
-                        shell3_in.print("busybox mount -o rw,remount,rw /system\n");
-                        shell3_in.flush();
-                        shell3_in.print("cd " + path + "\nrm !(oui.txt)\n");
-                        shell3_in.flush();
+                        shell = Shell.getFreeShell();
+                        shell.run("busybox mount -o rw,remount,rw /system");
+                        shell.run("cd " + path);
+                        shell.run("rm !(oui.txt)");
                         extract("airbase-ng", tools_location);
                         extract("aircrack-ng", tools_location);
                         extract("aireplay-ng", tools_location);
@@ -130,8 +121,8 @@ public class InstallToolsDialog extends DialogFragment {
                         extract("reaver", tools_location);
                         extract("reaver-wash", tools_location);
                         extract("libfakeioctl.so", lib_location);
-                        shell3_in.print("busybox mount -o ro,remount,ro /system\n");
-                        shell3_in.flush();
+                        shell.run("busybox mount -o ro,remount,ro /system");
+                        shell.done();
                         Toast.makeText(getActivity().getApplicationContext(), R.string.installed_tools_lib, Toast.LENGTH_SHORT).show();
                         pref_edit.putString("prefix", "LD_PRELOAD=" + lib_location + "/libfakeioctl.so");
                         pref_edit.commit();
@@ -165,9 +156,8 @@ public class InstallToolsDialog extends DialogFragment {
                 }
                 in.close();
                 out.close();
-                shell3_in.print("mv " + path + '/' + filename + " " + dest + '\n');
-                shell3_in.print("chmod 755 " + dest + '\n');
-                shell3_in.flush();
+                shell.run("mv " + path + '/' + filename + " " + dest);
+                shell.run("chmod 755 " + dest);
             }catch(IOException e){
                 Log.e("FileProvider", "Exception copying from assets", e);
             }
