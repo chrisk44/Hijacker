@@ -16,9 +16,9 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:inputType="text"
-        android:text="/sdcard/cap/wpa.cap-01.cap"
         android:ems="10"
-        android:id="@+id/capfile"/>
+        android:id="@+id/capfile"
+        android:hint="/sdcard/cap/handshake-01.cap"/>
 
     <TextView
         android:text="@string/path_to_wordlist"
@@ -32,9 +32,9 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:inputType="text"
-        android:text="/sdcard/rockyou.txt"
         android:ems="10"
-        android:id="@+id/wordlist"/>
+        android:id="@+id/wordlist"
+        android:hint="/sdcard/wordlist.txt"/>
 
     <RadioGroup
         android:layout_width="match_parent"

@@ -29,6 +29,11 @@
             android:title="@string/delete_extra_title"
             android:key="delete_extra"
             android:summary="@string/delete_extra_sum" />
+        <SwitchPreference
+            android:defaultValue="@string/always_cap"
+            android:title="@string/always_cap_title"
+            android:summary="@string/always_cap_sum"
+            android:key="always_cap"/>
         <EditTextPreference
             android:defaultValue="@string/deauthWait"
             android:selectAllOnFocus="true"

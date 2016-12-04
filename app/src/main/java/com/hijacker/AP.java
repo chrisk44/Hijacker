@@ -136,7 +136,7 @@ class AP {
         if(this.sec == WEP){
             //wep
             if(debug) Log.d("AP", "Cracking WEP");
-            startAirodump("--channel " + this.ch + " --bssid " + this.mac + " --ivs -w " + cap_dir + "/wep.cap");
+            startAirodump("--channel " + this.ch + " --bssid " + this.mac + " --ivs -w " + cap_dir + "/wep_ivs");
             startAireplayWEP(this.mac);
         }else if(this.sec == WPA || this.sec == WPA2){
             //wpa/wpa2
@@ -145,7 +145,7 @@ class AP {
             MainActivity.tv.setText("");
             while(wpa_thread.isAlive())      //Wait for everything to shutdown
             if(debug) Log.d("AP", "Cracking WPA/WPA2");
-            startAirodump("--channel " + this.ch + " --bssid " + this.mac + " -w " + cap_dir + "/wpa.cap");
+            startAirodump("--channel " + this.ch + " --bssid " + this.mac + " -w " + cap_dir + "/handshake");
             startAireplay(this.mac);
             wpa_thread.start();
         }

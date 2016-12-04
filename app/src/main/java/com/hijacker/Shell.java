@@ -62,7 +62,6 @@ class Shell{
         this.shell_in.flush();
     }
     void done(){
-        if(debug) Log.d("Shell", "Freeing shell");
         try{
             run("echo");
             run("echo ENDOFCLEAR");
@@ -71,6 +70,7 @@ class Shell{
             shell_out_error.reset();
         }catch(IOException ignored){}
         free.add(this);
+        if(debug) Log.d("Shell", "Freeing shell. Total is now " + free.size());
     }
     static Shell getFreeShell(){
         if(free.isEmpty()) return new Shell();

@@ -111,7 +111,7 @@ public class MainActivity extends AppCompatActivity{
     //Preferences - Defaults are in strings.xml
     static String iface, prefix, airodump_dir, aireplay_dir, aircrack_dir, mdk3_dir, reaver_dir, cap_dir, chroot_dir, enable_monMode, disable_monMode;
     static int deauthWait;
-    static boolean showLog, show_notif, show_details, airOnStartup, debug, confirm_exit, delete_extra, manuf_while_ados, monstart;
+    static boolean showLog, show_notif, show_details, airOnStartup, debug, confirm_exit, delete_extra, manuf_while_ados, monstart, always_cap;
 
     @Override
     protected void onCreate(Bundle savedInstanceState){
@@ -178,7 +178,7 @@ public class MainActivity extends AppCompatActivity{
                 Shell shell = getFreeShell();
                 try{
                     Thread.sleep(1000);
-                    shell.run("ls -1 " + cap_dir + "/wpa.cap-*.cap; echo ENDOFLS");
+                    shell.run("ls -1 " + cap_dir + "/handshake-*.cap; echo ENDOFLS");
                     capfile = getLastLine(shell.getShell_out(), "ENDOFLS");
 
                     if(debug) Log.d("wpa_thread", capfile);
@@ -187,7 +187,6 @@ public class MainActivity extends AppCompatActivity{
                             Log.d("wpa_thread", "cap file not found, airodump is probably not running...");
                             Log.d("wpa_thread", "Returning...");
                         }
-                        tv.append(getString(R.string.cap_notfound));
                     }else{
                         if(!showLog) Snackbar.make(getCurrentFocus(), getString(R.string.cap_is) + capfile, Snackbar.LENGTH_LONG).show();
                         progress_int = 0;
@@ -222,8 +221,8 @@ public class MainActivity extends AppCompatActivity{
                 }finally{
                     wpa_subthread.interrupt();
                     if(delete_extra){
-                        shell.run("rm -rf " + cap_dir + "/wpa.cap-*.csv");
-                        shell.run("rm -rf " + cap_dir + "/wpa.cap-*.netxml");
+                        shell.run("rm -rf " + cap_dir + "/handshake-*.csv");
+                        shell.run("rm -rf " + cap_dir + "/handshake-*.netxml");
                     }
                     if(debug) Log.d("wpa_thread", "wpa_thread finished");
                     shell.done();
@@ -287,10 +286,15 @@ public class MainActivity extends AppCompatActivity{
         final String temp;
         final int mode;
         if(params==null){
-            temp = "";
+            temp = always_cap ? " -w " + cap_dir + "/cap" : "";
             mode = 0;
         }else{
-            temp = params;
+            if(!(params.contains("handshake") || params.contains("wep_ivs")) && always_cap){
+                Log.d("ASD", "Doesn't contain cap");
+                temp = params + " -w " + cap_dir + "/cap";
+            }else{
+                temp = params;
+            }
             mode = 1;
         }
         final Shell shell = new Shell();
@@ -318,7 +322,7 @@ public class MainActivity extends AppCompatActivity{
         airodump_running = 1;
         refreshState();
         if(menu!=null) menu.getItem(1).setIcon(R.drawable.stop);
-}
+    }
 
     public static void _startAireplay(final String str){
         try{
@@ -453,10 +457,18 @@ public class MainActivity extends AppCompatActivity{
                 tv.append("Stopping airodump\n");
                 airodump_running = 0;
                 Item.filter();
+                if(delete_extra){
+                    runOne("rm -rf " + cap_dir + "/cap-*.csv");
+                    runOne("rm -rf " + cap_dir + "/cap-*.netxml");
+                }
                 break;
             case PROCESS_AIREPLAY:
                 tv.append("Stopping aireplay\n");
                 if(menu!=null) menu.getItem(3).setEnabled(false);
+                if(delete_extra && aireplay_running==AIREPLAY_WEP){
+                    runOne("rm -rf " + cap_dir + "/wep_ivs-*.csv");
+                    runOne("rm -rf " + cap_dir + "/wep_ivs-*.netxml");
+                }
                 aireplay_running = 0;
                 progress_int = deauthWait;
                 break;
@@ -593,6 +605,7 @@ public class MainActivity extends AppCompatActivity{
         confirm_exit = Boolean.parseBoolean(getString(R.string.confirm_exit));
         delete_extra = Boolean.parseBoolean(getString(R.string.delete_extra));
         manuf_while_ados = Boolean.parseBoolean(getString(R.string.manuf_while_ados));
+        always_cap = Boolean.parseBoolean(getString(R.string.always_cap));
 
         //Initialize notification
         notif = new NotificationCompat.Builder(this);
@@ -672,6 +685,7 @@ public class MainActivity extends AppCompatActivity{
         confirm_exit = pref.getBoolean("confirm_exit", confirm_exit);
         delete_extra = pref.getBoolean("delete_extra", delete_extra);
         manuf_while_ados = pref.getBoolean("manuf_while_ados", manuf_while_ados);
+        always_cap = pref.getBoolean("always_cap", always_cap);
         progress.setMax(deauthWait);
         progress.setProgress(deauthWait);
     }
