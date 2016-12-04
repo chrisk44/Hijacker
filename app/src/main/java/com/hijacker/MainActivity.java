@@ -112,7 +112,8 @@ public class MainActivity extends AppCompatActivity{
     static String iface, prefix, airodump_dir, aireplay_dir, aircrack_dir, mdk3_dir, reaver_dir, cap_dir, chroot_dir,
             enable_monMode, disable_monMode, custom_chroot_cmd;
     static int deauthWait;
-    static boolean showLog, show_notif, show_details, airOnStartup, debug, confirm_exit, delete_extra, manuf_while_ados, monstart, always_cap;
+    static boolean showLog, show_notif, show_details, airOnStartup, debug, confirm_exit, delete_extra, manuf_while_ados,
+            monstart, always_cap, cont_on_fail;
 
     @Override
     protected void onCreate(Bundle savedInstanceState){
@@ -272,6 +273,7 @@ public class MainActivity extends AppCompatActivity{
         getFreeShell().done();
         getFreeShell().done();
 
+        runOne(enable_monMode);
         runOne("mkdir " + cap_dir);
 
         stop(PROCESS_AIRODUMP);
@@ -607,6 +609,7 @@ public class MainActivity extends AppCompatActivity{
         chroot_dir = getString(R.string.chroot_dir);
         monstart = Boolean.parseBoolean(getString(R.string.monstart));
         custom_chroot_cmd = "";
+        cont_on_fail = Boolean.parseBoolean(getString(R.string.cont_on_fail));
 
         //Initialize notification
         notif = new NotificationCompat.Builder(this);
@@ -688,6 +691,7 @@ public class MainActivity extends AppCompatActivity{
         manuf_while_ados = pref.getBoolean("manuf_while_ados", manuf_while_ados);
         always_cap = pref.getBoolean("always_cap", always_cap);
         custom_chroot_cmd = pref.getString("custom_chroot_cmd", custom_chroot_cmd);
+        cont_on_fail = pref.getBoolean("cont_on_fail", cont_on_fail);
         progress.setMax(deauthWait);
         progress.setProgress(deauthWait);
     }

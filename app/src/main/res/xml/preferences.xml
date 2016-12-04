@@ -196,6 +196,12 @@
             android:summary="@string/monstart_sum"
             android:key="monstart"/>
 
+        <SwitchPreference
+            android:defaultValue="@string/cont_on_fail"
+            android:title="@string/cont_on_fail_title"
+            android:summary="@string/cont_on_fail_sum"
+            android:key="cont_on_fail"/>
+
     </PreferenceCategory>
     <PreferenceCategory android:title="@string/other">
         <Preference

@@ -206,6 +206,7 @@
     <string name="delete_extra" translatable="false">true</string>
     <string name="manuf_while_ados" translatable="false">false</string>
     <string name="always_cap" translatable="false">false</string>
+    <string name="cont_on_fail" translatable="false">false</string>
 
     <!-- Settings -->
     <string name="general">General</string>
@@ -316,6 +317,8 @@
         Can be used to initialize devices, variables etc.
         For many commands, create a shell script inside the chroot environment and run it from here.
         If the command you specify here doesn\'t work in chroot, reaver will not start.</string>
+    <string name="cont_on_fail_title">Ignore failed commands</string>
+    <string name="cont_on_fail_sum">Continue running in chroot in case monstart-nh or the custom command fail</string>
 
     <string name="restore_firmware">Restore firmware</string>
     <string name="no_backup">There is no backup. It is created when you install the tools through the app.</string>

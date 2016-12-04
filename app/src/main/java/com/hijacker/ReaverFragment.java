@@ -45,6 +45,7 @@ import static com.hijacker.CustomAPDialog.FOR_REAVER;
 import static com.hijacker.MainActivity.FRAGMENT_REAVER;
 import static com.hijacker.MainActivity.PROCESS_AIRODUMP;
 import static com.hijacker.MainActivity.PROCESS_REAVER;
+import static com.hijacker.MainActivity.cont_on_fail;
 import static com.hijacker.MainActivity.currentFragment;
 import static com.hijacker.MainActivity.custom_chroot_cmd;
 import static com.hijacker.MainActivity.debug;
@@ -154,9 +155,11 @@ public class ReaverFragment extends Fragment{
                             args += " -K 1";
                             cmd = "chroot /data/local/nhsystem/kali-armhf /bin/bash -c \'" + get_chroot_env() + "reaver " + args + "\'";
                             msg = new Message();
-                            msg.obj = "Running: " + cmd;
+                            msg.obj = "\nRunning: " + cmd + '\n';
                             refresh.sendMessage(msg);
-                            Process dc = Runtime.getRuntime().exec("su");
+                            ProcessBuilder pb = new ProcessBuilder("su");
+                            pb.redirectErrorStream(true);
+                            Process dc = pb.start();
                             out = new BufferedReader(new InputStreamReader(dc.getInputStream()));
                             PrintWriter in = new PrintWriter(dc.getOutputStream());
                             in.print(cmd + "\nexit\n");
@@ -178,7 +181,7 @@ public class ReaverFragment extends Fragment{
                             refresh.sendMessage(msg);
                         }
                         msg = new Message();
-                        msg.obj = "Exited\n";
+                        msg.obj = "\nDone\n";
                         refresh.sendMessage(msg);
                     }catch(IOException | InterruptedException e){
                         Log.e("Exception", "Caught Exception in ReaverFragment: " + e.toString());
@@ -261,8 +264,14 @@ public class ReaverFragment extends Fragment{
         for (String aENV : ENV) {
             ENV_OUT = ENV_OUT + "export " + aENV + " && ";
         }
-        if(monstart) ENV_OUT += "monstart-nh && ";
-        if(!custom_chroot_cmd.equals("")) ENV_OUT += custom_chroot_cmd + " && ";
+        if(monstart){
+            ENV_OUT += "monstart-nh";
+            ENV_OUT += cont_on_fail ? "; " : " && ";
+        }
+        if(!custom_chroot_cmd.equals("")){
+            ENV_OUT += custom_chroot_cmd;
+            ENV_OUT += cont_on_fail ? "; " : " && ";
+        }
         return ENV_OUT;
     }
 }
