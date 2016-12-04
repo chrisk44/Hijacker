@@ -324,5 +324,5 @@
     <string name="no_backup">There is no backup. It is created when you install the tools through the app.</string>
     <string name="reset_title">Reset Preferences</string>
     <string name="version_title">Version</string>
-    <string name="version" translatable="false">0.17</string>
+    <string name="version" translatable="false">v1-beta.18</string>
 </resources>

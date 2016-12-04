@@ -269,10 +269,6 @@ public class MainActivity extends AppCompatActivity{
         }
     }
     public static void main(){
-        getFreeShell().done();      //Initiazile 3 shells so we won't necessarily need to start them while running
-        getFreeShell().done();
-        getFreeShell().done();
-
         runOne(enable_monMode);
         runOne("mkdir " + cap_dir);
 
@@ -990,8 +986,9 @@ public class MainActivity extends AppCompatActivity{
 
         String temp = mac.subSequence(0, 2).toString() + mac.subSequence(3, 5).toString() + mac.subSequence(6, 8).toString();
         Shell shell = getFreeShell();
-        shell.run("grep -i " + temp + " " + path + "/oui.txt; echo ENDOFGREP");
+        shell.run("busybox grep -m 1 -i " + temp + " " + path + "/oui.txt; echo ENDOFGREP");
         String manuf = getLastLine(shell.getShell_out(), "ENDOFGREP");
+        shell.done();
 
         if(manuf=="ENDOFGREP" || manuf.length()<23) manuf = "Unknown Manufacturer";
         else manuf = manuf.substring(22);

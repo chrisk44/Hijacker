@@ -45,7 +45,9 @@ class Shell{
     private PrintWriter shell_in;
     private BufferedReader shell_out, shell_out_error;
     private static List<Shell> free = new ArrayList<>();
+    private static int total=0;
     Shell(){
+        total++;
         try{
             shell = Runtime.getRuntime().exec("su");
             shell_in = new PrintWriter(shell.getOutputStream());
@@ -54,6 +56,8 @@ class Shell{
         }catch(IOException e){
             Log.e("Shell", "Error opening shell");
         }
+        if(debug) Log.d("Shell", "New shell: total=" + total + " free:" + free.size());
+        if(free.size()>5) exitAll();
     }
     BufferedReader getShell_out(){ return this.shell_out; }
     BufferedReader getShell_out_error(){ return this.shell_out_error; }
@@ -63,14 +67,13 @@ class Shell{
     }
     void done(){
         try{
-            run("echo");
-            run("echo ENDOFCLEAR");
+            run("echo && echo ENDOFCLEAR");
             MainActivity.getLastLine(shell_out, "ENDOFCLEAR");      //This will read up to the last line and stop, effectively clearing shell_out
             shell_out.reset();                                      //<--- since this doesn't seem to do the job
             shell_out_error.reset();
         }catch(IOException ignored){}
         free.add(this);
-        if(debug) Log.d("Shell", "Freeing shell. Total is now " + free.size());
+        if(debug) Log.d("Shell", "Freeing shell: total=" + total + " free:" + free.size());
     }
     static Shell getFreeShell(){
         if(free.isEmpty()) return new Shell();
@@ -86,8 +89,10 @@ class Shell{
         shell.done();
     }
     static void exitAll(){
+        total -= free.size();
         for(int i=0;i<free.size();i++){
             free.get(i).run("exit");
+            free.get(i).shell.destroy();
         }
     }
 }
