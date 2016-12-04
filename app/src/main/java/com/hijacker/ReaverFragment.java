@@ -38,6 +38,7 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.io.PrintWriter;
 
 import static android.widget.Toast.LENGTH_SHORT;
 import static com.hijacker.CustomAPDialog.FOR_REAVER;
@@ -45,6 +46,7 @@ import static com.hijacker.MainActivity.FRAGMENT_REAVER;
 import static com.hijacker.MainActivity.PROCESS_AIRODUMP;
 import static com.hijacker.MainActivity.PROCESS_REAVER;
 import static com.hijacker.MainActivity.currentFragment;
+import static com.hijacker.MainActivity.custom_chroot_cmd;
 import static com.hijacker.MainActivity.debug;
 import static com.hijacker.MainActivity.iface;
 import static com.hijacker.MainActivity.monstart;
@@ -52,6 +54,7 @@ import static com.hijacker.MainActivity.prefix;
 import static com.hijacker.MainActivity.progress;
 import static com.hijacker.MainActivity.reaver_dir;
 import static com.hijacker.MainActivity.stop;
+import static com.hijacker.Shell.getFreeShell;
 import static com.hijacker.Shell.runOne;
 
 public class ReaverFragment extends Fragment{
@@ -132,6 +135,8 @@ public class ReaverFragment extends Fragment{
                 public void run(){
                     Log.d("ReaverFragment", "in thread");
                     try{
+                        BufferedReader out;
+                        Message msg;
                         String args = "-i " + iface + " -vvv";
                         args += ap==null ? " -b " + custom_mac : " -b " + ap.mac + " --channel " + ap.ch;
                         args += " -d " + ((EditText)v.findViewById(R.id.pin_delay)).getText();
@@ -141,22 +146,30 @@ public class ReaverFragment extends Fragment{
                         if(((CheckBox)v.findViewById(R.id.small_dh)).isChecked()) args += " -S";
                         String cmd;
                         if(((CheckBox)v.findViewById(R.id.pixie_dust)).isChecked()){
-                            Message msg = new Message();
+                            msg = new Message();
                             msg.obj = getString(R.string.chroot_warning);
                             refresh.sendMessage(msg);
                             Thread.sleep(3000);
                             Runtime.getRuntime().exec("su -c bootkali_init");       //Make sure kali has booted
                             args += " -K 1";
-                            cmd = "su -c chroot /data/local/nhsystem/kali-armhf /bin/bash -c \'" + get_chroot_env() + "reaver " + args + "\'";
+                            cmd = "chroot /data/local/nhsystem/kali-armhf /bin/bash -c \'" + get_chroot_env() + "reaver " + args + "\'";
+                            msg = new Message();
+                            msg.obj = "Running: " + cmd;
+                            refresh.sendMessage(msg);
+                            Process dc = Runtime.getRuntime().exec("su");
+                            out = new BufferedReader(new InputStreamReader(dc.getInputStream()));
+                            PrintWriter in = new PrintWriter(dc.getOutputStream());
+                            in.print(cmd + "\nexit\n");
+                            in.flush();
                         }else{
                             cmd = "su -c " + prefix + " " + reaver_dir + " " + args;
+                            msg = new Message();
+                            msg.obj = "Running: " + cmd;
+                            refresh.sendMessage(msg);
+                            Process dc = Runtime.getRuntime().exec(cmd);
+                            out = new BufferedReader(new InputStreamReader(dc.getInputStream()));
                         }
-                        Message msg = new Message();
-                        msg.obj = "Running: " + cmd;
-                        refresh.sendMessage(msg);
                         if(debug) Log.d("ReaverFragment", cmd);
-                        Process dc = Runtime.getRuntime().exec(cmd);
-                        BufferedReader out = new BufferedReader(new InputStreamReader(dc.getInputStream()));
                         cont = true;
                         String buffer;
                         while(cont && (buffer = out.readLine())!=null){
@@ -164,6 +177,9 @@ public class ReaverFragment extends Fragment{
                             msg.obj = buffer;
                             refresh.sendMessage(msg);
                         }
+                        msg = new Message();
+                        msg.obj = "Exited\n";
+                        refresh.sendMessage(msg);
                     }catch(IOException | InterruptedException e){
                         Log.e("Exception", "Caught Exception in ReaverFragment: " + e.toString());
                     }
@@ -246,6 +262,7 @@ public class ReaverFragment extends Fragment{
             ENV_OUT = ENV_OUT + "export " + aENV + " && ";
         }
         if(monstart) ENV_OUT += "monstart-nh && ";
+        if(!custom_chroot_cmd.equals("")) ENV_OUT += custom_chroot_cmd + " && ";
         return ENV_OUT;
     }
 }

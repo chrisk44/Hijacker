@@ -109,7 +109,8 @@ public class MainActivity extends AppCompatActivity{
     private DrawerLayout mDrawerLayout;
     protected ListView mDrawerList;
     //Preferences - Defaults are in strings.xml
-    static String iface, prefix, airodump_dir, aireplay_dir, aircrack_dir, mdk3_dir, reaver_dir, cap_dir, chroot_dir, enable_monMode, disable_monMode;
+    static String iface, prefix, airodump_dir, aireplay_dir, aircrack_dir, mdk3_dir, reaver_dir, cap_dir, chroot_dir,
+            enable_monMode, disable_monMode, custom_chroot_cmd;
     static int deauthWait;
     static boolean showLog, show_notif, show_details, airOnStartup, debug, confirm_exit, delete_extra, manuf_while_ados, monstart, always_cap;
 
@@ -590,8 +591,6 @@ public class MainActivity extends AppCompatActivity{
         aireplay_dir = getString(R.string.aireplay_dir);
         mdk3_dir = getString(R.string.mdk3_dir);
         reaver_dir = getString(R.string.reaver_dir);
-        chroot_dir = getString(R.string.chroot_dir);
-        monstart = Boolean.parseBoolean(getString(R.string.monstart));
         cap_dir = getString(R.string.cap_dir);
         enable_monMode = getString(R.string.enable_monMode);
         disable_monMode = getString(R.string.disable_monMode);
@@ -605,6 +604,9 @@ public class MainActivity extends AppCompatActivity{
         delete_extra = Boolean.parseBoolean(getString(R.string.delete_extra));
         manuf_while_ados = Boolean.parseBoolean(getString(R.string.manuf_while_ados));
         always_cap = Boolean.parseBoolean(getString(R.string.always_cap));
+        chroot_dir = getString(R.string.chroot_dir);
+        monstart = Boolean.parseBoolean(getString(R.string.monstart));
+        custom_chroot_cmd = "";
 
         //Initialize notification
         notif = new NotificationCompat.Builder(this);
@@ -685,6 +687,7 @@ public class MainActivity extends AppCompatActivity{
         delete_extra = pref.getBoolean("delete_extra", delete_extra);
         manuf_while_ados = pref.getBoolean("manuf_while_ados", manuf_while_ados);
         always_cap = pref.getBoolean("always_cap", always_cap);
+        custom_chroot_cmd = pref.getString("custom_chroot_cmd", custom_chroot_cmd);
         progress.setMax(deauthWait);
         progress.setProgress(deauthWait);
     }

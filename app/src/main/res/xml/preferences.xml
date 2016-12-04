@@ -161,6 +161,17 @@
             android:dialogMessage="@string/reaver_desc"
             android:dialogTitle="@string/reaver_title"
             android:key="reaver_dir"/>
+        <Preference
+            android:title="@string/copy_sample_title"
+            android:key="copy_sample_button" />
+        <Preference
+            android:title="@string/test_title"
+            android:summary="@string/test_sum"
+            android:key="test_tools" />
+    </PreferenceCategory>
+    <PreferenceCategory
+        android:title="@string/chroot">
+
         <EditTextPreference
             android:defaultValue="@string/chroot_dir"
             android:selectAllOnFocus="true"
@@ -169,18 +180,22 @@
             android:dialogTitle="@string/chroot_title"
             android:title="@string/chroot_title"
             android:key="chroot_dir"/>
+        <EditTextPreference
+            android:defaultValue=""
+            android:hint="sh /root/myscript.sh"
+            android:selectAllOnFocus="true"
+            android:singleLine="true"
+            android:title="@string/custom_chroot_cmd_title"
+            android:summary="@string/custom_chroot_cmd_sum"
+            android:dialogMessage="@string/custom_chroot_cmd_desc"
+            android:dialogTitle="@string/custom_chroot_cmd_title"
+            android:key="custom_chroot_cmd"/>
         <SwitchPreference
             android:defaultValue="@string/monstart"
             android:title="@string/monstart_title"
             android:summary="@string/monstart_sum"
             android:key="monstart"/>
-        <Preference
-            android:title="@string/copy_sample_title"
-            android:key="copy_sample_button" />
-        <Preference
-            android:title="@string/test_title"
-            android:summary="@string/test_sum"
-            android:key="test_tools" />
+
     </PreferenceCategory>
     <PreferenceCategory android:title="@string/other">
         <Preference
