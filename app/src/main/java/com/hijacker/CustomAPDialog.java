@@ -26,6 +26,8 @@ import android.view.View;
 import android.widget.EditText;
 
 public class CustomAPDialog extends DialogFragment {
+    static final int FOR_MDK=0, FOR_REAVER=1;
+    int mode;
     @Override
     public Dialog onCreateDialog(Bundle savedInstanceState) {
         AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
@@ -35,9 +37,16 @@ public class CustomAPDialog extends DialogFragment {
         builder.setTitle(R.string.custom_ap_title);
         builder.setPositiveButton(R.string.ok, new DialogInterface.OnClickListener() {
             public void onClick(DialogInterface dialog, int id) {
-                String mac = ((EditText)view.findViewById(R.id.custom_mac)).getText().toString();
-                ReaverFragment.custom_mac = mac;
-                ReaverFragment.select_button.setText(mac);
+                String mac = ((EditText) view.findViewById(R.id.custom_mac)).getText().toString();
+                if(mode==FOR_REAVER){
+                    ReaverFragment.ap = null;
+                    ReaverFragment.custom_mac = mac;
+                    ReaverFragment.select_button.setText(mac);
+                }else if(mode==FOR_MDK){
+                    MDKFragment.ados_ap = null;
+                    MDKFragment.custom_mac = mac;
+                    MDKFragment.select_button.setText(mac);
+                }
             }
         });
         builder.setNegativeButton(R.string.cancel, new DialogInterface.OnClickListener() {

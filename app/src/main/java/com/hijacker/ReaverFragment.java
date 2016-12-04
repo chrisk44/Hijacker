@@ -40,6 +40,7 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 
 import static android.widget.Toast.LENGTH_SHORT;
+import static com.hijacker.CustomAPDialog.FOR_REAVER;
 import static com.hijacker.MainActivity.FRAGMENT_REAVER;
 import static com.hijacker.MainActivity.PROCESS_AIRODUMP;
 import static com.hijacker.MainActivity.PROCESS_REAVER;
@@ -88,8 +89,8 @@ public class ReaverFragment extends Fragment{
         }
 
         select_button = (Button)v.findViewById(R.id.select_ap);
-        if(ap!=null) select_button.setText(ap.essid + " (" + ap.mac + ')');
-        else if(custom_mac!=null) select_button.setText(custom_mac);
+        if(custom_mac!=null) select_button.setText(custom_mac);
+        else if(ap!=null) select_button.setText(ap.essid + " (" + ap.mac + ')');
         select_button.setOnClickListener(new View.OnClickListener(){
             @Override
             public void onClick(View view){
@@ -105,6 +106,7 @@ public class ReaverFragment extends Fragment{
                     public boolean onMenuItemClick(android.view.MenuItem item) {
                         //ItemId = i in for()
                         if(item.getGroupId()==0){
+                            custom_mac = null;
                             AP temp = AP.APs.get(item.getItemId());
                             if(ap!=temp){
                                 ap = temp;
@@ -113,7 +115,9 @@ public class ReaverFragment extends Fragment{
                             select_button.setText(ap.essid + " (" + ap.mac + ')');
                         }else{
                             //Clcked custom
-                            new CustomAPDialog().show(getFragmentManager(), "CustomAPDialog");
+                            CustomAPDialog dialog = new CustomAPDialog();
+                            dialog.mode = FOR_REAVER;
+                            dialog.show(getFragmentManager(), "CustomAPDialog");
                         }
                         return true;
                     }

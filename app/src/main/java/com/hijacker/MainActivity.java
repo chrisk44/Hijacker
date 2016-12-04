@@ -290,7 +290,6 @@ public class MainActivity extends AppCompatActivity{
             mode = 0;
         }else{
             if(!(params.contains("handshake") || params.contains("wep_ivs")) && always_cap){
-                Log.d("ASD", "Doesn't contain cap");
                 temp = params + " -w " + cap_dir + "/cap";
             }else{
                 temp = params;

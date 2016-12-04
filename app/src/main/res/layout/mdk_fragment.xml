@@ -26,8 +26,7 @@
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:paddingEnd="20dp"
-            android:paddingStart="20dp"
-            >
+            android:paddingStart="20dp">
 
             <TextView
                 android:text="@string/ssid_file"
@@ -48,13 +47,32 @@
 
     </LinearLayout>
 
-    <Switch
-        android:text="@string/ados_title"
+    <LinearLayout
+        android:orientation="vertical"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:id="@+id/ados_switch"
-        android:padding="20dp"
-        android:textSize="16sp"
         android:layout_margin="5dp"
-        android:background="?attr/colorPrimary"/>
+        android:background="?attr/colorPrimary">
+
+        <Switch
+            android:text="@string/ados_title"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:id="@+id/ados_switch"
+            android:padding="20dp"
+            android:textSize="16sp"
+            android:elevation="@android:dimen/thumbnail_height"/>
+
+        <Button
+            style="?android:attr/buttonBarButtonStyle"
+            android:text="@string/select_ap"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:id="@+id/select_ap_ados"
+            android:layout_marginEnd="20dp"
+            android:layout_marginStart="20dp"/>
+
+    </LinearLayout>
+
+
 </LinearLayout>
