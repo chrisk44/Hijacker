@@ -43,16 +43,17 @@ import static com.hijacker.MainActivity.debug;
 class Shell{
     private Process shell;
     private PrintWriter shell_in;
-    private BufferedReader shell_out, shell_out_error;
+    private BufferedReader shell_out;
     private static List<Shell> free = new ArrayList<>();
     private static int total=0;
     Shell(){
         total++;
         try{
-            shell = Runtime.getRuntime().exec("su");
+            ProcessBuilder temp = new ProcessBuilder("su");
+            temp.redirectErrorStream(true);
+            shell = temp.start();
             shell_in = new PrintWriter(shell.getOutputStream());
             shell_out = new BufferedReader(new InputStreamReader(shell.getInputStream()));
-            shell_out_error = new BufferedReader(new InputStreamReader(shell.getErrorStream()));
         }catch(IOException e){
             Log.e("Shell", "Error opening shell");
         }
@@ -60,7 +61,6 @@ class Shell{
         if(free.size()>5) exitAll();
     }
     BufferedReader getShell_out(){ return this.shell_out; }
-    BufferedReader getShell_out_error(){ return this.shell_out_error; }
     void run(String cmd){
         this.shell_in.print(cmd + '\n');
         this.shell_in.flush();
@@ -70,7 +70,6 @@ class Shell{
             run("echo && echo ENDOFCLEAR");
             MainActivity.getLastLine(shell_out, "ENDOFCLEAR");      //This will read up to the last line and stop, effectively clearing shell_out
             shell_out.reset();                                      //<--- since this doesn't seem to do the job
-            shell_out_error.reset();
         }catch(IOException ignored){}
         free.add(this);
         if(debug) Log.d("Shell", "Freeing shell: total=" + total + " free:" + free.size());

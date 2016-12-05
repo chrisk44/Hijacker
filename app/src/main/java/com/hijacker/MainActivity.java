@@ -26,6 +26,7 @@ import android.content.ClipboardManager;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.content.pm.PackageManager;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.Build;
@@ -261,7 +262,7 @@ public class MainActivity extends AppCompatActivity{
                 in.close();
                 out.close();
                 if(chmod){
-                    Runtime.getRuntime().exec("run-as com.hijacker chmod 755 ./files/" + filename); //TODO: change this
+                    runOne("chmod 755 ./files/" + filename);
                 }
             }catch(IOException e){
                 Log.e("FileProvider", "Exception copying from assets", e);
@@ -305,7 +306,7 @@ public class MainActivity extends AppCompatActivity{
                 String cmd = "su -c " + prefix + " " + airodump_dir + " --update 1 " + temp + " " + iface;
                 if(debug) Log.d("startAirodump", cmd);
                 shell.run(cmd);
-                BufferedReader in = shell.getShell_out_error();
+                BufferedReader in = shell.getShell_out();
                 String buffer;
                 try{
                     while(cont && (buffer = in.readLine())!=null){
