@@ -3,6 +3,7 @@
 Hijacker is a Graphical User Interface for the wireless auditing tools airodump-ng, aireplay-ng and mdk3. It offers a simple and easy UI to use these tools without typing commands in a console and copy&pasting MAC addresses.
 
 This application requires an android device with a wireless adapter that supports **Monitor Mode**. A few android devices do, but none of them natively. This means that you will need a custom firmware. Nexus 5 and any other device that uses the BCM4339 (and BCM4358 (although injection is not yet supported so no aireplay or mdk)) chipset will work with [Nexmon](https://github.com/seemoo-lab/nexmon). Also, devices that use BCM4330 can use [bcmon](http://bcmon.blogspot.gr/).
+An alternative would be to use an external adapter that supports monitor mode in Android with an OTG cable.
 
 The required tools are included in the app. To install them go to Settings and click "Install Tools". This will install everything in the directory you select. If you have already installed them, you don't have to do anything. You can also have them at any directory you want and set the directories in Settings, though this might cause the wireless tools not being found by the aircrack-ng suite. The Nexmon driver and management utility is also included.
 
@@ -24,6 +25,7 @@ Root is also necessary, as these tools need root to work. If you don't grant roo
 * Include the tools
 * Reaver WPS cracking (pixie-dust attack using NetHunter chroot and external adapter)
 * .cap files cracking with custom wordlist
+* Save captured packets in .cap file
 
 ##Future features:
 * Let the user create custom commands to be ran on an access point or a client with one click.
@@ -45,5 +47,7 @@ Keep in mind that Hijacker is just a GUI for these tools. The way it runs the to
 First of all, if the app happens to crash at a random time, run it again and close it properly. This is to make sure that there are not any tools still running in the background, as this can cause battery drain. If it crashes during startup or exiting, open a terminal, run `ps | busybox grep -e air -e mdk` and kill the processes you see.
 
 Most of the problems arise from the binaries not being installed (correctly or at all). If that's the case, go to settings, click "install tools", choose directories for binaries and the lib (libfakeioctl.so) and click install. If the directory for your binaries is included in PATH, then you don't have to do anything else. If it's not, the you need to adjust the absolute paths of the binaries, right below the "install tools" option. This might also cause problems (especially with mdk) since these programs require the wireless tools to be installed, and they won't find them if you install them anywhere other than the paths included in your PATH variable. If you don't know what the PATH variable is, then you probably shouldn't be using any of these programs.
+
+Installing the tools via the NexMon app doesn't work anymore, so if there is a problem, just reinstall them through the app in the same directory you have them already.
 
 If you are certain that there is problem with the app itself and not the tools installation, open an issue here so I can fix it. Make sure to include precise steps to reproduce the problem and a logcat (having the logcat messages options enabled in settings). If the app happens to crash, a new activity should start which will generate a report in /sdcard and give you the option to email it to me directly. I suggest you do that, and if you are worried about what will be sent you can check it out yourself, it's just a txt file and it will be sent as an email attachment to me.
