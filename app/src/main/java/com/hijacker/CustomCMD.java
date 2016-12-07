@@ -17,8 +17,14 @@ package com.hijacker;
     along with this program.  If not, see <http://www.gnu.org/licenses/>
  */
 
+import static com.hijacker.MainActivity.PROCESS_AIREPLAY;
+import static com.hijacker.MainActivity.PROCESS_AIRODUMP;
+import static com.hijacker.MainActivity.PROCESS_MDK;
+import static com.hijacker.MainActivity.PROCESS_REAVER;
 import static com.hijacker.MainActivity.aireplay_dir;
 import static com.hijacker.MainActivity.airodump_dir;
+import static com.hijacker.MainActivity.disable_monMode;
+import static com.hijacker.MainActivity.enable_monMode;
 import static com.hijacker.MainActivity.iface;
 import static com.hijacker.MainActivity.mdk3_dir;
 import static com.hijacker.MainActivity.prefix;
@@ -28,7 +34,8 @@ public class CustomCMD{
     static final int TYPE_AP=0, TYPE_ST=1;
     private String title, start_cmd, stop_cmd;
     private int type;
-    private boolean running=false;
+    private boolean kill_airodump=false, kill_aireplay=false, kill_mdk=false, kill_reaver=false,
+            enable_mm=false, disable_mm=false, requires_clients=false, requires_connected=false;
     CustomCMD(String title, String start_cmd, String stop_cmd, int type){
         this.title = title;
         this.start_cmd = start_cmd;
@@ -39,11 +46,16 @@ public class CustomCMD{
     String getTitle(){ return title; }
     String getStart_cmd(){ return start_cmd; }
     String getStop_cmd(){ return stop_cmd; }
+    boolean requires_clients(){ return requires_clients; }
+    boolean requires_connected(){ return requires_connected; }
     int getType(){ return type; }
-    boolean isRunning(){ return running; }
-    void setRunning(boolean running){ this.running = running; }
     void run(){
+        if(kill_airodump) MainActivity.stop(PROCESS_AIRODUMP);
+        if(kill_aireplay) MainActivity.stop(PROCESS_AIREPLAY);
+        if(kill_mdk) MainActivity.stop(PROCESS_MDK);
+        if(kill_reaver) MainActivity.stop(PROCESS_REAVER);
         Shell shell = CustomCMDFragment.shell;
+        if(enable_mm) shell.run(enable_monMode);
         shell.run("export IFACE=\"" + iface + '\"');
         shell.run("export PREFIX=\"" + prefix + '\"');
         shell.run("export AIRODUMP_DIR=\"" + airodump_dir + '\"');
@@ -66,6 +78,8 @@ public class CustomCMD{
         CustomCMDFragment.thread.start();
     }
     void stop(){
-        CustomCMDFragment.shell.run(stop_cmd);
+        Shell shell = CustomCMDFragment.shell;
+        shell.run(stop_cmd);
+        if(disable_mm) shell.run(disable_monMode);
     }
 }

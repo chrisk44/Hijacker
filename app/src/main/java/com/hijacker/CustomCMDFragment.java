@@ -18,6 +18,7 @@ package com.hijacker;
  */
 
 import android.app.Fragment;
+import android.app.FragmentTransaction;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
@@ -116,10 +117,19 @@ public class CustomCMDFragment extends Fragment{
                 for(j=0;j<st_cmds.size();j++){
                     popup.getMenu().add(TYPE_ST, j, i+j, st_cmds.get(j).getTitle());
                 }
+                popup.getMenu().add(100, 0, i+j+1, "Manage commands...");
 
                 popup.setOnMenuItemClickListener(new PopupMenu.OnMenuItemClickListener() {
                     public boolean onMenuItemClick(android.view.MenuItem item){
                         switch(item.getGroupId()){
+                            case 100:
+                                //Open commands manager
+                                FragmentTransaction ft = getFragmentManager().beginTransaction();
+                                ft.replace(R.id.fragment1, new CustomCMDManagerFragment());
+                                ft.setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN);
+                                ft.addToBackStack(null);
+                                ft.commit();
+                                return true;
                             case TYPE_AP:
                                 //ap commands
                                 selected_cmd = ap_cmds.get(item.getItemId());
@@ -150,43 +160,51 @@ public class CustomCMDFragment extends Fragment{
                 popup.getMenuInflater().inflate(R.menu.popup_menu, popup.getMenu());
 
                 //add(groupId, itemId, order, title)
-                int i;
+                int i, added=0;
                 if(selected_cmd.getType()==TYPE_AP){
                     AP temp;
                     for(i = 0; i<AP.APs.size(); i++){
                         temp = AP.APs.get(i);
-                        popup.getMenu().add(TYPE_AP, i, i, temp.essid + " (" + temp.mac + ")");
+                        if(!selected_cmd.requires_clients() || temp.clients.size()>0){
+                            popup.getMenu().add(TYPE_AP, i, i, temp.essid + " (" + temp.mac + ")");
+                            added++;
+                        }
                     }
                 }else{
                     ST temp;
                     for(i = 0; i<ST.STs.size(); i++){
                         temp = ST.STs.get(i);
-                        popup.getMenu().add(TYPE_ST, i, i, temp.mac + " (" + temp.bssid + ")");
+                        if(!selected_cmd.requires_connected() || temp.bssid!=null){
+                            popup.getMenu().add(TYPE_ST, i, i, temp.mac + " (" + temp.bssid + ")");
+                            added++;
+                        }
                     }
                 }
 
-                popup.setOnMenuItemClickListener(new PopupMenu.OnMenuItemClickListener() {
-                    public boolean onMenuItemClick(android.view.MenuItem item){
-                        switch(item.getGroupId()){
-                            case TYPE_AP:
-                                //ap
-                                ap = AP.APs.get(item.getItemId());
-                                st = null;
-                                select_target.setText(ap.essid + " (" + ap.mac + ")");
-                                break;
-                            case TYPE_ST:
-                                //st
-                                st = ST.STs.get(item.getItemId());
-                                ap = null;
-                                select_target.setText(st.mac + " (" + st.bssid + ")");
-                                break;
+                if(added>0){    //If we call show() but there are not items to show, there will be an empty popup, so the next touch will be "ignored"
+                    popup.setOnMenuItemClickListener(new PopupMenu.OnMenuItemClickListener(){
+                        public boolean onMenuItemClick(android.view.MenuItem item){
+                            switch(item.getGroupId()){
+                                case TYPE_AP:
+                                    //ap
+                                    ap = AP.APs.get(item.getItemId());
+                                    st = null;
+                                    select_target.setText(ap.essid + " (" + ap.mac + ")");
+                                    break;
+                                case TYPE_ST:
+                                    //st
+                                    st = ST.STs.get(item.getItemId());
+                                    ap = null;
+                                    select_target.setText(st.mac + " (" + st.bssid + ")");
+                                    break;
+                            }
+                            stop.obtainMessage().sendToTarget();
+                            start_button.setEnabled(true);
+                            return true;
                         }
-                        stop.obtainMessage().sendToTarget();
-                        start_button.setEnabled(true);
-                        return true;
-                    }
-                });
-                if(i>0) popup.show();       //If we call show() but there are not items to show, there will be an empty popup, so the next touch will be "ignored"
+                    });
+                    popup.show();
+                }
             }
         });
 
@@ -203,6 +221,8 @@ public class CustomCMDFragment extends Fragment{
                     progress.setIndeterminate(true);
                 }else{
                     //started
+                    console.append("Running: " + selected_cmd.getStop_cmd() + '\n');
+                    if(debug) Log.d("CustomCMDFragment", "Running: " + selected_cmd.getStop_cmd());
                     selected_cmd.stop();
                     stop.obtainMessage().sendToTarget();
                 }
