@@ -30,13 +30,13 @@ import static com.hijacker.MainActivity.mdk3_dir;
 import static com.hijacker.MainActivity.prefix;
 import static com.hijacker.MainActivity.reaver_dir;
 
-public class CustomCMD{
+public class CustomAction{
     static final int TYPE_AP=0, TYPE_ST=1;
     private String title, start_cmd, stop_cmd;
     private int type;
     private boolean kill_airodump=false, kill_aireplay=false, kill_mdk=false, kill_reaver=false,
             enable_mm=false, disable_mm=false, requires_clients=false, requires_connected=false;
-    CustomCMD(String title, String start_cmd, String stop_cmd, int type){
+    CustomAction(String title, String start_cmd, String stop_cmd, int type){
         this.title = title;
         this.start_cmd = start_cmd;
         this.stop_cmd = stop_cmd;
@@ -54,7 +54,7 @@ public class CustomCMD{
         if(kill_aireplay) MainActivity.stop(PROCESS_AIREPLAY);
         if(kill_mdk) MainActivity.stop(PROCESS_MDK);
         if(kill_reaver) MainActivity.stop(PROCESS_REAVER);
-        Shell shell = CustomCMDFragment.shell;
+        Shell shell = CustomActionFragment.shell;
         if(enable_mm) shell.run(enable_monMode);
         shell.run("export IFACE=\"" + iface + '\"');
         shell.run("export PREFIX=\"" + prefix + '\"');
@@ -63,22 +63,22 @@ public class CustomCMD{
         shell.run("export MDK3_DIR=\"" + mdk3_dir + '\"');
         shell.run("export REAVER_DIR=\"" + reaver_dir + '\"');
         if(type==TYPE_AP){
-            shell.run("export MAC=\"" + CustomCMDFragment.ap.mac + '\"');
-            shell.run("export ESSID=\"" + CustomCMDFragment.ap.essid + '\"');
-            shell.run("export ENC=\"" + CustomCMDFragment.ap.enc + '\"');
-            shell.run("export CIPHER=\"" + CustomCMDFragment.ap.cipher + '\"');
-            shell.run("export AUTH=\"" + CustomCMDFragment.ap.auth + '\"');
-            shell.run("export CH=\"" + CustomCMDFragment.ap.ch + '\"');
+            shell.run("export MAC=\"" + CustomActionFragment.ap.mac + '\"');
+            shell.run("export ESSID=\"" + CustomActionFragment.ap.essid + '\"');
+            shell.run("export ENC=\"" + CustomActionFragment.ap.enc + '\"');
+            shell.run("export CIPHER=\"" + CustomActionFragment.ap.cipher + '\"');
+            shell.run("export AUTH=\"" + CustomActionFragment.ap.auth + '\"');
+            shell.run("export CH=\"" + CustomActionFragment.ap.ch + '\"');
         }else{
-            shell.run("export MAC=\"" + CustomCMDFragment.st.mac + '\"');
-            shell.run("export BSSID=\"" + CustomCMDFragment.st.bssid + '\"');
+            shell.run("export MAC=\"" + CustomActionFragment.st.mac + '\"');
+            shell.run("export BSSID=\"" + CustomActionFragment.st.bssid + '\"');
         }
         shell.run(start_cmd);
         shell.run("echo ENDOFCUSTOM");
-        CustomCMDFragment.thread.start();
+        CustomActionFragment.thread.start();
     }
     void stop(){
-        Shell shell = CustomCMDFragment.shell;
+        Shell shell = CustomActionFragment.shell;
         shell.run(stop_cmd);
         if(disable_mm) shell.run(disable_monMode);
     }

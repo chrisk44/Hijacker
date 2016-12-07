@@ -137,8 +137,8 @@ public class MainActivity extends AppCompatActivity{
         setSupportActionBar((Toolbar) findViewById(R.id.my_toolbar));
         setup();
 
-        CustomCMDFragment.ap_cmds.add(new CustomCMD("Custom1", "echo $MAC", "echo stopping", CustomCMD.TYPE_AP));
-        CustomCMDFragment.st_cmds.add(new CustomCMD("Custom2", "echo $MAC", "echo stopping", CustomCMD.TYPE_ST));
+        CustomActionFragment.cmds.add(new CustomAction("Custom1", "echo $MAC", "echo stopping", CustomAction.TYPE_AP));
+        CustomActionFragment.cmds.add(new CustomAction("Custom2", "echo $MAC", "echo stopping", CustomAction.TYPE_ST));
 
         refresh_thread = new Thread(new Runnable(){
             @Override
@@ -832,7 +832,7 @@ public class MainActivity extends AppCompatActivity{
                         ft.replace(R.id.fragment1, new ReaverFragment());
                         break;
                     case FRAGMENT_CUSTOM:
-                        ft.replace(R.id.fragment1, new CustomCMDFragment());
+                        ft.replace(R.id.fragment1, new CustomActionFragment());
                         break;
                     case FRAGMENT_SETTINGS:
                         ft.replace(R.id.fragment1, new SettingsFragment());
@@ -851,6 +851,51 @@ public class MainActivity extends AppCompatActivity{
     }
     class MyListAdapter extends ArrayAdapter<Item>{
         MyListAdapter(){
+            super(MainActivity.this, R.layout.listitem);
+        }
+
+        @Override
+        public View getView(int position, View convertView, ViewGroup parent){
+            // get a view to work with
+            View itemview = convertView;
+            if(itemview==null){
+                itemview = getLayoutInflater().inflate(R.layout.listitem, parent, false);
+            }
+
+            // find the item to work with
+            Item currentItem = Item.items.get(position);
+
+            TextView firstText = (TextView) itemview.findViewById(R.id.top_left);
+            firstText.setText(currentItem.s1);
+
+            TextView secondText = (TextView) itemview.findViewById(R.id.bottom_left);
+            secondText.setText(currentItem.s2);
+
+            TextView thirdText = (TextView) itemview.findViewById(R.id.bottom_right);
+            thirdText.setText(currentItem.s3);
+
+            TextView text4 = (TextView) itemview.findViewById(R.id.top_right);
+            text4.setText(currentItem.s4);
+
+            //Image
+            ImageView iv = (ImageView) itemview.findViewById(R.id.iv);
+            if(!currentItem.type){
+                iv.setImageResource(R.drawable.st2);
+            }else{
+                if(currentItem.ap.isHidden) iv.setImageResource(R.drawable.ap_hidden);
+                else iv.setImageResource(R.drawable.ap2);
+            }
+
+            return itemview;
+        }
+
+        @Override
+        public int getCount(){
+            return Item.items.size();
+        }
+    }
+    class CustomActionAdapter extends ArrayAdapter<Item>{
+        CustomActionAdapter(){
             super(MainActivity.this, R.layout.listitem);
         }
 

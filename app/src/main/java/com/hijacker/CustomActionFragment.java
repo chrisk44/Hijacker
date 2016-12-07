@@ -36,17 +36,16 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
-import static com.hijacker.CustomCMD.TYPE_AP;
-import static com.hijacker.CustomCMD.TYPE_ST;
+import static com.hijacker.CustomAction.TYPE_AP;
+import static com.hijacker.CustomAction.TYPE_ST;
 import static com.hijacker.MainActivity.FRAGMENT_CUSTOM;
 import static com.hijacker.MainActivity.currentFragment;
 import static com.hijacker.MainActivity.debug;
 import static com.hijacker.MainActivity.progress;
 
-public class CustomCMDFragment extends Fragment{
-    static List<CustomCMD> st_cmds = new ArrayList<>();
-    static List<CustomCMD> ap_cmds = new ArrayList<>();
-    static CustomCMD selected_cmd=null;
+public class CustomActionFragment extends Fragment{
+    static List<CustomAction> cmds = new ArrayList<>();
+    static CustomAction selected_cmd=null;
     static AP ap=null;
     static ST st=null;
     static Shell shell=null;
@@ -57,7 +56,7 @@ public class CustomCMDFragment extends Fragment{
     static String console_text = null;
     @Override
     public View onCreateView(LayoutInflater inflater, final ViewGroup container, Bundle savedInstanceState){
-        View v = inflater.inflate(R.layout.custom_fragment, container, false);
+        View v = inflater.inflate(R.layout.custom_action_fragment, container, false);
 
         thread = new Thread(new Runnable(){
             @Override
@@ -110,42 +109,31 @@ public class CustomCMDFragment extends Fragment{
                 popup.getMenuInflater().inflate(R.menu.popup_menu, popup.getMenu());
 
                 //add(groupId, itemId, order, title)
-                int i, j;
-                for(i=0;i<ap_cmds.size();i++){
-                    popup.getMenu().add(TYPE_AP, i, i, ap_cmds.get(i).getTitle());
+                int i;
+                for(i=0;i<cmds.size();i++){
+                    popup.getMenu().add(cmds.get(i).getType(), i, i, cmds.get(i).getTitle());
                 }
-                for(j=0;j<st_cmds.size();j++){
-                    popup.getMenu().add(TYPE_ST, j, i+j, st_cmds.get(j).getTitle());
-                }
-                popup.getMenu().add(100, 0, i+j+1, "Manage commands...");
+                popup.getMenu().add(100, 0, i+1, "Manage commands...");
 
                 popup.setOnMenuItemClickListener(new PopupMenu.OnMenuItemClickListener() {
                     public boolean onMenuItemClick(android.view.MenuItem item){
-                        switch(item.getGroupId()){
-                            case 100:
-                                //Open commands manager
-                                FragmentTransaction ft = getFragmentManager().beginTransaction();
-                                ft.replace(R.id.fragment1, new CustomCMDManagerFragment());
-                                ft.setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN);
-                                ft.addToBackStack(null);
-                                ft.commit();
-                                return true;
-                            case TYPE_AP:
-                                //ap commands
-                                selected_cmd = ap_cmds.get(item.getItemId());
-                                break;
-                            case TYPE_ST:
-                                //st commands
-                                selected_cmd = st_cmds.get(item.getItemId());
-                                break;
+                        if(item.getGroupId()==100){
+                            //Open commands manager
+                            FragmentTransaction ft = getFragmentManager().beginTransaction();
+                            ft.replace(R.id.fragment1, new CustomActionManagerFragment());
+                            ft.setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN);
+                            ft.addToBackStack(null);
+                            ft.commit();
+                        }else{
+                            selected_cmd = cmds.get(item.getItemId());
+                            stop.obtainMessage().sendToTarget();
+                            select_cmd.setText(selected_cmd.getTitle());
+                            select_target.setEnabled(true);
+                            select_target.setText(R.string.select_target);
+                            start_button.setEnabled(false);
+                            ap = null;
+                            st = null;
                         }
-                        stop.obtainMessage().sendToTarget();
-                        select_cmd.setText(selected_cmd.getTitle());
-                        select_target.setEnabled(true);
-                        select_target.setText(R.string.select_target);
-                        start_button.setEnabled(false);
-                        ap = null;
-                        st = null;
                         return true;
                     }
                 });

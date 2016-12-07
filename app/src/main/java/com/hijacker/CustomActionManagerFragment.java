@@ -26,10 +26,10 @@ import android.view.ViewGroup;
 import static com.hijacker.MainActivity.FRAGMENT_CUSTOM;
 import static com.hijacker.MainActivity.currentFragment;
 
-public class CustomCMDManagerFragment extends Fragment{
+public class CustomActionManagerFragment extends Fragment{
     @Override
     public View onCreateView(LayoutInflater inflater, final ViewGroup container, Bundle savedInstanceState){
-        View v = inflater.inflate(R.layout.custom_manager, container, false);
+        View v = inflater.inflate(R.layout.custom_action_manager, container, false);
 
         return v;
     }
