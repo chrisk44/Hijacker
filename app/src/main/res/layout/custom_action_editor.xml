@@ -19,14 +19,14 @@
         android:id="@+id/radio_group">
 
         <RadioButton
-            android:text="Access Point"
+            android:text="@string/access_point"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:id="@+id/ap_rb"
             android:layout_weight="1"/>
 
         <RadioButton
-            android:text="Station"
+            android:text="@string/station"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:id="@+id/st_rb"
@@ -84,7 +84,7 @@
         android:enabled="false"/>
 
     <CheckBox
-        android:text="Requires clients"
+        android:text="@string/requires_clients"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:id="@+id/requirement"
@@ -93,7 +93,7 @@
 
     <Space
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
+        android:layout_height="0dp"
         android:layout_gravity="bottom"
         android:layout_weight="1"/>
 

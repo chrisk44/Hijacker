@@ -33,8 +33,6 @@ import android.widget.TextView;
 
 import java.io.BufferedReader;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
 
 import static com.hijacker.CustomAction.TYPE_AP;
 import static com.hijacker.CustomAction.TYPE_ST;
@@ -113,7 +111,7 @@ public class CustomActionFragment extends Fragment{
                 for(i=0;i<cmds.size();i++){
                     popup.getMenu().add(cmds.get(i).getType(), i, i, cmds.get(i).getTitle());
                 }
-                popup.getMenu().add(100, 0, i+1, "Manage actions...");
+                popup.getMenu().add(100, 0, i+1, getString(R.string.manage_actions));
 
                 popup.setOnMenuItemClickListener(new PopupMenu.OnMenuItemClickListener() {
                     public boolean onMenuItemClick(android.view.MenuItem item){

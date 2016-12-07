@@ -131,7 +131,7 @@
     <!-- TestDialog -->
     <string name="testing">Testing tools…</string>
     <string name="make_sure_wifi">Make sure that WiFi is enabled</string>
-    <string name="checking_chroot">Checking chroot...</string>
+    <string name="checking_chroot">Checking chroot…</string>
     <string name="done">Done</string>
 
     <!-- ST -->
@@ -190,7 +190,8 @@
         $IFACE, $PREFIX, $AIRODUMP_DIR, $AIREPLAY_DIR, $MDK3_DIR, $REAVER_DIR\n
         AP: $MAC, $ESSID, $CH, $ENC, $CIPHER, $AUTH\n
         ST: $MAC, $BSSID\n
-        The start command will be ran when you run the action and the stop will be ran ONLY when you want to interrupt it.\n
+        The start command will be ran when you run the action and the stop will be ran ONLY when you want to interrupt it.
+        These commands will run as root.\n
         Go back to discard any changes.</string>
     <string name="custom_action_title">Title</string>
     <string name="start_command">Start command</string>
@@ -201,6 +202,13 @@
     <string name="requires_clients">Requires clients</string>
     <string name="title_empty">Title cannot be empty</string>
     <string name="start_cmd_empty">Start command cannot be empty</string>
+    <string name="delete">Delete</string>
+    <string name="delete_title">Delete Action?</string>
+    <string name="delete_message">This action will be permanently deleted. Are you sure?</string>
+    <string name="manage_actions">Manage actions…</string>
+    <string name="edit">Edit…</string>
+    <string name="access_point">Access Point</string>
+    <string name="station">Station</string>
 
     <!-- Default Preferences -->
     <string name="iface" translatable="false">wlan0</string>

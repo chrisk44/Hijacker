@@ -65,7 +65,6 @@ import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
 
-import static com.hijacker.CustomAction.TYPE_AP;
 import static com.hijacker.CustomAction.TYPE_ST;
 import static com.hijacker.IsolatedFragment.is_ap;
 import static com.hijacker.MDKFragment.ados;
@@ -141,9 +140,6 @@ public class MainActivity extends AppCompatActivity{
         setContentView(R.layout.activity_main);
         setSupportActionBar((Toolbar) findViewById(R.id.my_toolbar));
         setup();
-
-        new CustomAction("Custom1", "echo $MAC", "echo stopping", TYPE_AP);
-        new CustomAction("Custom2", "echo $MAC", "echo stopping", TYPE_ST);
 
         refresh_thread = new Thread(new Runnable(){
             @Override
@@ -239,15 +235,6 @@ public class MainActivity extends AppCompatActivity{
                 }
             }
         });
-
-        path = getFilesDir().getAbsolutePath();
-        if(debug) Log.d("Main", "path is " + path);
-        if(!(new File(path).exists())){
-            Log.e("onCreate", "App file directory doesn't exist");
-            ErrorDialog dialog = new ErrorDialog();
-            dialog.setMessage(getString(R.string.app_dir_notfound1) + path + getString(R.string.app_dir_notfound2));
-            dialog.show(fm, "ErrorDialog");
-        }
 
         extract("oui.txt", false);
 
@@ -665,6 +652,16 @@ public class MainActivity extends AppCompatActivity{
 
         //Google AppIndex
         client = new GoogleApiClient.Builder(this).addApi(AppIndex.API).build();
+
+        path = getFilesDir().getAbsolutePath();
+        CustomAction.load();
+        if(debug) Log.d("Main", "path is " + path);
+        if(!(new File(path).exists())){
+            Log.e("onCreate", "App file directory doesn't exist");
+            ErrorDialog dialog = new ErrorDialog();
+            dialog.setMessage(getString(R.string.app_dir_notfound1) + path + getString(R.string.app_dir_notfound2));
+            dialog.show(fm, "ErrorDialog");
+        }
     }
     static void load(){
         //Load Preferences

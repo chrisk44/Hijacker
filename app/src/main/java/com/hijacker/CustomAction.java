@@ -17,23 +17,26 @@ package com.hijacker;
     along with this program.  If not, see <http://www.gnu.org/licenses/>
  */
 
+import android.os.Environment;
+import android.util.Log;
+
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileReader;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
-import static com.hijacker.MainActivity.PROCESS_AIREPLAY;
-import static com.hijacker.MainActivity.PROCESS_AIRODUMP;
-import static com.hijacker.MainActivity.PROCESS_MDK;
-import static com.hijacker.MainActivity.PROCESS_REAVER;
 import static com.hijacker.MainActivity.aireplay_dir;
 import static com.hijacker.MainActivity.airodump_dir;
-import static com.hijacker.MainActivity.disable_monMode;
-import static com.hijacker.MainActivity.enable_monMode;
+import static com.hijacker.MainActivity.debug;
 import static com.hijacker.MainActivity.iface;
 import static com.hijacker.MainActivity.mdk3_dir;
 import static com.hijacker.MainActivity.prefix;
 import static com.hijacker.MainActivity.reaver_dir;
 
-public class CustomAction{
+class CustomAction{
     static final int TYPE_AP=0, TYPE_ST=1;
     static List<CustomAction> cmds = new ArrayList<>();
     private String title, start_cmd, stop_cmd;
@@ -53,11 +56,11 @@ public class CustomAction{
     boolean requires_clients(){ return requires_clients; }
     boolean requires_connected(){ return requires_connected; }
     int getType(){ return type; }
-    public void setTitle(String title){ this.title = title; }
-    public void setStart_cmd(String start_cmd){ this.start_cmd = start_cmd; }
-    public void setStop_cmd(String stop_cmd){ this.stop_cmd = stop_cmd; }
-    public void setRequires_clients(boolean requires_clients){ this.requires_clients = requires_clients; }
-    public void setRequires_connected(boolean requires_connected){ this.requires_connected = requires_connected; }
+    void setTitle(String title){ this.title = title; }
+    void setStart_cmd(String start_cmd){ this.start_cmd = start_cmd; }
+    void setStop_cmd(String stop_cmd){ this.stop_cmd = stop_cmd; }
+    void setRequires_clients(boolean requires_clients){ this.requires_clients = requires_clients; }
+    void setRequires_connected(boolean requires_connected){ this.requires_connected = requires_connected; }
     void run(){
         Shell shell = CustomActionFragment.shell;
         shell.run("export IFACE=\"" + iface + '\"');
@@ -88,5 +91,60 @@ public class CustomAction{
     }
     static void save(){
         //Save current cmds list to permanent storage
+        File file;
+        FileWriter writer;
+        String folder = Environment.getExternalStorageDirectory() + "/Hijacker-actions/";
+        CustomAction action;
+        for(int i=0;i<cmds.size();i++){
+            action = cmds.get(i);
+            file = new File(folder + action.getTitle() + ".action");
+            try{
+                writer = new FileWriter(file);
+                writer.write(action.title + '\n');
+                writer.write(action.start_cmd + '\n');
+                writer.write(action.stop_cmd + '\n');
+                writer.write(Integer.toString(action.type) + '\n');
+                writer.write(Boolean.toString(action.requires_clients || action.requires_connected) + '\n');
+                writer.close();
+            }catch(IOException e){
+                Log.e("CustomAction", "In load(): " + e.toString());
+            }
+        }
+    }
+    static void load(){
+        //load custom actions from storage to cmds
+        File folder = new File(Environment.getExternalStorageDirectory() + "/Hijacker-actions");
+        if(!folder.exists()){
+            folder.mkdir();
+        }
+        File actions[] = folder.listFiles();
+        if(actions!=null){
+            if(debug) Log.d("CustomAction", "Reading files...");
+            FileReader reader0;
+            BufferedReader reader;
+            for(File file : actions){
+                try{
+                    reader0 = new FileReader(file);
+                    reader = new BufferedReader(reader0);
+                    String title = reader.readLine();
+                    String start_cmd = reader.readLine();
+                    String stop_cmd = reader.readLine();
+                    int type = Integer.parseInt(reader.readLine());
+                    boolean requirement = Boolean.parseBoolean(reader.readLine());
+                    if(debug) Log.d("CustomAction", "Read from file " + file.getName() + ": " + title + ", " +
+                            start_cmd + ", " + stop_cmd + ", " + Integer.toString(type) + ", " + Boolean.toString(requirement));
+                    CustomAction action = new CustomAction(title, start_cmd, stop_cmd, type);
+                    if(type==TYPE_AP){
+                        action.setRequires_clients(requirement);
+                    }else{
+                        action.setRequires_connected(requirement);
+                    }
+                    reader.close();
+                    reader0.close();
+                }catch(IOException e){
+                    Log.e("CustomAction", "In load(): " + e.toString());
+                }
+            }
+        }
     }
 }

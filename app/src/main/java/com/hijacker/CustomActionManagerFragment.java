@@ -28,7 +28,6 @@ import android.widget.AdapterView;
 import android.widget.ListView;
 import android.widget.PopupMenu;
 
-import static com.hijacker.CustomAction.save;
 import static com.hijacker.MainActivity.FRAGMENT_CUSTOM;
 import static com.hijacker.MainActivity.currentFragment;
 import static com.hijacker.MainActivity.custom_action_adapter;
@@ -47,8 +46,8 @@ public class CustomActionManagerFragment extends Fragment{
                 popup.getMenuInflater().inflate(R.menu.popup_menu, popup.getMenu());
 
                 //add(groupId, itemId, order, title)
-                popup.getMenu().add(0, 0, 0, "Edit...");
-                popup.getMenu().add(0, 1, 1, "Delete");
+                popup.getMenu().add(0, 0, 0, getString(R.string.edit));
+                popup.getMenu().add(0, 1, 1, getString(R.string.delete));
 
                 popup.setOnMenuItemClickListener(new PopupMenu.OnMenuItemClickListener() {
                     public boolean onMenuItemClick(android.view.MenuItem item){
@@ -66,8 +65,9 @@ public class CustomActionManagerFragment extends Fragment{
                                 break;
                             case 1:
                                 //delete
-                                CustomAction.cmds.remove(index);
-                                save();
+                                ActionDeleteDialog dialog = new ActionDeleteDialog();
+                                dialog.index = index;
+                                dialog.show(getFragmentManager(), "ActionDeleteDialog");
                                 break;
                         }
                         return true;
