@@ -38,20 +38,20 @@ import java.util.List;
 
 import static com.hijacker.CustomAction.TYPE_AP;
 import static com.hijacker.CustomAction.TYPE_ST;
+import static com.hijacker.CustomAction.cmds;
 import static com.hijacker.MainActivity.FRAGMENT_CUSTOM;
 import static com.hijacker.MainActivity.currentFragment;
 import static com.hijacker.MainActivity.debug;
 import static com.hijacker.MainActivity.progress;
 
 public class CustomActionFragment extends Fragment{
-    static List<CustomAction> cmds = new ArrayList<>();
     static CustomAction selected_cmd=null;
     static AP ap=null;
     static ST st=null;
     static Shell shell=null;
     static Thread thread;
     static boolean cont;
-    Button start_button, select_target, select_cmd;
+    Button start_button, select_target, select_action;
     TextView console;
     static String console_text = null;
     @Override
@@ -84,10 +84,10 @@ public class CustomActionFragment extends Fragment{
         console.setMovementMethod(new ScrollingMovementMethod());
         start_button = (Button)v.findViewById(R.id.start_button);
         select_target = (Button)v.findViewById(R.id.select_target);
-        select_cmd = (Button)v.findViewById(R.id.select_cmd);
+        select_action = (Button)v.findViewById(R.id.select_action);
 
         if(selected_cmd!=null){
-            select_cmd.setText(selected_cmd.getTitle());
+            select_action.setText(selected_cmd.getTitle());
             select_target.setEnabled(true);
         }
         if(ap!=null){
@@ -102,7 +102,7 @@ public class CustomActionFragment extends Fragment{
             start_button.setText(R.string.stop);
         }
 
-        select_cmd.setOnClickListener(new View.OnClickListener(){
+        select_action.setOnClickListener(new View.OnClickListener(){
             @Override
             public void onClick(View view){
                 PopupMenu popup = new PopupMenu(getActivity(), view);
@@ -113,12 +113,12 @@ public class CustomActionFragment extends Fragment{
                 for(i=0;i<cmds.size();i++){
                     popup.getMenu().add(cmds.get(i).getType(), i, i, cmds.get(i).getTitle());
                 }
-                popup.getMenu().add(100, 0, i+1, "Manage commands...");
+                popup.getMenu().add(100, 0, i+1, "Manage actions...");
 
                 popup.setOnMenuItemClickListener(new PopupMenu.OnMenuItemClickListener() {
                     public boolean onMenuItemClick(android.view.MenuItem item){
                         if(item.getGroupId()==100){
-                            //Open commands manager
+                            //Open actions manager
                             FragmentTransaction ft = getFragmentManager().beginTransaction();
                             ft.replace(R.id.fragment1, new CustomActionManagerFragment());
                             ft.setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN);
@@ -127,7 +127,7 @@ public class CustomActionFragment extends Fragment{
                         }else{
                             selected_cmd = cmds.get(item.getItemId());
                             stop.obtainMessage().sendToTarget();
-                            select_cmd.setText(selected_cmd.getTitle());
+                            select_action.setText(selected_cmd.getTitle());
                             select_target.setEnabled(true);
                             select_target.setText(R.string.select_target);
                             start_button.setEnabled(false);
@@ -148,51 +148,49 @@ public class CustomActionFragment extends Fragment{
                 popup.getMenuInflater().inflate(R.menu.popup_menu, popup.getMenu());
 
                 //add(groupId, itemId, order, title)
-                int i, added=0;
+                int i;
                 if(selected_cmd.getType()==TYPE_AP){
                     AP temp;
                     for(i = 0; i<AP.APs.size(); i++){
                         temp = AP.APs.get(i);
-                        if(!selected_cmd.requires_clients() || temp.clients.size()>0){
-                            popup.getMenu().add(TYPE_AP, i, i, temp.essid + " (" + temp.mac + ")");
-                            added++;
+                        popup.getMenu().add(TYPE_AP, i, i, temp.essid + " (" + temp.mac + ")");
+                        if(selected_cmd.requires_clients() && temp.clients.size()==0){
+                            popup.getMenu().findItem(i).setEnabled(false);
                         }
                     }
                 }else{
                     ST temp;
                     for(i = 0; i<ST.STs.size(); i++){
                         temp = ST.STs.get(i);
-                        if(!selected_cmd.requires_connected() || temp.bssid!=null){
-                            popup.getMenu().add(TYPE_ST, i, i, temp.mac + " (" + temp.bssid + ")");
-                            added++;
+                        popup.getMenu().add(TYPE_ST, i, i, temp.mac + " (" + temp.bssid + ")");
+                        if(selected_cmd.requires_connected() && temp.bssid==null){
+                            popup.getMenu().findItem(i).setEnabled(true);
                         }
                     }
                 }
 
-                if(added>0){    //If we call show() but there are not items to show, there will be an empty popup, so the next touch will be "ignored"
-                    popup.setOnMenuItemClickListener(new PopupMenu.OnMenuItemClickListener(){
-                        public boolean onMenuItemClick(android.view.MenuItem item){
-                            switch(item.getGroupId()){
-                                case TYPE_AP:
-                                    //ap
-                                    ap = AP.APs.get(item.getItemId());
-                                    st = null;
-                                    select_target.setText(ap.essid + " (" + ap.mac + ")");
-                                    break;
-                                case TYPE_ST:
-                                    //st
-                                    st = ST.STs.get(item.getItemId());
-                                    ap = null;
-                                    select_target.setText(st.mac + " (" + st.bssid + ")");
-                                    break;
-                            }
-                            stop.obtainMessage().sendToTarget();
-                            start_button.setEnabled(true);
-                            return true;
+                popup.setOnMenuItemClickListener(new PopupMenu.OnMenuItemClickListener(){
+                    public boolean onMenuItemClick(android.view.MenuItem item){
+                        switch(item.getGroupId()){
+                            case TYPE_AP:
+                                //ap
+                                ap = AP.APs.get(item.getItemId());
+                                st = null;
+                                select_target.setText(ap.essid + " (" + ap.mac + ")");
+                                break;
+                            case TYPE_ST:
+                                //st
+                                st = ST.STs.get(item.getItemId());
+                                ap = null;
+                                select_target.setText(st.mac + " (" + st.bssid + ")");
+                                break;
                         }
-                    });
-                    popup.show();
-                }
+                        stop.obtainMessage().sendToTarget();
+                        start_button.setEnabled(true);
+                        return true;
+                    }
+                });
+                popup.show();
             }
         });
 

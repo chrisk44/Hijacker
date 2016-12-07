@@ -7,10 +7,10 @@
 
     <Button
         style="?android:attr/buttonBarButtonStyle"
-        android:text="@string/select_cmd"
+        android:text="@string/select_action"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:id="@+id/select_cmd"/>
+        android:id="@+id/select_action"/>
     <Button
         style="?android:attr/buttonBarButtonStyle"
         android:text="@string/select_target"

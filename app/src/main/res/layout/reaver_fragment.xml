@@ -99,10 +99,10 @@
         android:fontFamily="serif-monospace"/>
 
     <Button
-        style="?android:attr/buttonBarButtonStyle"
-        android:text="@string/start"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:id="@+id/start_button"/>
+    style="?android:attr/buttonBarButtonStyle"
+    android:text="@string/start"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:id="@+id/start_button"/>
 
 </LinearLayout>

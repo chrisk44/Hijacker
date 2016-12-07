@@ -183,8 +183,24 @@
     <string name="send_report">Send report</string>
 
     <!-- CustomCMDFragment -->
-    <string name="select_cmd">Select command</string>
+    <string name="select_action">Select action</string>
     <string name="select_target">Select target</string>
+    <string name="custom_action_editor">Custom Action Editor</string>
+    <string name="custom_action_editor_message">You can use the following variables:\n
+        $IFACE, $PREFIX, $AIRODUMP_DIR, $AIREPLAY_DIR, $MDK3_DIR, $REAVER_DIR\n
+        AP: $MAC, $ESSID, $CH, $ENC, $CIPHER, $AUTH\n
+        ST: $MAC, $BSSID\n
+        The start command will be ran when you run the action and the stop will be ran ONLY when you want to interrupt it.\n
+        Go back to discard any changes.</string>
+    <string name="custom_action_title">Title</string>
+    <string name="start_command">Start command</string>
+    <string name="stop_command">Stop command</string>
+    <string name="save">Save</string>
+    <string name="saved">Saved action</string>
+    <string name="requires_associated">Requires associated</string>
+    <string name="requires_clients">Requires clients</string>
+    <string name="title_empty">Title cannot be empty</string>
+    <string name="start_cmd_empty">Start command cannot be empty</string>
 
     <!-- Default Preferences -->
     <string name="iface" translatable="false">wlan0</string>

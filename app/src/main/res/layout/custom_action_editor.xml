@@ -1,0 +1,108 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+              android:orientation="vertical"
+              android:layout_width="match_parent"
+              android:layout_height="match_parent"
+              android:padding="10dp">
+
+    <TextView
+        android:text="@string/custom_action_editor_message"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:id="@+id/textView3"/>
+
+    <RadioGroup
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:padding="5dp"
+        android:id="@+id/radio_group">
+
+        <RadioButton
+            android:text="Access Point"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:id="@+id/ap_rb"
+            android:layout_weight="1"/>
+
+        <RadioButton
+            android:text="Station"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:id="@+id/st_rb"
+            android:layout_weight="1"/>
+    </RadioGroup>
+
+    <TextView
+        android:text="@string/custom_action_title"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:labelFor="@+id/title"
+        android:textColor="?android:attr/textColorPrimary"
+        android:textSize="18sp"/>
+
+    <EditText
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:inputType="text"
+        android:ems="10"
+        android:id="@+id/title"
+        android:enabled="false"/>
+
+    <TextView
+        android:text="@string/start_command"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:labelFor="@+id/start_cmd"
+        android:textColor="?android:attr/textColorPrimary"
+        android:textSize="18sp"/>
+
+    <EditText
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:inputType="text"
+        android:ems="10"
+        android:id="@+id/start_cmd"
+        android:hint="echo $MAC"
+        android:enabled="false"/>
+
+    <TextView
+        android:text="@string/stop_command"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:labelFor="@+id/stop_cmd"
+        android:textColor="?android:attr/textColorPrimary"
+        android:textSize="18sp"/>
+
+    <EditText
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:inputType="text"
+        android:ems="10"
+        android:id="@+id/stop_cmd"
+        android:hint="echo $MAC"
+        android:enabled="false"/>
+
+    <CheckBox
+        android:text="Requires clients"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:id="@+id/requirement"
+        android:enabled="false"
+        />
+
+    <Space
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_gravity="bottom"
+        android:layout_weight="1"/>
+
+    <Button
+        style="?android:attr/buttonBarButtonStyle"
+        android:text="@string/save"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:id="@+id/save_button"
+        android:enabled="false"/>
+
+</LinearLayout>

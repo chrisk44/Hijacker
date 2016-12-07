@@ -18,18 +18,77 @@ package com.hijacker;
  */
 
 import android.app.Fragment;
+import android.app.FragmentTransaction;
 import android.os.Bundle;
+import android.support.design.widget.FloatingActionButton;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AdapterView;
+import android.widget.ListView;
+import android.widget.PopupMenu;
 
+import static com.hijacker.CustomAction.save;
 import static com.hijacker.MainActivity.FRAGMENT_CUSTOM;
 import static com.hijacker.MainActivity.currentFragment;
+import static com.hijacker.MainActivity.custom_action_adapter;
 
 public class CustomActionManagerFragment extends Fragment{
     @Override
     public View onCreateView(LayoutInflater inflater, final ViewGroup container, Bundle savedInstanceState){
         View v = inflater.inflate(R.layout.custom_action_manager, container, false);
+
+        ListView list = (ListView)v.findViewById(R.id.list);
+        list.setAdapter(custom_action_adapter);
+        list.setOnItemClickListener(new AdapterView.OnItemClickListener(){
+            @Override
+            public void onItemClick(AdapterView<?> adapterView, View view, final int index, long l){
+                PopupMenu popup = new PopupMenu(getActivity(), view);
+                popup.getMenuInflater().inflate(R.menu.popup_menu, popup.getMenu());
+
+                //add(groupId, itemId, order, title)
+                popup.getMenu().add(0, 0, 0, "Edit...");
+                popup.getMenu().add(0, 1, 1, "Delete");
+
+                popup.setOnMenuItemClickListener(new PopupMenu.OnMenuItemClickListener() {
+                    public boolean onMenuItemClick(android.view.MenuItem item){
+                        switch(item.getItemId()){
+                            case 0:
+                                //Open editor for this
+                                CustomActionEditorFragment fragment = new CustomActionEditorFragment();
+                                fragment.action = CustomAction.cmds.get(index);
+
+                                FragmentTransaction ft = getFragmentManager().beginTransaction();
+                                ft.replace(R.id.fragment1, fragment);
+                                ft.setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN);
+                                ft.addToBackStack(null);
+                                ft.commit();
+                                break;
+                            case 1:
+                                //delete
+                                CustomAction.cmds.remove(index);
+                                save();
+                                break;
+                        }
+                        return true;
+                    }
+                });
+                popup.show();
+            }
+        });
+
+        FloatingActionButton fab = (FloatingActionButton)v.findViewById(R.id.floatingActionButton);
+        fab.setOnClickListener(new View.OnClickListener(){
+            @Override
+            public void onClick(View view){
+                //Open editor for new
+                FragmentTransaction ft = getFragmentManager().beginTransaction();
+                ft.replace(R.id.fragment1, new CustomActionEditorFragment());
+                ft.setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN);
+                ft.addToBackStack(null);
+                ft.commit();
+            }
+        });
 
         return v;
     }

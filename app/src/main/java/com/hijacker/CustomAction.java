@@ -17,6 +17,9 @@ package com.hijacker;
     along with this program.  If not, see <http://www.gnu.org/licenses/>
  */
 
+import java.util.ArrayList;
+import java.util.List;
+
 import static com.hijacker.MainActivity.PROCESS_AIREPLAY;
 import static com.hijacker.MainActivity.PROCESS_AIRODUMP;
 import static com.hijacker.MainActivity.PROCESS_MDK;
@@ -32,15 +35,16 @@ import static com.hijacker.MainActivity.reaver_dir;
 
 public class CustomAction{
     static final int TYPE_AP=0, TYPE_ST=1;
+    static List<CustomAction> cmds = new ArrayList<>();
     private String title, start_cmd, stop_cmd;
     private int type;
-    private boolean kill_airodump=false, kill_aireplay=false, kill_mdk=false, kill_reaver=false,
-            enable_mm=false, disable_mm=false, requires_clients=false, requires_connected=false;
+    private boolean requires_clients=false, requires_connected=false;
     CustomAction(String title, String start_cmd, String stop_cmd, int type){
         this.title = title;
         this.start_cmd = start_cmd;
         this.stop_cmd = stop_cmd;
         this.type = type;
+        cmds.add(this);
     }
 
     String getTitle(){ return title; }
@@ -49,13 +53,13 @@ public class CustomAction{
     boolean requires_clients(){ return requires_clients; }
     boolean requires_connected(){ return requires_connected; }
     int getType(){ return type; }
+    public void setTitle(String title){ this.title = title; }
+    public void setStart_cmd(String start_cmd){ this.start_cmd = start_cmd; }
+    public void setStop_cmd(String stop_cmd){ this.stop_cmd = stop_cmd; }
+    public void setRequires_clients(boolean requires_clients){ this.requires_clients = requires_clients; }
+    public void setRequires_connected(boolean requires_connected){ this.requires_connected = requires_connected; }
     void run(){
-        if(kill_airodump) MainActivity.stop(PROCESS_AIRODUMP);
-        if(kill_aireplay) MainActivity.stop(PROCESS_AIREPLAY);
-        if(kill_mdk) MainActivity.stop(PROCESS_MDK);
-        if(kill_reaver) MainActivity.stop(PROCESS_REAVER);
         Shell shell = CustomActionFragment.shell;
-        if(enable_mm) shell.run(enable_monMode);
         shell.run("export IFACE=\"" + iface + '\"');
         shell.run("export PREFIX=\"" + prefix + '\"');
         shell.run("export AIRODUMP_DIR=\"" + airodump_dir + '\"');
@@ -80,6 +84,9 @@ public class CustomAction{
     void stop(){
         Shell shell = CustomActionFragment.shell;
         shell.run(stop_cmd);
-        if(disable_mm) shell.run(disable_monMode);
+
+    }
+    static void save(){
+        //Save current cmds list to permanent storage
     }
 }

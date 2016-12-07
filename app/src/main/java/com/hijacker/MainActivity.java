@@ -65,6 +65,8 @@ import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
 
+import static com.hijacker.CustomAction.TYPE_AP;
+import static com.hijacker.CustomAction.TYPE_ST;
 import static com.hijacker.IsolatedFragment.is_ap;
 import static com.hijacker.MDKFragment.ados;
 import static com.hijacker.MDKFragment.ados_pid;
@@ -96,6 +98,7 @@ public class MainActivity extends AppCompatActivity{
     static Menu menu;
     static List<Item2> fifo;                    //List used as FIFO for handling calls to addAP/addST in an order
     static MyListAdapter adapter;
+    static CustomActionAdapter custom_action_adapter;
     static SharedPreferences pref;
     static SharedPreferences.Editor pref_edit;
     static ClipboardManager clipboard;
@@ -133,12 +136,14 @@ public class MainActivity extends AppCompatActivity{
         });
         adapter = new MyListAdapter();              //ALWAYS BEFORE setContentView AND setup(), can't stress it enough...
         adapter.setNotifyOnChange(true);
+        custom_action_adapter = new CustomActionAdapter();
+        custom_action_adapter.setNotifyOnChange(true);
         setContentView(R.layout.activity_main);
         setSupportActionBar((Toolbar) findViewById(R.id.my_toolbar));
         setup();
 
-        CustomActionFragment.cmds.add(new CustomAction("Custom1", "echo $MAC", "echo stopping", CustomAction.TYPE_AP));
-        CustomActionFragment.cmds.add(new CustomAction("Custom2", "echo $MAC", "echo stopping", CustomAction.TYPE_ST));
+        new CustomAction("Custom1", "echo $MAC", "echo stopping", TYPE_AP);
+        new CustomAction("Custom2", "echo $MAC", "echo stopping", TYPE_ST);
 
         refresh_thread = new Thread(new Runnable(){
             @Override
@@ -894,7 +899,7 @@ public class MainActivity extends AppCompatActivity{
             return Item.items.size();
         }
     }
-    class CustomActionAdapter extends ArrayAdapter<Item>{
+    class CustomActionAdapter extends ArrayAdapter<CustomAction>{
         CustomActionAdapter(){
             super(MainActivity.this, R.layout.listitem);
         }
@@ -908,27 +913,26 @@ public class MainActivity extends AppCompatActivity{
             }
 
             // find the item to work with
-            Item currentItem = Item.items.get(position);
+            CustomAction currentItem = CustomAction.cmds.get(position);
 
             TextView firstText = (TextView) itemview.findViewById(R.id.top_left);
-            firstText.setText(currentItem.s1);
+            firstText.setText(currentItem.getTitle());
 
             TextView secondText = (TextView) itemview.findViewById(R.id.bottom_left);
-            secondText.setText(currentItem.s2);
+            secondText.setText(currentItem.getStart_cmd());
 
             TextView thirdText = (TextView) itemview.findViewById(R.id.bottom_right);
-            thirdText.setText(currentItem.s3);
+            thirdText.setText("");
 
             TextView text4 = (TextView) itemview.findViewById(R.id.top_right);
-            text4.setText(currentItem.s4);
+            text4.setText("");
 
             //Image
             ImageView iv = (ImageView) itemview.findViewById(R.id.iv);
-            if(!currentItem.type){
+            if(currentItem.getType()==TYPE_ST){
                 iv.setImageResource(R.drawable.st2);
             }else{
-                if(currentItem.ap.isHidden) iv.setImageResource(R.drawable.ap_hidden);
-                else iv.setImageResource(R.drawable.ap2);
+                iv.setImageResource(R.drawable.ap2);
             }
 
             return itemview;
@@ -936,7 +940,7 @@ public class MainActivity extends AppCompatActivity{
 
         @Override
         public int getCount(){
-            return Item.items.size();
+            return CustomAction.cmds.size();
         }
     }
     public static void addAP(String essid, String mac, String enc, String cipher, String auth, int pwr, int beacons, int data, int ivs, int ch){
