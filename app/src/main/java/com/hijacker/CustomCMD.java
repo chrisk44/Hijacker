@@ -17,6 +17,13 @@ package com.hijacker;
     along with this program.  If not, see <http://www.gnu.org/licenses/>
  */
 
+import static com.hijacker.MainActivity.aireplay_dir;
+import static com.hijacker.MainActivity.airodump_dir;
+import static com.hijacker.MainActivity.iface;
+import static com.hijacker.MainActivity.mdk3_dir;
+import static com.hijacker.MainActivity.prefix;
+import static com.hijacker.MainActivity.reaver_dir;
+
 public class CustomCMD{
     static final int TYPE_AP=0, TYPE_ST=1;
     private String title, start_cmd, stop_cmd;
@@ -24,7 +31,7 @@ public class CustomCMD{
     private boolean running=false;
     CustomCMD(String title, String start_cmd, String stop_cmd, int type){
         this.title = title;
-        this.start_cmd = start_cmd + "; echo ENDOFCUSTOM";
+        this.start_cmd = start_cmd;
         this.stop_cmd = stop_cmd;
         this.type = type;
     }
@@ -37,18 +44,25 @@ public class CustomCMD{
     void setRunning(boolean running){ this.running = running; }
     void run(){
         Shell shell = CustomCMDFragment.shell;
+        shell.run("export IFACE=\"" + iface + '\"');
+        shell.run("export PREFIX=\"" + prefix + '\"');
+        shell.run("export AIRODUMP_DIR=\"" + airodump_dir + '\"');
+        shell.run("export AIREPLAY_DIR=\"" + aireplay_dir + '\"');
+        shell.run("export MDK3_DIR=\"" + mdk3_dir + '\"');
+        shell.run("export REAVER_DIR=\"" + reaver_dir + '\"');
         if(type==TYPE_AP){
-            shell.run("export MAC=" + CustomCMDFragment.ap.mac);
-            shell.run("export ESSID=" + CustomCMDFragment.ap.essid);
-            shell.run("export ENC=" + CustomCMDFragment.ap.enc);
-            shell.run("export CIPHER=" + CustomCMDFragment.ap.cipher);
-            shell.run("export AUTH=" + CustomCMDFragment.ap.auth);
-            shell.run("export CH=" + CustomCMDFragment.ap.ch);
+            shell.run("export MAC=\"" + CustomCMDFragment.ap.mac + '\"');
+            shell.run("export ESSID=\"" + CustomCMDFragment.ap.essid + '\"');
+            shell.run("export ENC=\"" + CustomCMDFragment.ap.enc + '\"');
+            shell.run("export CIPHER=\"" + CustomCMDFragment.ap.cipher + '\"');
+            shell.run("export AUTH=\"" + CustomCMDFragment.ap.auth + '\"');
+            shell.run("export CH=\"" + CustomCMDFragment.ap.ch + '\"');
         }else{
-            shell.run("export MAC=" + CustomCMDFragment.st.mac);
-            shell.run("export BSSID=" + CustomCMDFragment.st.bssid);
+            shell.run("export MAC=\"" + CustomCMDFragment.st.mac + '\"');
+            shell.run("export BSSID=\"" + CustomCMDFragment.st.bssid + '\"');
         }
         shell.run(start_cmd);
+        shell.run("echo ENDOFCUSTOM");
         CustomCMDFragment.thread.start();
     }
     void stop(){

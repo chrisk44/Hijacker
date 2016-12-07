@@ -53,10 +53,32 @@ public class CustomCMDFragment extends Fragment{
     static boolean cont;
     Button start_button, select_target, select_cmd;
     TextView console;
-    String console_text = null;
+    static String console_text = null;
     @Override
     public View onCreateView(LayoutInflater inflater, final ViewGroup container, Bundle savedInstanceState){
         View v = inflater.inflate(R.layout.custom_fragment, container, false);
+
+        thread = new Thread(new Runnable(){
+            @Override
+            public void run(){
+                if(debug) Log.d("CustomCMDFragment", "thread running");
+                BufferedReader out = shell.getShell_out();
+                try{
+                    Message msg;
+                    cont = true;
+                    String end = "ENDOFCUSTOM";
+                    String buffer = out.readLine();
+                    while(!end.equals(buffer) && cont){
+                        msg = new Message();
+                        msg.obj = buffer;
+                        refresh.sendMessage(msg);
+                        buffer = out.readLine();
+                    }
+                    stop.obtainMessage().sendToTarget();
+                    if(debug) Log.d("CustomCMDFragment", "thread done");
+                }catch(IOException ignored){}
+            }
+        });
 
         console = (TextView)v.findViewById(R.id.console);
         console.setMovementMethod(new ScrollingMovementMethod());
@@ -70,11 +92,11 @@ public class CustomCMDFragment extends Fragment{
         }
         if(ap!=null){
             start_button.setEnabled(true);
-            start_button.setText(ap.essid + " (" + ap.mac + ")");
+            select_target.setText(ap.essid + " (" + ap.mac + ")");
         }
         if(st!=null){
             start_button.setEnabled(true);
-            start_button.setText(st.mac + " (" + st.bssid + ")");
+            select_target.setText(st.mac + " (" + st.bssid + ")");
         }
         if(thread.isAlive()){
             start_button.setText(R.string.stop);
@@ -92,7 +114,7 @@ public class CustomCMDFragment extends Fragment{
                     popup.getMenu().add(TYPE_AP, i, i, ap_cmds.get(i).getTitle());
                 }
                 for(j=0;j<st_cmds.size();j++){
-                    popup.getMenu().add(TYPE_ST, j, i+j, st_cmds.get(i).getTitle());
+                    popup.getMenu().add(TYPE_ST, j, i+j, st_cmds.get(j).getTitle());
                 }
 
                 popup.setOnMenuItemClickListener(new PopupMenu.OnMenuItemClickListener() {
@@ -107,8 +129,13 @@ public class CustomCMDFragment extends Fragment{
                                 selected_cmd = st_cmds.get(item.getItemId());
                                 break;
                         }
+                        stop.obtainMessage().sendToTarget();
                         select_cmd.setText(selected_cmd.getTitle());
                         select_target.setEnabled(true);
+                        select_target.setText(R.string.select_target);
+                        start_button.setEnabled(false);
+                        ap = null;
+                        st = null;
                         return true;
                     }
                 });
@@ -154,52 +181,31 @@ public class CustomCMDFragment extends Fragment{
                                 select_target.setText(st.mac + " (" + st.bssid + ")");
                                 break;
                         }
+                        stop.obtainMessage().sendToTarget();
                         start_button.setEnabled(true);
                         return true;
                     }
                 });
-                popup.show();
+                if(i>0) popup.show();       //If we call show() but there are not items to show, there will be an empty popup, so the next touch will be "ignored"
             }
         });
 
         start_button.setOnClickListener(new View.OnClickListener(){
             @Override
             public void onClick(View view){
-                if(shell==null){        //same effect with !thread.isAlive()
+                if(!thread.isAlive()){        //same effect with !thread.isAlive()
                     //not started
                     shell = Shell.getFreeShell();
                     console.append("Running: " + selected_cmd.getStart_cmd() + '\n');
                     if(debug) Log.d("CustomCMDFragment", "Running: " + selected_cmd.getStart_cmd());
                     selected_cmd.run();
                     start_button.setText(R.string.stop);
+                    progress.setIndeterminate(true);
                 }else{
                     //started
                     selected_cmd.stop();
-                    shell.done();
-                    shell = null;
                     stop.obtainMessage().sendToTarget();
                 }
-            }
-        });
-
-        thread = new Thread(new Runnable(){
-            @Override
-            public void run(){
-                if(debug) Log.d("CustomCMDFragment", "thread running");
-                BufferedReader out = shell.getShell_out();
-                try{
-                    Message msg;
-                    String buffer = out.readLine();
-                    while(!buffer.equals("ENDOFCUSTOM") && cont){
-                        msg = new Message();
-                        msg.obj = buffer;
-                        refresh.sendMessage(msg);
-                    }
-                    msg = new Message();
-                    msg.obj = "\nDone\n";
-                    refresh.sendMessage(msg);
-                    stop.obtainMessage().sendToTarget();
-                }catch(IOException ignored){}
             }
         });
 
@@ -222,6 +228,8 @@ public class CustomCMDFragment extends Fragment{
             start_button.setText(R.string.start);
             cont = false;
             progress.setIndeterminate(false);
+            if(shell!=null) shell.done();
+            shell = null;
         }
     };
     public Handler refresh = new Handler(){

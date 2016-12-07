@@ -820,23 +820,21 @@ public class MainActivity extends AppCompatActivity{
                 FragmentTransaction ft = fm.beginTransaction();
                 switch(position){
                     case FRAGMENT_AIRODUMP:
-                        //Airodump
                         ft.replace(R.id.fragment1, is_ap==null ? new MyListFragment() : new IsolatedFragment());
                         break;
                     case FRAGMENT_MDK:
-                        //MDK3
                         ft.replace(R.id.fragment1, new MDKFragment());
                         break;
                     case FRAGMENT_CRACK:
-                        //Crack WPA
                         ft.replace(R.id.fragment1, new CrackFragment());
                         break;
                     case FRAGMENT_REAVER:
                         ft.replace(R.id.fragment1, new ReaverFragment());
-                        //Reaver
+                        break;
+                    case FRAGMENT_CUSTOM:
+                        ft.replace(R.id.fragment1, new CustomCMDFragment());
                         break;
                     case FRAGMENT_SETTINGS:
-                        //Settings
                         ft.replace(R.id.fragment1, new SettingsFragment());
                         break;
                 }
