@@ -188,7 +188,8 @@ public class CustomActionFragment extends Fragment{
                         return true;
                     }
                 });
-                popup.show();
+                if(popup.getMenu().size()>0) popup.show();
+
             }
         });
 
