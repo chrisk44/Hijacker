@@ -26,7 +26,7 @@ Root is also necessary, as these tools need root to work. If you don't grant roo
 * Reaver WPS cracking (pixie-dust attack using NetHunter chroot and external adapter)
 * .cap files cracking with custom wordlist
 * Save captured packets in .cap file
-* Let the user create custom commands to be ran on an access point or a client with one click
+* Create custom commands to be ran on an access point or a client with one click
 
 ##Installation:
 Make sure:
