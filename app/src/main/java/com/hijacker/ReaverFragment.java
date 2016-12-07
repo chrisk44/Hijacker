@@ -137,7 +137,7 @@ public class ReaverFragment extends Fragment{
                     try{
                         BufferedReader out;
                         Message msg;
-                        String args = "-i " + iface + " -vvv";
+                        String args = "-i " + iface + " -vv";
                         args += ap==null ? " -b " + custom_mac : " -b " + ap.mac + " --channel " + ap.ch;
                         args += " -d " + ((EditText)v.findViewById(R.id.pin_delay)).getText();
                         args += " -l " + ((EditText)v.findViewById(R.id.locked_delay)).getText();

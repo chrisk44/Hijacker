@@ -31,6 +31,8 @@ import static com.hijacker.MainActivity.copy;
 import static com.hijacker.MainActivity.iface;
 import static com.hijacker.MainActivity.mdk3_dir;
 import static com.hijacker.MainActivity.prefix;
+import static com.hijacker.MainActivity.reaver_dir;
+import static com.hijacker.ReaverFragment.get_chroot_env;
 
 public class CopySampleDialog extends DialogFragment {
     @Override
@@ -57,6 +59,12 @@ public class CopySampleDialog extends DialogFragment {
                         break;
                     case 3:
                         copy(prefix + " " + mdk3_dir + " " + iface + " b -m", getView());
+                        break;
+                    case 4:
+                        copy(prefix + " " + reaver_dir + " -i " + iface + " -vv -b 00:11:22:33:44:55 --channel 6 -L -E -S", getView());
+                        break;
+                    case 5:
+                        copy("chroot /data/local/nhsystem/kali-armhf /bin/bash -c \'" + get_chroot_env() + "reaver -i " + iface + " -vv -b 00:11:22:33:44:55 --channel 6 -L -E -S\'", getView());
                         break;
                 }
                 dismiss();
