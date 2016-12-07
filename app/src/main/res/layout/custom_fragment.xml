@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+              android:orientation="vertical"
+              android:layout_width="match_parent"
+              android:layout_height="match_parent"
+              android:padding="5dp">
+
+    <Button
+        style="?android:attr/buttonBarButtonStyle"
+        android:text="@string/select_cmd"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:id="@+id/select_cmd"/>
+    <Button
+        style="?android:attr/buttonBarButtonStyle"
+        android:text="@string/select_target"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:id="@+id/select_target"
+        android:enabled="false"/>
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:id="@+id/console"
+        android:background="@color/colorPrimary"
+        android:textColor="?android:attr/textColorPrimary"
+        android:nestedScrollingEnabled="true"
+        android:layout_marginTop="5dp"
+        android:padding="3dp"
+        android:textSize="10sp"
+        android:layout_weight="1"
+        android:scrollHorizontally="true"
+        android:saveEnabled="true"
+        android:gravity="bottom"
+        android:fontFamily="serif-monospace"/>
+
+    <Button
+        style="?android:attr/buttonBarButtonStyle"
+        android:text="@string/start"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:id="@+id/start_button"
+        android:enabled="false"/>
+
+</LinearLayout>

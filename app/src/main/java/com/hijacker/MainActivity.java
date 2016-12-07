@@ -26,7 +26,6 @@ import android.content.ClipboardManager;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
-import android.content.pm.PackageManager;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.Build;
@@ -77,7 +76,7 @@ import static com.hijacker.Shell.runOne;
 public class MainActivity extends AppCompatActivity{
     static final int AIREPLAY_DEAUTH = 1, AIREPLAY_WEP = 2;
     static final int FRAGMENT_AIRODUMP = 0, FRAGMENT_MDK = 1, FRAGMENT_CRACK = 2,
-            FRAGMENT_REAVER = 3, FRAGMENT_SETTINGS = 4;                     //These need to correspond to the items in the drawer
+            FRAGMENT_REAVER = 3, FRAGMENT_CUSTOM=4, FRAGMENT_SETTINGS = 5;                     //These need to correspond to the items in the drawer
     static final int PROCESS_AIRODUMP=0, PROCESS_AIREPLAY=1, PROCESS_MDK=2, PROCESS_AIRCRACK=3, PROCESS_REAVER=4;
     static final int MDK_BF=0, MDK_ADOS=1;
     //State variables
@@ -137,6 +136,9 @@ public class MainActivity extends AppCompatActivity{
         setContentView(R.layout.activity_main);
         setSupportActionBar((Toolbar) findViewById(R.id.my_toolbar));
         setup();
+
+        CustomCMDFragment.ap_cmds.add(new CustomCMD("Custom1", "echo $MAC", "echo stopping", CustomCMD.TYPE_AP));
+        CustomCMDFragment.st_cmds.add(new CustomCMD("Custom2", "echo $MAC", "echo stopping", CustomCMD.TYPE_ST));
 
         refresh_thread = new Thread(new Runnable(){
             @Override

@@ -159,7 +159,7 @@
     <string name="select_wep_bits">Select how many bits the key is</string>
 
     <!-- ReaverFragment -->
-    <string name="select_ap">Select AP</string>
+    <string name="select_ap">Select Access Point</string>
     <string name="pixie_dust">Use pixie-dust (requires NetHunter chroot)</string>
     <string name="ignore_locked">Ignore Locked State reported by the AP</string>
     <string name="eap_fail">Terminate each session with EAP FAIL</string>
@@ -181,6 +181,10 @@
         It contains the app version, the Android version, the model of your device, and a Logcat to help troubleshoot the problem. Below is the report.txt that will be sent.
         Click \"Send report\" to report the problem.</string>
     <string name="send_report">Send report</string>
+
+    <!-- CustomCMDFragment -->
+    <string name="select_cmd">Select command</string>
+    <string name="select_target">Select target</string>
 
     <!-- Default Preferences -->
     <string name="iface" translatable="false">wlan0</string>

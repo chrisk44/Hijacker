@@ -55,7 +55,6 @@ import static com.hijacker.MainActivity.prefix;
 import static com.hijacker.MainActivity.progress;
 import static com.hijacker.MainActivity.reaver_dir;
 import static com.hijacker.MainActivity.stop;
-import static com.hijacker.Shell.getFreeShell;
 import static com.hijacker.Shell.runOne;
 
 public class ReaverFragment extends Fragment{
