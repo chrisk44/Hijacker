@@ -78,7 +78,7 @@ public class MainActivity extends AppCompatActivity{
     static final int AIREPLAY_DEAUTH = 1, AIREPLAY_WEP = 2;
     static final int FRAGMENT_AIRODUMP = 0, FRAGMENT_MDK = 1, FRAGMENT_CRACK = 2,
             FRAGMENT_REAVER = 3, FRAGMENT_CUSTOM=4, FRAGMENT_SETTINGS = 5;                     //These need to correspond to the items in the drawer
-    static final int PROCESS_AIRODUMP=0, PROCESS_AIREPLAY=1, PROCESS_MDK=2, PROCESS_AIRCRACK=3, PROCESS_REAVER=4;
+    static final int PROCESS_ALL=-1, PROCESS_AIRODUMP=0, PROCESS_AIREPLAY=1, PROCESS_MDK=2, PROCESS_AIRCRACK=3, PROCESS_REAVER=4;
     static final int MDK_BF=0, MDK_ADOS=1;
     //State variables
     static boolean cont = false, wpacheckcont = false, done = true, notif_on = false;  //done: for calling refreshHandler only when it has stopped
@@ -87,7 +87,7 @@ public class MainActivity extends AppCompatActivity{
     static boolean show_ap = true, show_st = true, show_na_st = true, wpa = true, wep = true, opn = true;
     static boolean show_ch[] = {true, false, false, false, false, false, false, false, false, false, false, false, false, false, false};
     static int pwr_filter = 120;
-    static TextView tv, ap_count, st_count;                               //Log textview, AP and ST count textviews in toolbar
+    static TextView ap_count, st_count;                               //Log textview, AP and ST count textviews in toolbar
     static ProgressBar progress;
     static Toolbar toolbar;
     static Drawable overflow[] = {null, null, null, null, null, null, null, null};      //Drawables to use for overflow button icon
@@ -114,7 +114,7 @@ public class MainActivity extends AppCompatActivity{
     static String iface, prefix, airodump_dir, aireplay_dir, aircrack_dir, mdk3_dir, reaver_dir, cap_dir, chroot_dir,
             enable_monMode, disable_monMode, custom_chroot_cmd;
     static int deauthWait;
-    static boolean showLog, show_notif, show_details, airOnStartup, debug, confirm_exit, delete_extra, manuf_while_ados,
+    static boolean show_notif, show_details, airOnStartup, debug, confirm_exit, delete_extra, manuf_while_ados,
             monstart, always_cap, cont_on_fail;
 
     @Override
@@ -144,16 +144,16 @@ public class MainActivity extends AppCompatActivity{
         refresh_thread = new Thread(new Runnable(){
             @Override
             public void run(){
-                if(debug) Log.d("refresh_thread", "refresh_thread running");
-                while(cont){
-                    try{
+            if(debug) Log.d("refresh_thread", "refresh_thread running");
+                try{
+                    while(cont){
                         Thread.sleep(1000);
-                    }catch(InterruptedException e){
-                        Log.e("Exception", "Caught Exception in main() refresh_thread block: " + e.toString());
+                        if(done){
+                            refreshHandler.obtainMessage().sendToTarget();
+                        }
                     }
-                    if(done){
-                        refreshHandler.obtainMessage().sendToTarget();
-                    }
+                }catch(InterruptedException e){
+                    Log.e("Exception", "Caught Exception in main() refresh_thread block: " + e.toString());
                 }
             }
         });
@@ -194,13 +194,12 @@ public class MainActivity extends AppCompatActivity{
                             Log.d("wpa_thread", "Returning...");
                         }
                     }else{
-                        if(!showLog) Snackbar.make(getCurrentFocus(), getString(R.string.cap_is) + capfile, Snackbar.LENGTH_LONG).show();
+                        Snackbar.make(getCurrentFocus(), getString(R.string.cap_is) + capfile, Snackbar.LENGTH_LONG).show();
                         progress_int = 0;
                         wpacheckcont = true;
                         wpa_subthread.start();
                         while(result!=1 && wpacheckcont){
                             if(debug) Log.d("wpa_thread", "Checking cap file...");
-                            if(progress_int>deauthWait) appendDot.obtainMessage().sendToTarget();
                             shell.run(aircrack_dir + " " + capfile + " && echo ENDOFAIR");
                             BufferedReader out = shell.getShell_out();
                             buffer = out.readLine();
@@ -311,7 +310,6 @@ public class MainActivity extends AppCompatActivity{
             }
         }).start();
         refresh_thread.start();
-        tv.append("Airodump: " + temp + "\n");
         airodump_running = 1;
         refreshState();
         if(menu!=null) menu.getItem(1).setIcon(R.drawable.stop);
@@ -323,7 +321,6 @@ public class MainActivity extends AppCompatActivity{
             if(debug) Log.d("_startAireplay", cmd);
             Runtime.getRuntime().exec(cmd);
         }catch(IOException e){ Log.e("Exception", "Caught Exception in _startAireplay() start block: " + e.toString()); }
-        tv.append("Aireplay: " + str + "\n");
         menu.getItem(3).setEnabled(true);       //Enable 'Stop aireplay' button
         refreshState();
         notification();
@@ -351,7 +348,6 @@ public class MainActivity extends AppCompatActivity{
         switch(mode){
             case MDK_BF:
                 //beacon flood mode
-                tv.append("Beacon Flood\n");
                 try{
                     String cmd = "su -c " + prefix + " " + mdk3_dir + " " + iface + " b -m";
                     if(str!=null) cmd += " -f " + str;
@@ -363,7 +359,6 @@ public class MainActivity extends AppCompatActivity{
                 break;
             case MDK_ADOS:
                 //Authentication DoS mode
-                tv.append("Authentication DoS" + str + "\n");
                 try{
                     String cmd = "su -c " + prefix + " " + mdk3_dir + " " + iface + " a -m";
                     cmd += str==null ? "" : " -i " + str;
@@ -418,6 +413,9 @@ public class MainActivity extends AppCompatActivity{
                 case PROCESS_REAVER:
                     shell.run("ps | grep reav; echo ENDOFPS");
                     break;
+                case PROCESS_ALL:
+                    shell.run("ps; echo ENDOFPS");
+                    break;
             }
             BufferedReader shell_out = shell.getShell_out();
             while(s==null){ s = shell_out.readLine(); } //for some reason sometimes s remains null
@@ -438,6 +436,7 @@ public class MainActivity extends AppCompatActivity{
         if(pr<=4) pids = getPIDs(pr);
         switch(pr){
             case PROCESS_AIRODUMP:
+                refresh_thread.interrupt();
                 progress.setIndeterminate(false);
                 progress.setProgress(deauthWait);
                 if(menu!=null) menu.getItem(1).setIcon(R.drawable.run);
@@ -447,7 +446,6 @@ public class MainActivity extends AppCompatActivity{
                     wpacheckcont = false;
                     wpa_thread.interrupt();
                 }
-                tv.append("Stopping airodump\n");
                 airodump_running = 0;
                 Item.filter();
                 if(delete_extra){
@@ -456,7 +454,6 @@ public class MainActivity extends AppCompatActivity{
                 }
                 break;
             case PROCESS_AIREPLAY:
-                tv.append("Stopping aireplay\n");
                 if(menu!=null) menu.getItem(3).setEnabled(false);
                 if(delete_extra && aireplay_running==AIREPLAY_WEP){
                     runOne("rm -rf " + cap_dir + "/wep_ivs-*.csv");
@@ -466,15 +463,12 @@ public class MainActivity extends AppCompatActivity{
                 progress_int = deauthWait;
                 break;
             case PROCESS_MDK:
-                tv.append("Stopping mdk3\n");
                 ados = false;
                 bf = false;
                 break;
             case PROCESS_AIRCRACK:
-                tv.append("Stopping aircrack\n");
                 break;
             case PROCESS_REAVER:
-                tv.append("Stopping reaver\n");
                 break;
             default:
                 pids.add(pr);
@@ -499,23 +493,15 @@ public class MainActivity extends AppCompatActivity{
         public void handleMessage(Message msg){
             stop(PROCESS_AIRODUMP);
             stop(PROCESS_AIREPLAY);
-            tv.setText(getString(R.string.handshake_captured) + msg.obj + '\n');
-            if(!showLog){
-                Snackbar snackbar = Snackbar.make(getCurrentFocus(), getString(R.string.handshake_captured) + msg.obj + '\n', Snackbar.LENGTH_LONG);
-                snackbar.show();
-            }
+            Snackbar snackbar = Snackbar.make(getCurrentFocus(), getString(R.string.handshake_captured) + msg.obj + '\n', Snackbar.LENGTH_LONG);
+            snackbar.show();
             progress.setIndeterminate(false);
         }
     };
     public Handler stopAireplayForHandshake = new Handler(){
         public void handleMessage(Message msg){
-            stop(PROCESS_AIREPLAY);
-            tv.append(getString(R.string.stopped_to_capture) + '\n');
-            tv.append(getString(R.string.checking));
-            if(!showLog){
-                Snackbar snackbar = Snackbar.make(getCurrentFocus(), getString(R.string.stopped_to_capture), Snackbar.LENGTH_LONG);
-                snackbar.show();
-            }
+            stop(PROCESS_AIREPLAY);Snackbar snackbar = Snackbar.make(getCurrentFocus(), getString(R.string.stopped_to_capture), Snackbar.LENGTH_LONG);
+            snackbar.show();
             progress.setIndeterminate(true);
         }
     };
@@ -523,11 +509,6 @@ public class MainActivity extends AppCompatActivity{
         public void handleMessage(Message msg){
             progress.setIndeterminate(false);
             progress.setProgress(deauthWait);
-        }
-    };
-    public static Handler appendDot = new Handler(){
-        public void handleMessage(Message msg){
-            tv.append(".");
         }
     };
     public static Handler refreshHandler = new Handler(){
@@ -556,7 +537,6 @@ public class MainActivity extends AppCompatActivity{
     };
 
     void setup(){
-        tv = (TextView) findViewById(R.id.tv);
         ap_count = (TextView) findViewById(R.id.ap_count);
         st_count = (TextView) findViewById(R.id.st_count);
         fifo = new ArrayList<>();
@@ -588,7 +568,6 @@ public class MainActivity extends AppCompatActivity{
         enable_monMode = getString(R.string.enable_monMode);
         disable_monMode = getString(R.string.disable_monMode);
         deauthWait = Integer.parseInt(getString(R.string.deauthWait));
-        showLog = Boolean.parseBoolean(getString(R.string.showLog));
         show_notif = Boolean.parseBoolean(getString(R.string.show_notif));
         show_details = Boolean.parseBoolean(getString(R.string.show_details));
         airOnStartup = Boolean.parseBoolean(getString(R.string.airOnStartup));
@@ -666,9 +645,6 @@ public class MainActivity extends AppCompatActivity{
     static void load(){
         //Load Preferences
         if(debug) Log.d("Main", "Loading preferences...");
-        showLog = pref.getBoolean("showLog", showLog);
-        if(showLog && currentFragment!=FRAGMENT_SETTINGS) tv.setMaxHeight(999999);
-        else tv.setMaxHeight(0);
 
         iface = pref.getString("iface", iface);
         prefix = pref.getString("prefix", prefix);
@@ -702,7 +678,6 @@ public class MainActivity extends AppCompatActivity{
         switch(item.getItemId()){
             case R.id.reset:
                 Item.clear();
-                tv.setText("");
                 ap_count.setText("0");
                 st_count.setText("0");
                 stop(PROCESS_AIRODUMP);
@@ -947,7 +922,6 @@ public class MainActivity extends AppCompatActivity{
         fifo.add(new Item2(mac, bssid, pwr, lost, frames));
     }
     public void onAPStats(View v){ new StatsDialog().show(fm, "asdTAG4"); }
-    public void onClearLog(View v){ tv.setText(""); }
     public void onCrack(View v){
         //Clicked crack with isolated ap
         if(wpa_thread.isAlive()){

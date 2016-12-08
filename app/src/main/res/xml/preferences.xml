@@ -66,10 +66,6 @@
             android:key="debug"
             android:summary="@string/debug_sum" />
         <SwitchPreference
-            android:defaultValue="@string/showLog"
-            android:title="@string/log"
-            android:key="showLog" />
-        <SwitchPreference
             android:defaultValue="@string/confirm_exit"
             android:title="@string/exit_title"
             android:key="confirm_exit"

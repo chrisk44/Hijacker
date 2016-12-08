@@ -23,8 +23,7 @@
             android:background="?attr/colorPrimary"
             android:elevation="4dp"
             android:theme="@style/ThemeOverlay.AppCompat.ActionBar"
-            app:popupTheme="@style/ThemeOverlay.AppCompat.Light"
-            >
+            app:popupTheme="@style/ThemeOverlay.AppCompat.Light">
 
             <ImageView
                 android:layout_height="@android:dimen/app_icon_size"
@@ -79,23 +78,12 @@
             android:layout_below="@+id/my_toolbar"
             android:maxHeight="5dp" />
 
-        <TextView
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:id="@+id/tv"
-            android:layout_below="@+id/progressBar"
-            android:textSize="8sp"
-            android:clickable="true"
-            android:onClick="onClearLog"
-            android:paddingLeft="5dp"
-            android:paddingRight="5dp" />
-
         <fragment
             android:id="@+id/fragment1"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:name="com.hijacker.MyListFragment"
-            android:layout_below="@+id/tv"
+            android:layout_below="@+id/progressBar"
             android:layout_marginTop="3dp" />
 
     </RelativeLayout>

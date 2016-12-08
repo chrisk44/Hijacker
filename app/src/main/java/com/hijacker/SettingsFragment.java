@@ -29,7 +29,6 @@ import static com.hijacker.MainActivity.FRAGMENT_SETTINGS;
 import static com.hijacker.MainActivity.currentFragment;
 import static com.hijacker.MainActivity.load;
 import static com.hijacker.MainActivity.path;
-import static com.hijacker.MainActivity.tv;
 
 public class SettingsFragment extends PreferenceFragment {
     SharedPreferences.OnSharedPreferenceChangeListener listener;
@@ -50,7 +49,6 @@ public class SettingsFragment extends PreferenceFragment {
             }
         }
 
-        tv.setMaxHeight(0);
         findPreference("test_tools").setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
             @Override
             public boolean onPreferenceClick(Preference preference) {

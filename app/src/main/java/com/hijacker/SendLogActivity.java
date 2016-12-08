@@ -70,7 +70,6 @@ import static com.hijacker.MainActivity.path;
 import static com.hijacker.MainActivity.prefix;
 import static com.hijacker.MainActivity.ps;
 import static com.hijacker.MainActivity.reaver_dir;
-import static com.hijacker.MainActivity.showLog;
 import static com.hijacker.MainActivity.show_details;
 import static com.hijacker.MainActivity.show_notif;
 
@@ -178,7 +177,6 @@ public class SendLogActivity extends AppCompatActivity{
             writer.write("\tenable_monMode: " + enable_monMode + '\n');
             writer.write("\tdisable_monMode: " + disable_monMode + '\n');
             writer.write("\tdeauthWait: " + Integer.toString(deauthWait) + '\n');
-            writer.write("\tshowLog: " + Boolean.toString(showLog) + '\n');
             writer.write("\tshow_notif: " + Boolean.toString(show_notif) + '\n');
             writer.write("\tshow_details: " + Boolean.toString(show_details) + '\n');
             writer.write("\tairOnStartup: " + Boolean.toString(airOnStartup) + '\n');

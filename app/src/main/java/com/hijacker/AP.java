@@ -142,7 +142,6 @@ class AP {
             //wpa/wpa2
             wpacheckcont = false;           //Make sure wpa threads are not running from previous cracking
             wpa_thread.interrupt();
-            MainActivity.tv.setText("");
             while(wpa_thread.isAlive())      //Wait for everything to shutdown
             if(debug) Log.d("AP", "Cracking WPA/WPA2");
             startAirodump("--channel " + this.ch + " --bssid " + this.mac + " -w " + cap_dir + "/handshake");
