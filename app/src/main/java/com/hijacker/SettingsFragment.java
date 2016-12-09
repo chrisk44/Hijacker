@@ -21,11 +21,14 @@ import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.preference.Preference;
 import android.preference.PreferenceFragment;
+import android.preference.SwitchPreference;
 import android.widget.Toast;
 
 import java.io.File;
 
 import static com.hijacker.MainActivity.FRAGMENT_SETTINGS;
+import static com.hijacker.MainActivity.big_brother;
+import static com.hijacker.MainActivity.big_brother_thread;
 import static com.hijacker.MainActivity.currentFragment;
 import static com.hijacker.MainActivity.load;
 import static com.hijacker.MainActivity.path;
@@ -108,6 +111,8 @@ public class SettingsFragment extends PreferenceFragment {
             @Override
             public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key) {
                 load();
+                if(big_brother && !big_brother_thread.isAlive()) big_brother_thread.start();
+                if(!big_brother && big_brother_thread.isAlive()) big_brother_thread.interrupt();
             }
         };
         getPreferenceManager().getSharedPreferences().registerOnSharedPreferenceChangeListener(listener);

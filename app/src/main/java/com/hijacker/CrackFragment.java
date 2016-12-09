@@ -42,8 +42,10 @@ import java.io.InputStreamReader;
 import static com.hijacker.MainActivity.FRAGMENT_CRACK;
 import static com.hijacker.MainActivity.PROCESS_AIRCRACK;
 import static com.hijacker.MainActivity.aircrack_dir;
+import static com.hijacker.MainActivity.cap_dir;
 import static com.hijacker.MainActivity.currentFragment;
 import static com.hijacker.MainActivity.debug;
+import static com.hijacker.MainActivity.getLastLine;
 import static com.hijacker.MainActivity.path;
 import static com.hijacker.MainActivity.progress;
 import static com.hijacker.MainActivity.stop;
@@ -69,6 +71,14 @@ public class CrackFragment extends Fragment{
             //Disable all the WEP options
             wep_rg.getChildAt(i).setEnabled(false);
         }
+
+        Shell shell = Shell.getFreeShell();
+        shell.run("ls -1 " + cap_dir + "/handshake-*.cap; echo ENDOFLS");
+        capfile = getLastLine(shell.getShell_out(), "ENDOFLS");
+        if(!capfile.equals("ENDOFLS")){
+            ((EditText)v.findViewById(R.id.capfile)).setText(capfile);
+        }
+        shell.done();
 
         thread = new Thread(new Runnable(){
             @Override

@@ -50,6 +50,9 @@ public class InstallFirmwareDialog extends DialogFragment {
         if(!(new File("/su").exists())){
             ((EditText)view.findViewById(R.id.util_location)).setText("/system/xbin");
         }
+        if(new File(path + "/fw_bcmdhd.orig.bin").exists()){
+            ((CheckBox)view.findViewById(R.id.backup)).setChecked(false);
+        }
         shell = Shell.getFreeShell();
 
         builder.setView(view);

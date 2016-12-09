@@ -24,14 +24,22 @@ import android.os.Bundle;
 import android.support.v7.app.AlertDialog;
 import android.util.Log;
 
+import static com.hijacker.MainActivity.big_brother;
+import static com.hijacker.MainActivity.big_brother_thread;
+
 public class ErrorDialog extends DialogFragment {
     String message;
-    String title = getString(R.string.error);
+    String title=null;
     @Override
     public Dialog onCreateDialog(Bundle savedInstanceState) {
+        if(title==null) title = getString(R.string.error);
         AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
         builder.setPositiveButton(R.string.ok, new DialogInterface.OnClickListener() {
-            public void onClick(DialogInterface dialog, int id) {}
+            public void onClick(DialogInterface dialog, int id) {
+                if(!big_brother_thread.isAlive() && big_brother){
+                    big_brother_thread.start();   //If the error was from there restart the thread
+                }
+            }
         });
         builder.setNeutralButton(R.string.exit, new DialogInterface.OnClickListener() {
             @Override

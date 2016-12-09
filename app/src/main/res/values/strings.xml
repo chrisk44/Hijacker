@@ -27,6 +27,16 @@
     <string name="drawer_close">Close Drawer</string>
     <string name="ados_running">Authentication DoS is already running</string>
     <string name="disconnect_started">Disconnect All started</string>
+    <string name="big_brother_message">This could be caused by busybox (installed by you) or toolbox (installed by the app) not being installed</string>
+    <string name="airodump_still_running">Airodump is still running!</string>
+    <string name="airodump_not_running">Airodump is not running!</string>
+    <string name="aireplay_still_running">Aireplay is still running!</string>
+    <string name="aireplay_not_running">Aireplay is not running!</string>
+    <string name="mdk_still_running">MDK3 is still running!</string>
+    <string name="mdk_not_running">MDK3 is not running!</string>
+    <string name="reaver_still_running">Reaver is still running!</string>
+    <string name="reaver_not_running">Reaver is not running</string>
+    <string name="oui_not_found">oui.txt file was not extracted. Manufacturer detection will not work. Restart the app to try again.</string>
 
     <!-- wpa_thread -->
     <string name="stopped_to_capture">Stopped aireplay to capture handshake…</string>
@@ -235,6 +245,7 @@
     <string name="manuf_while_ados" translatable="false">false</string>
     <string name="always_cap" translatable="false">false</string>
     <string name="cont_on_fail" translatable="false">false</string>
+    <string name="big_brother" translatable="false">true</string>
 
     <!-- Settings -->
     <string name="general">General</string>
@@ -267,7 +278,7 @@
     <string name="always_cap_sum">Create a .cap file every time airodump-ng starts</string>
 
     <string name="delete_extra_title">Delete extra cap files</string>
-    <string name="delete_extra_sum">Delete .csv and .netxml files created by airodump when cracking a network</string>
+    <string name="delete_extra_sum">Delete .csv and .netxml files created by airodump when saving to .cap file</string>
 
     <string name="deauthWait_title">WPA Deauth wait (sec)</string>
     <string name="deauthWait_sum">Time to deauthenticate clients when cracking WPA</string>
@@ -282,10 +293,12 @@
     <string name="notif_details_title">Show details</string>
     <string name="notif_details_sum">Show additional details about aireplay and mdk in notification</string>
 
-    <string name="log">Show Log</string>
-
     <string name="debug_title">Logcat Messages</string>
     <string name="debug_sum">Print debugging messages to logcat. Messages about exceptions will be printed anyway.</string>
+
+    <string name="big_brother_title">Big Brother</string>
+    <string name="big_brother_sum">Run a background thread to verify that the tools that are supposed to be running, are actually running.
+        Disable this if you are getting false positives.</string>
 
     <string name="exit_title">Confirm Exit</string>
     <string name="exit_sum">Show a confirmation dialog when pressing back from the home screen</string>
@@ -352,5 +365,5 @@
     <string name="no_backup">There is no backup. It is created when you install the tools through the app.</string>
     <string name="reset_title">Reset Preferences</string>
     <string name="version_title">Version</string>
-    <string name="version" translatable="false">v1-beta.19</string>
+    <string name="version" translatable="false">v1-beta.20</string>
 </resources>

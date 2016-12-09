@@ -62,6 +62,7 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -93,7 +94,7 @@ public class MainActivity extends AppCompatActivity{
     static Drawable overflow[] = {null, null, null, null, null, null, null, null};      //Drawables to use for overflow button icon
     static ImageView[] status = {null, null, null, null, null};                                     //Icons in TestDialog, set in TestDialog class
     static int progress_int;
-    static Thread refresh_thread, wpa_thread;
+    static Thread refresh_thread, wpa_thread, big_brother_thread;
     static Menu menu;
     static List<Item2> fifo;                    //List used as FIFO for handling calls to addAP/addST in an order
     static MyListAdapter adapter;
@@ -104,7 +105,7 @@ public class MainActivity extends AppCompatActivity{
     static NotificationCompat.Builder notif;
     static NotificationManager nm;
     static FragmentManager fm;
-    static String path;             //Path for oui.txt
+    static String path;             //App files path (ends with .../files)
     static boolean init=false;      //True on first run to swap the dialogs for initialization
     private GoogleApiClient client;
     private String[] mPlanetTitles;
@@ -115,7 +116,7 @@ public class MainActivity extends AppCompatActivity{
             enable_monMode, disable_monMode, custom_chroot_cmd;
     static int deauthWait;
     static boolean show_notif, show_details, airOnStartup, debug, confirm_exit, delete_extra, manuf_while_ados,
-            monstart, always_cap, cont_on_fail;
+            monstart, always_cap, cont_on_fail, big_brother;
 
     @Override
     protected void onCreate(Bundle savedInstanceState){
@@ -143,18 +144,14 @@ public class MainActivity extends AppCompatActivity{
 
         refresh_thread = new Thread(new Runnable(){
             @Override
-            public void run(){
+            public void run(){          //TODO: this doesn't finish on android 6, causing Thread.IllegalStateSomethingException
             if(debug) Log.d("refresh_thread", "refresh_thread running");
-                try{
-                    while(cont){
-                        Thread.sleep(1000);
-                        if(done){
-                            refreshHandler.obtainMessage().sendToTarget();
-                        }
-                    }
-                }catch(InterruptedException e){
-                    Log.e("Exception", "Caught Exception in main() refresh_thread block: " + e.toString());
+            try{
+                while(cont){
+                    if(done) refreshHandler.obtainMessage().sendToTarget();
+                    Thread.sleep(1000);
                 }
+            }catch(InterruptedException e){ Log.e("Exception", "Caught Exception in main() refresh_thread block: " + e.toString()); }
             }
         });
         wpa_thread = new Thread(new Runnable(){
@@ -185,14 +182,14 @@ public class MainActivity extends AppCompatActivity{
                 try{
                     Thread.sleep(1000);
                     shell.run("ls -1 " + cap_dir + "/handshake-*.cap; echo ENDOFLS");
-                    capfile = getLastLine(shell.getShell_out(), "ENDOFLS");
+                        capfile = getLastLine(shell.getShell_out(), "ENDOFLS");
 
-                    if(debug) Log.d("wpa_thread", capfile);
-                    if(capfile.equals("ENDOFLS")){
-                        if(debug){
-                            Log.d("wpa_thread", "cap file not found, airodump is probably not running...");
-                            Log.d("wpa_thread", "Returning...");
-                        }
+                        if(debug) Log.d("wpa_thread", capfile);
+                        if(capfile.equals("ENDOFLS")){
+                            if(debug){
+                                Log.d("wpa_thread", "cap file not found, airodump is probably not running...");
+                                Log.d("wpa_thread", "Returning...");
+                            }
                     }else{
                         Snackbar.make(getCurrentFocus(), getString(R.string.cap_is) + capfile, Snackbar.LENGTH_LONG).show();
                         progress_int = 0;
@@ -207,7 +204,6 @@ public class MainActivity extends AppCompatActivity{
                             else{
                                 while(!buffer.equals("ENDOFAIR")){
                                     if(result!=1) result = checkwpa(buffer);
-                                    //if(result==0) Log.d("wpa_check", buffer);
                                     buffer = out.readLine();
                                 }
                                 Thread.sleep(700);
@@ -234,8 +230,93 @@ public class MainActivity extends AppCompatActivity{
                 }
             }
         });
+        big_brother_thread = new Thread(new Runnable(){        //Thread to check whether the tools we think are running, are actually running
+            @Override
+            public void run(){
+                try{
+                    boolean flag = true;
+                    while(flag){
+                        Thread.sleep(5000);
+                        if(debug) Log.d("big_brother_handler", "Big brother watching...");
+                        List<Integer> list;
+                        Message msg;
+                        list = getPIDs(PROCESS_AIRODUMP);
+                        if(airodump_running!=0 && list.size()==0){          //airodump not running
+                            msg = new Message();
+                            msg.obj = getString(R.string.airodump_not_running);
+                            big_brother_handler.sendMessage(msg);
+                            flag = false;
+                            airodump_running = 0;
+                        }else if(airodump_running==0 && list.size()>0){     //airodump still running
+                            stop(PROCESS_AIRODUMP);
+                            if(getPIDs(PROCESS_AIRODUMP).size()>0){
+                                msg = new Message();
+                                msg.obj = getString(R.string.airodump_still_running);
+                                big_brother_handler.sendMessage(msg);
+                                flag = false;
+                            }
+                        }
+                        list = getPIDs(PROCESS_AIREPLAY);
+                        if(aireplay_running!=0 && list.size()==0){      //aireplay not running
+                            msg = new Message();
+                            msg.obj = getString(R.string.aireplay_not_running);
+                            big_brother_handler.sendMessage(msg);
+                            flag = false;
+                            aireplay_running = 0;
+                        }else if(aireplay_running==0 && list.size()>0){ //aireplay still running
+                            stop(PROCESS_AIREPLAY);
+                            if(getPIDs(PROCESS_AIREPLAY).size()>0){
+                                msg = new Message();
+                                msg.obj = getString(R.string.aireplay_still_running);
+                                big_brother_handler.sendMessage(msg);
+                                flag = false;
+                            }
+                        }
+                        list = getPIDs(PROCESS_MDK);
+                        if((bf || ados) && list.size()==0){         //mdk not running
+                            msg = new Message();
+                            msg.obj = getString(R.string.mdk_not_running);
+                            big_brother_handler.sendMessage(msg);
+                            flag = false;
+                            bf = false;
+                            ados = false;
+                        }else if(!(bf || ados) && list.size()>0){   //mdk still running
+                            stop(PROCESS_MDK);
+                            if(getPIDs(PROCESS_MDK).size()>0){
+                                msg = new Message();
+                                msg.obj = getString(R.string.mdk_still_running);
+                                big_brother_handler.sendMessage(msg);
+                                flag = false;
+                            }
+                        }
+                        list = getPIDs(PROCESS_REAVER);
+                        if(ReaverFragment.cont && list.size()==0){         //reaver not running
+                            msg = new Message();
+                            msg.obj = getString(R.string.reaver_not_running);
+                            big_brother_handler.sendMessage(msg);
+                            flag = false;
+                            ReaverFragment.cont = false;
+                        }else if(!ReaverFragment.cont && list.size()>0){   //reaver still running
+                            stop(PROCESS_REAVER);
+                            if(getPIDs(PROCESS_REAVER).size()>0){
+                                msg = new Message();
+                                msg.obj = getString(R.string.reaver_still_running);
+                                big_brother_handler.sendMessage(msg);
+                                flag = false;
+                            }
+                        }
+                    }
+                }catch(InterruptedException e){ Log.e("big_brother thread", "Exception: " + e.toString()); }
+            }
+        });
 
-        extract("oui.txt", false);
+        extract("oui.txt", true);
+        File oui = new File(path + "/oui.txt");
+        if(!oui.exists()){
+            ErrorDialog dialog = new ErrorDialog();
+            dialog.setMessage(getString(R.string.oui_not_found));
+            dialog.show(getFragmentManager(), "ErrorDialog");
+        }
 
         if(!pref.getBoolean("disclaimer", false)) new DisclaimerDialog().show(fm, "Disclaimer");
         else main();
@@ -255,7 +336,7 @@ public class MainActivity extends AppCompatActivity{
                 in.close();
                 out.close();
                 if(chmod){
-                    runOne("chmod 755 ./files/" + filename);
+                    runOne("chmod 744 ./files/" + filename);
                 }
             }catch(IOException e){
                 Log.e("FileProvider", "Exception copying from assets", e);
@@ -273,6 +354,7 @@ public class MainActivity extends AppCompatActivity{
         stop(PROCESS_REAVER);
         if(airOnStartup) startAirodump(null);
         else if(menu!=null) menu.getItem(1).setIcon(R.drawable.run);
+        if(big_brother) big_brother_thread.start();
     }
 
     public static void startAirodump(String params){
@@ -289,8 +371,7 @@ public class MainActivity extends AppCompatActivity{
             }
             mode = 1;
         }
-        final Shell shell = new Shell();
-        shell.run(enable_monMode);
+        runOne(enable_monMode);
         stop(PROCESS_AIRODUMP);
         cont = true;
         new Thread(new Runnable(){
@@ -298,15 +379,14 @@ public class MainActivity extends AppCompatActivity{
             public void run(){
                 String cmd = "su -c " + prefix + " " + airodump_dir + " --update 1 " + temp + " " + iface;
                 if(debug) Log.d("startAirodump", cmd);
-                shell.run(cmd);
-                BufferedReader in = shell.getShell_out();
-                String buffer;
                 try{
+                    Process process = Runtime.getRuntime().exec(cmd);
+                    BufferedReader in = new BufferedReader(new InputStreamReader(process.getErrorStream()));
+                    String buffer;
                     while(cont && (buffer = in.readLine())!=null){
                         main(buffer, mode);
                     }
                 }catch(IOException e){ Log.e("Exception", "Caught Exception in startAirodump() read block: " + e.toString()); }
-                shell.done();
             }
         }).start();
         refresh_thread.start();
@@ -399,22 +479,22 @@ public class MainActivity extends AppCompatActivity{
             String s = null;
             switch(pr){
                 case PROCESS_AIRODUMP:
-                    shell.run("ps | grep airo; echo ENDOFPS");
+                    shell.run("toolbox ps | busybox grep airo; busybox echo ENDOFPS");
                     break;
                 case PROCESS_AIREPLAY:
-                    shell.run("ps | grep aire; echo ENDOFPS");
+                    shell.run("toolbox ps | busybox grep aire; busybox echo ENDOFPS");
                     break;
                 case PROCESS_MDK:
-                    shell.run("ps | grep mdk3; echo ENDOFPS");
+                    shell.run("toolbox ps | busybox grep mdk3; busybox echo ENDOFPS");
                     break;
                 case PROCESS_AIRCRACK:
-                    shell.run("ps | grep airc; echo ENDOFPS");
+                    shell.run("toolbox ps | busybox grep airc; busybox echo ENDOFPS");
                     break;
                 case PROCESS_REAVER:
-                    shell.run("ps | grep reav; echo ENDOFPS");
+                    shell.run("toolbox ps | busybox grep reav; busybox echo ENDOFPS");
                     break;
                 case PROCESS_ALL:
-                    shell.run("ps; echo ENDOFPS");
+                    shell.run("toolbox ps; busybox echo ENDOFPS");
                     break;
             }
             BufferedReader shell_out = shell.getShell_out();
@@ -436,11 +516,11 @@ public class MainActivity extends AppCompatActivity{
         if(pr<=4) pids = getPIDs(pr);
         switch(pr){
             case PROCESS_AIRODUMP:
-                refresh_thread.interrupt();
+                cont = false;
+                refresh_thread.interrupt();     //here to help with the Thread.IllegalStateSomethingException in andorid 6 but doesn't help
                 progress.setIndeterminate(false);
                 progress.setProgress(deauthWait);
                 if(menu!=null) menu.getItem(1).setIcon(R.drawable.run);
-                cont = false;
                 if(wpa_thread.isAlive()){
                     IsolatedFragment.cont = false;
                     wpacheckcont = false;
@@ -448,16 +528,16 @@ public class MainActivity extends AppCompatActivity{
                 }
                 airodump_running = 0;
                 Item.filter();
-                if(delete_extra){
-                    runOne("rm -rf " + cap_dir + "/cap-*.csv");
-                    runOne("rm -rf " + cap_dir + "/cap-*.netxml");
+                if(delete_extra && always_cap){
+                    runOne("busybox rm -rf " + cap_dir + "/cap-*.csv");
+                    runOne("busybox rm -rf " + cap_dir + "/cap-*.netxml");
                 }
                 break;
             case PROCESS_AIREPLAY:
                 if(menu!=null) menu.getItem(3).setEnabled(false);
                 if(delete_extra && aireplay_running==AIREPLAY_WEP){
-                    runOne("rm -rf " + cap_dir + "/wep_ivs-*.csv");
-                    runOne("rm -rf " + cap_dir + "/wep_ivs-*.netxml");
+                    runOne("busybox rm -rf " + cap_dir + "/wep_ivs-*.csv");
+                    runOne("busybox rm -rf " + cap_dir + "/wep_ivs-*.netxml");
                 }
                 aireplay_running = 0;
                 progress_int = deauthWait;
@@ -480,7 +560,7 @@ public class MainActivity extends AppCompatActivity{
             Shell shell = getFreeShell();
             for(int i = 0; i<pids.size(); i++){
                 if(debug) Log.d("Killing...", Integer.toString(pids.get(i)));
-                shell.run("kill " + pids.get(i));
+                shell.run("busybox kill " + pids.get(i));
             }
             shell.done();
         }
@@ -535,6 +615,15 @@ public class MainActivity extends AppCompatActivity{
             stop(PROCESS_AIREPLAY);
         }
     };
+    public Handler big_brother_handler = new Handler(){
+        public void handleMessage(Message msg){
+            Log.d("big_brother_handler", "Message is " + (String)msg.obj);
+            ErrorDialog dialog = new ErrorDialog();
+            dialog.setTitle((String)msg.obj);
+            dialog.setMessage(getString(R.string.big_brother_message));
+            dialog.show(getFragmentManager(), "ErrorDialog");
+        }
+    };
 
     void setup(){
         ap_count = (TextView) findViewById(R.id.ap_count);
@@ -580,6 +669,7 @@ public class MainActivity extends AppCompatActivity{
         monstart = Boolean.parseBoolean(getString(R.string.monstart));
         custom_chroot_cmd = "";
         cont_on_fail = Boolean.parseBoolean(getString(R.string.cont_on_fail));
+        big_brother = Boolean.parseBoolean(getString(R.string.big_brother));
 
         //Initialize notification
         notif = new NotificationCompat.Builder(this);
@@ -604,8 +694,6 @@ public class MainActivity extends AppCompatActivity{
         nm = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
 
         load();
-        progress.setProgress(deauthWait);
-        progress.setMax(deauthWait);
 
         //Load strings for when they cannot be retrived with getString or R.string...
         ST.not_connected = getString(R.string.not_connected);
@@ -663,6 +751,7 @@ public class MainActivity extends AppCompatActivity{
         show_details = pref.getBoolean("show_details", show_details);
         airOnStartup = pref.getBoolean("airOnStartup", airOnStartup);
         debug = pref.getBoolean("debug", debug);
+        big_brother = pref.getBoolean("big_brother", big_brother);
         confirm_exit = pref.getBoolean("confirm_exit", confirm_exit);
         delete_extra = pref.getBoolean("delete_extra", delete_extra);
         manuf_while_ados = pref.getBoolean("manuf_while_ados", manuf_while_ados);
@@ -722,6 +811,7 @@ public class MainActivity extends AppCompatActivity{
     protected void onDestroy(){
         notif_on = false;
         nm.cancelAll();
+        big_brother_thread.interrupt();
         stop(PROCESS_AIRODUMP);
         stop(PROCESS_AIREPLAY);
         stop(PROCESS_MDK);
@@ -960,7 +1050,6 @@ public class MainActivity extends AppCompatActivity{
     static void notification(){
         if(notif_on && show_notif && !(airodump_running==0 && aireplay_running==0 &&
                 !bf && !ados && !CrackFragment.cont && !ReaverFragment.cont)){
-            Log.d("notification", "in notification()");
             String str;
             if(is_ap==null) str = "APs: " + Item.i + " | STs: " + (Item.items.size() - Item.i);
             else str = is_ap.essid + " | STs: " + (Item.items.size() - Item.i);
@@ -1007,11 +1096,11 @@ public class MainActivity extends AppCompatActivity{
 
         String temp = mac.subSequence(0, 2).toString() + mac.subSequence(3, 5).toString() + mac.subSequence(6, 8).toString();
         Shell shell = getFreeShell();
-        shell.run("busybox grep -m 1 -i " + temp + " " + path + "/oui.txt; echo ENDOFGREP");
+        shell.run("busybox grep -m 1 -i " + temp + " " + path + "/oui.txt; busybox echo ENDOFGREP");
         String manuf = getLastLine(shell.getShell_out(), "ENDOFGREP");
         shell.done();
 
-        if(manuf=="ENDOFGREP" || manuf.length()<23) manuf = "Unknown Manufacturer";
+        if(manuf.equals("ENDOFGREP") || manuf.length()<23) manuf = "Unknown Manufacturer";
         else manuf = manuf.substring(22);
         return manuf;
     }

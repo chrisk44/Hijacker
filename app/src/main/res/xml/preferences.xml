@@ -66,6 +66,11 @@
             android:key="debug"
             android:summary="@string/debug_sum" />
         <SwitchPreference
+            android:defaultValue="@string/big_brother"
+            android:title="@string/big_brother_title"
+            android:summary="@string/big_brother_sum"
+            android:key="big_brother"/>
+        <SwitchPreference
             android:defaultValue="@string/confirm_exit"
             android:title="@string/exit_title"
             android:key="confirm_exit"

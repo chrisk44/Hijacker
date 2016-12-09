@@ -121,6 +121,7 @@ public class InstallToolsDialog extends DialogFragment {
                         extract("reaver", tools_location);
                         extract("reaver-wash", tools_location);
                         extract("libfakeioctl.so", lib_location);
+                        extract("toolbox", tools_location);
                         shell.run("busybox mount -o ro,remount,ro /system");
                         shell.done();
                         Toast.makeText(getActivity().getApplicationContext(), R.string.installed_tools_lib, Toast.LENGTH_SHORT).show();
@@ -158,6 +159,8 @@ public class InstallToolsDialog extends DialogFragment {
                 out.close();
                 shell.run("mv " + path + '/' + filename + " " + dest);
                 shell.run("chmod 755 " + dest);
+                shell.run("chown root " + dest);
+                shell.run("chgrp shell " + dest);
             }catch(IOException e){
                 Log.e("FileProvider", "Exception copying from assets", e);
             }

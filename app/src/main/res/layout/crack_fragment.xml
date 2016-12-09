@@ -34,7 +34,8 @@
         android:inputType="text"
         android:ems="10"
         android:id="@+id/wordlist"
-        android:hint="/sdcard/wordlist.txt"/>
+        android:hint="/sdcard/wordlist.txt"
+        android:text="/sdcard/wordlist.txt"/>
 
     <RadioGroup
         android:layout_width="match_parent"
