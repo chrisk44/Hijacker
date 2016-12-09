@@ -94,7 +94,7 @@ public class MainActivity extends AppCompatActivity{
     static Drawable overflow[] = {null, null, null, null, null, null, null, null};      //Drawables to use for overflow button icon
     static ImageView[] status = {null, null, null, null, null};                                     //Icons in TestDialog, set in TestDialog class
     static int progress_int;
-    static Thread refresh_thread, wpa_thread, big_brother_thread;
+    static Thread refresh_thread, wpa_thread, watchdog_thread;
     static Menu menu;
     static List<Item2> fifo;                    //List used as FIFO for handling calls to addAP/addST in an order
     static MyListAdapter adapter;
@@ -116,7 +116,7 @@ public class MainActivity extends AppCompatActivity{
             enable_monMode, disable_monMode, custom_chroot_cmd;
     static int deauthWait;
     static boolean show_notif, show_details, airOnStartup, debug, confirm_exit, delete_extra, manuf_while_ados,
-            monstart, always_cap, cont_on_fail, big_brother;
+            monstart, always_cap, cont_on_fail, watchdog;
 
     @Override
     protected void onCreate(Bundle savedInstanceState){
@@ -197,7 +197,7 @@ public class MainActivity extends AppCompatActivity{
                         wpa_subthread.start();
                         while(result!=1 && wpacheckcont){
                             if(debug) Log.d("wpa_thread", "Checking cap file...");
-                            shell.run(aircrack_dir + " " + capfile + " && echo ENDOFAIR");
+                            shell.run(aircrack_dir + " " + capfile + "; echo ENDOFAIR");
                             BufferedReader out = shell.getShell_out();
                             buffer = out.readLine();
                             if(buffer==null) wpacheckcont = false;
@@ -218,7 +218,9 @@ public class MainActivity extends AppCompatActivity{
                     }else stopIndeterminate.obtainMessage().sendToTarget();
                 }catch(IOException | InterruptedException e){
                     Log.e("Exception", "Caught Exception in wpa_thread: " + e.toString());
-                    stop1.obtainMessage().sendToTarget();
+                    Message msg = new Message();
+                    msg.what = PROCESS_AIREPLAY;
+                    stop_handler.sendMessage(msg);
                 }finally{
                     wpa_subthread.interrupt();
                     if(delete_extra){
@@ -230,29 +232,31 @@ public class MainActivity extends AppCompatActivity{
                 }
             }
         });
-        big_brother_thread = new Thread(new Runnable(){        //Thread to check whether the tools we think are running, are actually running
+        watchdog_thread = new Thread(new Runnable(){        //Thread to check whether the tools we think are running, are actually running
             @Override
             public void run(){
                 try{
                     boolean flag = true;
                     while(flag){
                         Thread.sleep(5000);
-                        if(debug) Log.d("big_brother_handler", "Big brother watching...");
+                        if(debug) Log.d("watchdog_handler", "Watchdog watching...");
                         List<Integer> list;
                         Message msg;
                         list = getPIDs(PROCESS_AIRODUMP);
                         if(airodump_running!=0 && list.size()==0){          //airodump not running
                             msg = new Message();
                             msg.obj = getString(R.string.airodump_not_running);
-                            big_brother_handler.sendMessage(msg);
+                            watchdog_handler.sendMessage(msg);
                             flag = false;
                             airodump_running = 0;
                         }else if(airodump_running==0 && list.size()>0){     //airodump still running
-                            stop(PROCESS_AIRODUMP);
+                            msg = new Message();
+                            msg.what = PROCESS_AIRODUMP;
+                            stop_handler.sendMessage(msg);
                             if(getPIDs(PROCESS_AIRODUMP).size()>0){
                                 msg = new Message();
                                 msg.obj = getString(R.string.airodump_still_running);
-                                big_brother_handler.sendMessage(msg);
+                                watchdog_handler.sendMessage(msg);
                                 flag = false;
                             }
                         }
@@ -260,15 +264,17 @@ public class MainActivity extends AppCompatActivity{
                         if(aireplay_running!=0 && list.size()==0){      //aireplay not running
                             msg = new Message();
                             msg.obj = getString(R.string.aireplay_not_running);
-                            big_brother_handler.sendMessage(msg);
+                            watchdog_handler.sendMessage(msg);
                             flag = false;
                             aireplay_running = 0;
                         }else if(aireplay_running==0 && list.size()>0){ //aireplay still running
-                            stop(PROCESS_AIREPLAY);
+                            msg = new Message();
+                            msg.what = PROCESS_AIREPLAY;
+                            stop_handler.sendMessage(msg);
                             if(getPIDs(PROCESS_AIREPLAY).size()>0){
                                 msg = new Message();
                                 msg.obj = getString(R.string.aireplay_still_running);
-                                big_brother_handler.sendMessage(msg);
+                                watchdog_handler.sendMessage(msg);
                                 flag = false;
                             }
                         }
@@ -276,16 +282,18 @@ public class MainActivity extends AppCompatActivity{
                         if((bf || ados) && list.size()==0){         //mdk not running
                             msg = new Message();
                             msg.obj = getString(R.string.mdk_not_running);
-                            big_brother_handler.sendMessage(msg);
+                            watchdog_handler.sendMessage(msg);
                             flag = false;
                             bf = false;
                             ados = false;
                         }else if(!(bf || ados) && list.size()>0){   //mdk still running
-                            stop(PROCESS_MDK);
+                            msg = new Message();
+                            msg.what = PROCESS_MDK;
+                            stop_handler.sendMessage(msg);
                             if(getPIDs(PROCESS_MDK).size()>0){
                                 msg = new Message();
                                 msg.obj = getString(R.string.mdk_still_running);
-                                big_brother_handler.sendMessage(msg);
+                                watchdog_handler.sendMessage(msg);
                                 flag = false;
                             }
                         }
@@ -293,20 +301,22 @@ public class MainActivity extends AppCompatActivity{
                         if(ReaverFragment.cont && list.size()==0){         //reaver not running
                             msg = new Message();
                             msg.obj = getString(R.string.reaver_not_running);
-                            big_brother_handler.sendMessage(msg);
+                            watchdog_handler.sendMessage(msg);
                             flag = false;
                             ReaverFragment.cont = false;
                         }else if(!ReaverFragment.cont && list.size()>0){   //reaver still running
-                            stop(PROCESS_REAVER);
+                            msg = new Message();
+                            msg.what = PROCESS_REAVER;
+                            stop_handler.sendMessage(msg);
                             if(getPIDs(PROCESS_REAVER).size()>0){
                                 msg = new Message();
                                 msg.obj = getString(R.string.reaver_still_running);
-                                big_brother_handler.sendMessage(msg);
+                                watchdog_handler.sendMessage(msg);
                                 flag = false;
                             }
                         }
                     }
-                }catch(InterruptedException e){ Log.e("big_brother thread", "Exception: " + e.toString()); }
+                }catch(InterruptedException e){ Log.e("watchdog thread", "Exception: " + e.toString()); }
             }
         });
 
@@ -354,7 +364,7 @@ public class MainActivity extends AppCompatActivity{
         stop(PROCESS_REAVER);
         if(airOnStartup) startAirodump(null);
         else if(menu!=null) menu.getItem(1).setIcon(R.drawable.run);
-        if(big_brother) big_brother_thread.start();
+        if(watchdog) watchdog_thread.start();
     }
 
     public static void startAirodump(String params){
@@ -526,12 +536,12 @@ public class MainActivity extends AppCompatActivity{
                     wpacheckcont = false;
                     wpa_thread.interrupt();
                 }
-                airodump_running = 0;
                 Item.filter();
                 if(delete_extra && always_cap){
                     runOne("busybox rm -rf " + cap_dir + "/cap-*.csv");
                     runOne("busybox rm -rf " + cap_dir + "/cap-*.netxml");
                 }
+                airodump_running = 0;
                 break;
             case PROCESS_AIREPLAY:
                 if(menu!=null) menu.getItem(3).setEnabled(false);
@@ -610,17 +620,17 @@ public class MainActivity extends AppCompatActivity{
             progress.setProgress(progress_int);
         }
     };
-    public static Handler stop1 = new Handler(){
+    public Handler stop_handler = new Handler(){
         public void handleMessage(Message msg){
-            stop(PROCESS_AIREPLAY);
+            stop(msg.what);
         }
     };
-    public Handler big_brother_handler = new Handler(){
+    public Handler watchdog_handler = new Handler(){
         public void handleMessage(Message msg){
-            Log.d("big_brother_handler", "Message is " + (String)msg.obj);
+            if(debug) Log.d("watchdog_handler", "Message is " + msg.obj);
             ErrorDialog dialog = new ErrorDialog();
             dialog.setTitle((String)msg.obj);
-            dialog.setMessage(getString(R.string.big_brother_message));
+            dialog.setMessage(getString(R.string.watchdog_message));
             dialog.show(getFragmentManager(), "ErrorDialog");
         }
     };
@@ -669,7 +679,7 @@ public class MainActivity extends AppCompatActivity{
         monstart = Boolean.parseBoolean(getString(R.string.monstart));
         custom_chroot_cmd = "";
         cont_on_fail = Boolean.parseBoolean(getString(R.string.cont_on_fail));
-        big_brother = Boolean.parseBoolean(getString(R.string.big_brother));
+        watchdog = Boolean.parseBoolean(getString(R.string.watchdog));
 
         //Initialize notification
         notif = new NotificationCompat.Builder(this);
@@ -751,7 +761,7 @@ public class MainActivity extends AppCompatActivity{
         show_details = pref.getBoolean("show_details", show_details);
         airOnStartup = pref.getBoolean("airOnStartup", airOnStartup);
         debug = pref.getBoolean("debug", debug);
-        big_brother = pref.getBoolean("big_brother", big_brother);
+        watchdog = pref.getBoolean("watchdog", watchdog);
         confirm_exit = pref.getBoolean("confirm_exit", confirm_exit);
         delete_extra = pref.getBoolean("delete_extra", delete_extra);
         manuf_while_ados = pref.getBoolean("manuf_while_ados", manuf_while_ados);
@@ -811,7 +821,7 @@ public class MainActivity extends AppCompatActivity{
     protected void onDestroy(){
         notif_on = false;
         nm.cancelAll();
-        big_brother_thread.interrupt();
+        watchdog_thread.interrupt();
         stop(PROCESS_AIRODUMP);
         stop(PROCESS_AIREPLAY);
         stop(PROCESS_MDK);

@@ -46,32 +46,7 @@ import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.util.ArrayList;
 
-import static com.hijacker.MainActivity.PROCESS_AIRCRACK;
-import static com.hijacker.MainActivity.PROCESS_AIREPLAY;
-import static com.hijacker.MainActivity.PROCESS_AIRODUMP;
-import static com.hijacker.MainActivity.PROCESS_MDK;
-import static com.hijacker.MainActivity.PROCESS_REAVER;
-import static com.hijacker.MainActivity.airOnStartup;
-import static com.hijacker.MainActivity.aircrack_dir;
-import static com.hijacker.MainActivity.aireplay_dir;
-import static com.hijacker.MainActivity.airodump_dir;
-import static com.hijacker.MainActivity.cap_dir;
-import static com.hijacker.MainActivity.chroot_dir;
-import static com.hijacker.MainActivity.confirm_exit;
-import static com.hijacker.MainActivity.deauthWait;
-import static com.hijacker.MainActivity.debug;
-import static com.hijacker.MainActivity.delete_extra;
-import static com.hijacker.MainActivity.disable_monMode;
-import static com.hijacker.MainActivity.enable_monMode;
-import static com.hijacker.MainActivity.iface;
-import static com.hijacker.MainActivity.manuf_while_ados;
-import static com.hijacker.MainActivity.mdk3_dir;
-import static com.hijacker.MainActivity.path;
-import static com.hijacker.MainActivity.prefix;
 import static com.hijacker.MainActivity.ps;
-import static com.hijacker.MainActivity.reaver_dir;
-import static com.hijacker.MainActivity.show_details;
-import static com.hijacker.MainActivity.show_notif;
 
 public class SendLogActivity extends AppCompatActivity{
     String filename;
@@ -158,41 +133,14 @@ public class SendLogActivity extends AppCompatActivity{
             writer.write("Android version: " +  Build.VERSION.SDK_INT + "\n");
             writer.write("Device: " + model + "\n");
             writer.write("App version: " + (info == null ? "(null)" : info.versionCode) + "\n");
-            writer.write("Airodump: " + Integer.toString(MainActivity.airodump_running) + "\n");
-            writer.write("Aireplay: " + Integer.toString(MainActivity.aireplay_running) + "\n");
-            writer.write("Mdk BF: " + Integer.toString(MDKFragment.bf_pid) + "\n");
-            writer.write("Mdk ADoS: " + Integer.toString(MDKFragment.ados_pid) + "\n");
-            writer.write("Reaver: " + Boolean.toString(ReaverFragment.cont) + "\n");
-            writer.write("path: " + path + '\n');
-            writer.write("prefs:\n");
-            writer.write("\tiface: " + iface + '\n');
-            writer.write("\tprefix: " + prefix + '\n');
-            writer.write("\tairodump_dir: " + airodump_dir + '\n');
-            writer.write("\taireplay_dir: " + aireplay_dir + '\n');
-            writer.write("\taircrack_dir: " + aircrack_dir + '\n');
-            writer.write("\tmdk3_dir: " + mdk3_dir + '\n');
-            writer.write("\treaver_dir: " + reaver_dir + '\n');
-            writer.write("\tcap_dir: " + cap_dir + '\n');
-            writer.write("\tchroot_dir: " + chroot_dir + '\n');
-            writer.write("\tenable_monMode: " + enable_monMode + '\n');
-            writer.write("\tdisable_monMode: " + disable_monMode + '\n');
-            writer.write("\tdeauthWait: " + Integer.toString(deauthWait) + '\n');
-            writer.write("\tshow_notif: " + Boolean.toString(show_notif) + '\n');
-            writer.write("\tshow_details: " + Boolean.toString(show_details) + '\n');
-            writer.write("\tairOnStartup: " + Boolean.toString(airOnStartup) + '\n');
-            writer.write("\tdebug: " + Boolean.toString(debug) + '\n');
-            writer.write("\tconfirm_exit: " + Boolean.toString(confirm_exit) + '\n');
-            writer.write("\tdelete_extra: " + Boolean.toString(delete_extra) + '\n');
-            writer.write("\tmanuf_while_ados: " + Boolean.toString(manuf_while_ados) + '\n');
 
             // get input stream
-            String cmd = " echo pref_file--------------------------------------; su -c cat " + path + "/../shared_prefs/com.hijacker_preferences.xml;";
-            cmd += " echo ls_system-xbin---------------------------------; su -c ls /system/xbin -1| busybox grep -e air -e mdk -e reaver -e nexutil -e iw -e libfakeioctl.so;";
-            cmd += " echo ls_su-xbin-------------------------------------; su -c ls /su/xbin -1| busybox grep -e air -e mdk -e reaver -e nexutil -e iw -e libfakeioctl.so;";
-            cmd += " echo ls_vendor-lib----------------------------------; su -c ls /vendor/lib -1| busybox grep -e air -e mdk -e reaver -e nexutil -e iw -e libfakeioctl.so;";
-            cmd += " echo ls_su-lib--------------------------------------; su -c ls /su/lib -1| busybox grep -e air -e mdk -e reaver -e nexutil -e iw -e libfakeioctl.so;";
-            cmd += " echo ls_system-lib----------------------------------; su -c ls /system/lib -1| busybox grep -e air -e mdk -e reaver -e nexutil -e iw -e libfakeioctl.so;";
-            cmd += " echo ls_capdir--------------------------------------; su -c ls " + cap_dir + " -1| busybox grep -e air -e mdk -e reaver -e nexutil -e iw -e libfakeioctl.so;";
+            String cmd = "echo pref_file--------------------------------------; su -c cat /data/user/0/com.hijacker/shared_prefs/com.hijacker_preferences.xml;";
+            cmd += " echo ls_system-xbin---------------------------------; su -c ls /system/xbin -1| busybox grep -e air -e mdk -e reaver -e nexutil -e iw -e libfakeioctl.so -e busybox -e toolbox;";
+            cmd += " echo ls_su-xbin-------------------------------------; su -c ls /su/xbin -1| busybox grep -e air -e mdk -e reaver -e nexutil -e iw -e libfakeioctl.so -e busybox -e toolbox;";
+            cmd += " echo ls_vendor-lib----------------------------------; su -c ls /vendor/lib -1| busybox grep -e air -e mdk -e reaver -e nexutil -e iw -e libfakeioctl.so -e busybox -e toolbox;";
+            cmd += " echo ls_su-lib--------------------------------------; su -c ls /su/lib -1| busybox grep -e air -e mdk -e reaver -e nexutil -e iw -e libfakeioctl.so -e busybox -e toolbox;";
+            cmd += " echo ls_system-lib----------------------------------; su -c ls /system/lib -1| busybox grep -e air -e mdk -e reaver -e nexutil -e iw -e libfakeioctl.so -e busybox -e toolbox;";
             cmd += " echo fw_bcmdhd--------------------------------------; su -c strings /vendor/firmware/fw_bcmdhd.bin | grep \"FWID:\";";
             cmd += " echo ps---------------------------------------------; su -c ps | busybox grep -e air -e mdk -e reaver;";
             cmd += " echo logcat-----------------------------------------; logcat -d -v time;";
@@ -223,47 +171,22 @@ public class SendLogActivity extends AppCompatActivity{
             Toast.makeText(this, "Report was not created", Toast.LENGTH_LONG).show();
         }else sendLogFile(filename);
     }
-    public ArrayList<Integer> getPIDs(int pr){
-        ArrayList<Integer> list = new ArrayList<>();
+    public void stopAll(){
+        ArrayList<Integer> pids = new ArrayList<>();
         try{
             int pid;
             String s = null;
-            switch(pr){
-                case PROCESS_AIRODUMP:
-                    shell_in.print("ps | grep airo; echo ENDOFPS\n");
-                    break;
-                case PROCESS_AIREPLAY:
-                    shell_in.print("ps | grep aire; echo ENDOFPS\n");
-                    break;
-                case PROCESS_MDK:
-                    shell_in.print("ps | grep mdk3; echo ENDOFPS\n");
-                    break;
-                case PROCESS_AIRCRACK:
-                    shell_in.print("ps | grep airc; echo ENDOFPS\n");
-                    break;
-                case PROCESS_REAVER:
-                    shell_in.print("ps | grep reav; echo ENDOFPS\n");
-                    break;
-            }
+            shell_in.print("toolbox ps | busybox grep -e air -e mdk -e reaver; echo ENDOFPS\n");
             shell_in.flush();
             while(s==null){ s = shell_out.readLine(); } //for some reason sometimes s remains null
             while(!s.equals("ENDOFPS")){
                 pid = ps(s);
                 if(pid!=0){
-                    list.add(pid);
+                    pids.add(pid);
                 }
                 s = shell_out.readLine();
             }
         }catch(IOException e){ Log.e("Exception", "Caught Exception in getPIDs(pr): " + e.toString()); }
-        return list;
-    }
-    public void stopAll(){
-        ArrayList<Integer> pids = new ArrayList<>();
-        pids.addAll(getPIDs(PROCESS_AIRCRACK));
-        pids.addAll(getPIDs(PROCESS_AIRODUMP));
-        pids.addAll(getPIDs(PROCESS_AIREPLAY));
-        pids.addAll(getPIDs(PROCESS_MDK));
-        pids.addAll(getPIDs(PROCESS_REAVER));
         if(pids.isEmpty()) Log.d("stopAll", "Nothing found");
         else{
             for(int i = 0; i<pids.size(); i++){

@@ -27,7 +27,7 @@
     <string name="drawer_close">Close Drawer</string>
     <string name="ados_running">Authentication DoS is already running</string>
     <string name="disconnect_started">Disconnect All started</string>
-    <string name="big_brother_message">This could be caused by busybox (installed by you) or toolbox (installed by the app) not being installed</string>
+    <string name="watchdog_message">This could be caused by improper installation of busybox and toolbox. Go to settings and install the tools, and make sure you have busybox installed and updated.</string>
     <string name="airodump_still_running">Airodump is still running!</string>
     <string name="airodump_not_running">Airodump is not running!</string>
     <string name="aireplay_still_running">Aireplay is still running!</string>
@@ -197,7 +197,7 @@
     <string name="select_target">Select target</string>
     <string name="custom_action_editor">Custom Action Editor</string>
     <string name="custom_action_editor_message">You can use the following variables:\n
-        $IFACE, $PREFIX, $AIRODUMP_DIR, $AIREPLAY_DIR, $MDK3_DIR, $REAVER_DIR\n
+        $IFACE, $AIRODUMP_DIR, $AIREPLAY_DIR, $MDK3_DIR, $REAVER_DIR\n
         AP: $MAC, $ESSID, $CH, $ENC, $CIPHER, $AUTH\n
         ST: $MAC, $BSSID\n
         The start command will be ran when you run the action and the stop will be ran ONLY when you want to interrupt it.
@@ -245,7 +245,7 @@
     <string name="manuf_while_ados" translatable="false">false</string>
     <string name="always_cap" translatable="false">false</string>
     <string name="cont_on_fail" translatable="false">false</string>
-    <string name="big_brother" translatable="false">true</string>
+    <string name="watchdog" translatable="false">true</string>
 
     <!-- Settings -->
     <string name="general">General</string>
@@ -296,8 +296,8 @@
     <string name="debug_title">Logcat Messages</string>
     <string name="debug_sum">Print debugging messages to logcat. Messages about exceptions will be printed anyway.</string>
 
-    <string name="big_brother_title">Big Brother</string>
-    <string name="big_brother_sum">Run a background thread to verify that the tools that are supposed to be running, are actually running.
+    <string name="watchdog_title">Watchdog</string>
+    <string name="watchdog_sum">Run a background thread to verify that the tools that are supposed to be running, are actually running.
         Disable this if you are getting false positives.</string>
 
     <string name="exit_title">Confirm Exit</string>

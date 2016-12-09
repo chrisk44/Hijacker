@@ -24,8 +24,8 @@ import android.os.Bundle;
 import android.support.v7.app.AlertDialog;
 import android.util.Log;
 
-import static com.hijacker.MainActivity.big_brother;
-import static com.hijacker.MainActivity.big_brother_thread;
+import static com.hijacker.MainActivity.watchdog;
+import static com.hijacker.MainActivity.watchdog_thread;
 
 public class ErrorDialog extends DialogFragment {
     String message;
@@ -36,8 +36,8 @@ public class ErrorDialog extends DialogFragment {
         AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
         builder.setPositiveButton(R.string.ok, new DialogInterface.OnClickListener() {
             public void onClick(DialogInterface dialog, int id) {
-                if(!big_brother_thread.isAlive() && big_brother){
-                    big_brother_thread.start();   //If the error was from there restart the thread
+                if(!watchdog_thread.isAlive() && watchdog){
+                    watchdog_thread.start();   //If the error was from there restart the thread
                 }
             }
         });

@@ -50,6 +50,8 @@ import static com.hijacker.MainActivity.getPIDs;
 import static com.hijacker.MainActivity.load;
 import static com.hijacker.MainActivity.status;
 import static com.hijacker.MainActivity.stop;
+import static com.hijacker.MainActivity.watchdog;
+import static com.hijacker.MainActivity.watchdog_thread;
 import static com.hijacker.Shell.getFreeShell;
 import static com.hijacker.Shell.runOne;
 
@@ -65,6 +67,7 @@ public class TestDialog extends DialogFragment {
         thread = new Thread(new Runnable(){
             @Override
             public void run(){
+                watchdog_thread.interrupt();
                 Shell shell = getFreeShell();
                 try{
                     Thread.sleep(500);
@@ -126,6 +129,7 @@ public class TestDialog extends DialogFragment {
                     Log.d("test_thread", "Interrupted");
                 }finally{
                     shell.done();
+                    if(watchdog) watchdog_thread.start();
                 }
             }
         });
