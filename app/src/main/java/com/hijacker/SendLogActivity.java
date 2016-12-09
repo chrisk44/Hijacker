@@ -143,6 +143,8 @@ public class SendLogActivity extends AppCompatActivity{
             cmd += " echo ls_system-lib----------------------------------; su -c ls /system/lib -1| busybox grep -e air -e mdk -e reaver -e nexutil -e iw -e libfakeioctl.so -e busybox -e toolbox;";
             cmd += " echo fw_bcmdhd--------------------------------------; su -c strings /vendor/firmware/fw_bcmdhd.bin | grep \"FWID:\";";
             cmd += " echo ps---------------------------------------------; su -c ps | busybox grep -e air -e mdk -e reaver;";
+            cmd += " echo busybox----------------------------------------; busybox;";
+            cmd += " echo toolbox----------------------------------------; toolbox;";
             cmd += " echo logcat-----------------------------------------; logcat -d -v time;";
             cmd += " echo ENDOFLOG\n";
             Log.d("cmd", cmd);
