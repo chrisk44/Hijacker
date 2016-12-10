@@ -58,7 +58,6 @@ public class CrackFragment extends Fragment{
     static Thread thread;
     static boolean cont=false;
     static String capfile, wordlist, console_text;
-    static String cap_notfound, wordlist_notfound, select_wpa_wep, select_wep_bits;
     @Override
     public View onCreateView(LayoutInflater inflater, final ViewGroup container, Bundle savedInstanceState){
         final View v = inflater.inflate(R.layout.crack_fragment, container, false);
@@ -73,7 +72,7 @@ public class CrackFragment extends Fragment{
         }
 
         Shell shell = Shell.getFreeShell();
-        shell.run("ls -1 " + cap_dir + "/handshake-*.cap; echo ENDOFLS");
+        shell.run("ls -1 " + cap_dir + "/handshake-*.cap; busybox echo ENDOFLS");
         capfile = getLastLine(shell.getShell_out(), "ENDOFLS");
         if(!capfile.equals("ENDOFLS") && capfile.charAt(0)!='l'){
             ((EditText)v.findViewById(R.id.capfile)).setText(capfile);
@@ -140,18 +139,18 @@ public class CrackFragment extends Fragment{
                 if(thread.isAlive()){
                     cont = false;
                 }else if(!cap.exists() || !cap.isFile()){
-                    Snackbar.make(v, cap_notfound, Snackbar.LENGTH_LONG).show();
+                    Snackbar.make(v, getString(R.string.cap_notfound), Snackbar.LENGTH_LONG).show();
                 }else if(!word.exists() || !word.isFile()){
-                    Snackbar.make(v, wordlist_notfound, Snackbar.LENGTH_LONG).show();
+                    Snackbar.make(v, getString(R.string.wordlist_notfound), Snackbar.LENGTH_LONG).show();
                 }else{
                     RadioGroup temp = (RadioGroup)v.findViewById(R.id.radio_group);
                     if(temp.getCheckedRadioButtonId()==-1){
                         //Mode not selected
-                        Snackbar.make(v, select_wpa_wep, Snackbar.LENGTH_SHORT).show();
+                        Snackbar.make(v, getString(R.string.select_wpa_wep), Snackbar.LENGTH_SHORT).show();
                     }else if(temp.getCheckedRadioButtonId()==R.id.wep_rb &&
                             ((RadioGroup)v.findViewById(R.id.wep_rg)).getCheckedRadioButtonId()==-1){
                         //If wep is selected, we need to have a wep bit length selection
-                        Snackbar.make(v, select_wep_bits, Snackbar.LENGTH_SHORT).show();
+                        Snackbar.make(v, getString(R.string.select_wep_bits), Snackbar.LENGTH_SHORT).show();
                     }else{
                         switch(((RadioGroup) v.findViewById(R.id.radio_group)).getCheckedRadioButtonId()){
                             case R.id.wpa_rb:
@@ -164,7 +163,7 @@ public class CrackFragment extends Fragment{
                                 break;
                         }
                         button.setText(R.string.stop);
-                        console.append("Running...\n");
+                        console.append("\nRunning...\n");
                         progress.setIndeterminate(true);
                         thread.start();
                     }
@@ -183,7 +182,7 @@ public class CrackFragment extends Fragment{
             if((new File(path + "/aircrack-out.txt")).exists()){
                 Shell shell = Shell.getFreeShell();
                 BufferedReader out = shell.getShell_out();
-                shell.run("cat " + path + "/aircrack-out.txt; echo ");              //No newline at the end of the file, readLine will hang
+                shell.run("cat " + path + "/aircrack-out.txt; busybox echo ");              //No newline at the end of the file, readLine will hang
                 try{
                     console.append("Key found: " + out.readLine() + '\n');
                 }catch(IOException ignored){}

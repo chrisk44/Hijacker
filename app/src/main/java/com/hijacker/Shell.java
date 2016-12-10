@@ -67,12 +67,12 @@ class Shell{
     }
     void done(){
         try{
-            run("echo && echo ENDOFCLEAR");
+            run("busybox echo && busybox echo ENDOFCLEAR");
             MainActivity.getLastLine(shell_out, "ENDOFCLEAR");      //This will read up to the last line and stop, effectively clearing shell_out
             shell_out.reset();                                      //<--- since this doesn't seem to do the job
         }catch(IOException ignored){}
         free.add(this);
-        if(debug) Log.d("Shell", "Freeing shell: total=" + total + " free:" + free.size());
+        if(debug) Log.d("Shell", "Freeing shell: total:" + total + " free:" + free.size());
     }
     static Shell getFreeShell(){
         if(free.isEmpty()) return new Shell();

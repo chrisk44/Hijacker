@@ -101,7 +101,7 @@ public class RestoreFirmwareDialog extends DialogFragment {
                     positiveButton.setActivated(false);
                     ProgressBar progress = (ProgressBar)view.findViewById(R.id.install_firm_progress);
                     progress.setIndeterminate(true);
-                    shell.run("find /system/ -type f -name \"fw_bcmdhd.bin\"; echo ENDOFFIND");
+                    shell.run("find /system/ -type f -name \"fw_bcmdhd.bin\"; busybox echo ENDOFFIND");
                     BufferedReader out = shell.getShell_out();
                     try{
                         String buffer = null, lastline;

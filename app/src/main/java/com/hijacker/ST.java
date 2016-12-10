@@ -17,6 +17,8 @@ package com.hijacker;
     along with this program.  If not, see <http://www.gnu.org/licenses/>
  */
 
+import android.app.FragmentManager;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -79,6 +81,11 @@ class ST {
         c = "PWR: " + this.pwr + " | Frames: " + this.frames;
         if(item!=null) item.update(this.mac, b, c, this.manuf);
         else item = new Item(AP.APs.size() + id, this.mac, b, c, this.manuf, false, null, this);
+    }
+    void showInfo(FragmentManager fragmentManager){
+        STDialog dialog = new STDialog();
+        dialog.info_st = this;
+        dialog.show(fragmentManager, "STDialog");
     }
     static ST getSTByMac(String mac){
         for(int i=STs.size()-1;i>=0;i--){

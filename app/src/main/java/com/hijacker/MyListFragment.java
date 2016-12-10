@@ -17,7 +17,6 @@ package com.hijacker;
     along with this program.  If not, see <http://www.gnu.org/licenses/>
  */
 
-import android.app.FragmentTransaction;
 import android.app.ListFragment;
 import android.os.Bundle;
 import android.util.Log;
@@ -32,18 +31,16 @@ import static com.hijacker.AP.WPA;
 import static com.hijacker.AP.WPA2;
 import static com.hijacker.MainActivity.FRAGMENT_AIRODUMP;
 import static com.hijacker.MainActivity.MDK_ADOS;
-import static com.hijacker.MainActivity.PROCESS_AIRODUMP;
 import static com.hijacker.MainActivity.aireplay_dir;
 import static com.hijacker.MainActivity.airodump_dir;
+import static com.hijacker.MainActivity.cap_dir;
 import static com.hijacker.MainActivity.copy;
 import static com.hijacker.MainActivity.currentFragment;
 import static com.hijacker.MainActivity.debug;
 import static com.hijacker.MainActivity.iface;
 import static com.hijacker.MainActivity.prefix;
-import static com.hijacker.MainActivity.startAireplay;
 import static com.hijacker.MainActivity.startAirodump;
 import static com.hijacker.MainActivity.startMdk;
-import static com.hijacker.MainActivity.stop;
 
 public class MyListFragment extends ListFragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -80,9 +77,7 @@ public class MyListFragment extends ListFragment {
                     switch(item.getItemId()) {
                         case 0:
                             //Info
-                            APDialog dialog = new APDialog();
-                            dialog.info_ap = clicked.ap;
-                            dialog.show(getFragmentManager(), "APDialog");
+                            clicked.ap.showInfo(getFragmentManager());
                             break;
                         case 1:
                             //copy mac to clipboard
@@ -90,14 +85,7 @@ public class MyListFragment extends ListFragment {
                             break;
                         case 2:
                             //Disconnect
-                            stop(PROCESS_AIRODUMP);
-                            if (debug) Log.d("MyListFragment", "Starting airodump for channel " + clicked.ap.ch);
-                            startAirodump("--channel " + clicked.ap.ch);
-                            if(debug) {
-                                Log.d("MyListFragment", "Starting aireplay without targets...");
-                                Log.d("MyListFragment", clicked.ap.mac);
-                            }
-                            startAireplay(clicked.ap.mac);
+                            clicked.ap.disconnectAll();
                             break;
                         case 3:
                             //Watch
@@ -132,26 +120,19 @@ public class MyListFragment extends ListFragment {
                         case 8:
                             //Copy command to crack to clipboard
                             String str;
-                            if(clicked.ap.sec==WEP) str = prefix + " " + airodump_dir + " --channel " + clicked.ap.ch + " --bssid " + clicked.ap.mac + " --ivs -w /sdcard/cap/wep.cap " + iface;
-                            else str = prefix + " " + airodump_dir + " --channel " + clicked.ap.ch + " --bssid " + clicked.ap.mac + " -w /sdcard/cap/wpa.cap " + iface;
+                            if(clicked.ap.sec==WEP) str = prefix + " " + airodump_dir + " --channel " + clicked.ap.ch + " --bssid " + clicked.ap.mac + " --ivs -w " + cap_dir + "/wep_ivs " + iface;
+                            else str = prefix + " " + airodump_dir + " --channel " + clicked.ap.ch + " --bssid " + clicked.ap.mac + " -w " + cap_dir + "/handshake " + iface;
 
                             copy(str, v);
                             break;
                         case 9:
                             //copy disconnect command to clipboard
-                            String str2 = prefix + " " + airodump_dir + " --channel " + clicked.ap.ch + " " + iface;
+                            String str2 = prefix + " " + aireplay_dir + " --deauth 0 -a " + clicked.ap.mac + " " + iface;
                             copy(str2, v);
                             break;
                         case 10:
                             //crack with reaver
-                            ReaverFragment.ap = clicked.ap;
-                            FragmentTransaction ft = getFragmentManager().beginTransaction();
-                            ft.replace(R.id.fragment1, new ReaverFragment());
-                            ft.setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN);
-                            ft.addToBackStack(null);
-                            ft.commit();
-                            getFragmentManager().executePendingTransactions();      //Wait for everything to be set up
-                            ReaverFragment.start_button.performClick();             //Click start to run reaver
+                            clicked.ap.crackReaver(getFragmentManager());
                             break;
                     }
                     return true;
@@ -176,9 +157,7 @@ public class MyListFragment extends ListFragment {
                     switch(item.getItemId()) {
                         case 0:
                             //Info
-                            STDialog dialog = new STDialog();
-                            dialog.info_st = clicked.st;
-                            dialog.show(getFragmentManager(), "STDialog");
+                            clicked.st.showInfo(getFragmentManager());
                             break;
                         case 1:
                             //copy to clipboard

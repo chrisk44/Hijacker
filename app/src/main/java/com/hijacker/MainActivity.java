@@ -181,7 +181,7 @@ public class MainActivity extends AppCompatActivity{
                 Shell shell = getFreeShell();
                 try{
                     Thread.sleep(1000);
-                    shell.run("ls -1 " + cap_dir + "/handshake-*.cap; echo ENDOFLS");
+                    shell.run("ls -1 " + cap_dir + "/handshake-*.cap; busybox echo ENDOFLS");
                         capfile = getLastLine(shell.getShell_out(), "ENDOFLS");
 
                         if(debug) Log.d("wpa_thread", capfile);
@@ -197,7 +197,7 @@ public class MainActivity extends AppCompatActivity{
                         wpa_subthread.start();
                         while(result!=1 && wpacheckcont){
                             if(debug) Log.d("wpa_thread", "Checking cap file...");
-                            shell.run(aircrack_dir + " " + capfile + "; echo ENDOFAIR");
+                            shell.run(aircrack_dir + " " + capfile + "; busybox echo ENDOFAIR");
                             BufferedReader out = shell.getShell_out();
                             buffer = out.readLine();
                             if(buffer==null) wpacheckcont = false;
@@ -708,10 +708,6 @@ public class MainActivity extends AppCompatActivity{
         //Load strings for when they cannot be retrived with getString or R.string...
         ST.not_connected = getString(R.string.not_connected);
         ST.paired = getString(R.string.paired);
-        CrackFragment.cap_notfound = getString(R.string.cap_notfound);
-        CrackFragment.wordlist_notfound = getString(R.string.wordlist_notfound);
-        CrackFragment.select_wpa_wep = getString(R.string.select_wpa_wep);
-        CrackFragment.select_wep_bits = getString(R.string.select_wep_bits);
 
         //Initialize the drawer
         mPlanetTitles = getResources().getStringArray(R.array.planets_array);

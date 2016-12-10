@@ -17,6 +17,8 @@ package com.hijacker;
     along with this program.  If not, see <http://www.gnu.org/licenses/>
  */
 
+import android.app.FragmentManager;
+import android.app.FragmentTransaction;
 import android.util.Log;
 import java.util.ArrayList;
 import java.util.List;
@@ -150,6 +152,32 @@ class AP {
         }
         if(is_ap==null) isolate(this.mac);
     }
+    void crackReaver(FragmentManager fragmentManager){
+        ReaverFragment.ap = this;
+        FragmentTransaction ft = fragmentManager.beginTransaction();
+        ft.replace(R.id.fragment1, new ReaverFragment());
+        ft.setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN);
+        ft.addToBackStack(null);
+        ft.commit();
+        fragmentManager.executePendingTransactions();      //Wait for everything to be set up
+        ReaverFragment.start_button.performClick();             //Click start to run reaver
+    }
+    void showInfo(FragmentManager fragmentManager){
+        APDialog dialog = new APDialog();
+        dialog.info_ap = this;
+        dialog.show(fragmentManager, "APDialog");
+    }
+    void disconnectAll(){
+        stop(PROCESS_AIRODUMP);
+        if (debug) Log.d("AP", "Starting airodump for channel " + this.ch);
+        startAirodump("--channel " + this.ch);
+        if(debug) {
+            Log.d("AP", "Starting aireplay without targets...");
+            Log.d("AP", this.mac);
+        }
+        startAireplay(this.mac);
+    }
+
     static void clear(){
         APs.clear();
         wpa = 0;
