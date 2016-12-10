@@ -31,6 +31,7 @@ import android.widget.RadioGroup;
 
 import static com.hijacker.CustomAction.TYPE_AP;
 import static com.hijacker.CustomAction.TYPE_ST;
+import static com.hijacker.CustomAction.cmds;
 import static com.hijacker.CustomAction.save;
 import static com.hijacker.MainActivity.FRAGMENT_CUSTOM;
 import static com.hijacker.MainActivity.currentFragment;
@@ -94,25 +95,36 @@ public class CustomActionEditorFragment extends Fragment{
                     action.setStart_cmd(start_cmd);
                     action.setStop_cmd(stop_cmd);
                     if(action.getType()==TYPE_AP){
-                        action.setRequires_clients(((CheckBox)v.findViewById(R.id.requirement)).isChecked());
+                        action.setRequires_clients(((CheckBox) v.findViewById(R.id.requirement)).isChecked());
                     }else{
-                        action.setRequires_connected(((CheckBox)v.findViewById(R.id.requirement)).isChecked());
+                        action.setRequires_connected(((CheckBox) v.findViewById(R.id.requirement)).isChecked());
                     }
                     save();
                     Snackbar.make(v, getString(R.string.saved) + " " + action.getTitle(), Snackbar.LENGTH_SHORT).show();
                 }else{
-                    //create new action
-                    if(((RadioGroup)v.findViewById(R.id.radio_group)).getCheckedRadioButtonId()==R.id.ap_rb){
-                        //this action is for ap
-                        action = new CustomAction(title, start_cmd, stop_cmd, TYPE_AP);
-                        action.setRequires_clients(((CheckBox)v.findViewById(R.id.requirement)).isChecked());
-                    }else{
-                        //this action is for st
-                        action = new CustomAction(title, start_cmd, stop_cmd, TYPE_ST);
-                        action.setRequires_connected(((CheckBox)v.findViewById(R.id.requirement)).isChecked());
+                    boolean found = false;
+                    for(int i=0;i<cmds.size();i++){
+                        if(cmds.get(i).getTitle().equals(title)){
+                            found = true;
+                            break;
+                        }
                     }
-                    save();
-                    Snackbar.make(v, getString(R.string.saved) + " " + action.getTitle(), Snackbar.LENGTH_SHORT).show();
+                    if(found){
+                        Snackbar.make(v, getString(R.string.action_exists), Snackbar.LENGTH_SHORT).show();
+                    }else{
+                        //create new action
+                        if(((RadioGroup) v.findViewById(R.id.radio_group)).getCheckedRadioButtonId()==R.id.ap_rb){
+                            //this action is for ap
+                            action = new CustomAction(title, start_cmd, stop_cmd, TYPE_AP);
+                            action.setRequires_clients(((CheckBox) v.findViewById(R.id.requirement)).isChecked());
+                        }else{
+                            //this action is for st
+                            action = new CustomAction(title, start_cmd, stop_cmd, TYPE_ST);
+                            action.setRequires_connected(((CheckBox) v.findViewById(R.id.requirement)).isChecked());
+                        }
+                        save();
+                        Snackbar.make(v, getString(R.string.saved) + " " + action.getTitle(), Snackbar.LENGTH_SHORT).show();
+                    }
                 }
             }
         });

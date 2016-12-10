@@ -160,9 +160,9 @@ public class CustomActionFragment extends Fragment{
                     ST temp;
                     for(i = 0; i<ST.STs.size(); i++){
                         temp = ST.STs.get(i);
-                        popup.getMenu().add(TYPE_ST, i, i, temp.mac + " (" + temp.bssid + ")");
+                        popup.getMenu().add(TYPE_ST, i, i, temp.mac + ((temp.bssid==null) ? "" : " (" + temp.bssid + ")"));
                         if(selected_cmd.requires_connected() && temp.bssid==null){
-                            popup.getMenu().findItem(i).setEnabled(true);
+                            popup.getMenu().findItem(i).setEnabled(false);
                         }
                     }
                 }
@@ -174,15 +174,14 @@ public class CustomActionFragment extends Fragment{
                                 //ap
                                 ap = AP.APs.get(item.getItemId());
                                 st = null;
-                                select_target.setText(ap.essid + " (" + ap.mac + ")");
                                 break;
                             case TYPE_ST:
                                 //st
                                 st = ST.STs.get(item.getItemId());
                                 ap = null;
-                                select_target.setText(st.mac + " (" + st.bssid + ")");
                                 break;
                         }
+                        select_target.setText(item.getTitle());
                         stop.obtainMessage().sendToTarget();
                         start_button.setEnabled(true);
                         return true;

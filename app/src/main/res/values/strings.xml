@@ -13,7 +13,7 @@
     <string name="stop_attacks">Stop attacks</string>
 
     <!-- Main -->
-    <string name="cap_notfound">cap file not found, airodump is probably not running…\n</string>
+    <string name="cap_notfound">cap file not found</string>
     <string name="cap_is">Cap file is </string>
     <string name="error_opening_shell">Error opening su shell</string>
     <string name="error_opening_shell2">Error opening su shell to kill remaining processes</string>
@@ -192,7 +192,7 @@
         Click \"Send report\" to report the problem.</string>
     <string name="send_report">Send report</string>
 
-    <!-- CustomCMDFragment -->
+    <!-- CustomActionFragment -->
     <string name="select_action">Select action</string>
     <string name="select_target">Select target</string>
     <string name="custom_action_editor">Custom Action Editor</string>
@@ -219,6 +219,7 @@
     <string name="edit">Edit…</string>
     <string name="access_point">Access Point</string>
     <string name="station">Station</string>
+    <string name="action_exists">An action with this name already exists</string>
 
     <!-- Default Preferences -->
     <string name="iface" translatable="false">wlan0</string>

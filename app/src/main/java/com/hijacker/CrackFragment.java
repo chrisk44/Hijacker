@@ -139,9 +139,9 @@ public class CrackFragment extends Fragment{
                 File word = new File(wordlist);
                 if(thread.isAlive()){
                     cont = false;
-                }else if(!cap.exists() && cap.isFile()){
+                }else if(!cap.exists() || !cap.isFile()){
                     Snackbar.make(v, cap_notfound, Snackbar.LENGTH_LONG).show();
-                }else if(!word.exists() && word.isFile()){
+                }else if(!word.exists() || !word.isFile()){
                     Snackbar.make(v, wordlist_notfound, Snackbar.LENGTH_LONG).show();
                 }else{
                     RadioGroup temp = (RadioGroup)v.findViewById(R.id.radio_group);
