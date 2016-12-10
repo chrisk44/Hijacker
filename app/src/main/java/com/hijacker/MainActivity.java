@@ -145,13 +145,14 @@ public class MainActivity extends AppCompatActivity{
         refresh_thread = new Thread(new Runnable(){
             @Override
             public void run(){          //TODO: this doesn't finish on android 6, causing Thread.IllegalStateSomethingException
-            if(debug) Log.d("refresh_thread", "refresh_thread running");
-            try{
-                while(cont){
-                    if(done) refreshHandler.obtainMessage().sendToTarget();
-                    Thread.sleep(1000);
-                }
-            }catch(InterruptedException e){ Log.e("Exception", "Caught Exception in main() refresh_thread block: " + e.toString()); }
+                if(debug) Log.d("refresh_thread", "refresh_thread running");
+                try{
+                   while(cont){
+                       if(done) refreshHandler.obtainMessage().sendToTarget();
+                       Thread.sleep(1000);
+                   }
+                }catch(InterruptedException e){ Log.e("Exception", "Caught Exception in main() refresh_thread block: " + e.toString()); }
+                if(debug) Log.d("refresh_thread", "refresh_thread done");
             }
         });
         wpa_thread = new Thread(new Runnable(){
