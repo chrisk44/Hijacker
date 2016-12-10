@@ -75,7 +75,7 @@ public class CrackFragment extends Fragment{
         Shell shell = Shell.getFreeShell();
         shell.run("ls -1 " + cap_dir + "/handshake-*.cap; echo ENDOFLS");
         capfile = getLastLine(shell.getShell_out(), "ENDOFLS");
-        if(!capfile.equals("ENDOFLS")){
+        if(!capfile.equals("ENDOFLS") && capfile.charAt(0)!='l'){
             ((EditText)v.findViewById(R.id.capfile)).setText(capfile);
         }
         shell.done();
