@@ -327,8 +327,8 @@
     <string name="chroot_title">Chroot directory</string>
     <string name="chroot_desc">Directory where a kali chroot is installed by NetHunter (required only for pixie-dust attack with reaver)</string>
 
-    <string name="monstart_title">monstart-nh</string>
-    <string name="monstart_sum">Run monstart-nh command when running reaver in NetHunter chroot (only in NetHunterOS)</string>
+    <string name="monstart_title">source monstart-nh</string>
+    <string name="monstart_sum">Run source monstart-nh command when running reaver in NetHunter chroot (only in NetHunterOS)</string>
 
     <string name="copy_sample_title">Copy test command</string>
 

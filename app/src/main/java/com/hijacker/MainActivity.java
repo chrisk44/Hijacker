@@ -334,7 +334,7 @@ public class MainActivity extends AppCompatActivity{
             dialog.setMessage(getString(R.string.oui_not_found));
             dialog.show(getFragmentManager(), "ErrorDialog");
         }
-        extract("busybox", true);
+        extract("busybox", false);
         runOne("cp " + path + "/busybox /su/xbin/busybox");
         runOne("chmod 755 /su/xbin/busybox");
 

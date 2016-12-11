@@ -265,7 +265,7 @@ public class ReaverFragment extends Fragment{
             ENV_OUT = ENV_OUT + "export " + aENV + " && ";
         }
         if(monstart){
-            ENV_OUT += "monstart-nh";
+            ENV_OUT += "source monstart-nh";
             ENV_OUT += cont_on_fail ? "; " : " && ";
         }
         if(!custom_chroot_cmd.equals("")){
