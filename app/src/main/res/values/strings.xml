@@ -27,7 +27,7 @@
     <string name="drawer_close">Close Drawer</string>
     <string name="ados_running">Authentication DoS is already running</string>
     <string name="disconnect_started">Disconnect All started</string>
-    <string name="watchdog_message">This could be caused by improper installation of busybox and toolbox. Go to settings and install the tools, and make sure you have busybox installed and updated.</string>
+    <string name="watchdog_message">This could be caused by improper installation of busybox and toolbox or the tools. Go to settings and install the tools, and make sure you have busybox installed and updated.</string>
     <string name="airodump_still_running">Airodump is still running!</string>
     <string name="airodump_not_running">Airodump is not running!</string>
     <string name="aireplay_still_running">Aireplay is still running!</string>
@@ -366,5 +366,5 @@
     <string name="no_backup">There is no backup. It is created when you install the tools through the app.</string>
     <string name="reset_title">Reset Preferences</string>
     <string name="version_title">Version</string>
-    <string name="version" translatable="false">v1-beta.21</string>
+    <string name="version" translatable="false">v1-beta.22</string>
 </resources>
