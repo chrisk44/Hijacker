@@ -133,18 +133,18 @@ public class SendLogActivity extends AppCompatActivity{
             writer.write("Device: " + model + "\n");
             writer.write("App version: " + (info == null ? "(null)" : info.versionCode) + "\n");
 
-            String cmd = "busybox echo pref_file--------------------------------------; su -c cat /data/user/0/com.hijacker/shared_prefs/com.hijacker_preferences.xml;";
-            cmd += " busybox echo ls_system-xbin---------------------------------; su -c ls /system/xbin -1| busybox grep -e air -e mdk -e reaver -e nexutil -e iw -e libfakeioctl.so -e busybox -e toolbox;";
-            cmd += " busybox echo ls_su-xbin-------------------------------------; su -c ls /su/xbin -1| busybox grep -e air -e mdk -e reaver -e nexutil -e iw -e libfakeioctl.so -e busybox -e toolbox;";
-            cmd += " busybox echo ls_vendor-lib----------------------------------; su -c ls /vendor/lib -1| busybox grep -e air -e mdk -e reaver -e nexutil -e iw -e libfakeioctl.so -e busybox -e toolbox;";
-            cmd += " busybox echo ls_su-lib--------------------------------------; su -c ls /su/lib -1| busybox grep -e air -e mdk -e reaver -e nexutil -e iw -e libfakeioctl.so -e busybox -e toolbox;";
-            cmd += " busybox echo ls_system-lib----------------------------------; su -c ls /system/lib -1| busybox grep -e air -e mdk -e reaver -e nexutil -e iw -e libfakeioctl.so -e busybox -e toolbox;";
-            cmd += " busybox echo fw_bcmdhd--------------------------------------; su -c strings /vendor/firmware/fw_bcmdhd.bin | grep \"FWID:\";";
-            cmd += " busybox echo ps---------------------------------------------; su -c ps | busybox grep -e air -e mdk -e reaver;";
-            cmd += " busybox echo busybox----------------------------------------; busybox;";
-            cmd += " busybox echo toolbox----------------------------------------; toolbox;";
-            cmd += " busybox echo logcat-----------------------------------------; logcat -d -v time;";
-            cmd += " busybox echo ENDOFLOG\n";
+            String cmd = "echo pref_file--------------------------------------; su -c cat /data/user/0/com.hijacker/shared_prefs/com.hijacker_preferences.xml;";
+            cmd += " echo ls_system-xbin---------------------------------; su -c ls /system/xbin -1| busybox grep -e air -e mdk -e reaver -e nexutil -e iw -e libfakeioctl.so -e busybox -e toolbox;";
+            cmd += " echo ls_su-xbin-------------------------------------; su -c ls /su/xbin -1| busybox grep -e air -e mdk -e reaver -e nexutil -e iw -e libfakeioctl.so -e busybox -e toolbox;";
+            cmd += " echo ls_vendor-lib----------------------------------; su -c ls /vendor/lib -1| busybox grep -e air -e mdk -e reaver -e nexutil -e iw -e libfakeioctl.so -e busybox -e toolbox;";
+            cmd += " echo ls_su-lib--------------------------------------; su -c ls /su/lib -1| busybox grep -e air -e mdk -e reaver -e nexutil -e iw -e libfakeioctl.so -e busybox -e toolbox;";
+            cmd += " echo ls_system-lib----------------------------------; su -c ls /system/lib -1| busybox grep -e air -e mdk -e reaver -e nexutil -e iw -e libfakeioctl.so -e busybox -e toolbox;";
+            cmd += " echo fw_bcmdhd--------------------------------------; su -c strings /vendor/firmware/fw_bcmdhd.bin | grep \"FWID:\";";
+            cmd += " echo ps---------------------------------------------; su -c ps | busybox grep -e air -e mdk -e reaver;";
+            cmd += " echo busybox----------------------------------------; busybox;";
+            cmd += " echo toolbox----------------------------------------; toolbox;";
+            cmd += " echo logcat-----------------------------------------; logcat -d -v time;";
+            cmd += " echo ENDOFLOG\n";
             Log.d("cmd", cmd);
             shell_in.print(cmd);                //Runtime.getRuntime().exec(cmd) just echos the cmd...
             shell_in.flush();
@@ -176,7 +176,7 @@ public class SendLogActivity extends AppCompatActivity{
         try{
             int pid;
             String s = null;
-            shell_in.print("toolbox ps | busybox grep -e air -e mdk -e reaver; busybox echo ENDOFPS\n");
+            shell_in.print("toolbox ps | busybox grep -e air -e mdk -e reaver; echo ENDOFPS\n");
             shell_in.flush();
             while(s==null){ s = shell_out.readLine(); } //for some reason sometimes s remains null
             while(!s.equals("ENDOFPS")){

@@ -67,7 +67,7 @@ class Shell{
     }
     void done(){
         try{
-            run("busybox echo && busybox echo ENDOFCLEAR");
+            run("echo; echo ENDOFCLEAR");
             MainActivity.getLastLine(shell_out, "ENDOFCLEAR");      //This will read up to the last line and stop, effectively clearing shell_out
             shell_out.reset();                                      //<--- since this doesn't seem to do the job
         }catch(IOException ignored){}

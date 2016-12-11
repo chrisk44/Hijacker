@@ -72,7 +72,7 @@ public class CrackFragment extends Fragment{
         }
 
         Shell shell = Shell.getFreeShell();
-        shell.run("ls -1 " + cap_dir + "/handshake-*.cap; busybox echo ENDOFLS");
+        shell.run("ls -1 " + cap_dir + "/handshake-*.cap; echo ENDOFLS");
         capfile = getLastLine(shell.getShell_out(), "ENDOFLS");
         if(!capfile.equals("ENDOFLS") && capfile.charAt(0)!='l'){
             ((EditText)v.findViewById(R.id.capfile)).setText(capfile);
@@ -182,7 +182,7 @@ public class CrackFragment extends Fragment{
             if((new File(path + "/aircrack-out.txt")).exists()){
                 Shell shell = Shell.getFreeShell();
                 BufferedReader out = shell.getShell_out();
-                shell.run("cat " + path + "/aircrack-out.txt; busybox echo ");              //No newline at the end of the file, readLine will hang
+                shell.run("cat " + path + "/aircrack-out.txt; echo ");              //No newline at the end of the file, readLine will hang
                 try{
                     console.append("Key found: " + out.readLine() + '\n');
                 }catch(IOException ignored){}

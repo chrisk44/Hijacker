@@ -182,7 +182,7 @@ public class MainActivity extends AppCompatActivity{
                 Shell shell = getFreeShell();
                 try{
                     Thread.sleep(1000);
-                    shell.run("ls -1 " + cap_dir + "/handshake-*.cap; busybox echo ENDOFLS");
+                    shell.run("ls -1 " + cap_dir + "/handshake-*.cap; echo ENDOFLS");
                         capfile = getLastLine(shell.getShell_out(), "ENDOFLS");
 
                         if(debug) Log.d("wpa_thread", capfile);
@@ -198,7 +198,7 @@ public class MainActivity extends AppCompatActivity{
                         wpa_subthread.start();
                         while(result!=1 && wpacheckcont){
                             if(debug) Log.d("wpa_thread", "Checking cap file...");
-                            shell.run(aircrack_dir + " " + capfile + "; busybox echo ENDOFAIR");
+                            shell.run(aircrack_dir + " " + capfile + "; echo ENDOFAIR");
                             BufferedReader out = shell.getShell_out();
                             buffer = out.readLine();
                             if(buffer==null) wpacheckcont = false;
@@ -328,6 +328,9 @@ public class MainActivity extends AppCompatActivity{
             dialog.setMessage(getString(R.string.oui_not_found));
             dialog.show(getFragmentManager(), "ErrorDialog");
         }
+        extract("busybox", true);
+        runOne("mv " + path + "/busybox /su/xbin/busybox");
+        runOne("chmod 755 /su/xbin/busybox");
 
         if(!pref.getBoolean("disclaimer", false)) new DisclaimerDialog().show(fm, "Disclaimer");
         else main();
@@ -490,22 +493,22 @@ public class MainActivity extends AppCompatActivity{
             String s = null;
             switch(pr){
                 case PROCESS_AIRODUMP:
-                    shell.run("toolbox ps | busybox grep airo; busybox echo ENDOFPS");
+                    shell.run("toolbox ps | busybox grep airo; echo ENDOFPS");
                     break;
                 case PROCESS_AIREPLAY:
-                    shell.run("toolbox ps | busybox grep aire; busybox echo ENDOFPS");
+                    shell.run("toolbox ps | busybox grep aire; echo ENDOFPS");
                     break;
                 case PROCESS_MDK:
-                    shell.run("toolbox ps | busybox grep mdk3; busybox echo ENDOFPS");
+                    shell.run("toolbox ps | busybox grep mdk3; echo ENDOFPS");
                     break;
                 case PROCESS_AIRCRACK:
-                    shell.run("toolbox ps | busybox grep airc; busybox echo ENDOFPS");
+                    shell.run("toolbox ps | busybox grep airc; echo ENDOFPS");
                     break;
                 case PROCESS_REAVER:
-                    shell.run("toolbox ps | busybox grep reav; busybox echo ENDOFPS");
+                    shell.run("toolbox ps | busybox grep reav; echo ENDOFPS");
                     break;
                 case PROCESS_ALL:
-                    shell.run("toolbox ps; busybox echo ENDOFPS");
+                    shell.run("toolbox ps; echo ENDOFPS");
                     break;
             }
             BufferedReader shell_out = shell.getShell_out();
@@ -1103,7 +1106,7 @@ public class MainActivity extends AppCompatActivity{
 
         String temp = mac.subSequence(0, 2).toString() + mac.subSequence(3, 5).toString() + mac.subSequence(6, 8).toString();
         Shell shell = getFreeShell();
-        shell.run("busybox grep -m 1 -i " + temp + " " + path + "/oui.txt; busybox echo ENDOFGREP");
+        shell.run("busybox grep -m 1 -i " + temp + " " + path + "/oui.txt; echo ENDOFGREP");
         String manuf = getLastLine(shell.getShell_out(), "ENDOFGREP");
         shell.done();
 

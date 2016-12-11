@@ -81,7 +81,7 @@ class CustomAction{
             shell.run("export BSSID=\"" + CustomActionFragment.st.bssid + '\"');
         }
         shell.run(start_cmd);
-        shell.run("busybox echo ENDOFCUSTOM");
+        shell.run("echo ENDOFCUSTOM");
         CustomActionFragment.thread.start();
     }
     void stop(){
