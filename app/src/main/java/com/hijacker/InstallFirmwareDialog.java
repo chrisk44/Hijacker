@@ -37,11 +37,13 @@ import java.io.IOException;
 import java.io.InputStream;
 
 import static com.hijacker.MainActivity.debug;
+import static com.hijacker.MainActivity.getLastLine;
 import static com.hijacker.MainActivity.path;
 
 public class InstallFirmwareDialog extends DialogFragment {
     View view;
     Shell shell;
+    boolean fw_verification_override = false;
     @Override
     public Dialog onCreateDialog(Bundle savedInstanceState) {
         AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
@@ -110,11 +112,23 @@ public class InstallFirmwareDialog extends DialogFragment {
                                 Toast.makeText(getActivity().getApplicationContext(), R.string.backup_created, Toast.LENGTH_SHORT).show();
                             }
                         }
-                        extract("fw_bcmdhd.bin", firm_location);
-                        extract("nexutil", util_location);
-                        shell.run("busybox mount -o ro,remount,ro /system");
-                        Toast.makeText(getActivity().getApplicationContext(), R.string.installed_firm_util, Toast.LENGTH_SHORT).show();
-                        dismiss();
+                        shell.done();                   //clear any existing output
+                        shell = Shell.getFreeShell();
+                        shell.run("strings " + firm_location + "/fw_bcmdhd.bin | busybox grep \"FWID:\"; echo ENDOFSTRINGS");
+                        String result = getLastLine(shell.getShell_out(), "ENDOFSTRINGS");
+                        result = result.substring(0, 4);
+
+                        if(result.equals("4339") || fw_verification_override){
+                            extract("fw_bcmdhd.bin", firm_location);
+                            extract("nexutil", util_location);
+                            shell.run("busybox mount -o ro,remount,ro /system");
+                            Toast.makeText(getActivity().getApplicationContext(), R.string.installed_firm_util, Toast.LENGTH_SHORT).show();
+                            dismiss();
+                        }else{
+                            Toast.makeText(getActivity().getApplicationContext(), R.string.fw_not_compatible, Toast.LENGTH_LONG).show();
+                            fw_verification_override = true;
+                            if(debug) Log.d("InstallFirmwareDialog", "Firmware verification is: " + result);
+                        }
                     }
                 }
             });

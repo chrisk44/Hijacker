@@ -31,6 +31,7 @@ import java.util.List;
 import static com.hijacker.MainActivity.aireplay_dir;
 import static com.hijacker.MainActivity.airodump_dir;
 import static com.hijacker.MainActivity.debug;
+import static com.hijacker.MainActivity.fm;
 import static com.hijacker.MainActivity.iface;
 import static com.hijacker.MainActivity.mdk3_dir;
 import static com.hijacker.MainActivity.prefix;
@@ -88,7 +89,6 @@ class CustomAction{
     void stop(){
         Shell shell = CustomActionFragment.shell;
         shell.run(stop_cmd);
-
     }
     static void save(){
         //Save current cmds list to permanent storage
@@ -109,6 +109,9 @@ class CustomAction{
                 writer.close();
             }catch(IOException e){
                 Log.e("CustomAction", "In load(): " + e.toString());
+                ErrorDialog dialog = new ErrorDialog();
+                dialog.setMessage("Error while saving " + action.title);
+                dialog.show(fm, "ErrorDialog");
             }
         }
     }

@@ -26,9 +26,12 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
 
+import static com.hijacker.MainActivity.runInHandler;
+
 public class APDialog extends DialogFragment {
     AP info_ap;
     TextView ap[] = {null, null, null, null, null, null, null, null, null, null, null, null};
+    Runnable runnable;
     @Override
     public Dialog onCreateDialog(Bundle savedInstanceState) {
         AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
@@ -62,6 +65,36 @@ public class APDialog extends DialogFragment {
         ap[10].setText(Integer.toString(info_ap.clients.size()));
         ap[11].setText(info_ap.manuf);
 
+        runnable = new Runnable(){
+            @Override
+            public void run(){
+                ap[0].setText(info_ap.essid);
+                ap[1].setText(info_ap.mac);
+                ap[2].setText(Integer.toString(info_ap.ch));
+                ap[3].setText(Integer.toString(info_ap.pwr));
+                ap[4].setText(info_ap.enc);
+                ap[5].setText(info_ap.auth);
+                ap[6].setText(info_ap.cipher);
+                ap[7].setText(Integer.toString(info_ap.beacons));
+                ap[8].setText(Integer.toString(info_ap.data));
+                ap[9].setText(Integer.toString(info_ap.ivs));
+                ap[10].setText(Integer.toString(info_ap.clients.size()));
+                ap[11].setText(info_ap.manuf);
+            }
+        };
+        new Thread(new Runnable(){
+            @Override
+            public void run(){
+                try{
+                    Thread.sleep(1000);
+                    while(APDialog.this.isResumed()){
+                        runInHandler(runnable);
+                        Thread.sleep(1000);
+                    }
+                }catch(InterruptedException ignored){}
+            }
+        }).start();
+
         builder.setView(view);
         builder.setTitle(info_ap.essid);
         builder.setNegativeButton(R.string.close, new DialogInterface.OnClickListener() {
@@ -74,30 +107,5 @@ public class APDialog extends DialogFragment {
             public void onClick(DialogInterface dialog, int id) {}
         });
         return builder.create();
-    }
-    @Override
-    public void onStart() {
-        super.onStart();
-        AlertDialog d = (AlertDialog)getDialog();
-        if(d != null) {
-            Button neutralButton = d.getButton(Dialog.BUTTON_NEUTRAL);
-            neutralButton.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    ap[0].setText(info_ap.essid);
-                    ap[1].setText(info_ap.mac);
-                    ap[2].setText(Integer.toString(info_ap.ch));
-                    ap[3].setText(Integer.toString(info_ap.pwr));
-                    ap[4].setText(info_ap.enc);
-                    ap[5].setText(info_ap.auth);
-                    ap[6].setText(info_ap.cipher);
-                    ap[7].setText(Integer.toString(info_ap.beacons));
-                    ap[8].setText(Integer.toString(info_ap.data));
-                    ap[9].setText(Integer.toString(info_ap.ivs));
-                    ap[10].setText(Integer.toString(info_ap.clients.size()));
-                    ap[11].setText(info_ap.manuf);
-                }
-            });
-        }
     }
 }

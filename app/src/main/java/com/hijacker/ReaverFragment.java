@@ -152,7 +152,7 @@ public class ReaverFragment extends Fragment{
                         Thread.sleep(3000);
                         Runtime.getRuntime().exec("su -c bootkali_init");       //Make sure kali has booted
                         args += " -K 1";
-                        cmd = "chroot /data/local/nhsystem/kali-armhf /bin/bash -c \'" + get_chroot_env() + "reaver " + args + "\'";
+                        cmd = "chroot " + MainActivity.chroot_dir + " /bin/bash -c \'" + get_chroot_env() + "reaver " + args + "\'";
                         msg = new Message();
                         msg.obj = "\nRunning: " + cmd + '\n';
                         refresh.sendMessage(msg);

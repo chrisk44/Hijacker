@@ -178,26 +178,20 @@ public class MainActivity extends AppCompatActivity{
                                     }
                                 });
                             }
-                            if(wpacheckcont){
-                                runInHandler(new Runnable(){
-                                    @Override
-                                    public void run(){
+                            runInHandler(new Runnable(){
+                                @Override
+                                public void run(){
+                                    if(wpacheckcont){
                                         stop(PROCESS_AIREPLAY);
                                         Snackbar snackbar = Snackbar.make(getCurrentFocus(), getString(R.string.stopped_to_capture), Snackbar.LENGTH_LONG);
                                         snackbar.show();
                                         progress.setIndeterminate(true);
-                                    }
-                                });
-                            }
-                            else{
-                                runInHandler(new Runnable(){
-                                    @Override
-                                    public void run(){
+                                    }else{
                                         progress.setIndeterminate(false);
                                         progress.setProgress(deauthWait);
                                     }
-                                });
-                            }
+                                }
+                            });
                         }catch(InterruptedException e){ Log.e("Exception", "Caught Exception in wpa_subthread: " + e.toString()); }
                         if(debug) Log.d("wpa_subthread", "wpa_subthread finished");
                     }
@@ -239,26 +233,19 @@ public class MainActivity extends AppCompatActivity{
                         }
                         wpacheckcont = false;
                     }
-                    if(result==1){
-                        runInHandler(new Runnable(){
-                            @Override
-                            public void run(){
+                    final int temp = result;
+                    runInHandler(new Runnable(){
+                        @Override
+                        public void run(){
+                            if(temp==1){
                                 stop(PROCESS_AIRODUMP);
                                 stop(PROCESS_AIREPLAY);
-                                Snackbar snackbar = Snackbar.make(getCurrentFocus(), getString(R.string.handshake_captured) + capfile, Snackbar.LENGTH_LONG);
-                                snackbar.show();
-                                progress.setIndeterminate(false);
+                                Snackbar.make(getCurrentFocus(), getString(R.string.handshake_captured) + ' ' + capfile, Snackbar.LENGTH_LONG).show();
                             }
-                        });
-                    }else{
-                        runInHandler(new Runnable(){
-                            @Override
-                            public void run(){
-                                progress.setIndeterminate(false);
-                                progress.setProgress(deauthWait);
-                            }
-                        });
-                    }
+                            progress.setIndeterminate(false);
+                            progress.setProgress(deauthWait);
+                        }
+                    });
                 }catch(IOException | InterruptedException e){
                     Log.e("Exception", "Caught Exception in wpa_thread: " + e.toString());
                     Message msg = new Message();
@@ -374,8 +361,9 @@ public class MainActivity extends AppCompatActivity{
             dialog.show(getFragmentManager(), "ErrorDialog");
         }
         extract("busybox", false);
-        runOne("cp " + path + "/busybox /su/xbin/busybox");
-        runOne("chmod 755 /su/xbin/busybox");
+        String dest = new File("/su").exists() ? "/su/xbin/busybox" : "/system/xbin/busybox";
+        runOne("cp " + path + "/busybox " + dest);
+        runOne("chmod 755 " + dest);
 
         if(!pref.getBoolean("disclaimer", false)) new DisclaimerDialog().show(fm, "Disclaimer");
         else main();
@@ -403,8 +391,6 @@ public class MainActivity extends AppCompatActivity{
         }
     }
     public static void main(){
-        runOne("cp " + path + "/busybox /su/xbin/busybox");
-        runOne("chmod 755 /su/xbin/busybox");
         runOne(enable_monMode);
         runOne("mkdir " + cap_dir);
 
@@ -582,7 +568,7 @@ public class MainActivity extends AppCompatActivity{
         switch(pr){
             case PROCESS_AIRODUMP:
                 cont = false;
-                refresh_thread.interrupt();     //here to help with the Thread.IllegalStateSomethingException in andorid 6 but doesn't help
+                refresh_thread.interrupt();
                 progress.setIndeterminate(false);
                 progress.setProgress(deauthWait);
                 if(menu!=null) menu.getItem(1).setIcon(R.drawable.run);
@@ -835,10 +821,10 @@ public class MainActivity extends AppCompatActivity{
                 return true;
 
             case R.id.filter:
-                new FiltersDialog().show(fm, "asdTAG");
+                new FiltersDialog().show(fm, "FiltersDialog");
                 return true;
 
-            case R.id.settings:                             //To be removed
+            case R.id.settings:
                 if(currentFragment!=FRAGMENT_SETTINGS){
                     FragmentTransaction ft = fm.beginTransaction();
                     ft.replace(R.id.fragment1, new SettingsFragment());
@@ -856,6 +842,7 @@ public class MainActivity extends AppCompatActivity{
     protected void onDestroy(){
         notif_on = false;
         nm.cancelAll();
+        CustomAction.save();
         watchdog_thread.interrupt();
         stop(PROCESS_AIRODUMP);
         stop(PROCESS_AIREPLAY);
@@ -1107,6 +1094,7 @@ public class MainActivity extends AppCompatActivity{
                 if(ados) str += " | MDK3 Authentication DoS...";
                 if(ReaverFragment.cont) str += " | Reaver running...";
                 if(CrackFragment.cont) str += " | Cracking .cap file...";
+                if(CustomActionFragment.cont) str += " | Running action " + CustomActionFragment.selected_action.getTitle() + "...";
             }
 
             notif.setContentText(str);

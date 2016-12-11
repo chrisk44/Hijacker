@@ -25,8 +25,11 @@ import android.support.v7.app.AlertDialog;
 import android.view.View;
 import android.widget.TextView;
 
+import static com.hijacker.MainActivity.runInHandler;
+
 public class StatsDialog extends DialogFragment {
     TextView wpa_count, wpa2_count, wep_count, opn_count;
+    Runnable runnable;
     @Override
     public Dialog onCreateDialog(Bundle savedInstanceState) {
         AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
@@ -43,6 +46,28 @@ public class StatsDialog extends DialogFragment {
         wpa2_count.setText(Integer.toString(AP.wpa2));
         wep_count.setText(Integer.toString(AP.wep));
         opn_count.setText(Integer.toString(AP.opn));
+
+        runnable = new Runnable(){
+            @Override
+            public void run(){
+                wpa_count.setText(Integer.toString(AP.wpa));
+                wpa2_count.setText(Integer.toString(AP.wpa2));
+                wep_count.setText(Integer.toString(AP.wep));
+                opn_count.setText(Integer.toString(AP.opn));
+            }
+        };
+        new Thread(new Runnable(){
+            @Override
+            public void run(){
+                try{
+                    Thread.sleep(1000);
+                    while(StatsDialog.this.isResumed()){
+                        runInHandler(runnable);
+                        Thread.sleep(1000);
+                    }
+                }catch(InterruptedException ignored){}
+            }
+        }).start();
 
         builder.setView(view);
         builder.setTitle(R.string.ap_stats);

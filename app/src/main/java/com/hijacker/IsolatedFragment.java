@@ -21,6 +21,7 @@ import android.app.Fragment;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -36,6 +37,7 @@ import static com.hijacker.MainActivity.PROCESS_AIRODUMP;
 import static com.hijacker.MainActivity.aireplay_dir;
 import static com.hijacker.MainActivity.copy;
 import static com.hijacker.MainActivity.currentFragment;
+import static com.hijacker.MainActivity.debug;
 import static com.hijacker.MainActivity.iface;
 import static com.hijacker.MainActivity.isolate;
 import static com.hijacker.MainActivity.prefix;
@@ -80,11 +82,11 @@ public class IsolatedFragment extends Fragment{
         listview.setAdapter(MainActivity.adapter);
         listview.setOnItemClickListener(new AdapterView.OnItemClickListener(){
             @Override
-            public void onItemClick(AdapterView<?> adapterView, final View view, int i, long l){
+            public void onItemClick(AdapterView<?> adapterView, final View v, int i, long l){
                 final Item clicked = Item.items.get(i);
 
                 //ST
-                PopupMenu popup = new PopupMenu(getActivity(), view);
+                PopupMenu popup = new PopupMenu(getActivity(), v);
                 popup.getMenuInflater().inflate(R.menu.popup_menu, popup.getMenu());
 
                 popup.getMenu().add(0, 0, 0, "Info");
@@ -96,16 +98,15 @@ public class IsolatedFragment extends Fragment{
 
                 popup.setOnMenuItemClickListener(new PopupMenu.OnMenuItemClickListener() {
                     public boolean onMenuItemClick(android.view.MenuItem item) {
+                        if(debug) Log.d("MyListFragment", "Clicked " + item.getItemId() + " for st");
                         switch(item.getItemId()) {
                             case 0:
                                 //Info
-                                STDialog dialog = new STDialog();
-                                dialog.info_st = clicked.st;
-                                dialog.show(getFragmentManager(), "STDialog");
+                                clicked.st.showInfo(getFragmentManager());
                                 break;
                             case 1:
                                 //copy to clipboard
-                                copy(clicked.st.mac, view);
+                                copy(clicked.st.mac, v);
                                 break;
                             case 2:
                                 //Disconnect this
@@ -114,7 +115,7 @@ public class IsolatedFragment extends Fragment{
                             case 3:
                                 //copy disconnect command to clipboard
                                 String str = prefix + " " + aireplay_dir + " --ignore-negative-one --deauth 0 -a " + clicked.st.bssid + " -c " + clicked.st.mac + " " + iface;
-                                copy(str, view);
+                                copy(str, v);
                                 break;
                         }
                         return true;

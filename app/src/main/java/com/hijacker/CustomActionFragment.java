@@ -43,13 +43,13 @@ import static com.hijacker.MainActivity.debug;
 import static com.hijacker.MainActivity.progress;
 
 public class CustomActionFragment extends Fragment{
-    static CustomAction selected_cmd=null;
+    static CustomAction selected_action=null;
     static AP ap=null;
     static ST st=null;
     static Shell shell=null;
     static Thread thread;
     static Runnable runnable;
-    static boolean cont;
+    static boolean cont=false;
     Button start_button, select_target, select_action;
     TextView console;
     static String console_text = null;
@@ -86,8 +86,8 @@ public class CustomActionFragment extends Fragment{
         select_target = (Button)v.findViewById(R.id.select_target);
         select_action = (Button)v.findViewById(R.id.select_action);
 
-        if(selected_cmd!=null){
-            select_action.setText(selected_cmd.getTitle());
+        if(selected_action!=null){
+            select_action.setText(selected_action.getTitle());
             select_target.setEnabled(true);
         }
         if(ap!=null){
@@ -125,9 +125,9 @@ public class CustomActionFragment extends Fragment{
                             ft.addToBackStack(null);
                             ft.commit();
                         }else{
-                            selected_cmd = cmds.get(item.getItemId());
+                            selected_action = cmds.get(item.getItemId());
                             stop.obtainMessage().sendToTarget();
-                            select_action.setText(selected_cmd.getTitle());
+                            select_action.setText(selected_action.getTitle());
                             select_target.setEnabled(true);
                             select_target.setText(R.string.select_target);
                             start_button.setEnabled(false);
@@ -149,12 +149,12 @@ public class CustomActionFragment extends Fragment{
 
                 //add(groupId, itemId, order, title)
                 int i;
-                if(selected_cmd.getType()==TYPE_AP){
+                if(selected_action.getType()==TYPE_AP){
                     AP temp;
                     for(i = 0; i<AP.APs.size(); i++){
                         temp = AP.APs.get(i);
                         popup.getMenu().add(TYPE_AP, i, i, temp.essid + " (" + temp.mac + ")");
-                        if(selected_cmd.requires_clients() && temp.clients.size()==0){
+                        if(selected_action.requires_clients() && temp.clients.size()==0){
                             popup.getMenu().findItem(i).setEnabled(false);
                         }
                     }
@@ -163,7 +163,7 @@ public class CustomActionFragment extends Fragment{
                     for(i = 0; i<ST.STs.size(); i++){
                         temp = ST.STs.get(i);
                         popup.getMenu().add(TYPE_ST, i, i, temp.mac + ((temp.bssid==null) ? "" : " (" + temp.bssid + ")"));
-                        if(selected_cmd.requires_connected() && temp.bssid==null){
+                        if(selected_action.requires_connected() && temp.bssid==null){
                             popup.getMenu().findItem(i).setEnabled(false);
                         }
                     }
@@ -200,16 +200,16 @@ public class CustomActionFragment extends Fragment{
                 if(!thread.isAlive()){        //same effect with !thread.isAlive()
                     //not started
                     shell = Shell.getFreeShell();
-                    console.append("Running: " + selected_cmd.getStart_cmd() + '\n');
-                    if(debug) Log.d("CustomCMDFragment", "Running: " + selected_cmd.getStart_cmd());
-                    selected_cmd.run();
+                    console.append("Running: " + selected_action.getStart_cmd() + '\n');
+                    if(debug) Log.d("CustomCMDFragment", "Running: " + selected_action.getStart_cmd());
+                    selected_action.run();
                     start_button.setText(R.string.stop);
                     progress.setIndeterminate(true);
                 }else{
                     //started
-                    console.append("Running: " + selected_cmd.getStop_cmd() + '\n');
-                    if(debug) Log.d("CustomCMDFragment", "Running: " + selected_cmd.getStop_cmd());
-                    selected_cmd.stop();
+                    console.append("Running: " + selected_action.getStop_cmd() + '\n');
+                    if(debug) Log.d("CustomCMDFragment", "Running: " + selected_action.getStop_cmd());
+                    selected_action.stop();
                     stop.obtainMessage().sendToTarget();
                 }
             }

@@ -71,11 +71,7 @@ public class CustomActionEditorFragment extends Fragment{
                 v.findViewById(R.id.stop_cmd).setEnabled(true);
                 v.findViewById(R.id.requirement).setEnabled(true);
                 v.findViewById(R.id.save_button).setEnabled(true);
-                if(i==R.id.st_rb){
-                    ((CheckBox)v.findViewById(R.id.requirement)).setText(R.string.requires_associated);
-                }else{
-                    ((CheckBox)v.findViewById(R.id.requirement)).setText(R.string.requires_clients);
-                }
+                ((CheckBox)v.findViewById(R.id.requirement)).setText(i==R.id.st_rb ? R.string.requires_associated : R.string.requires_clients);
             }
         });
 

@@ -38,8 +38,7 @@ public class ActionDeleteDialog extends DialogFragment{
         builder.setTitle(R.string.delete_title);
         builder.setPositiveButton(R.string.delete, new DialogInterface.OnClickListener() {
             public void onClick(DialogInterface dialog, int id) {
-                File file = new File(Environment.getExternalStorageDirectory() + "/Hijacker-actions/" + cmds.get(index).getTitle() + ".action");
-                file.delete();
+                new File(Environment.getExternalStorageDirectory() + "/Hijacker-actions/" + cmds.get(index).getTitle() + ".action").delete();
                 cmds.remove(index);
                 custom_action_adapter.notifyDataSetChanged();
             }

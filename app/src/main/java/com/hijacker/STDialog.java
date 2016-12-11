@@ -26,9 +26,12 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
 
+import static com.hijacker.MainActivity.runInHandler;
+
 public class STDialog extends DialogFragment {
     ST info_st;
     TextView st[] = {null, null, null, null, null, null};
+    Runnable runnable;
     @Override
     public Dialog onCreateDialog(Bundle savedInstanceState) {
         AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
@@ -54,6 +57,34 @@ public class STDialog extends DialogFragment {
         st[4].setText(Integer.toString(info_st.lost));
         st[5].setText(info_st.manuf);
 
+        runnable = new Runnable(){
+            @Override
+            public void run(){
+                st[0].setText(info_st.mac);
+
+                if(info_st.bssid==null) st[1].setText(R.string.not_connected);
+                else if(AP.getAPByMac(info_st.bssid)!=null) st[1].setText(info_st.bssid + " (" + AP.getAPByMac(info_st.bssid).essid + ")");
+                else st[1].setText(info_st.bssid);
+
+                st[2].setText(Integer.toString(info_st.pwr));
+                st[3].setText(Integer.toString(info_st.frames));
+                st[4].setText(Integer.toString(info_st.lost));
+                st[5].setText(info_st.manuf);
+            }
+        };
+        new Thread(new Runnable(){
+            @Override
+            public void run(){
+                try{
+                    Thread.sleep(1000);
+                    while(STDialog.this.isResumed()){
+                        runInHandler(runnable);
+                        Thread.sleep(1000);
+                    }
+                }catch(InterruptedException ignored){}
+            }
+        }).start();
+
         builder.setView(view);
         builder.setTitle(info_st.mac);
         builder.setNegativeButton(R.string.close, new DialogInterface.OnClickListener() {
@@ -66,28 +97,5 @@ public class STDialog extends DialogFragment {
             public void onClick(DialogInterface dialog, int id) {}
         });
         return builder.create();
-    }
-    @Override
-    public void onStart() {
-        super.onStart();
-        AlertDialog d = (AlertDialog)getDialog();
-        if(d != null) {
-            Button neutralButton = d.getButton(Dialog.BUTTON_NEUTRAL);
-            neutralButton.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    st[0].setText(info_st.mac);
-
-                    if(info_st.bssid==null) st[1].setText(R.string.not_connected);
-                    else if(AP.getAPByMac(info_st.bssid)!=null) st[1].setText(info_st.bssid + " (" + AP.getAPByMac(info_st.bssid).essid + ")");
-                    else st[1].setText(info_st.bssid);
-
-                    st[2].setText(Integer.toString(info_st.pwr));
-                    st[3].setText(Integer.toString(info_st.frames));
-                    st[4].setText(Integer.toString(info_st.lost));
-                    st[5].setText(info_st.manuf);
-                }
-            });
-        }
     }
 }

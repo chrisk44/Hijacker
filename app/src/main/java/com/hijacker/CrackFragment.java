@@ -182,7 +182,7 @@ public class CrackFragment extends Fragment{
             cont = false;
             progress.setIndeterminate(false);
             stop(PROCESS_AIRCRACK);
-            if((new File(path + "/aircrack-out.txt")).exists()){
+            if(new File(path + "/aircrack-out.txt").exists()){
                 Shell shell = Shell.getFreeShell();
                 BufferedReader out = shell.getShell_out();
                 shell.run("cat " + path + "/aircrack-out.txt; echo ");              //No newline at the end of the file, readLine will hang
