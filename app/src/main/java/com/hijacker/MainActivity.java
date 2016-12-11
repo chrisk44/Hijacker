@@ -171,16 +171,40 @@ public class MainActivity extends AppCompatActivity{
                             while(progress_int<=deauthWait && wpacheckcont){
                                 Thread.sleep(1000);
                                 progress_int++;
-                                progressHandler.obtainMessage().sendToTarget();
+                                runInHandler(new Runnable(){
+                                    @Override
+                                    public void run(){
+                                        progress.setProgress(progress_int);
+                                    }
+                                });
                             }
-                            if(wpacheckcont) MainActivity.this.stopAireplayForHandshake.obtainMessage().sendToTarget();
-                            else stopIndeterminate.obtainMessage().sendToTarget();
+                            if(wpacheckcont){
+                                runInHandler(new Runnable(){
+                                    @Override
+                                    public void run(){
+                                        stop(PROCESS_AIREPLAY);
+                                        Snackbar snackbar = Snackbar.make(getCurrentFocus(), getString(R.string.stopped_to_capture), Snackbar.LENGTH_LONG);
+                                        snackbar.show();
+                                        progress.setIndeterminate(true);
+                                    }
+                                });
+                            }
+                            else{
+                                runInHandler(new Runnable(){
+                                    @Override
+                                    public void run(){
+                                        progress.setIndeterminate(false);
+                                        progress.setProgress(deauthWait);
+                                    }
+                                });
+                            }
                         }catch(InterruptedException e){ Log.e("Exception", "Caught Exception in wpa_subthread: " + e.toString()); }
                         if(debug) Log.d("wpa_subthread", "wpa_subthread finished");
                     }
                 });
 
-                String capfile, buffer;
+                final String capfile;
+                String buffer;
                 int result = 0;
                 Shell shell = getFreeShell();
                 try{
@@ -216,10 +240,25 @@ public class MainActivity extends AppCompatActivity{
                         wpacheckcont = false;
                     }
                     if(result==1){
-                        Message msg = new Message();
-                        msg.obj = capfile;
-                        MainActivity.this.handshakeCaptured.sendMessage(msg);
-                    }else stopIndeterminate.obtainMessage().sendToTarget();
+                        runInHandler(new Runnable(){
+                            @Override
+                            public void run(){
+                                stop(PROCESS_AIRODUMP);
+                                stop(PROCESS_AIREPLAY);
+                                Snackbar snackbar = Snackbar.make(getCurrentFocus(), getString(R.string.handshake_captured) + capfile, Snackbar.LENGTH_LONG);
+                                snackbar.show();
+                                progress.setIndeterminate(false);
+                            }
+                        });
+                    }else{
+                        runInHandler(new Runnable(){
+                            @Override
+                            public void run(){
+                                progress.setIndeterminate(false);
+                                progress.setProgress(deauthWait);
+                            }
+                        });
+                    }
                 }catch(IOException | InterruptedException e){
                     Log.e("Exception", "Caught Exception in wpa_thread: " + e.toString());
                     Message msg = new Message();
@@ -595,28 +634,6 @@ public class MainActivity extends AppCompatActivity{
     }
 
     //Handlers used for tasks that require the Main thread to update the view, but need to be run by other threads
-    public Handler handshakeCaptured = new Handler(){
-        public void handleMessage(Message msg){
-            stop(PROCESS_AIRODUMP);
-            stop(PROCESS_AIREPLAY);
-            Snackbar snackbar = Snackbar.make(getCurrentFocus(), getString(R.string.handshake_captured) + msg.obj + '\n', Snackbar.LENGTH_LONG);
-            snackbar.show();
-            progress.setIndeterminate(false);
-        }
-    };
-    public Handler stopAireplayForHandshake = new Handler(){
-        public void handleMessage(Message msg){
-            stop(PROCESS_AIREPLAY);Snackbar snackbar = Snackbar.make(getCurrentFocus(), getString(R.string.stopped_to_capture), Snackbar.LENGTH_LONG);
-            snackbar.show();
-            progress.setIndeterminate(true);
-        }
-    };
-    public static Handler stopIndeterminate = new Handler(){
-        public void handleMessage(Message msg){
-            progress.setIndeterminate(false);
-            progress.setProgress(deauthWait);
-        }
-    };
     public static Handler refreshHandler = new Handler(){
         public void handleMessage(Message msg){
             done = false;
@@ -629,11 +646,6 @@ public class MainActivity extends AppCompatActivity{
             st_count.setText(Integer.toString(Item.items.size() - Item.i));
             notification();
             done = true;
-        }
-    };
-    public static Handler progressHandler = new Handler(){
-        public void handleMessage(Message msg){
-            progress.setProgress(progress_int);
         }
     };
     public Handler stop_handler = new Handler(){
@@ -650,6 +662,17 @@ public class MainActivity extends AppCompatActivity{
             dialog.show(getFragmentManager(), "ErrorDialog");
         }
     };
+    public static Handler handler = new Handler(){
+        public void handleMessage(Message msg){
+            Runnable runnable = (Runnable)msg.obj;
+            runnable.run();
+        }
+    };
+    public static void runInHandler(Runnable runnable){
+        Message msg = new Message();
+        msg.obj = runnable;
+        handler.sendMessage(msg);
+    }
 
     void setup(){
         ap_count = (TextView) findViewById(R.id.ap_count);
