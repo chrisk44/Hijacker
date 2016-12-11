@@ -51,6 +51,7 @@ import static com.hijacker.MainActivity.load;
 import static com.hijacker.MainActivity.status;
 import static com.hijacker.MainActivity.stop;
 import static com.hijacker.MainActivity.watchdog;
+import static com.hijacker.MainActivity.watchdog_runnable;
 import static com.hijacker.MainActivity.watchdog_thread;
 import static com.hijacker.Shell.getFreeShell;
 import static com.hijacker.Shell.runOne;
@@ -60,66 +61,60 @@ public class TestDialog extends DialogFragment {
     TextView test_cur_cmd;
     ProgressBar test_progress;
     Thread thread;
+    Runnable runnable;
     public Dialog onCreateDialog(Bundle savedInstanceState) {
         setCancelable(false);
         load();
 
-        thread = new Thread(new Runnable(){
+        runnable = new Runnable(){
             @Override
             public void run(){
                 watchdog_thread.interrupt();
-                Shell shell = getFreeShell();
                 try{
                     Thread.sleep(500);
                     //Separate calls so the UI can be refreshed, otherwise it gets blocked.
-                    Message msg = new Message();
+                    Message msg = new Message();        //call to stop everything and turn on monitor mode
                     msg.what = 0;
-                    msg.obj = shell;
                     test_wait = true;
                     runTest.sendMessage(msg);
                     while(test_wait){
                         Thread.sleep(100);
                     }
 
-                    msg = new Message();
+                    msg = new Message();                //call to test airodump
                     msg.what = 1;
-                    msg.obj = shell;
                     test_wait = true;
                     runTest.sendMessage(msg);
                     while(test_wait){
                         Thread.sleep(100);
                     }
 
-                    msg = new Message();
+                    msg = new Message();                //call to test aireplay
                     msg.what = 2;
-                    msg.obj = shell;
                     test_wait = true;
                     runTest.sendMessage(msg);
                     while(test_wait){
                         Thread.sleep(100);
                     }
 
-                    msg = new Message();
+                    msg = new Message();                //call to test mdk
                     msg.what = 3;
-                    msg.obj = shell;
                     test_wait = true;
                     runTest.sendMessage(msg);
                     while(test_wait){
                         Thread.sleep(100);
                     }
 
-                    msg = new Message();
+                    msg = new Message();                //call to test reaver
                     msg.what = 4;
-                    msg.obj = shell;
                     test_wait = true;
                     runTest.sendMessage(msg);
                     while(test_wait){
                         Thread.sleep(100);
                     }
 
-                    msg = new Message();
+                    msg = new Message();                //call to check chroot
                     msg.what = 5;
-                    msg.obj = shell;
                     test_wait = true;
                     runTest.sendMessage(msg);
                     while(test_wait){
@@ -128,11 +123,14 @@ public class TestDialog extends DialogFragment {
                 }catch(InterruptedException e){
                     Log.d("test_thread", "Interrupted");
                 }finally{
-                    shell.done();
-                    if(watchdog) watchdog_thread.start();
+                    if(watchdog){
+                        watchdog_thread = new Thread(watchdog_runnable);
+                        watchdog_thread.start();
+                    }
                 }
             }
-        });
+        };
+
         AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
         View view = getActivity().getLayoutInflater().inflate(R.layout.test, null);
 
@@ -151,6 +149,7 @@ public class TestDialog extends DialogFragment {
         test_cur_cmd = (TextView)view.findViewById(R.id.current_cmd);
         test_cur_cmd.setText(enable_monMode);
 
+        thread = new Thread(runnable);
         thread.start();
 
         builder.setView(view);
@@ -169,7 +168,6 @@ public class TestDialog extends DialogFragment {
         public void handleMessage(Message msg){
             try{
                 String cmd;
-                Shell shell = (Shell)msg.obj;
                 switch(msg.what){
                     case 0:
                         stop(PROCESS_AIRODUMP);
@@ -177,17 +175,17 @@ public class TestDialog extends DialogFragment {
                         stop(PROCESS_MDK);
                         cmd = enable_monMode;
                         Log.d("test_thread", cmd);
-                        shell.run(cmd);
+                        Runtime.getRuntime().exec(cmd);
                         Thread.sleep(1000);
                         status[0].setImageResource(R.drawable.testing);
-                        test_cur_cmd.setText(prefix + " " + airodump_dir + " " + iface);
+                        test_cur_cmd.setText("su -c " + prefix + " " + airodump_dir + " " + iface);
                         test_wait = false;
                         break;
 
                     case 1:
-                        cmd = prefix + " " + airodump_dir + " " + iface;
+                        cmd = "su -c " + prefix + " " + airodump_dir + " " + iface;
                         Log.d("test_thread", cmd);
-                        shell.run(cmd);
+                        Runtime.getRuntime().exec(cmd);
                         Thread.sleep(1000);
                         if(getPIDs(PROCESS_AIRODUMP).size()==0) status[0].setImageResource(R.drawable.failed);
                         else{
@@ -196,14 +194,14 @@ public class TestDialog extends DialogFragment {
                         }
                         test_progress.setProgress(1);
                         status[1].setImageResource(R.drawable.testing);
-                        test_cur_cmd.setText(prefix + " " + aireplay_dir + " --deauth 0 -a 11:22:33:44:55:66 " + iface);
+                        test_cur_cmd.setText("su -c " + prefix + " " + aireplay_dir + " --deauth 0 -a 11:22:33:44:55:66 " + iface);
                         test_wait = false;
                         break;
 
                     case 2:
-                        cmd = prefix + " " + aireplay_dir + " --deauth 0 -a 11:22:33:44:55:66 " + iface;
+                        cmd = "su -c " + prefix + " " + aireplay_dir + " --deauth 0 -a 11:22:33:44:55:66 " + iface;
                         Log.d("test_thread", cmd);
-                        shell.run(cmd);
+                        Runtime.getRuntime().exec(cmd);
                         Thread.sleep(1000);
                         if(getPIDs(PROCESS_AIREPLAY).size()==0) status[1].setImageResource(R.drawable.failed);
                         else{
@@ -212,14 +210,14 @@ public class TestDialog extends DialogFragment {
                         }
                         test_progress.setProgress(2);
                         status[2].setImageResource(R.drawable.testing);
-                        test_cur_cmd.setText(prefix + " " + mdk3_dir + " " + iface + " b -m");
+                        test_cur_cmd.setText("su -c " + prefix + " " + mdk3_dir + " " + iface + " b -m");
                         test_wait = false;
                         break;
 
                     case 3:
-                        cmd = prefix + " " + mdk3_dir + " " + iface + " b -m";
+                        cmd = "su -c " + prefix + " " + mdk3_dir + " " + iface + " b -m";
                         Log.d("test_thread", cmd);
-                        shell.run(cmd);
+                        Runtime.getRuntime().exec(cmd);
                         Thread.sleep(1000);
                         if(getPIDs(PROCESS_MDK).size()==0) status[2].setImageResource(R.drawable.failed);
                         else{
@@ -228,14 +226,14 @@ public class TestDialog extends DialogFragment {
                         }
                         test_progress.setProgress(3);
                         status[3].setImageResource(R.drawable.testing);
-                        test_cur_cmd.setText(prefix + " " + reaver_dir + " -i " + iface + " -b 00:11:22:33:44:55 -c 2");
+                        test_cur_cmd.setText("su -c " + prefix + " " + reaver_dir + " -i " + iface + " -b 00:11:22:33:44:55 -c 2");
                         test_wait = false;
                         break;
 
                     case 4:
-                        cmd = prefix + " " + reaver_dir + " -i " + iface + " -b 00:11:22:33:44:55 -c 2";
+                        cmd = "su -c " + prefix + " " + reaver_dir + " -i " + iface + " -b 00:11:22:33:44:55 -c 2";
                         Log.d("test_thread", cmd);
-                        shell.run(cmd);
+                        Runtime.getRuntime().exec(cmd);
                         Thread.sleep(1000);
                         if(getPIDs(PROCESS_REAVER).size()==0) status[3].setImageResource(R.drawable.failed);
                         else{
@@ -262,7 +260,7 @@ public class TestDialog extends DialogFragment {
                         if(!chroot_dir.exists() || !kali_init){
                             status[4].setImageResource(R.drawable.failed);
                             if(!chroot_dir.exists()) test_cur_cmd.setText(R.string.chroot_notfound);
-                            if(!kali_init) test_cur_cmd.setText(R.string.kali_notfound);
+                            else if(!kali_init) test_cur_cmd.setText(R.string.kali_notfound);
                         }else{
                             test_cur_cmd.setText(R.string.done);
                             status[4].setImageResource(R.drawable.passed);
@@ -277,7 +275,7 @@ public class TestDialog extends DialogFragment {
                         test_progress.setProgress(6);
                         break;
                 }
-            }catch(InterruptedException e){
+            }catch(InterruptedException | IOException e){
                 Log.e("Exception", "Caught Exception in runTest Handler: " + e.toString());
             }
         }

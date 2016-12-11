@@ -56,6 +56,7 @@ public class CrackFragment extends Fragment{
     Button button;
     static int mode;
     static Thread thread;
+    static Runnable runnable;
     static boolean cont=false;
     static String capfile, wordlist, console_text;
     @Override
@@ -72,14 +73,14 @@ public class CrackFragment extends Fragment{
         }
 
         Shell shell = Shell.getFreeShell();
-        shell.run("ls -1 " + cap_dir + "/handshake-*.cap; echo ENDOFLS");
+        shell.run("busybox ls -1 " + cap_dir + "/handshake-*.cap; echo ENDOFLS");
         capfile = getLastLine(shell.getShell_out(), "ENDOFLS");
         if(!capfile.equals("ENDOFLS") && capfile.charAt(0)!='l'){
             ((EditText)v.findViewById(R.id.capfile)).setText(capfile);
         }
         shell.done();
 
-        thread = new Thread(new Runnable(){
+        runnable = new Runnable(){
             @Override
             public void run(){
                 Log.d("CrackFragment", "in thread");
@@ -117,7 +118,8 @@ public class CrackFragment extends Fragment{
 
                 stop.obtainMessage().sendToTarget();
             }
-        });
+        };
+        thread = new Thread(runnable);
 
         ((RadioButton)v.findViewById(R.id.wep_rb)).setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener(){
             @Override
@@ -165,6 +167,7 @@ public class CrackFragment extends Fragment{
                         button.setText(R.string.stop);
                         console.append("\nRunning...\n");
                         progress.setIndeterminate(true);
+                        thread = new Thread(runnable);
                         thread.start();
                     }
                 }

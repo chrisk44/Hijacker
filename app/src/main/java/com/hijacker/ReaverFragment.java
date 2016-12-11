@@ -62,6 +62,7 @@ public class ReaverFragment extends Fragment{
     static Button start_button, select_button;
     TextView console;
     static Thread thread;
+    static Runnable runnable;
     static boolean cont=false;
     static String console_text = null, pin_delay="1", locked_delay="60", custom_mac=null;       //delays are always used as strings
     static boolean ignore_locked, eap_fail, small_dh;
@@ -129,67 +130,66 @@ public class ReaverFragment extends Fragment{
             }
         });
 
-        if(thread==null){
-            thread = new Thread(new Runnable(){
-                @Override
-                public void run(){
-                    Log.d("ReaverFragment", "in thread");
-                    try{
-                        BufferedReader out;
-                        Message msg;
-                        String args = "-i " + iface + " -vv";
-                        args += ap==null ? " -b " + custom_mac : " -b " + ap.mac + " --channel " + ap.ch;
-                        args += " -d " + ((EditText)v.findViewById(R.id.pin_delay)).getText();
-                        args += " -l " + ((EditText)v.findViewById(R.id.locked_delay)).getText();
-                        if(((CheckBox)v.findViewById(R.id.ignore_locked)).isChecked()) args += " -L";
-                        if(((CheckBox)v.findViewById(R.id.eap_fail)).isChecked()) args += " -E";
-                        if(((CheckBox)v.findViewById(R.id.small_dh)).isChecked()) args += " -S";
-                        String cmd;
-                        if(((CheckBox)v.findViewById(R.id.pixie_dust)).isChecked()){
-                            msg = new Message();
-                            msg.obj = getString(R.string.chroot_warning);
-                            refresh.sendMessage(msg);
-                            Thread.sleep(3000);
-                            Runtime.getRuntime().exec("su -c bootkali_init");       //Make sure kali has booted
-                            args += " -K 1";
-                            cmd = "chroot /data/local/nhsystem/kali-armhf /bin/bash -c \'" + get_chroot_env() + "reaver " + args + "\'";
-                            msg = new Message();
-                            msg.obj = "\nRunning: " + cmd + '\n';
-                            refresh.sendMessage(msg);
-                            ProcessBuilder pb = new ProcessBuilder("su");
-                            pb.redirectErrorStream(true);
-                            Process dc = pb.start();
-                            out = new BufferedReader(new InputStreamReader(dc.getInputStream()));
-                            PrintWriter in = new PrintWriter(dc.getOutputStream());
-                            in.print(cmd + "\nexit\n");
-                            in.flush();
-                        }else{
-                            cmd = "su -c " + prefix + " " + reaver_dir + " " + args;
-                            msg = new Message();
-                            msg.obj = "Running: " + cmd;
-                            refresh.sendMessage(msg);
-                            Process dc = Runtime.getRuntime().exec(cmd);
-                            out = new BufferedReader(new InputStreamReader(dc.getInputStream()));
-                        }
-                        if(debug) Log.d("ReaverFragment", cmd);
-                        cont = true;
-                        String buffer;
-                        while(cont && (buffer = out.readLine())!=null){
-                            msg = new Message();
-                            msg.obj = buffer;
-                            refresh.sendMessage(msg);
-                        }
+        runnable = new Runnable(){
+            @Override
+            public void run(){
+                Log.d("ReaverFragment", "in thread");
+                try{
+                    BufferedReader out;
+                    Message msg;
+                    String args = "-i " + iface + " -vv";
+                    args += ap==null ? " -b " + custom_mac : " -b " + ap.mac + " --channel " + ap.ch;
+                    args += " -d " + ((EditText)v.findViewById(R.id.pin_delay)).getText();
+                    args += " -l " + ((EditText)v.findViewById(R.id.locked_delay)).getText();
+                    if(((CheckBox)v.findViewById(R.id.ignore_locked)).isChecked()) args += " -L";
+                    if(((CheckBox)v.findViewById(R.id.eap_fail)).isChecked()) args += " -E";
+                    if(((CheckBox)v.findViewById(R.id.small_dh)).isChecked()) args += " -S";
+                    String cmd;
+                    if(((CheckBox)v.findViewById(R.id.pixie_dust)).isChecked()){
                         msg = new Message();
-                        msg.obj = "\nDone\n";
+                        msg.obj = getString(R.string.chroot_warning);
                         refresh.sendMessage(msg);
-                    }catch(IOException | InterruptedException e){
-                        Log.e("Exception", "Caught Exception in ReaverFragment: " + e.toString());
+                        Thread.sleep(3000);
+                        Runtime.getRuntime().exec("su -c bootkali_init");       //Make sure kali has booted
+                        args += " -K 1";
+                        cmd = "chroot /data/local/nhsystem/kali-armhf /bin/bash -c \'" + get_chroot_env() + "reaver " + args + "\'";
+                        msg = new Message();
+                        msg.obj = "\nRunning: " + cmd + '\n';
+                        refresh.sendMessage(msg);
+                        ProcessBuilder pb = new ProcessBuilder("su");
+                        pb.redirectErrorStream(true);
+                        Process dc = pb.start();
+                        out = new BufferedReader(new InputStreamReader(dc.getInputStream()));
+                        PrintWriter in = new PrintWriter(dc.getOutputStream());
+                        in.print(cmd + "\nexit\n");
+                        in.flush();
+                    }else{
+                        cmd = "su -c " + prefix + " " + reaver_dir + " " + args;
+                        msg = new Message();
+                        msg.obj = "Running: " + cmd;
+                        refresh.sendMessage(msg);
+                        Process dc = Runtime.getRuntime().exec(cmd);
+                        out = new BufferedReader(new InputStreamReader(dc.getInputStream()));
                     }
-
-                    stop.obtainMessage().sendToTarget();
+                    if(debug) Log.d("ReaverFragment", cmd);
+                    cont = true;
+                    String buffer;
+                    while(cont && (buffer = out.readLine())!=null){
+                        msg = new Message();
+                        msg.obj = buffer;
+                        refresh.sendMessage(msg);
+                    }
+                    msg = new Message();
+                    msg.obj = "\nDone\n";
+                    refresh.sendMessage(msg);
+                }catch(IOException | InterruptedException e){
+                    Log.e("Exception", "Caught Exception in ReaverFragment: " + e.toString());
                 }
-            });
-        }
+
+                stop.obtainMessage().sendToTarget();
+            }
+        };
+        thread = new Thread(runnable);
 
         start_button = (Button)v.findViewById(R.id.start_button);
         start_button.setText(thread.isAlive() ? R.string.stop : R.string.start);
@@ -203,6 +203,7 @@ public class ReaverFragment extends Fragment{
                         start_button.setText(R.string.stop);
                         stop(PROCESS_AIRODUMP);            //Can't have channels changing from anywhere else
                         progress.setIndeterminate(true);
+                        thread = new Thread(runnable);
                         thread.start();
                     }
                 }else{

@@ -82,6 +82,7 @@ class CustomAction{
         }
         shell.run(start_cmd);
         shell.run("echo ENDOFCUSTOM");
+        CustomActionFragment.thread = new Thread(CustomActionFragment.runnable);
         CustomActionFragment.thread.start();
     }
     void stop(){

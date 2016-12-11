@@ -35,6 +35,7 @@ import static com.hijacker.MainActivity.startAireplay;
 import static com.hijacker.MainActivity.startAireplayWEP;
 import static com.hijacker.MainActivity.startAirodump;
 import static com.hijacker.MainActivity.stop;
+import static com.hijacker.MainActivity.wpa_runnable;
 import static com.hijacker.MainActivity.wpa_thread;
 import static com.hijacker.MainActivity.wpacheckcont;
 
@@ -148,6 +149,7 @@ class AP {
             if(debug) Log.d("AP", "Cracking WPA/WPA2");
             startAirodump("--channel " + this.ch + " --bssid " + this.mac + " -w " + cap_dir + "/handshake");
             startAireplay(this.mac);
+            wpa_thread = new Thread(wpa_runnable);
             wpa_thread.start();
         }
         if(is_ap==null) isolate(this.mac);

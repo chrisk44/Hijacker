@@ -95,6 +95,7 @@ public class MainActivity extends AppCompatActivity{
     static ImageView[] status = {null, null, null, null, null};                                     //Icons in TestDialog, set in TestDialog class
     static int progress_int;
     static Thread refresh_thread, wpa_thread, watchdog_thread;
+    static Runnable refresh_runnable, wpa_runnable, watchdog_runnable;
     static Menu menu;
     static List<Item2> fifo;                    //List used as FIFO for handling calls to addAP/addST in an order
     static MyListAdapter adapter;
@@ -142,20 +143,22 @@ public class MainActivity extends AppCompatActivity{
         setSupportActionBar((Toolbar) findViewById(R.id.my_toolbar));
         setup();
 
-        refresh_thread = new Thread(new Runnable(){
+        refresh_runnable = new Runnable(){
             @Override
-            public void run(){          //TODO: this doesn't finish on android 6, causing Thread.IllegalStateSomethingException
+            public void run(){
                 if(debug) Log.d("refresh_thread", "refresh_thread running");
                 try{
-                   while(cont){
-                       if(done) refreshHandler.obtainMessage().sendToTarget();
-                       Thread.sleep(1000);
-                   }
+                    while(cont){
+                        if(done) refreshHandler.obtainMessage().sendToTarget();
+                        Thread.sleep(1000);
+                    }
                 }catch(InterruptedException e){ Log.e("Exception", "Caught Exception in main() refresh_thread block: " + e.toString()); }
                 if(debug) Log.d("refresh_thread", "refresh_thread done");
             }
-        });
-        wpa_thread = new Thread(new Runnable(){
+        };
+        refresh_thread = new Thread(refresh_runnable);
+
+        wpa_runnable = new Runnable(){
             @Override
             public void run(){
                 if(debug) Log.d("wpa_thread", "Started wpa_thread");
@@ -182,7 +185,7 @@ public class MainActivity extends AppCompatActivity{
                 Shell shell = getFreeShell();
                 try{
                     Thread.sleep(1000);
-                    shell.run("ls -1 " + cap_dir + "/handshake-*.cap; echo ENDOFLS");
+                    shell.run("busybox ls -1 " + cap_dir + "/handshake-*.cap; echo ENDOFLS");
                         capfile = getLastLine(shell.getShell_out(), "ENDOFLS");
 
                         if(debug) Log.d("wpa_thread", capfile);
@@ -232,8 +235,10 @@ public class MainActivity extends AppCompatActivity{
                     shell.done();
                 }
             }
-        });
-        watchdog_thread = new Thread(new Runnable(){        //Thread to check whether the tools we think are running, are actually running
+        };
+        wpa_thread = new Thread(wpa_runnable);
+
+        watchdog_runnable = new Runnable(){        //Thread to check whether the tools we think are running, are actually running
             @Override
             public void run(){
                 try{
@@ -319,7 +324,8 @@ public class MainActivity extends AppCompatActivity{
                     }
                 }catch(InterruptedException e){ Log.e("watchdog thread", "Exception: " + e.toString()); }
             }
-        });
+        };
+        watchdog_thread = new Thread(watchdog_runnable);
 
         extract("oui.txt", true);
         File oui = new File(path + "/oui.txt");
@@ -329,7 +335,7 @@ public class MainActivity extends AppCompatActivity{
             dialog.show(getFragmentManager(), "ErrorDialog");
         }
         extract("busybox", true);
-        runOne("mv " + path + "/busybox /su/xbin/busybox");
+        runOne("cp " + path + "/busybox /su/xbin/busybox");
         runOne("chmod 755 /su/xbin/busybox");
 
         if(!pref.getBoolean("disclaimer", false)) new DisclaimerDialog().show(fm, "Disclaimer");
@@ -358,6 +364,8 @@ public class MainActivity extends AppCompatActivity{
         }
     }
     public static void main(){
+        runOne("cp " + path + "/busybox /su/xbin/busybox");
+        runOne("chmod 755 /su/xbin/busybox");
         runOne(enable_monMode);
         runOne("mkdir " + cap_dir);
 
@@ -368,7 +376,10 @@ public class MainActivity extends AppCompatActivity{
         stop(PROCESS_REAVER);
         if(airOnStartup) startAirodump(null);
         else if(menu!=null) menu.getItem(1).setIcon(R.drawable.run);
-        if(watchdog) watchdog_thread.start();
+        if(watchdog){
+            watchdog_thread = new Thread(watchdog_runnable);
+            watchdog_thread.start();
+        }
     }
 
     public static void startAirodump(String params){
@@ -403,6 +414,7 @@ public class MainActivity extends AppCompatActivity{
                 }catch(IOException e){ Log.e("Exception", "Caught Exception in startAirodump() read block: " + e.toString()); }
             }
         }).start();
+        refresh_thread = new Thread(refresh_runnable);
         refresh_thread.start();
         airodump_running = 1;
         refreshState();

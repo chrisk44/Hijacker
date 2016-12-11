@@ -48,6 +48,7 @@ public class CustomActionFragment extends Fragment{
     static ST st=null;
     static Shell shell=null;
     static Thread thread;
+    static Runnable runnable;
     static boolean cont;
     Button start_button, select_target, select_action;
     TextView console;
@@ -56,7 +57,7 @@ public class CustomActionFragment extends Fragment{
     public View onCreateView(LayoutInflater inflater, final ViewGroup container, Bundle savedInstanceState){
         View v = inflater.inflate(R.layout.custom_action_fragment, container, false);
 
-        thread = new Thread(new Runnable(){
+        runnable = new Runnable(){
             @Override
             public void run(){
                 if(debug) Log.d("CustomCMDFragment", "thread running");
@@ -76,7 +77,8 @@ public class CustomActionFragment extends Fragment{
                     if(debug) Log.d("CustomCMDFragment", "thread done");
                 }catch(IOException ignored){}
             }
-        });
+        };
+        thread = new Thread(runnable);
 
         console = (TextView)v.findViewById(R.id.console);
         console.setMovementMethod(new ScrollingMovementMethod());

@@ -134,11 +134,11 @@ public class SendLogActivity extends AppCompatActivity{
             writer.write("App version: " + (info == null ? "(null)" : info.versionCode) + "\n");
 
             String cmd = "echo pref_file--------------------------------------; su -c cat /data/user/0/com.hijacker/shared_prefs/com.hijacker_preferences.xml;";
-            cmd += " echo ls_system-xbin---------------------------------; su -c ls /system/xbin -1| busybox grep -e air -e mdk -e reaver -e nexutil -e iw -e libfakeioctl.so -e busybox -e toolbox;";
-            cmd += " echo ls_su-xbin-------------------------------------; su -c ls /su/xbin -1| busybox grep -e air -e mdk -e reaver -e nexutil -e iw -e libfakeioctl.so -e busybox -e toolbox;";
-            cmd += " echo ls_vendor-lib----------------------------------; su -c ls /vendor/lib -1| busybox grep -e air -e mdk -e reaver -e nexutil -e iw -e libfakeioctl.so -e busybox -e toolbox;";
-            cmd += " echo ls_su-lib--------------------------------------; su -c ls /su/lib -1| busybox grep -e air -e mdk -e reaver -e nexutil -e iw -e libfakeioctl.so -e busybox -e toolbox;";
-            cmd += " echo ls_system-lib----------------------------------; su -c ls /system/lib -1| busybox grep -e air -e mdk -e reaver -e nexutil -e iw -e libfakeioctl.so -e busybox -e toolbox;";
+            cmd += " echo ls_system-xbin---------------------------------; su -c ls /system/xbin | busybox grep -e air -e mdk -e reaver -e nexutil -e iw -e libfakeioctl.so -e busybox -e toolbox;";
+            cmd += " echo ls_su-xbin-------------------------------------; su -c ls /su/xbin | busybox grep -e air -e mdk -e reaver -e nexutil -e iw -e libfakeioctl.so -e busybox -e toolbox;";
+            cmd += " echo ls_vendor-lib----------------------------------; su -c ls /vendor/lib | busybox grep -e air -e mdk -e reaver -e nexutil -e iw -e libfakeioctl.so -e busybox -e toolbox;";
+            cmd += " echo ls_su-lib--------------------------------------; su -c ls /su/lib | busybox grep -e air -e mdk -e reaver -e nexutil -e iw -e libfakeioctl.so -e busybox -e toolbox;";
+            cmd += " echo ls_system-lib----------------------------------; su -c ls /system/lib | busybox grep -e air -e mdk -e reaver -e nexutil -e iw -e libfakeioctl.so -e busybox -e toolbox;";
             cmd += " echo fw_bcmdhd--------------------------------------; su -c strings /vendor/firmware/fw_bcmdhd.bin | grep \"FWID:\";";
             cmd += " echo ps---------------------------------------------; su -c ps | busybox grep -e air -e mdk -e reaver;";
             cmd += " echo busybox----------------------------------------; busybox;";

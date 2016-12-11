@@ -48,13 +48,14 @@ public class IsolatedFragment extends Fragment{
     static AP is_ap;
     TextView essid, manuf, mac, sec1, numbers, sec2;
     static Thread thread;
+    static Runnable runnable;
     static boolean cont = true;
     static int exit_on;
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState){
         view = inflater.inflate(R.layout.isolated_fragment, container, false);
 
-        thread = new Thread(new Runnable(){
+        runnable = new Runnable(){
             @Override
             public void run(){
                 cont = true;
@@ -65,7 +66,8 @@ public class IsolatedFragment extends Fragment{
                     }catch(InterruptedException ignored){}
                 }
             }
-        });
+        };
+        thread = new Thread(runnable);
 
         essid = (TextView)view.findViewById(R.id.essid);
         manuf = (TextView)view.findViewById(R.id.manuf);
@@ -140,6 +142,7 @@ public class IsolatedFragment extends Fragment{
     public void onResume() {
         super.onResume();
         currentFragment = FRAGMENT_AIRODUMP;
+        thread = new Thread(runnable);
         thread.start();
         ((Button)view.findViewById(R.id.crack)).setText(wpa_thread.isAlive() ? R.string.stop : R.string.crack);
         ((Button)view.findViewById(R.id.dos)).setText(MDKFragment.ados ? R.string.stop : R.string.dos);
