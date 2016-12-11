@@ -40,6 +40,7 @@ import static com.hijacker.MainActivity.MDK_ADOS;
 import static com.hijacker.MainActivity.MDK_BF;
 import static com.hijacker.MainActivity.currentFragment;
 import static com.hijacker.MainActivity.debug;
+import static com.hijacker.MainActivity.runInHandler;
 import static com.hijacker.MainActivity.startMdk;
 import static com.hijacker.MainActivity.stop;
 
@@ -117,7 +118,13 @@ public class MDKFragment extends Fragment{
                             AP temp = AP.APs.get(item.getItemId());
                             if(ados_ap!=temp){
                                 ados_ap = temp;
-                                stop.obtainMessage().sendToTarget();
+                                runInHandler(new Runnable(){
+                                    @Override
+                                    public void run(){
+                                        ados_switch.setChecked(false);
+                                        stop(ados_pid);
+                                    }
+                                });
                             }
                             select_button.setText(ados_ap.essid + " (" + ados_ap.mac + ')');
                         }else{
@@ -136,12 +143,6 @@ public class MDKFragment extends Fragment{
 
         return v;
     }
-    public Handler stop = new Handler(){
-        public void handleMessage(Message msg){
-            ados_switch.setChecked(false);
-            stop(ados_pid);
-        }
-    };
     @Override
     public void onResume() {
         super.onResume();
