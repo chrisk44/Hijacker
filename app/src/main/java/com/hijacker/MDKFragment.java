@@ -48,7 +48,7 @@ public class MDKFragment extends Fragment{
     static AP ados_ap=null;
     Switch bf_switch, ados_switch;
     static Button select_button;
-    static String custom_mac=null;
+    static String custom_mac=null, ssid_file=null;
     static boolean bf=false, ados=false;
     static int bf_pid, ados_pid;
     @Override
@@ -132,6 +132,7 @@ public class MDKFragment extends Fragment{
                 popup.show();
             }
         });
+        if(ssid_file!=null) ((EditText)v.findViewById(R.id.ssid_file)).setText(ssid_file);
 
         return v;
     }
@@ -145,6 +146,11 @@ public class MDKFragment extends Fragment{
     public void onResume() {
         super.onResume();
         currentFragment = FRAGMENT_MDK;
+    }
+    @Override
+    public void onPause(){
+        super.onPause();
+        ssid_file = ((EditText)v.findViewById(R.id.ssid_file)).getText().toString();
     }
 }
 
