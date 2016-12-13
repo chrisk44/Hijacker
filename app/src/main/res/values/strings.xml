@@ -222,6 +222,16 @@
     <string name="station">Station</string>
     <string name="action_exists">An action with this name already exists</string>
 
+    <!-- ExportDialog -->
+    <string name="export">Export</string>
+    <string name="export_title">Export…</string>
+    <string name="output_file_title">Output file</string>
+    <string name="output_file_hint">/sdcard/output.txt</string>
+    <string name="visible">Visible</string>
+    <string name="output_file_exists">File already exists. Click again to overwrite.</string>
+    <string name="output_file_cant_write">Can\'t write to that file</string>
+    <string name="output_file_exported">Exported</string>
+
     <!-- Default Preferences -->
     <string name="iface" translatable="false">wlan0</string>
     <string name="prefix" translatable="false">LD_PRELOAD=/vendor/lib/libfakeioctl.so</string>

@@ -93,9 +93,6 @@ public class STDialog extends DialogFragment {
                 //close
             }
         });
-        builder.setNeutralButton(R.string.refresh, new DialogInterface.OnClickListener() {
-            public void onClick(DialogInterface dialog, int id) {}
-        });
         return builder.create();
     }
 }

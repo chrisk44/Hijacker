@@ -87,6 +87,9 @@ class ST {
         dialog.info_st = this;
         dialog.show(fragmentManager, "STDialog");
     }
+    public String toString(){
+        return mac + '\t' + (bssid==null ? "(not associated)" : bssid) + '\t' + pwr + '\t' + frames + '\t' + lost + '\t' + manuf + '\n';
+    }
     static ST getSTByMac(String mac){
         for(int i=STs.size()-1;i>=0;i--){
             if(mac.equals(STs.get(i).mac)){

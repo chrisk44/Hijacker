@@ -17,6 +17,7 @@ package com.hijacker;
     along with this program.  If not, see <http://www.gnu.org/licenses/>
  */
 
+import android.Manifest;
 import android.app.FragmentManager;
 import android.app.FragmentTransaction;
 import android.app.NotificationManager;
@@ -26,6 +27,7 @@ import android.content.ClipboardManager;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.content.pm.PackageManager;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.Build;
@@ -34,6 +36,8 @@ import android.os.Handler;
 import android.os.Message;
 import android.preference.PreferenceManager;
 import android.support.design.widget.Snackbar;
+import android.support.v4.app.ActivityCompat;
+import android.support.v4.content.ContextCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.app.NotificationCompat;
@@ -352,6 +356,10 @@ public class MainActivity extends AppCompatActivity{
             }
         };
         watchdog_thread = new Thread(watchdog_runnable);
+
+        if(ContextCompat.checkSelfPermission(this, Manifest.permission.WRITE_EXTERNAL_STORAGE)==PackageManager.PERMISSION_DENIED){
+            ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE}, 0);
+        }
 
         extract("oui.txt", true);
         File oui = new File(path + "/oui.txt");
@@ -832,6 +840,10 @@ public class MainActivity extends AppCompatActivity{
                     ft.addToBackStack(null);
                     ft.commit();
                 }
+                return true;
+
+            case R.id.export:
+                new ExportDialog().show(getFragmentManager(), "ExportDialog");
                 return true;
 
             default:

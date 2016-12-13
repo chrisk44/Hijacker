@@ -23,6 +23,10 @@
         android:icon="@drawable/stop_aireplay"
         app:showAsAction="ifRoom"/>
 
+    <item android:id="@+id/export"
+          android:title="@string/export_title"
+          app:showAsAction="never" />
+
     <item android:id="@+id/settings"
         android:title="@string/settings"
         app:showAsAction="never" />

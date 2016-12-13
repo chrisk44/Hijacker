@@ -179,6 +179,10 @@ class AP {
         }
         startAireplay(this.mac);
     }
+    public String toString(){
+        return mac + '\t' + pwr + '\t' + ch + '\t' + beacons + '\t' + data + '\t' + ivs + '\t' +
+                enc + '\t' + auth + '\t' + cipher + '\t' + (isHidden ? "Yes" : "No") + '\t' + essid + '\t' + manuf + '\n';
+    }
 
     static void clear(){
         APs.clear();

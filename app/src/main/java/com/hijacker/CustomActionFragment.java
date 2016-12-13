@@ -96,7 +96,7 @@ public class CustomActionFragment extends Fragment{
         }
         if(st!=null){
             start_button.setEnabled(true);
-            select_target.setText(st.mac + " (" + st.bssid + ")");
+            select_target.setText(st.mac + " (" + AP.getAPByMac(st.bssid).essid + ")");
         }
         if(thread.isAlive()){
             start_button.setText(R.string.stop);
@@ -162,7 +162,7 @@ public class CustomActionFragment extends Fragment{
                     ST temp;
                     for(i = 0; i<ST.STs.size(); i++){
                         temp = ST.STs.get(i);
-                        popup.getMenu().add(TYPE_ST, i, i, temp.mac + ((temp.bssid==null) ? "" : " (" + temp.bssid + ")"));
+                        popup.getMenu().add(TYPE_ST, i, i, temp.mac + ((temp.bssid==null) ? "" : " (" + AP.getAPByMac(temp.bssid).essid + ")"));
                         if(selected_action.requires_connected() && temp.bssid==null){
                             popup.getMenu().findItem(i).setEnabled(false);
                         }

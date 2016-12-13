@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+              android:orientation="vertical"
+              android:layout_width="match_parent"
+              android:layout_height="match_parent">
+
+    <TextView
+        android:text="@string/output_file_title"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:textColor="@android:color/white"
+        android:textSize="18sp"
+        android:labelFor="@+id/output_file"
+        android:paddingEnd="8dp"
+        android:paddingStart="8dp"/>
+
+    <EditText
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="@string/output_file_hint"
+        android:ems="10"
+        android:id="@+id/output_file"
+        android:inputType="text"
+        android:paddingEnd="8dp"
+        android:paddingStart="8dp"/>
+
+    <RadioGroup
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:id="@+id/radio_group">
+
+        <RadioButton
+            android:text="@string/all"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:id="@+id/all_rb"
+            android:layout_weight="1"
+            android:checked="true"/>
+
+        <RadioButton
+            android:text="@string/visible"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:id="@+id/visible_rb"
+            android:layout_weight="1"/>
+    </RadioGroup>
+
+</LinearLayout>
