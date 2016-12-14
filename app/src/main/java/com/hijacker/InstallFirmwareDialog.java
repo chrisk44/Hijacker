@@ -43,7 +43,6 @@ import static com.hijacker.MainActivity.path;
 public class InstallFirmwareDialog extends DialogFragment {
     View view;
     Shell shell;
-    boolean fw_verification_override = false;
     @Override
     public Dialog onCreateDialog(Bundle savedInstanceState) {
         AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
@@ -62,9 +61,7 @@ public class InstallFirmwareDialog extends DialogFragment {
         builder.setMessage(R.string.install_message);
         builder.setNegativeButton(R.string.cancel, new DialogInterface.OnClickListener() {
             @Override
-            public void onClick(DialogInterface dialog, int which) {
-                //close
-            }
+            public void onClick(DialogInterface dialog, int which) {}
         });
         builder.setPositiveButton(R.string.install, new DialogInterface.OnClickListener() {
             @Override
@@ -84,6 +81,19 @@ public class InstallFirmwareDialog extends DialogFragment {
         if(d != null) {
             final Button positiveButton = d.getButton(Dialog.BUTTON_POSITIVE);
             Button neutralButton = d.getButton(Dialog.BUTTON_NEUTRAL);
+            positiveButton.setOnLongClickListener(new View.OnLongClickListener(){
+                @Override
+                public boolean onLongClick(View v){
+                    String firm_location = ((EditText)view.findViewById(R.id.firm_location)).getText().toString();
+                    String util_location = ((EditText)view.findViewById(R.id.util_location)).getText().toString();
+                    extract("fw_bcmdhd.bin", firm_location);
+                    extract("nexutil", util_location);
+                    shell.run("busybox mount -o ro,remount,ro /system");
+                    Toast.makeText(getActivity().getApplicationContext(), R.string.installed_firm_util, Toast.LENGTH_SHORT).show();
+                    dismiss();
+                    return false;
+                }
+            });
             positiveButton.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
@@ -118,7 +128,7 @@ public class InstallFirmwareDialog extends DialogFragment {
                         String result = getLastLine(shell.getShell_out(), "ENDOFSTRINGS");
                         result = result.substring(0, 4);
 
-                        if(result.equals("4339") || fw_verification_override){
+                        if(result.equals("4339")){
                             extract("fw_bcmdhd.bin", firm_location);
                             extract("nexutil", util_location);
                             shell.run("busybox mount -o ro,remount,ro /system");
@@ -126,7 +136,6 @@ public class InstallFirmwareDialog extends DialogFragment {
                             dismiss();
                         }else{
                             Toast.makeText(getActivity().getApplicationContext(), R.string.fw_not_compatible, Toast.LENGTH_LONG).show();
-                            fw_verification_override = true;
                             if(debug) Log.d("InstallFirmwareDialog", "Firmware verification is: " + result);
                         }
                     }

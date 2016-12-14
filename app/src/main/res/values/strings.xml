@@ -91,7 +91,7 @@
     <string name="installed_firm_util">Installed firmware and utility</string>
     <string name="firm_notfound_bcm">Firmware not found. Are you sure you have BCM4339?</string>
     <string name="create_backup">Create Backup</string>
-    <string name="fw_not_compatible">Your device does not seem to be compatible with Nexmon (BCM4339). If you want to install it anyway, click install again.</string>
+    <string name="fw_not_compatible">Your device does not seem to be compatible with Nexmon (BCM4339). If you want to install it anyway, press and hold Install.</string>
 
     <!-- InstallToolsDialog -->
     <string name="dir_notfound_tools">Directory for tools doesn\'t exist</string>
@@ -228,7 +228,7 @@
     <string name="output_file_title">Output file</string>
     <string name="output_file_hint">/sdcard/output.txt</string>
     <string name="visible">Visible</string>
-    <string name="output_file_exists">File already exists. Click again to overwrite.</string>
+    <string name="output_file_exists">File already exists. Press and hold Export to overwrite.</string>
     <string name="output_file_cant_write">Can\'t write to that file</string>
     <string name="output_file_exported">Exported</string>
 
@@ -377,5 +377,5 @@
     <string name="no_backup">There is no backup. It is created when you install the tools through the app.</string>
     <string name="reset_title">Reset Preferences</string>
     <string name="version_title">Version</string>
-    <string name="version" translatable="false">v1-beta.23</string>
+    <string name="version" translatable="false">v1-rc.1</string>
 </resources>
