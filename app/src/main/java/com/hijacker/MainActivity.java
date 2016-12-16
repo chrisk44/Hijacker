@@ -252,9 +252,7 @@ public class MainActivity extends AppCompatActivity{
                     });
                 }catch(IOException | InterruptedException e){
                     Log.e("Exception", "Caught Exception in wpa_thread: " + e.toString());
-                    Message msg = new Message();
-                    msg.what = PROCESS_AIREPLAY;
-                    stop_handler.sendMessage(msg);
+                    stop(PROCESS_AIREPLAY);
                 }finally{
                     wpa_subthread.interrupt();
                     if(delete_extra){
@@ -286,9 +284,7 @@ public class MainActivity extends AppCompatActivity{
                             flag = false;
                             airodump_running = 0;
                         }else if(airodump_running==0 && list.size()>0){     //airodump still running
-                            msg = new Message();
-                            msg.what = PROCESS_AIRODUMP;
-                            stop_handler.sendMessage(msg);
+                            stop(PROCESS_AIRODUMP);
                             if(getPIDs(PROCESS_AIRODUMP).size()>0){
                                 msg = new Message();
                                 msg.obj = getString(R.string.airodump_still_running);
@@ -304,9 +300,7 @@ public class MainActivity extends AppCompatActivity{
                             flag = false;
                             aireplay_running = 0;
                         }else if(aireplay_running==0 && list.size()>0){ //aireplay still running
-                            msg = new Message();
-                            msg.what = PROCESS_AIREPLAY;
-                            stop_handler.sendMessage(msg);
+                            stop(PROCESS_AIREPLAY);
                             if(getPIDs(PROCESS_AIREPLAY).size()>0){
                                 msg = new Message();
                                 msg.obj = getString(R.string.aireplay_still_running);
@@ -323,9 +317,7 @@ public class MainActivity extends AppCompatActivity{
                             bf = false;
                             ados = false;
                         }else if(!(bf || ados) && list.size()>0){   //mdk still running
-                            msg = new Message();
-                            msg.what = PROCESS_MDK;
-                            stop_handler.sendMessage(msg);
+                            stop(PROCESS_MDK);
                             if(getPIDs(PROCESS_MDK).size()>0){
                                 msg = new Message();
                                 msg.obj = getString(R.string.mdk_still_running);
@@ -341,9 +333,7 @@ public class MainActivity extends AppCompatActivity{
                             flag = false;
                             ReaverFragment.cont = false;
                         }else if(!ReaverFragment.cont && list.size()>0){   //reaver still running
-                            msg = new Message();
-                            msg.what = PROCESS_REAVER;
-                            stop_handler.sendMessage(msg);
+                            stop(PROCESS_REAVER);
                             if(getPIDs(PROCESS_REAVER).size()>0){
                                 msg = new Message();
                                 msg.obj = getString(R.string.reaver_still_running);
@@ -577,15 +567,20 @@ public class MainActivity extends AppCompatActivity{
             case PROCESS_AIRODUMP:
                 cont = false;
                 refresh_thread.interrupt();
-                progress.setIndeterminate(false);
-                progress.setProgress(deauthWait);
-                if(menu!=null) menu.getItem(1).setIcon(R.drawable.run);
+                runInHandler(new Runnable(){
+                    @Override
+                    public void run(){
+                        progress.setIndeterminate(false);
+                        progress.setProgress(deauthWait);
+                        if(menu!=null) menu.getItem(1).setIcon(R.drawable.run);
+                        Item.filter();
+                    }
+                });
                 if(wpa_thread.isAlive()){
                     IsolatedFragment.cont = false;
                     wpacheckcont = false;
                     wpa_thread.interrupt();
                 }
-                Item.filter();
                 if(delete_extra && always_cap){
                     runOne("busybox rm -rf " + cap_dir + "/cap-*.csv");
                     runOne("busybox rm -rf " + cap_dir + "/cap-*.netxml");
@@ -593,7 +588,12 @@ public class MainActivity extends AppCompatActivity{
                 airodump_running = 0;
                 break;
             case PROCESS_AIREPLAY:
-                if(menu!=null) menu.getItem(3).setEnabled(false);
+                runInHandler(new Runnable(){
+                    @Override
+                    public void run(){
+                        if(menu!=null) menu.getItem(3).setEnabled(false);
+                    }
+                });
                 if(delete_extra && aireplay_running==AIREPLAY_WEP){
                     runOne("busybox rm -rf " + cap_dir + "/wep_ivs-*.csv");
                     runOne("busybox rm -rf " + cap_dir + "/wep_ivs-*.netxml");
@@ -623,8 +623,13 @@ public class MainActivity extends AppCompatActivity{
             }
             shell.done();
         }
-        refreshState();
-        notification();
+        runInHandler(new Runnable(){
+            @Override
+            public void run(){
+                refreshState();
+                notification();
+            }
+        });
     }
 
     //Handlers used for tasks that require the Main thread to update the view, but need to be run by other threads
@@ -640,11 +645,6 @@ public class MainActivity extends AppCompatActivity{
             st_count.setText(Integer.toString(Item.items.size() - Item.i));
             notification();
             done = true;
-        }
-    };
-    public Handler stop_handler = new Handler(){
-        public void handleMessage(Message msg){
-            stop(msg.what);
         }
     };
     public Handler watchdog_handler = new Handler(){
