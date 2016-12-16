@@ -358,10 +358,22 @@ public class MainActivity extends AppCompatActivity{
             dialog.setMessage(getString(R.string.oui_not_found));
             dialog.show(getFragmentManager(), "ErrorDialog");
         }
+
         extract("busybox", false);
-        String dest = new File("/su").exists() ? "/su/xbin/busybox" : "/system/xbin/busybox";
-        runOne("cp " + path + "/busybox " + dest);
-        runOne("chmod 755 " + dest);
+        Shell shell = getFreeShell();
+        String dest = "/su/xbin/busybox";
+        boolean inSystem = false;
+        if(new File("/su").exists()){
+            dest = "/system/xbin/busybox";
+            inSystem = true;
+            shell.run("chmod 755 " + path + "/busybox");
+            shell.run(path + "/busybox mount -o rw,remount,rw /system");
+        }
+        shell.run("cp " + path + "/busybox " + dest);
+        shell.run("chmod 755 " + dest);
+        if(inSystem) shell.run("busybox mount -o ro,remount,ro /system");
+        shell.done();
+        if(debug) Log.d("onCreate", "Installed " + dest);
 
         if(!pref.getBoolean("disclaimer", false)) new DisclaimerDialog().show(fm, "Disclaimer");
         else main();
@@ -440,8 +452,14 @@ public class MainActivity extends AppCompatActivity{
         refresh_thread = new Thread(refresh_runnable);
         refresh_thread.start();
         airodump_running = 1;
-        refreshState();
-        if(menu!=null) menu.getItem(1).setIcon(R.drawable.stop);
+        runInHandler(new Runnable(){
+            @Override
+            public void run(){
+                if(menu!=null) menu.getItem(1).setIcon(R.drawable.stop);
+                refreshState();
+                notification();
+            }
+        });
     }
 
     public static void _startAireplay(final String str){
@@ -450,9 +468,14 @@ public class MainActivity extends AppCompatActivity{
             if(debug) Log.d("_startAireplay", cmd);
             Runtime.getRuntime().exec(cmd);
         }catch(IOException e){ Log.e("Exception", "Caught Exception in _startAireplay() start block: " + e.toString()); }
-        menu.getItem(3).setEnabled(true);       //Enable 'Stop aireplay' button
-        refreshState();
-        notification();
+        runInHandler(new Runnable(){
+            @Override
+            public void run(){
+                menu.getItem(3).setEnabled(true);       //Enable 'Stop aireplay' button
+                refreshState();
+                notification();
+            }
+        });
     }
     public static void startAireplay(String mac){
         //Disconnect all clients from mac
@@ -516,8 +539,13 @@ public class MainActivity extends AppCompatActivity{
                 ados_pid = pid;
                 break;
         }
-        refreshState();
-        notification();
+        runInHandler(new Runnable(){
+            @Override
+            public void run(){
+                refreshState();
+                notification();
+            }
+        });
     }
 
     public static ArrayList<Integer> getPIDs(int pr){
@@ -545,6 +573,9 @@ public class MainActivity extends AppCompatActivity{
                 case PROCESS_ALL:
                     shell.run("toolbox ps; echo ENDOFPS");
                     break;
+                default:
+                    Log.e("getPIDs", "Method called with invalid pr code");
+                    return null;
             }
             BufferedReader shell_out = shell.getShell_out();
             while(s==null){ s = shell_out.readLine(); } //for some reason sometimes s remains null
@@ -606,8 +637,10 @@ public class MainActivity extends AppCompatActivity{
                 bf = false;
                 break;
             case PROCESS_AIRCRACK:
+                CrackFragment.cont = false;
                 break;
             case PROCESS_REAVER:
+                ReaverFragment.cont = false;
                 break;
             default:
                 pids.add(pr);
@@ -658,8 +691,7 @@ public class MainActivity extends AppCompatActivity{
     };
     public static Handler handler = new Handler(){
         public void handleMessage(Message msg){
-            Runnable runnable = (Runnable)msg.obj;
-            runnable.run();
+            ((Runnable)msg.obj).run();
         }
     };
     public static void runInHandler(Runnable runnable){
