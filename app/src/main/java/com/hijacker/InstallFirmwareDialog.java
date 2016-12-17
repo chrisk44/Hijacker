@@ -132,12 +132,12 @@ public class InstallFirmwareDialog extends DialogFragment {
 
                         if(result.equals("4339")){
                             WifiManager wifiManager = (WifiManager) getActivity().getSystemService(Context.WIFI_SERVICE);
-                            //wifiManager.setWifiEnabled(true);
-                            //wifiManager.setWifiEnabled(false);
+                            wifiManager.setWifiEnabled(false);
                             extract("fw_bcmdhd.bin", firm_location);
                             extract("nexutil", util_location);
                             shell.run("busybox mount -o ro,remount,ro /system");
                             Toast.makeText(getActivity().getApplicationContext(), R.string.installed_firm_util, Toast.LENGTH_SHORT).show();
+                            wifiManager.setWifiEnabled(true);
                             dismiss();
                         }else{
                             Toast.makeText(getActivity().getApplicationContext(), R.string.fw_not_compatible, Toast.LENGTH_LONG).show();
