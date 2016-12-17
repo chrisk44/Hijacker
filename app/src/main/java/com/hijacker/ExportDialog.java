@@ -48,9 +48,7 @@ public class ExportDialog extends DialogFragment{
         });
         builder.setNegativeButton(R.string.cancel, new DialogInterface.OnClickListener() {
             @Override
-            public void onClick(DialogInterface dialog, int which) {
-                //close
-            }
+            public void onClick(DialogInterface dialog, int which) { }
         });
         return builder.create();
     }
@@ -73,7 +71,7 @@ public class ExportDialog extends DialogFragment{
                     File out_file = new File(((EditText) view.findViewById(R.id.output_file)).getText().toString());
 
                     if(out_file.exists()){
-                        Toast.makeText(getActivity().getApplicationContext(), R.string.output_file_exists, Toast.LENGTH_LONG).show();
+                        Toast.makeText(getActivity(), R.string.output_file_exists, Toast.LENGTH_LONG).show();
                     }else export(out_file);
                 }
             });
@@ -83,7 +81,7 @@ public class ExportDialog extends DialogFragment{
         try{
             out_file.createNewFile();
             if(!out_file.canWrite()){
-                Toast.makeText(getActivity().getApplicationContext(), R.string.output_file_cant_write, Toast.LENGTH_SHORT).show();
+                Toast.makeText(getActivity(), R.string.output_file_cant_write, Toast.LENGTH_SHORT).show();
                 return;
             }
             FileWriter out = new FileWriter(out_file);
@@ -113,7 +111,7 @@ public class ExportDialog extends DialogFragment{
                 }
             }
             out.close();
-            Toast.makeText(getActivity().getApplicationContext(), R.string.output_file_exported, Toast.LENGTH_SHORT).show();
+            Toast.makeText(getActivity(), R.string.output_file_exported, Toast.LENGTH_SHORT).show();
         }catch(IOException e){ Log.e("ExportDialog", "Exception: " + e.toString()); }
         dismiss();
     }

@@ -89,9 +89,9 @@ public class InstallToolsDialog extends DialogFragment {
                     File tools = new File(tools_location);
                     File lib = new File(lib_location);
                     if(!tools.exists()){
-                        Toast.makeText(getActivity().getApplicationContext(), R.string.dir_notfound_tools, Toast.LENGTH_SHORT).show();
+                        Toast.makeText(getActivity(), R.string.dir_notfound_tools, Toast.LENGTH_SHORT).show();
                     }else if(!lib.exists()){
-                        Toast.makeText(getActivity().getApplicationContext(), R.string.dir_notfound_lib, Toast.LENGTH_SHORT).show();
+                        Toast.makeText(getActivity(), R.string.dir_notfound_lib, Toast.LENGTH_SHORT).show();
                     }else{
                         if(debug){
                             Log.d("InstallToolsDialog", "Installing Tools in " + tools_location);
@@ -124,11 +124,11 @@ public class InstallToolsDialog extends DialogFragment {
                         extract("toolbox", tools_location);
                         shell.run("busybox mount -o ro,remount,ro /system");
                         shell.done();
-                        Toast.makeText(getActivity().getApplicationContext(), R.string.installed_tools_lib, Toast.LENGTH_SHORT).show();
+                        Toast.makeText(getActivity(), R.string.installed_tools_lib, Toast.LENGTH_SHORT).show();
                         pref_edit.putString("prefix", "LD_PRELOAD=" + lib_location + "/libfakeioctl.so");
                         pref_edit.commit();
                         load();
-                        Toast.makeText(getActivity().getApplicationContext(), R.string.prefix_adjusted, Toast.LENGTH_LONG).show();
+                        Toast.makeText(getActivity(), R.string.prefix_adjusted, Toast.LENGTH_LONG).show();
                         dismiss();
                     }
                 }

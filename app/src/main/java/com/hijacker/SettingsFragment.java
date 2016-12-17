@@ -94,7 +94,7 @@ public class SettingsFragment extends PreferenceFragment {
             public boolean onPreferenceClick(Preference preference){
                 File origFirm = new File(path + "/fw_bcmdhd.orig.bin");
                 if(!origFirm.exists()){
-                    Toast.makeText(getActivity().getApplicationContext(), R.string.no_backup, Toast.LENGTH_SHORT).show();
+                    Toast.makeText(getActivity(), R.string.no_backup, Toast.LENGTH_SHORT).show();
                 }else new RestoreFirmwareDialog().show(getFragmentManager(), "RestoreFragmentDialog");
                 return false;
             }

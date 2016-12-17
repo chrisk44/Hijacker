@@ -91,7 +91,7 @@ public class InstallFirmwareDialog extends DialogFragment {
                     extract("fw_bcmdhd.bin", firm_location);
                     extract("nexutil", util_location);
                     shell.run("busybox mount -o ro,remount,ro /system");
-                    Toast.makeText(getActivity().getApplicationContext(), R.string.installed_firm_util, Toast.LENGTH_SHORT).show();
+                    Toast.makeText(getActivity(), R.string.installed_firm_util, Toast.LENGTH_SHORT).show();
                     dismiss();
                     return false;
                 }
@@ -105,11 +105,11 @@ public class InstallFirmwareDialog extends DialogFragment {
                     File firm = new File(firm_location);
                     File util = new File(util_location);
                     if(!firm.exists()){
-                        Toast.makeText(getActivity().getApplicationContext(), R.string.dir_notfound_firm, Toast.LENGTH_SHORT).show();
+                        Toast.makeText(getActivity(), R.string.dir_notfound_firm, Toast.LENGTH_SHORT).show();
                     }else if(!(new File(firm_location + "/fw_bcmdhd.bin").exists())){
-                        Toast.makeText(getActivity().getApplicationContext(), R.string.firm_notfound, Toast.LENGTH_SHORT).show();
+                        Toast.makeText(getActivity(), R.string.firm_notfound, Toast.LENGTH_SHORT).show();
                     }else if(!util.exists()){
-                        Toast.makeText(getActivity().getApplicationContext(), R.string.dir_notfound_util, Toast.LENGTH_SHORT).show();
+                        Toast.makeText(getActivity(), R.string.dir_notfound_util, Toast.LENGTH_SHORT).show();
                     }else{
                         if(debug){
                             Log.d("InstallFirmwareDialog", "Installing firmware in " + firm_location);
@@ -118,10 +118,10 @@ public class InstallFirmwareDialog extends DialogFragment {
                         shell.run("busybox mount -o rw,remount,rw /system");
                         if(((CheckBox)view.findViewById(R.id.backup)).isChecked()){
                             if(new File(path + "/fw_bcmdhd.orig.bin").exists()){
-                                Toast.makeText(getActivity().getApplicationContext(), R.string.backup_exists, Toast.LENGTH_SHORT).show();
+                                Toast.makeText(getActivity(), R.string.backup_exists, Toast.LENGTH_SHORT).show();
                             }else{
                                 shell.run("cp -n " + firm_location + "/fw_bcmdhd.bin " + path + "/fw_bcmdhd.orig.bin");
-                                Toast.makeText(getActivity().getApplicationContext(), R.string.backup_created, Toast.LENGTH_SHORT).show();
+                                Toast.makeText(getActivity(), R.string.backup_created, Toast.LENGTH_SHORT).show();
                             }
                         }
                         shell.done();                   //clear any existing output
@@ -136,11 +136,11 @@ public class InstallFirmwareDialog extends DialogFragment {
                             extract("fw_bcmdhd.bin", firm_location);
                             extract("nexutil", util_location);
                             shell.run("busybox mount -o ro,remount,ro /system");
-                            Toast.makeText(getActivity().getApplicationContext(), R.string.installed_firm_util, Toast.LENGTH_SHORT).show();
+                            Toast.makeText(getActivity(), R.string.installed_firm_util, Toast.LENGTH_SHORT).show();
                             wifiManager.setWifiEnabled(true);
                             dismiss();
                         }else{
-                            Toast.makeText(getActivity().getApplicationContext(), R.string.fw_not_compatible, Toast.LENGTH_LONG).show();
+                            Toast.makeText(getActivity(), R.string.fw_not_compatible, Toast.LENGTH_LONG).show();
                             if(debug) Log.d("InstallFirmwareDialog", "Firmware verification is: " + result);
                         }
                     }
@@ -165,7 +165,7 @@ public class InstallFirmwareDialog extends DialogFragment {
                             buffer = out.readLine();
                         }
                         if(lastline.equals("ENDOFFIND")){
-                            Toast.makeText(getActivity().getApplicationContext(), R.string.firm_notfound_bcm, Toast.LENGTH_LONG).show();
+                            Toast.makeText(getActivity(), R.string.firm_notfound_bcm, Toast.LENGTH_LONG).show();
                         }else{
                             lastline = lastline.substring(0, lastline.length()-14);
                             ((EditText)view.findViewById(R.id.firm_location)).setText(lastline);

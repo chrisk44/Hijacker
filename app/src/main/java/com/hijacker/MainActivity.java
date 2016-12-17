@@ -208,14 +208,14 @@ public class MainActivity extends AppCompatActivity{
                 try{
                     Thread.sleep(1000);
                     shell.run("busybox ls -1 " + cap_dir + "/handshake-*.cap; echo ENDOFLS");
-                        capfile = getLastLine(shell.getShell_out(), "ENDOFLS");
+                    capfile = getLastLine(shell.getShell_out(), "ENDOFLS");
 
-                        if(debug) Log.d("wpa_thread", capfile);
-                        if(capfile.equals("ENDOFLS")){
-                            if(debug){
-                                Log.d("wpa_thread", "cap file not found, airodump is probably not running...");
-                                Log.d("wpa_thread", "Returning...");
-                            }
+                    if(debug) Log.d("wpa_thread", capfile);
+                    if(capfile.equals("ENDOFLS")){
+                        if(debug){
+                            Log.d("wpa_thread", "cap file not found, airodump is probably not running...");
+                            Log.d("wpa_thread", "Returning...");
+                        }
                     }else{
                         Snackbar.make(getCurrentFocus(), getString(R.string.cap_is) + capfile, Snackbar.LENGTH_LONG).show();
                         progress_int = 0;

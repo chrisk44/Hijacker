@@ -78,9 +78,9 @@ public class RestoreFirmwareDialog extends DialogFragment {
 
                     File firm = new File(firm_location);
                     if(!firm.exists()){
-                        Toast.makeText(getActivity().getApplicationContext(), R.string.dir_notfound_firm, Toast.LENGTH_SHORT).show();
+                        Toast.makeText(getActivity(), R.string.dir_notfound_firm, Toast.LENGTH_SHORT).show();
                     }else if(!(new File(firm_location + "/fw_bcmdhd.bin").exists())){
-                        Toast.makeText(getActivity().getApplicationContext(), R.string.firm_notfound, Toast.LENGTH_SHORT).show();
+                        Toast.makeText(getActivity(), R.string.firm_notfound, Toast.LENGTH_SHORT).show();
                     }else{
                         if(debug){
                             Log.d("RestoreFirmwareDialog", "Restoring firmware in " + firm_location);
@@ -88,7 +88,7 @@ public class RestoreFirmwareDialog extends DialogFragment {
                         shell.run("busybox mount -o rw,remount,rw /system");
 
                         shell.run("cp " + path + "/fw_bcmdhd.orig.bin " + firm_location + "/fw_bcmdhd.bin");
-                        Toast.makeText(getActivity().getApplicationContext(), R.string.restored, Toast.LENGTH_SHORT).show();
+                        Toast.makeText(getActivity(), R.string.restored, Toast.LENGTH_SHORT).show();
 
                         shell.run("busybox mount -o ro,remount,ro /system");
                         dismiss();
@@ -114,7 +114,7 @@ public class RestoreFirmwareDialog extends DialogFragment {
                             buffer = out.readLine();
                         }
                         if(lastline.equals("ENDOFFIND")){
-                            Toast.makeText(getActivity().getApplicationContext(), R.string.firm_notfound_bcm, Toast.LENGTH_LONG).show();
+                            Toast.makeText(getActivity(), R.string.firm_notfound_bcm, Toast.LENGTH_LONG).show();
                         }else{
                             lastline = lastline.substring(0, lastline.length()-14);
                             ((EditText)view.findViewById(R.id.firm_location)).setText(lastline);
