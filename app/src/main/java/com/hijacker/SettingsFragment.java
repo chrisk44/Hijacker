@@ -17,7 +17,9 @@ package com.hijacker;
     along with this program.  If not, see <http://www.gnu.org/licenses/>
  */
 
+import android.content.Intent;
 import android.content.SharedPreferences;
+import android.net.Uri;
 import android.os.Bundle;
 import android.preference.Preference;
 import android.preference.PreferenceFragment;
@@ -94,6 +96,26 @@ public class SettingsFragment extends PreferenceFragment {
                 if(!origFirm.exists()){
                     Toast.makeText(getActivity().getApplicationContext(), R.string.no_backup, Toast.LENGTH_SHORT).show();
                 }else new RestoreFirmwareDialog().show(getFragmentManager(), "RestoreFragmentDialog");
+                return false;
+            }
+        });
+        findPreference("send_feedback").setOnPreferenceClickListener(new Preference.OnPreferenceClickListener(){
+            @Override
+            public boolean onPreferenceClick(Preference preference){
+                Intent intent = new Intent (Intent.ACTION_SEND);
+                intent.setType("plain/text");
+                intent.putExtra(Intent.EXTRA_EMAIL, new String[] {"kiriakopoulos44@gmail.com"});
+                intent.putExtra(Intent.EXTRA_SUBJECT, "Hijacker feedback");
+                startActivity(intent);
+                return false;
+            }
+        });
+        findPreference("github").setOnPreferenceClickListener(new Preference.OnPreferenceClickListener(){
+            @Override
+            public boolean onPreferenceClick(Preference preference){
+                Intent intent = new Intent(Intent.ACTION_VIEW);
+                intent.setData(Uri.parse("https://github.com/chrisk44/Hijacker"));
+                startActivity(intent);
                 return false;
             }
         });

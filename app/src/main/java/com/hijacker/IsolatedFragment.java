@@ -51,7 +51,7 @@ public class IsolatedFragment extends Fragment{
     TextView essid, manuf, mac, sec1, numbers, sec2;
     static Thread thread;
     static Runnable runnable;
-    static boolean cont = true;
+    static boolean cont = false;
     static int exit_on;
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState){

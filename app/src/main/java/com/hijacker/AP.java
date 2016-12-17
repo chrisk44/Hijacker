@@ -130,9 +130,6 @@ class AP {
         }
     }
     void crack(){
-        this.beacons=0;
-        this.data=0;
-        this.ivs=0;
         stop(PROCESS_AIRODUMP);
         stop(PROCESS_AIREPLAY);
         adapter.notifyDataSetChanged();

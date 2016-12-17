@@ -17,6 +17,7 @@ package com.hijacker;
     along with this program.  If not, see <http://www.gnu.org/licenses/>
  */
 
+import android.annotation.SuppressLint;
 import android.app.Fragment;
 import android.app.FragmentTransaction;
 import android.os.Bundle;
@@ -53,6 +54,7 @@ public class CustomActionFragment extends Fragment{
     Button start_button, select_target, select_action;
     TextView console;
     static String console_text = null;
+    @SuppressLint("SetTextI18n")
     @Override
     public View onCreateView(LayoutInflater inflater, final ViewGroup container, Bundle savedInstanceState){
         View v = inflater.inflate(R.layout.custom_action_fragment, container, false);
@@ -96,7 +98,7 @@ public class CustomActionFragment extends Fragment{
         }
         if(st!=null){
             start_button.setEnabled(true);
-            select_target.setText(st.mac + " (" + AP.getAPByMac(st.bssid).essid + ")");
+            select_target.setText(st.mac + ((st.bssid==null) ? "" : " (" + AP.getAPByMac(st.bssid).essid + ")"));
         }
         if(thread.isAlive()){
             start_button.setText(R.string.stop);
@@ -113,11 +115,11 @@ public class CustomActionFragment extends Fragment{
                 for(i=0;i<cmds.size();i++){
                     popup.getMenu().add(cmds.get(i).getType(), i, i, cmds.get(i).getTitle());
                 }
-                popup.getMenu().add(100, 0, i+1, getString(R.string.manage_actions));
+                popup.getMenu().add(-1, 0, i+1, getString(R.string.manage_actions));
 
                 popup.setOnMenuItemClickListener(new PopupMenu.OnMenuItemClickListener() {
                     public boolean onMenuItemClick(android.view.MenuItem item){
-                        if(item.getGroupId()==100){
+                        if(item.getGroupId()==-1){
                             //Open actions manager
                             FragmentTransaction ft = getFragmentManager().beginTransaction();
                             ft.replace(R.id.fragment1, new CustomActionManagerFragment());
@@ -197,7 +199,7 @@ public class CustomActionFragment extends Fragment{
         start_button.setOnClickListener(new View.OnClickListener(){
             @Override
             public void onClick(View view){
-                if(!thread.isAlive()){        //same effect with !thread.isAlive()
+                if(!thread.isAlive()){
                     //not started
                     shell = Shell.getFreeShell();
                     console.append("Running: " + selected_action.getStart_cmd() + '\n');

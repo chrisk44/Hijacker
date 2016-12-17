@@ -189,7 +189,7 @@ public class ReaverFragment extends Fragment{
                 stop.obtainMessage().sendToTarget();
             }
         };
-        thread = new Thread(runnable);
+        if(thread==null) thread = new Thread(runnable);
 
         start_button = (Button)v.findViewById(R.id.start_button);
         start_button.setText(thread.isAlive() ? R.string.stop : R.string.start);
@@ -201,6 +201,7 @@ public class ReaverFragment extends Fragment{
                         Snackbar.make(v, select_button.getText(), Snackbar.LENGTH_LONG).show();
                     }else{
                         start_button.setText(R.string.stop);
+                        cont = true;
                         stop(PROCESS_AIRODUMP);            //Can't have channels changing from anywhere else
                         progress.setIndeterminate(true);
                         thread = new Thread(runnable);

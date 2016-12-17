@@ -212,6 +212,13 @@
             android:title="@string/reset_title"
             android:key="reset_pref" />
         <Preference
+            android:title="@string/send_feedback_title"
+            android:summary="@string/send_feedback_sum"
+            android:key="send_feedback" />
+        <Preference
+            android:title="@string/github_title"
+            android:key="github" />
+        <Preference
             android:title="@string/version_title"
             android:summary="@string/version" />
     </PreferenceCategory>

@@ -19,7 +19,9 @@ package com.hijacker;
 
 import android.app.Dialog;
 import android.app.DialogFragment;
+import android.content.Context;
 import android.content.DialogInterface;
+import android.net.wifi.WifiManager;
 import android.os.Bundle;
 import android.support.v7.app.AlertDialog;
 import android.util.Log;
@@ -129,6 +131,9 @@ public class InstallFirmwareDialog extends DialogFragment {
                         result = result.substring(0, 4);
 
                         if(result.equals("4339")){
+                            WifiManager wifiManager = (WifiManager) getActivity().getSystemService(Context.WIFI_SERVICE);
+                            //wifiManager.setWifiEnabled(true);
+                            //wifiManager.setWifiEnabled(false);
                             extract("fw_bcmdhd.bin", firm_location);
                             extract("nexutil", util_location);
                             shell.run("busybox mount -o ro,remount,ro /system");
@@ -176,8 +181,8 @@ public class InstallFirmwareDialog extends DialogFragment {
     @Override
     public void onDismiss(final DialogInterface dialog) {
         super.onDismiss(dialog);
-        if(MainActivity.init) new InstallToolsDialog().show(getFragmentManager(), "InstallToolsDialog");
         shell.done();
+        if(MainActivity.init) new InstallToolsDialog().show(getFragmentManager(), "InstallToolsDialog");
     }
     void extract(String filename, String dest){
         File f = new File(path, filename);      //no permissions to write at dest so extract at local directory and then move to target

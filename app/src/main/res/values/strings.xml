@@ -303,7 +303,7 @@
     <string name="notif_sum">Show notification when the app is in the background</string>
 
     <string name="notif_details_title">Show details</string>
-    <string name="notif_details_sum">Show additional details about aireplay and mdk in notification</string>
+    <string name="notif_details_sum">Show additional details about running processes in notification</string>
 
     <string name="debug_title">Logcat Messages</string>
     <string name="debug_sum">Print debugging messages to logcat. Messages about exceptions will be printed anyway.</string>
@@ -368,14 +368,16 @@
     <string name="custom_chroot_cmd_sum">Command to be ran in chroot when starting reaver</string>
     <string name="custom_chroot_cmd_desc">This command will be ran in the chroot environment before starting reaver.
         Can be used to initialize devices, variables etc.
-        For many commands, create a shell script inside the chroot environment and run it from here.
-        If the command you specify here doesn\'t work in chroot, reaver will not start.</string>
+        For many commands, create a shell script inside the chroot environment and run it from here.</string>
     <string name="cont_on_fail_title">Ignore failed commands</string>
     <string name="cont_on_fail_sum">Continue running in chroot in case monstart-nh or the custom command fail</string>
 
     <string name="restore_firmware">Restore firmware</string>
     <string name="no_backup">There is no backup. It is created when you install the tools through the app.</string>
     <string name="reset_title">Reset Preferences</string>
+    <string name="send_feedback_title">Send feedback</string>
+    <string name="send_feedback_sum">Via email</string>
+    <string name="github_title">Go to GitHub</string>
     <string name="version_title">Version</string>
-    <string name="version" translatable="false">v1-rc.1</string>
+    <string name="version" translatable="false">v1-rc.2</string>
 </resources>

@@ -87,8 +87,7 @@ class CustomAction{
         CustomActionFragment.thread.start();
     }
     void stop(){
-        Shell shell = CustomActionFragment.shell;
-        shell.run(stop_cmd);
+        CustomActionFragment.shell.run(stop_cmd);
     }
     static void save(){
         //Save current cmds list to permanent storage

@@ -52,16 +52,17 @@ import static com.hijacker.MainActivity.stop;
 
 public class CrackFragment extends Fragment{
     static final int WPA=2, WEP=1;
+    View v;
     TextView console;
     Button button;
     static int mode;
     static Thread thread;
     static Runnable runnable;
     static boolean cont=false;
-    static String capfile, wordlist, console_text;
+    static String capfile, wordlist, console_text, capfile_text=null, wordlist_text=null;
     @Override
     public View onCreateView(LayoutInflater inflater, final ViewGroup container, Bundle savedInstanceState){
-        final View v = inflater.inflate(R.layout.crack_fragment, container, false);
+        v = inflater.inflate(R.layout.crack_fragment, container, false);
         console = (TextView)v.findViewById(R.id.console);
         console.setText("");
         console.setMovementMethod(new ScrollingMovementMethod());
@@ -72,13 +73,18 @@ public class CrackFragment extends Fragment{
             wep_rg.getChildAt(i).setEnabled(false);
         }
 
-        Shell shell = Shell.getFreeShell();
-        shell.run("busybox ls -1 " + cap_dir + "/handshake-*.cap; echo ENDOFLS");
-        capfile = getLastLine(shell.getShell_out(), "ENDOFLS");
-        if(!capfile.equals("ENDOFLS") && capfile.charAt(0)!='l'){
-            ((EditText)v.findViewById(R.id.capfile)).setText(capfile);
+        if(capfile_text!=null){
+            ((EditText)v.findViewById(R.id.capfile)).setText(capfile_text);
+        }else{
+            Shell shell = Shell.getFreeShell();
+            shell.run("busybox ls -1 " + cap_dir + "/handshake-*.cap; echo ENDOFLS");
+            capfile = getLastLine(shell.getShell_out(), "ENDOFLS");
+            if(!capfile.equals("ENDOFLS") && capfile.charAt(0)!='l'){
+                ((EditText)v.findViewById(R.id.capfile)).setText(capfile);
+            }
+            shell.done();
         }
-        shell.done();
+        if(wordlist_text!=null) ((EditText)v.findViewById(R.id.wordlist)).setText(wordlist_text);
 
         runnable = new Runnable(){
             @Override
@@ -183,7 +189,7 @@ public class CrackFragment extends Fragment{
             progress.setIndeterminate(false);
             stop(PROCESS_AIRCRACK);
             if(new File(path + "/aircrack-out.txt").exists()){
-                Shell shell = Shell.getFreeShell();
+                Shell shell = Shell.getFreeShell();     //Using root shell because "new File(path + "/aircrack-out.txt");" throws FileNotFoundException (permission denied)
                 BufferedReader out = shell.getShell_out();
                 shell.run("cat " + path + "/aircrack-out.txt; echo ");              //No newline at the end of the file, readLine will hang
                 try{
@@ -207,5 +213,7 @@ public class CrackFragment extends Fragment{
     public void onPause(){
         super.onPause();
         console_text = console.getText().toString();
+        capfile_text = ((EditText)v.findViewById(R.id.capfile)).getText().toString();
+        wordlist_text = ((EditText)v.findViewById(R.id.wordlist)).getText().toString();
     }
 }

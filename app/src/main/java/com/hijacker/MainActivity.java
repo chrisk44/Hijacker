@@ -350,6 +350,12 @@ public class MainActivity extends AppCompatActivity{
         if(ContextCompat.checkSelfPermission(this, Manifest.permission.WRITE_EXTERNAL_STORAGE)==PackageManager.PERMISSION_DENIED){
             ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE}, 0);
         }
+        if(ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_WIFI_STATE)==PackageManager.PERMISSION_DENIED){
+            ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.ACCESS_WIFI_STATE}, 0);
+        }
+        if(ContextCompat.checkSelfPermission(this, Manifest.permission.CHANGE_WIFI_STATE)==PackageManager.PERMISSION_DENIED){
+            ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.CHANGE_WIFI_STATE}, 0);
+        }
 
         extract("oui.txt", true);
         File oui = new File(path + "/oui.txt");
@@ -363,7 +369,7 @@ public class MainActivity extends AppCompatActivity{
         Shell shell = getFreeShell();
         String dest = "/su/xbin/busybox";
         boolean inSystem = false;
-        if(new File("/su").exists()){
+        if(!(new File("/su").exists())){
             dest = "/system/xbin/busybox";
             inSystem = true;
             shell.run("chmod 755 " + path + "/busybox");
@@ -601,8 +607,6 @@ public class MainActivity extends AppCompatActivity{
                 runInHandler(new Runnable(){
                     @Override
                     public void run(){
-                        progress.setIndeterminate(false);
-                        progress.setProgress(deauthWait);
                         if(menu!=null) menu.getItem(1).setIcon(R.drawable.run);
                         Item.filter();
                     }
@@ -1087,7 +1091,7 @@ public class MainActivity extends AppCompatActivity{
     public static void addST(String mac, String bssid, int pwr, int lost, int frames){
         fifo.add(new Item2(mac, bssid, pwr, lost, frames));
     }
-    public void onAPStats(View v){ new StatsDialog().show(fm, "asdTAG4"); }
+    public void onAPStats(View v){ new StatsDialog().show(fm, "StatsDialog"); }
     public void onCrack(View v){
         //Clicked crack with isolated ap
         if(wpa_thread.isAlive()){
@@ -1167,6 +1171,11 @@ public class MainActivity extends AppCompatActivity{
         if(aireplay_running!=0) state += 2;
         if(bf || ados) state += 4;
         toolbar.setOverflowIcon(overflow[state]);
+
+        if(!(ReaverFragment.cont || CrackFragment.cont || wpa_thread.isAlive())){
+            progress.setIndeterminate(false);
+            progress.setProgress(deauthWait);
+        }
     }
     static String getManuf(String mac){
         if(ados && !manuf_while_ados) return "ADoS running";
