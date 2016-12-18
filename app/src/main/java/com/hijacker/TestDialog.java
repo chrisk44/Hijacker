@@ -80,10 +80,10 @@ public class TestDialog extends DialogFragment {
                             stop(PROCESS_MDK);
                             String cmd = enable_monMode;
                             Log.d("test_thread", cmd);
+                            runOne(cmd);
                             try{
-                                Runtime.getRuntime().exec(cmd);
                                 Thread.sleep(1000);
-                            }catch(IOException | InterruptedException ignored){}
+                            }catch(InterruptedException ignored){}
                             status[0].setImageResource(R.drawable.testing);
                             test_cur_cmd.setText("su -c " + prefix + " " + airodump_dir + " " + iface);
                             test_wait = false;

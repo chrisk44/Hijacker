@@ -131,7 +131,7 @@ public class SendLogActivity extends AppCompatActivity{
             writer = new FileWriter(file);
             writer.write("Android version: " +  Build.VERSION.SDK_INT + "\n");
             writer.write("Device: " + model + "\n");
-            writer.write("App version: " + (info == null ? "(null)" : info.versionCode) + "\n");
+            writer.write("App version: " + (info == null ? "(null)" : info.versionName) + "\n");
 
             String cmd = "echo pref_file--------------------------------------; su -c cat /data/user/0/com.hijacker/shared_prefs/com.hijacker_preferences.xml;";
             cmd += " echo ls_system-xbin---------------------------------; su -c ls /system/xbin | busybox grep -e air -e mdk -e reaver -e nexutil -e iw -e libfakeioctl.so -e busybox -e toolbox;";
