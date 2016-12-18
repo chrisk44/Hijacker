@@ -84,6 +84,11 @@ class Item {
                     adapter.add(this);
                 }
             }
+        }else{
+            this.check();
+            if(!this.show){
+                filter();
+            }
         }
     }
     void check(){
@@ -97,7 +102,7 @@ class Item {
             if(type){
                 this.show = false;
             }else{
-                this.show = is_ap.mac.equals(this.st.bssid);
+                this.show = is_ap.mac.equals(this.st.bssid) && show_st && this.st.pwr>=pwr_filter*(-1);
             }
         }
     }

@@ -92,11 +92,11 @@ public class MainActivity extends AppCompatActivity{
     static boolean show_ap = true, show_st = true, show_na_st = true, wpa = true, wep = true, opn = true;
     static boolean show_ch[] = {true, false, false, false, false, false, false, false, false, false, false, false, false, false, false};
     static int pwr_filter = 120;
-    static TextView ap_count, st_count;                               //Log textview, AP and ST count textviews in toolbar
+    static TextView ap_count, st_count;                               //AP and ST count textviews in toolbar
     static ProgressBar progress;
     static Toolbar toolbar;
     static Drawable overflow[] = {null, null, null, null, null, null, null, null};      //Drawables to use for overflow button icon
-    static ImageView[] status = {null, null, null, null, null};                                     //Icons in TestDialog, set in TestDialog class
+    static ImageView[] status = {null, null, null, null, null};                         //Icons in TestDialog, set in TestDialog class
     static int progress_int;
     static Thread refresh_thread, wpa_thread, watchdog_thread;
     static Runnable refresh_runnable, wpa_runnable, watchdog_runnable;
