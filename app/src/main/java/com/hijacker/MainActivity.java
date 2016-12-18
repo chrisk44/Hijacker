@@ -83,7 +83,7 @@ public class MainActivity extends AppCompatActivity{
     static final int AIREPLAY_DEAUTH = 1, AIREPLAY_WEP = 2;
     static final int FRAGMENT_AIRODUMP = 0, FRAGMENT_MDK = 1, FRAGMENT_CRACK = 2,
             FRAGMENT_REAVER = 3, FRAGMENT_CUSTOM=4, FRAGMENT_SETTINGS = 5;                     //These need to correspond to the items in the drawer
-    static final int PROCESS_ALL=-1, PROCESS_AIRODUMP=0, PROCESS_AIREPLAY=1, PROCESS_MDK=2, PROCESS_AIRCRACK=3, PROCESS_REAVER=4;
+    static final int PROCESS_AIRODUMP=0, PROCESS_AIREPLAY=1, PROCESS_MDK=2, PROCESS_AIRCRACK=3, PROCESS_REAVER=4;
     static final int MDK_BF=0, MDK_ADOS=1;
     //State variables
     static boolean cont = false, wpacheckcont = false, done = true, notif_on = false;  //done: for calling refreshHandler only when it has stopped
@@ -507,8 +507,8 @@ public class MainActivity extends AppCompatActivity{
             case MDK_BF:
                 //beacon flood mode
                 try{
-                    String cmd = "su -c " + prefix + " " + mdk3_dir + " " + iface + " b -m";
-                    if(str!=null) cmd += " -f " + str;
+                    String cmd = "su -c " + prefix + " " + mdk3_dir + " " + iface + " b -m ";
+                    if(str!=null) cmd += str;
                     if(debug) Log.d("MDK3", cmd);
                     Runtime.getRuntime().exec(cmd);
                     Thread.sleep(500);
@@ -575,9 +575,6 @@ public class MainActivity extends AppCompatActivity{
                     break;
                 case PROCESS_REAVER:
                     shell.run("toolbox ps | busybox grep reav; echo ENDOFPS");
-                    break;
-                case PROCESS_ALL:
-                    shell.run("toolbox ps; echo ENDOFPS");
                     break;
                 default:
                     Log.e("getPIDs", "Method called with invalid pr code");

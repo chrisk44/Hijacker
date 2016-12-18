@@ -153,6 +153,10 @@
     <string name="bf_title">Beacon Flooding</string>
     <string name="ados_title">Authentication DoS</string>
     <string name="ssid_file">SSID file</string>
+    <string name="managed">Managed</string>
+    <string name="ad_hoc">Ad-hoc</string>
+    <string name="select_enc">Select at least one encryption</string>
+    <string name="select_type">Select at least one type of network</string>
 
     <!-- IsolatedFragment (xml) -->
     <string name="crack">Crack</string>
@@ -379,5 +383,5 @@
     <string name="send_feedback_sum">Via email</string>
     <string name="github_title">Go to GitHub</string>
     <string name="version_title">Version</string>
-    <string name="version" translatable="false">v1-rc.2</string>
+    <string name="version" translatable="false">v1-rc.3</string>
 </resources>

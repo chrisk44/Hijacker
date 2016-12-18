@@ -24,6 +24,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.CheckBox;
 import android.widget.CompoundButton;
 import android.widget.EditText;
 import android.widget.PopupMenu;
@@ -48,6 +49,7 @@ public class MDKFragment extends Fragment{
     Switch bf_switch, ados_switch;
     static Button select_button;
     static String custom_mac=null, ssid_file=null;
+    static boolean managed=true, adhoc=true, opn=true, wep=true, tkip=true, aes=true;
     static boolean bf=false, ados=false;
     static int bf_pid, ados_pid;
     @Override
@@ -63,15 +65,42 @@ public class MDKFragment extends Fragment{
                 //Beacon Flooding
                 if(b){
                     String ssid_file = ((EditText)v.findViewById(R.id.ssid_file)).getText().toString();
-                    if(ssid_file.equals("")){
-                        startMdk(MDK_BF, null);
-                    }else{
-                        if(new File(ssid_file).exists()) startMdk(MDK_BF, ssid_file);
-                        else{
+                    managed = ((CheckBox)v.findViewById(R.id.managed)).isChecked();
+                    adhoc = ((CheckBox)v.findViewById(R.id.adhoc)).isChecked();
+                    opn = ((CheckBox)v.findViewById(R.id.opn)).isChecked();
+                    wep = ((CheckBox)v.findViewById(R.id.wep)).isChecked();
+                    tkip = ((CheckBox)v.findViewById(R.id.tkip)).isChecked();
+                    aes = ((CheckBox)v.findViewById(R.id.aes)).isChecked();
+                    String args = "";
+                    if(!managed && !adhoc){
+                        Toast.makeText(getActivity(), getString(R.string.select_type), Toast.LENGTH_SHORT).show();
+                        bf_switch.setChecked(false);
+                        return;
+                    }
+                    if(!(managed && adhoc)){
+                        if(managed) args += " -t 0";
+                        if(adhoc) args += " -t 1";
+                    }
+                    if(!(opn || wep || tkip || aes)){
+                        Toast.makeText(getActivity(), getString(R.string.select_enc), Toast.LENGTH_SHORT).show();
+                        bf_switch.setChecked(false);
+                        return;
+                    }
+                    args += " -w ";
+                    if(opn) args += 'n';
+                    if(wep) args += 'w';
+                    if(tkip) args += 't';
+                    if(aes) args += 'a';
+                    if(!ssid_file.equals("")){
+                        if(!(new File(ssid_file).exists())){
                             Toast.makeText(getActivity(), ssid_file + " doesn't exist", Toast.LENGTH_SHORT).show();
                             bf_switch.setChecked(false);
+                            return;
+                        }else{
+                            args += " -f " + ssid_file;
                         }
                     }
+                    startMdk(MDK_BF, args);
                     if(debug) Log.d("MDKFragment", "bf_pid is " + bf_pid);
                 }else{
                     bf = false;
@@ -138,6 +167,24 @@ public class MDKFragment extends Fragment{
             }
         });
         if(ssid_file!=null) ((EditText)v.findViewById(R.id.ssid_file)).setText(ssid_file);
+        CompoundButton.OnCheckedChangeListener listener = new CompoundButton.OnCheckedChangeListener(){
+            @Override
+            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked){
+                if(bf) bf_switch.setChecked(false);
+            }
+        };
+        ((CheckBox)v.findViewById(R.id.managed)).setChecked(managed);
+        ((CheckBox)v.findViewById(R.id.managed)).setOnCheckedChangeListener(listener);
+        ((CheckBox)v.findViewById(R.id.adhoc)).setChecked(adhoc);
+        ((CheckBox)v.findViewById(R.id.adhoc)).setOnCheckedChangeListener(listener);
+        ((CheckBox)v.findViewById(R.id.opn)).setChecked(opn);
+        ((CheckBox)v.findViewById(R.id.opn)).setOnCheckedChangeListener(listener);
+        ((CheckBox)v.findViewById(R.id.wep)).setChecked(wep);
+        ((CheckBox)v.findViewById(R.id.wep)).setOnCheckedChangeListener(listener);
+        ((CheckBox)v.findViewById(R.id.tkip)).setChecked(tkip);
+        ((CheckBox)v.findViewById(R.id.tkip)).setOnCheckedChangeListener(listener);
+        ((CheckBox)v.findViewById(R.id.aes)).setChecked(aes);
+        ((CheckBox)v.findViewById(R.id.aes)).setOnCheckedChangeListener(listener);
 
         return v;
     }
@@ -150,6 +197,12 @@ public class MDKFragment extends Fragment{
     public void onPause(){
         super.onPause();
         ssid_file = ((EditText)v.findViewById(R.id.ssid_file)).getText().toString();
+        managed = ((CheckBox)v.findViewById(R.id.managed)).isChecked();
+        adhoc = ((CheckBox)v.findViewById(R.id.adhoc)).isChecked();
+        opn = ((CheckBox)v.findViewById(R.id.opn)).isChecked();
+        wep = ((CheckBox)v.findViewById(R.id.wep)).isChecked();
+        tkip = ((CheckBox)v.findViewById(R.id.tkip)).isChecked();
+        aes = ((CheckBox)v.findViewById(R.id.aes)).isChecked();
     }
 }
 
