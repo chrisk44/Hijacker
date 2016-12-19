@@ -18,6 +18,7 @@ package com.hijacker;
  */
 
 import android.Manifest;
+import android.app.Activity;
 import android.app.FragmentManager;
 import android.app.FragmentTransaction;
 import android.app.NotificationManager;
@@ -38,14 +39,18 @@ import android.preference.PreferenceManager;
 import android.support.design.widget.Snackbar;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
+import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.app.NotificationCompat;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
+import android.view.ContextMenu;
+import android.view.Gravity;
 import android.view.KeyEvent;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
@@ -381,8 +386,10 @@ public class MainActivity extends AppCompatActivity{
         shell.done();
         if(debug) Log.d("onCreate", "Installed " + dest);
 
-        if(!pref.getBoolean("disclaimer", false)) new DisclaimerDialog().show(fm, "Disclaimer");
-        else main();
+        if(!pref.getBoolean("disclaimer", false)){
+            mDrawerLayout.openDrawer(GravityCompat.START);      //Can't open it later
+            new DisclaimerDialog().show(fm, "Disclaimer");
+        }else main();
     }
     void extract(String filename, boolean chmod){
         File f = new File(getFilesDir(), filename);
@@ -781,6 +788,12 @@ public class MainActivity extends AppCompatActivity{
         mDrawerList = (ListView) findViewById(R.id.left_drawer);
         mDrawerList.setAdapter(new ArrayAdapter<>(this, R.layout.drawer_list_item, R.id.navDrawerTv, mPlanetTitles));
         mDrawerList.setOnItemClickListener(new DrawerItemClickListener());
+        mDrawerList.setOnSystemUiVisibilityChangeListener(new View.OnSystemUiVisibilityChangeListener(){
+            @Override                   //Works only for the first run
+            public void onSystemUiVisibilityChange(int visibility){
+                mDrawerList.getChildAt(currentFragment).setBackgroundResource(R.color.colorAccent);
+            }
+        });
 
         FragmentTransaction ft = fm.beginTransaction();
         ft.replace(R.id.fragment1, new MyListFragment());
