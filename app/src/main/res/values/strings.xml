@@ -189,6 +189,7 @@
     <!-- CustomAPDialog -->
     <string name="custom_ap_title">Custom AP</string>
     <string name="mac_address">MAC Address</string>
+    <string name="custom_chroot_cmd_illegal">The custom command can\'t contain the character \'</string>
 
     <!-- SendLogActivity -->
     <string name="unexpected_error_title">Unexpected Error</string>
@@ -339,12 +340,6 @@
     <string name="reaver_sum">Reaver absolute path</string>
     <string name="reaver_desc">If reaver is not installed somewhere that PATH points to, you need to specify the absolute reaver filename here. Options can be used too. Make sure the file is executable.</string>
 
-    <string name="chroot_title">Chroot directory</string>
-    <string name="chroot_desc">Directory where a kali chroot is installed by NetHunter (required only for pixie-dust attack with reaver)</string>
-
-    <string name="monstart_title">source monstart-nh</string>
-    <string name="monstart_sum">Run source monstart-nh command when running reaver in NetHunter chroot (only in NetHunterOS)</string>
-
     <string name="copy_sample_title">Copy test command</string>
 
     <string name="test_title">Test tools</string>
@@ -368,11 +363,19 @@
     <string name="lib_location_default">/vendor/lib</string>
 
     <string name="chroot">Chroot</string>
+
+    <string name="chroot_title">Chroot directory</string>
+    <string name="chroot_desc">Directory where a kali chroot is installed by NetHunter (required only for pixie-dust attack with reaver)</string>
+
+    <string name="monstart_title">source monstart-nh</string>
+    <string name="monstart_sum">Run source monstart-nh command when running reaver in NetHunter chroot (only in NetHunterOS)</string>
+
     <string name="custom_chroot_cmd_title">Custom command</string>
     <string name="custom_chroot_cmd_sum">Command to be ran in chroot when starting reaver</string>
     <string name="custom_chroot_cmd_desc">This command will be ran in the chroot environment before starting reaver.
         Can be used to initialize devices, variables etc.
-        For many commands, create a shell script inside the chroot environment and run it from here.</string>
+        For many commands, create a shell script inside the chroot environment and run it from here.
+        Don\'t use the character \'.</string>
     <string name="cont_on_fail_title">Ignore failed commands</string>
     <string name="cont_on_fail_sum">Continue running in chroot in case monstart-nh or the custom command fail</string>
 

@@ -17,6 +17,7 @@ package com.hijacker;
     along with this program.  If not, see <http://www.gnu.org/licenses/>
  */
 
+import android.app.Activity;
 import android.app.Fragment;
 import android.os.Bundle;
 import android.os.Handler;
@@ -54,6 +55,7 @@ import static com.hijacker.MainActivity.monstart;
 import static com.hijacker.MainActivity.prefix;
 import static com.hijacker.MainActivity.progress;
 import static com.hijacker.MainActivity.reaver_dir;
+import static com.hijacker.MainActivity.runInHandler;
 import static com.hijacker.MainActivity.stop;
 import static com.hijacker.Shell.runOne;
 
@@ -149,10 +151,9 @@ public class ReaverFragment extends Fragment{
                         msg = new Message();
                         msg.obj = getString(R.string.chroot_warning);
                         refresh.sendMessage(msg);
-                        Thread.sleep(3000);
                         Runtime.getRuntime().exec("su -c bootkali_init");       //Make sure kali has booted
                         args += " -K 1";
-                        cmd = "chroot " + MainActivity.chroot_dir + " /bin/bash -c \'" + get_chroot_env() + "reaver " + args + "\'";
+                        cmd = "chroot " + MainActivity.chroot_dir + " /bin/bash -c \'" + get_chroot_env(getActivity()) + "reaver " + args + "\'";
                         msg = new Message();
                         msg.obj = "\nRunning: " + cmd + '\n';
                         refresh.sendMessage(msg);
@@ -182,7 +183,7 @@ public class ReaverFragment extends Fragment{
                     msg = new Message();
                     msg.obj = "\nDone\n";
                     refresh.sendMessage(msg);
-                }catch(IOException | InterruptedException e){
+                }catch(IOException e){
                     Log.e("Exception", "Caught Exception in ReaverFragment: " + e.toString());
                 }
 
@@ -248,7 +249,7 @@ public class ReaverFragment extends Fragment{
         eap_fail = ((CheckBox)v.findViewById(R.id.eap_fail)).isChecked();
         small_dh = ((CheckBox)v.findViewById(R.id.small_dh)).isChecked();
     }
-    static String get_chroot_env(){
+    static String get_chroot_env(final Activity activity){
         // add strings here , they will be in the kali env
         String[] ENV = {
                 "USER=root",
@@ -270,8 +271,17 @@ public class ReaverFragment extends Fragment{
             ENV_OUT += cont_on_fail ? "; " : " && ";
         }
         if(!custom_chroot_cmd.equals("")){
-            ENV_OUT += custom_chroot_cmd;
-            ENV_OUT += cont_on_fail ? "; " : " && ";
+            if(custom_chroot_cmd.contains("'") && activity!=null){
+                runInHandler(new Runnable(){
+                    @Override
+                    public void run(){
+                        Toast.makeText(activity, activity.getString(R.string.custom_chroot_cmd_illegal), Toast.LENGTH_SHORT).show();
+                    }
+                });
+            }else{
+                ENV_OUT += custom_chroot_cmd;
+                ENV_OUT += cont_on_fail ? "; " : " && ";
+            }
         }
         return ENV_OUT;
     }

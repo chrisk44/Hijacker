@@ -166,11 +166,12 @@ public class MDKFragment extends Fragment{
                 popup.show();
             }
         });
+        //Restore options
         if(ssid_file!=null) ((EditText)v.findViewById(R.id.ssid_file)).setText(ssid_file);
         CompoundButton.OnCheckedChangeListener listener = new CompoundButton.OnCheckedChangeListener(){
             @Override
             public void onCheckedChanged(CompoundButton buttonView, boolean isChecked){
-                if(bf) bf_switch.setChecked(false);
+                bf_switch.setChecked(false);
             }
         };
         ((CheckBox)v.findViewById(R.id.managed)).setChecked(managed);
@@ -196,6 +197,7 @@ public class MDKFragment extends Fragment{
     @Override
     public void onPause(){
         super.onPause();
+        //Save options
         ssid_file = ((EditText)v.findViewById(R.id.ssid_file)).getText().toString();
         managed = ((CheckBox)v.findViewById(R.id.managed)).isChecked();
         adhoc = ((CheckBox)v.findViewById(R.id.adhoc)).isChecked();
