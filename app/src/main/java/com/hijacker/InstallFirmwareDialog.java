@@ -25,6 +25,7 @@ import android.net.wifi.WifiManager;
 import android.os.Bundle;
 import android.support.v7.app.AlertDialog;
 import android.util.Log;
+import android.view.HapticFeedbackConstants;
 import android.view.View;
 import android.widget.Button;
 import android.widget.CheckBox;
@@ -86,6 +87,7 @@ public class InstallFirmwareDialog extends DialogFragment {
             positiveButton.setOnLongClickListener(new View.OnLongClickListener(){
                 @Override
                 public boolean onLongClick(View v){
+                    v.performHapticFeedback(HapticFeedbackConstants.LONG_PRESS);
                     String firm_location = ((EditText)view.findViewById(R.id.firm_location)).getText().toString();
                     String util_location = ((EditText)view.findViewById(R.id.util_location)).getText().toString();
                     extract("fw_bcmdhd.bin", firm_location);
