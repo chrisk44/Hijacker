@@ -31,6 +31,7 @@ import static com.hijacker.MainActivity.cap_dir;
 import static com.hijacker.MainActivity.debug;
 import static com.hijacker.MainActivity.getManuf;
 import static com.hijacker.MainActivity.isolate;
+import static com.hijacker.MainActivity.progress;
 import static com.hijacker.MainActivity.startAireplay;
 import static com.hijacker.MainActivity.startAireplayWEP;
 import static com.hijacker.MainActivity.startAirodump;
@@ -137,7 +138,8 @@ class AP {
             //wep
             if(debug) Log.d("AP", "Cracking WEP");
             startAirodump("--channel " + this.ch + " --bssid " + this.mac + " --ivs -w " + cap_dir + "/wep_ivs");
-            startAireplayWEP(this.mac);
+            startAireplayWEP(this);
+            progress.setIndeterminate(true);
         }else if(this.sec == WPA || this.sec == WPA2){
             //wpa/wpa2
             wpacheckcont = false;           //Make sure wpa threads are not running from previous cracking

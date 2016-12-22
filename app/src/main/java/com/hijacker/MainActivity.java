@@ -496,12 +496,12 @@ public class MainActivity extends AppCompatActivity{
         aireplay_running = AIREPLAY_DEAUTH;
         _startAireplay("--deauth 0 -a " + mac1 + " -c " + mac2);
     }
-    public static void startAireplayWEP(String mac){
+    public static void startAireplayWEP(AP ap){
         //Increase IV generation from ap mac to crack a wep network
         aireplay_running = AIREPLAY_WEP;
-        _startAireplay("--fakeauth 0 -a " + mac);
-        _startAireplay("--arpreplay -b " + mac);
-        _startAireplay("--caffe-latte -b " + mac);
+        if(!ap.essid.equals("<hidden>")) _startAireplay("--fakeauth 0 -a " + ap.mac + " -e " + ap.essid);
+        //_startAireplay("--arpreplay -b " + ap.mac);       //Aireoplay tries to open a file at a read-only system
+        //_startAireplay("--caffe-latte -b " + ap.mac);     //don't know where
     }
 
     public static void startMdk(int mode, String str){
@@ -609,6 +609,10 @@ public class MainActivity extends AppCompatActivity{
                     public void run(){
                         if(menu!=null) menu.getItem(1).setIcon(R.drawable.run);
                         Item.filter();
+                        if(aireplay_running==AIREPLAY_WEP){
+                            stop(PROCESS_AIREPLAY);     //Since airodump is going to stop, arp replays are useless
+                            progress.setIndeterminate(false);
+                        }
                     }
                 });
                 if(wpa_thread.isAlive()){
