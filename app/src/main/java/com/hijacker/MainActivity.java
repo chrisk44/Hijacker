@@ -366,21 +366,14 @@ public class MainActivity extends AppCompatActivity{
             dialog.show(getFragmentManager(), "ErrorDialog");
         }
 
-        extract("busybox", false);
-        Shell shell = getFreeShell();
-        String dest = "/su/xbin/busybox";
-        boolean inSystem = false;
-        if(!(new File("/su").exists())){
-            dest = "/system/xbin/busybox";
-            inSystem = true;
-            shell.run("chmod 755 " + path + "/busybox");
-            shell.run(path + "/busybox mount -o rw,remount,rw /system");
-        }
-        shell.run("cp " + path + "/busybox " + dest);
-        shell.run("chmod 755 " + dest);
-        if(inSystem) shell.run("busybox mount -o ro,remount,ro /system");
-        shell.done();
-        if(debug) Log.d("onCreate", "Installed " + dest);
+        if(new File("/su").exists()){
+            extract("busybox", false);
+            Shell shell = getFreeShell();
+            shell.run("cp " + path + "/busybox /su/xbin/busybox");
+            shell.run("chmod 755 /su/xbin/busybox");
+            shell.done();
+            if(debug) Log.d("onCreate", "Installed busybox in /su/xbin");
+        }else if(debug) Log.d("onCreate", "No /su to install busybox");
 
         if(!pref.getBoolean("disclaimer", false)){
             mDrawerLayout.openDrawer(GravityCompat.START);      //Can't open it later
