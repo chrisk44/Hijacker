@@ -49,7 +49,7 @@ import java.util.ArrayList;
 import static com.hijacker.MainActivity.ps;
 
 public class SendLogActivity extends AppCompatActivity{
-    String filename;
+    String filename, stackTrace;
     Process shell;
     PrintWriter shell_in;
     BufferedReader shell_out;
@@ -59,6 +59,8 @@ public class SendLogActivity extends AppCompatActivity{
         requestWindowFeature(Window.FEATURE_NO_TITLE); // make a dialog without a titlebar
         setFinishOnTouchOutside(false); // prevent users from dismissing the dialog by tapping outside
         setContentView(R.layout.activity_send_log);
+        stackTrace = getIntent().getStringExtra("exception");
+        Log.e("SendLogActivity", stackTrace);
 
         try{
             shell = Runtime.getRuntime().exec("su");
@@ -132,6 +134,7 @@ public class SendLogActivity extends AppCompatActivity{
             writer.write("Android version: " +  Build.VERSION.SDK_INT + "\n");
             writer.write("Device: " + model + "\n");
             writer.write("App version: " + (info == null ? "(null)" : info.versionName) + "\n");
+            writer.write("\nStack trace:\n" + stackTrace + '\n');
 
             String cmd = "echo pref_file--------------------------------------; su -c cat /data/user/0/com.hijacker/shared_prefs/com.hijacker_preferences.xml;";
             cmd += " echo ls_system-xbin---------------------------------; su -c ls /system/xbin | busybox grep -e air -e mdk -e reaver -e nexutil -e iw -e libfakeioctl.so -e busybox -e toolbox;";

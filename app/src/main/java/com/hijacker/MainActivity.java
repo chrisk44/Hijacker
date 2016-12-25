@@ -51,6 +51,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
+import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.ProgressBar;
@@ -131,10 +132,15 @@ public class MainActivity extends AppCompatActivity{
             @Override
             public void uncaughtException(Thread thread, Throwable throwable){
                 throwable.printStackTrace();
+                String stackTrace = "";
+                for(int i=0;i<throwable.getStackTrace().length;i++){
+                    stackTrace += throwable.getStackTrace()[i].toString() + '\n';
+                }
 
                 Intent intent = new Intent();
                 intent.setAction("com.hijacker.SendLogActivity");
                 intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                intent.putExtra("exception", stackTrace);
                 startActivity(intent);
 
                 System.exit(1);
@@ -188,8 +194,8 @@ public class MainActivity extends AppCompatActivity{
                                 public void run(){
                                     if(wpacheckcont){
                                         stop(PROCESS_AIREPLAY);
-                                        Snackbar snackbar = Snackbar.make(getCurrentFocus(), getString(R.string.stopped_to_capture), Snackbar.LENGTH_LONG);
-                                        snackbar.show();
+                                        if(getCurrentFocus()!=null) Snackbar.make(getCurrentFocus(), getString(R.string.stopped_to_capture), Snackbar.LENGTH_LONG).show();
+                                        else Toast.makeText(MainActivity.this, getString(R.string.stopped_to_capture), Toast.LENGTH_SHORT).show();
                                         progress.setIndeterminate(true);
                                     }else{
                                         progress.setIndeterminate(false);
@@ -218,7 +224,8 @@ public class MainActivity extends AppCompatActivity{
                             Log.d("wpa_thread", "Returning...");
                         }
                     }else{
-                        Snackbar.make(getCurrentFocus(), getString(R.string.cap_is) + capfile, Snackbar.LENGTH_LONG).show();
+                        if(getCurrentFocus()!=null) Snackbar.make(getCurrentFocus(), getString(R.string.cap_is) + capfile, Snackbar.LENGTH_LONG).show();
+                        else Toast.makeText(MainActivity.this, getString(R.string.cap_is) + capfile, Toast.LENGTH_SHORT).show();
                         progress_int = 0;
                         wpacheckcont = true;
                         wpa_subthread.start();
@@ -245,10 +252,12 @@ public class MainActivity extends AppCompatActivity{
                             if(temp==1){
                                 stop(PROCESS_AIRODUMP);
                                 stop(PROCESS_AIREPLAY);
-                                Snackbar.make(getCurrentFocus(), getString(R.string.handshake_captured) + ' ' + capfile, Snackbar.LENGTH_LONG).show();
+                                if(getCurrentFocus()!=null) Snackbar.make(getCurrentFocus(), getString(R.string.handshake_captured) + ' ' + capfile, Snackbar.LENGTH_LONG).show();
+                                else Toast.makeText(MainActivity.this, getString(R.string.handshake_captured), Toast.LENGTH_SHORT).show();
                             }
                             progress.setIndeterminate(false);
                             progress.setProgress(deauthWait);
+                            if(getCurrentFocus()!=null) ((Button)findViewById(R.id.crack)).setText(getString(R.string.crack));
                         }
                     });
                 }catch(IOException | InterruptedException e){
@@ -602,7 +611,7 @@ public class MainActivity extends AppCompatActivity{
                     public void run(){
                         if(menu!=null) menu.getItem(1).setIcon(R.drawable.run);
                         Item.filter();
-                        if(aireplay_running==AIREPLAY_WEP){
+                        if(aireplay_running!=0){
                             stop(PROCESS_AIREPLAY);     //Since airodump is going to stop, arp replays are useless
                             progress.setIndeterminate(false);
                         }
@@ -910,6 +919,10 @@ public class MainActivity extends AppCompatActivity{
         super.onResume();
         notif_on = false;
         if(nm!=null) nm.cancelAll();
+        if(!watchdog_thread.isAlive() && watchdog){
+            watchdog_thread = new Thread(watchdog_runnable);
+            watchdog_thread.start();
+        }
     }
     @Override
     protected void onStop(){
@@ -919,6 +932,7 @@ public class MainActivity extends AppCompatActivity{
             notif_on = true;
             notification();
         }
+        if(watchdog_thread.isAlive()) watchdog_thread.interrupt();
         client.disconnect();
     }
     @Override
@@ -1101,6 +1115,8 @@ public class MainActivity extends AppCompatActivity{
             stop(PROCESS_AIRODUMP);
             stop(PROCESS_AIREPLAY);
             ((TextView)v).setText(R.string.crack);
+            progress.setIndeterminate(false);
+            progress.setProgress(deauthWait);
         }else{
             is_ap.crack();
             ((TextView)v).setText(R.string.stop);
