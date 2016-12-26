@@ -55,7 +55,9 @@
                 android:paddingStart="20dp"
                 android:paddingBottom="10dp"
                 android:paddingTop="10dp"
-                android:paddingEnd="5dp" />
+                android:paddingEnd="5dp"
+                android:clickable="true"
+                android:onClick="onAPStats" />
 
             <TextView
                 android:text="0"
@@ -63,7 +65,9 @@
                 android:layout_height="wrap_content"
                 android:id="@+id/st_count"
                 android:textColor="@android:color/white"
-                android:textSize="18sp" />
+                android:textSize="18sp"
+                android:clickable="true"
+                android:onClick="onAPStats" />
 
         </android.support.v7.widget.Toolbar>
 

@@ -42,10 +42,10 @@ import static com.hijacker.MainActivity.wpacheckcont;
 
 class AP {
     static final int WPA=0, WPA2=1, WEP=2, OPN=3, UNKNOWN=4;
-    static int wpa=0, wpa2=0, wep=0, opn=0;
+    static int wpa=0, wpa2=0, wep=0, opn=0, hidden=0;
     static List <AP>APs = new ArrayList<>();
     boolean isHidden = false;
-    int pwr, beacons, data, ivs, ch, id, sec;
+    int pwr, beacons, data, ivs, ch, id, sec=UNKNOWN;
     String essid, mac, enc, cipher, auth, manuf;
     List <ST>clients = new ArrayList<>();
     Item item;
@@ -56,26 +56,6 @@ class AP {
         this.manuf = getManuf(this.mac);
         this.update(essid, enc, cipher, auth, pwr, beacons, data, ivs, ch);
 
-        switch(this.enc){
-            case "WPA":
-                wpa++;
-                sec = WPA;
-                break;
-            case "WPA2":
-                wpa2++;
-                sec = WPA2;
-                break;
-            case "WEP":
-                wep++;
-                sec = WEP;
-                break;
-            case "OPN":
-                opn++;
-                sec = OPN;
-                break;
-            default:
-                sec = UNKNOWN;
-        }
         APs.add(this);
     }
 
@@ -83,7 +63,10 @@ class AP {
     void update(String essid, String enc, String cipher, String auth,
                               int pwr, int beacons, int data, int ivs, int ch){
         this.essid = essid;
-        if(essid.equals("<hidden>")) isHidden = true;
+        if(essid.equals("<hidden>") && !isHidden){
+            isHidden = true;
+            hidden++;
+        }
         this.enc = enc;
         this.cipher = cipher;
         this.auth = auth;
@@ -169,9 +152,11 @@ class AP {
         dialog.show(fragmentManager, "APDialog");
     }
     void disconnectAll(){
-        stop(PROCESS_AIRODUMP);
-        if (debug) Log.d("AP", "Starting airodump for channel " + this.ch);
-        startAirodump("--channel " + this.ch);
+        if(IsolatedFragment.is_ap==null){
+            stop(PROCESS_AIRODUMP);
+            if(debug) Log.d("AP", "Starting airodump for channel " + this.ch);
+            startAirodump("--channel " + this.ch);
+        }
         if(debug) {
             Log.d("AP", "Starting aireplay without targets...");
             Log.d("AP", this.mac);
@@ -189,5 +174,6 @@ class AP {
         wpa2 = 0;
         wep = 0;
         opn = 0;
+        hidden = 0;
     }
 }

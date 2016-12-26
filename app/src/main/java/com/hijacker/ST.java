@@ -33,6 +33,7 @@ import static com.hijacker.MainActivity.stop;
 class ST {
     static List <ST>STs = new ArrayList<>();
     static String paired, not_connected;
+    static int connected=0;
     int pwr, lost, frames, id;
     boolean added_as_client = false;
     Item item;
@@ -57,6 +58,7 @@ class ST {
         if(bssid=="na") bssid=null;
 
         if(added_as_client && bssid==null){
+            connected--;
             added_as_client = false;
             AP.getAPByMac(this.bssid).removeClient(this);
         }else if(!added_as_client && bssid!=null){
@@ -65,6 +67,7 @@ class ST {
                 this.bssid = bssid;
                 temp.addClient(this);
                 added_as_client = true;
+                connected++;
             }
         }
 
@@ -98,5 +101,8 @@ class ST {
         }
         return null;
     }
-    static void clear(){ STs.clear(); }
+    static void clear(){
+        STs.clear();
+        connected = 0;
+    }
 }

@@ -108,9 +108,12 @@
     <string name="eoe_message">Yes, this is an ErrorDialog saying that there was an error displaying a previous ErrorDialog.</string>
 
     <!-- StatsDialog -->
-    <string name="ap_stats">Access Point Stats</string>
-    <string name="security">Security:</string>
+    <string name="ap_stats">Statistics</string>
+    <string name="security">AP Security:</string>
     <string name="open">OPEN:</string>
+    <string name="misc">Miscellaneous:</string>
+    <string name="hidden">Hidden:</string>
+    <string name="connected">Connected devices:</string>
 
     <!-- APDialog (xml) -->
     <string name="mac">MAC:</string>

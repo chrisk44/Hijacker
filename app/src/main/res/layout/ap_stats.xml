@@ -55,6 +55,30 @@
             android:textColor="@android:color/white"
             android:textSize="16sp" />
 
+        <TextView
+            android:text="@string/misc"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:padding="5dp"
+            android:textColor="@android:color/white"
+            android:textSize="16sp"
+            android:textStyle="normal|bold" />
+
+        <TextView
+            android:text="@string/hidden"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:padding="5dp"
+            android:textColor="@android:color/white"
+            android:textSize="16sp" />
+        <TextView
+            android:text="@string/connected"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:padding="5dp"
+            android:textColor="@android:color/white"
+            android:textSize="16sp" />
+
     </LinearLayout>
 
     <LinearLayout
@@ -95,6 +119,26 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:id="@+id/opn_count"
+            android:padding="5dp"
+            android:textColor="@android:color/white"
+            android:textSize="16sp" />
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:padding="5dp"
+            android:textColor="@android:color/white"
+            android:textSize="16sp" />
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:id="@+id/hidden_count"
+            android:padding="5dp"
+            android:textColor="@android:color/white"
+            android:textSize="16sp" />
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:id="@+id/connected_count"
             android:padding="5dp"
             android:textColor="@android:color/white"
             android:textSize="16sp" />

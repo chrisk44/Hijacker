@@ -28,7 +28,7 @@ import android.widget.TextView;
 import static com.hijacker.MainActivity.runInHandler;
 
 public class StatsDialog extends DialogFragment {
-    TextView wpa_count, wpa2_count, wep_count, opn_count;
+    TextView wpa_count, wpa2_count, wep_count, opn_count, hidden_count, connected_count;
     Runnable runnable;
     @Override
     public Dialog onCreateDialog(Bundle savedInstanceState) {
@@ -40,12 +40,16 @@ public class StatsDialog extends DialogFragment {
             wpa2_count = (TextView)view.findViewById(R.id.wpa2_count);
             wep_count = (TextView)view.findViewById(R.id.wep_count);
             opn_count = (TextView)view.findViewById(R.id.opn_count);
+            hidden_count = (TextView)view.findViewById(R.id.hidden_count);
+            connected_count = (TextView)view.findViewById(R.id.connected_count);
         }
 
         wpa_count.setText(Integer.toString(AP.wpa));
         wpa2_count.setText(Integer.toString(AP.wpa2));
         wep_count.setText(Integer.toString(AP.wep));
         opn_count.setText(Integer.toString(AP.opn));
+        hidden_count.setText(Integer.toString(AP.hidden));
+        connected_count.setText(Integer.toString(ST.connected) + '/' + Integer.toString(ST.STs.size()));
 
         runnable = new Runnable(){
             @Override
@@ -54,6 +58,8 @@ public class StatsDialog extends DialogFragment {
                 wpa2_count.setText(Integer.toString(AP.wpa2));
                 wep_count.setText(Integer.toString(AP.wep));
                 opn_count.setText(Integer.toString(AP.opn));
+                hidden_count.setText(Integer.toString(AP.hidden));
+                connected_count.setText(Integer.toString(ST.connected) + '/' + Integer.toString(ST.STs.size()));
             }
         };
         new Thread(new Runnable(){
