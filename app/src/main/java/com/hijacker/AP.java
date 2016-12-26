@@ -138,7 +138,7 @@ class AP {
             //wep
             if(debug) Log.d("AP", "Cracking WEP");
             startAirodump("--channel " + this.ch + " --bssid " + this.mac + " --ivs -w " + cap_dir + "/wep_ivs");
-            startAireplayWEP(this);
+            if(!this.essid.equals("<hidden>")) startAireplayWEP(this);
             progress.setIndeterminate(true);
         }else if(this.sec == WPA || this.sec == WPA2){
             //wpa/wpa2

@@ -501,7 +501,7 @@ public class MainActivity extends AppCompatActivity{
     public static void startAireplayWEP(AP ap){
         //Increase IV generation from ap mac to crack a wep network
         aireplay_running = AIREPLAY_WEP;
-        if(!ap.essid.equals("<hidden>")) _startAireplay("--fakeauth 0 -a " + ap.mac + " -e " + ap.essid);
+        _startAireplay("--fakeauth 0 -a " + ap.mac + " -e " + ap.essid);
         //_startAireplay("--arpreplay -b " + ap.mac);       //Aireoplay tries to open a file at a read-only system
         //_startAireplay("--caffe-latte -b " + ap.mac);     //don't know where
     }

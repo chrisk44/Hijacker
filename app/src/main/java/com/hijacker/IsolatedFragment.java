@@ -31,6 +31,9 @@ import android.widget.ListView;
 import android.widget.PopupMenu;
 import android.widget.TextView;
 
+import static com.hijacker.AP.WEP;
+import static com.hijacker.AP.WPA;
+import static com.hijacker.AP.WPA2;
 import static com.hijacker.MainActivity.FRAGMENT_AIRODUMP;
 import static com.hijacker.MainActivity.PROCESS_AIREPLAY;
 import static com.hijacker.MainActivity.PROCESS_AIRODUMP;
@@ -146,6 +149,7 @@ public class IsolatedFragment extends Fragment{
         thread = new Thread(runnable);
         thread.start();
         ((Button)view.findViewById(R.id.crack)).setText(wpa_thread.isAlive() ? R.string.stop : R.string.crack);
+        view.findViewById(R.id.crack).setEnabled(is_ap.sec==WPA || is_ap.sec==WPA2 || is_ap.sec==WEP);
         ((Button)view.findViewById(R.id.dos)).setText(MDKFragment.ados ? R.string.stop : R.string.dos);
         refresh.obtainMessage().sendToTarget();
     }
