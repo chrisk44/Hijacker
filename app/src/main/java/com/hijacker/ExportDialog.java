@@ -114,7 +114,7 @@ public class ExportDialog extends DialogFragment{
             }
             out.close();
             Toast.makeText(getActivity(), R.string.output_file_exported, Toast.LENGTH_SHORT).show();
-        }catch(IOException e){ Log.e("ExportDialog", "Exception: " + e.toString()); }
+        }catch(IOException e){ Log.e("HIJACKER/ExportDialog", "Exception: " + e.toString()); }
         dismiss();
     }
 }

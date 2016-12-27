@@ -82,9 +82,7 @@ public class RestoreFirmwareDialog extends DialogFragment {
                     }else if(!(new File(firm_location + "/fw_bcmdhd.bin").exists())){
                         Toast.makeText(getActivity(), R.string.firm_notfound, Toast.LENGTH_SHORT).show();
                     }else{
-                        if(debug){
-                            Log.d("RestoreFirmwareDialog", "Restoring firmware in " + firm_location);
-                        }
+                        if(debug) Log.d("HIJACKER/RestoreFirm", "Restoring firmware in " + firm_location);
                         shell.run("busybox mount -o rw,remount,rw /system");
 
                         shell.run("cp " + path + "/fw_bcmdhd.orig.bin " + firm_location + "/fw_bcmdhd.bin");

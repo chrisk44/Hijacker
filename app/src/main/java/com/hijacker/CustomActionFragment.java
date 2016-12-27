@@ -62,7 +62,7 @@ public class CustomActionFragment extends Fragment{
         runnable = new Runnable(){
             @Override
             public void run(){
-                if(debug) Log.d("CustomCMDFragment", "thread running");
+                if(debug) Log.d("HIJACKER/CustomCMDFragment", "thread running");
                 BufferedReader out = shell.getShell_out();
                 try{
                     Message msg;
@@ -76,7 +76,7 @@ public class CustomActionFragment extends Fragment{
                         buffer = out.readLine();
                     }
                     stop.obtainMessage().sendToTarget();
-                    if(debug) Log.d("CustomCMDFragment", "thread done");
+                    if(debug) Log.d("HIJACKER/CustomCMDFragment", "thread done");
                 }catch(IOException ignored){}
             }
         };
@@ -203,14 +203,14 @@ public class CustomActionFragment extends Fragment{
                     //not started
                     shell = Shell.getFreeShell();
                     console.append("Running: " + selected_action.getStart_cmd() + '\n');
-                    if(debug) Log.d("CustomCMDFragment", "Running: " + selected_action.getStart_cmd());
+                    if(debug) Log.d("HIJACKER/CustomCMDFragment", "Running: " + selected_action.getStart_cmd());
                     selected_action.run();
                     start_button.setText(R.string.stop);
                     progress.setIndeterminate(true);
                 }else{
                     //started
                     console.append("Running: " + selected_action.getStop_cmd() + '\n');
-                    if(debug) Log.d("CustomCMDFragment", "Running: " + selected_action.getStop_cmd());
+                    if(debug) Log.d("HIJACKER/CustomCMDFragment", "Running: " + selected_action.getStop_cmd());
                     selected_action.stop();
                     stop.obtainMessage().sendToTarget();
                 }

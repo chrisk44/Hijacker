@@ -100,6 +100,7 @@ public class MainActivity extends AppCompatActivity{
     static Drawable overflow[] = {null, null, null, null, null, null, null, null};      //Drawables to use for overflow button icon
     static ImageView[] status = {null, null, null, null, null};                         //Icons in TestDialog, set in TestDialog class
     static int progress_int;
+    static long last_action;
     static Thread refresh_thread, wpa_thread, watchdog_thread;
     static Runnable refresh_runnable, wpa_runnable, watchdog_runnable;
     static Menu menu;
@@ -157,14 +158,14 @@ public class MainActivity extends AppCompatActivity{
         refresh_runnable = new Runnable(){
             @Override
             public void run(){
-                if(debug) Log.d("refresh_thread", "refresh_thread running");
+                if(debug) Log.d("HIJACKER/refresh_thread", "refresh_thread running");
                 try{
                     while(cont){
                         if(done) refreshHandler.obtainMessage().sendToTarget();
                         Thread.sleep(1000);
                     }
-                }catch(InterruptedException e){ Log.e("Exception", "Caught Exception in main() refresh_thread block: " + e.toString()); }
-                if(debug) Log.d("refresh_thread", "refresh_thread done");
+                }catch(InterruptedException e){ Log.e("HIJACKER/Exception", "Caught Exception in main() refresh_thread block: " + e.toString()); }
+                if(debug) Log.d("HIJACKER/refresh_thread", "refresh_thread done");
             }
         };
         refresh_thread = new Thread(refresh_runnable);
@@ -172,12 +173,12 @@ public class MainActivity extends AppCompatActivity{
         wpa_runnable = new Runnable(){
             @Override
             public void run(){
-                if(debug) Log.d("wpa_thread", "Started wpa_thread");
+                if(debug) Log.d("HIJACKER/wpa_thread", "Started wpa_thread");
 
                 Thread wpa_subthread = new Thread(new Runnable(){
                     @Override
                     public void run(){
-                        if(debug) Log.d("wpa_subthread", "wpa_subthread started");
+                        if(debug) Log.d("HIJACKER/wpa_subthread", "wpa_subthread started");
                         try{
                             while(progress_int<=deauthWait && wpacheckcont){
                                 Thread.sleep(1000);
@@ -203,8 +204,8 @@ public class MainActivity extends AppCompatActivity{
                                     }
                                 }
                             });
-                        }catch(InterruptedException e){ Log.e("Exception", "Caught Exception in wpa_subthread: " + e.toString()); }
-                        if(debug) Log.d("wpa_subthread", "wpa_subthread finished");
+                        }catch(InterruptedException e){ Log.e("HIJACKER/Exception", "Caught Exception in wpa_subthread: " + e.toString()); }
+                        if(debug) Log.d("HIJACKER/wpa_subthread", "wpa_subthread finished");
                     }
                 });
 
@@ -217,11 +218,11 @@ public class MainActivity extends AppCompatActivity{
                     shell.run("busybox ls -1 " + cap_dir + "/handshake-*.cap; echo ENDOFLS");
                     capfile = getLastLine(shell.getShell_out(), "ENDOFLS");
 
-                    if(debug) Log.d("wpa_thread", capfile);
+                    if(debug) Log.d("HIJACKER/wpa_thread", capfile);
                     if(capfile.equals("ENDOFLS")){
                         if(debug){
-                            Log.d("wpa_thread", "cap file not found, airodump is probably not running...");
-                            Log.d("wpa_thread", "Returning...");
+                            Log.d("HIJACKER/wpa_thread", "cap file not found, airodump is probably not running...");
+                            Log.d("HIJACKER/wpa_thread", "Returning...");
                         }
                     }else{
                         if(getCurrentFocus()!=null) Snackbar.make(getCurrentFocus(), getString(R.string.cap_is) + capfile, Snackbar.LENGTH_LONG).show();
@@ -230,7 +231,7 @@ public class MainActivity extends AppCompatActivity{
                         wpacheckcont = true;
                         wpa_subthread.start();
                         while(result!=1 && wpacheckcont){
-                            if(debug) Log.d("wpa_thread", "Checking cap file...");
+                            if(debug) Log.d("HIJACKER/wpa_thread", "Checking cap file...");
                             shell.run(aircrack_dir + " " + capfile + "; echo ENDOFAIR");
                             BufferedReader out = shell.getShell_out();
                             buffer = out.readLine();
@@ -261,7 +262,7 @@ public class MainActivity extends AppCompatActivity{
                         }
                     });
                 }catch(IOException | InterruptedException e){
-                    Log.e("Exception", "Caught Exception in wpa_thread: " + e.toString());
+                    Log.e("HIJACKER/Exception", "Caught Exception in wpa_thread: " + e.toString());
                     stop(PROCESS_AIREPLAY);
                 }finally{
                     wpa_subthread.interrupt();
@@ -269,7 +270,7 @@ public class MainActivity extends AppCompatActivity{
                         shell.run("rm -rf " + cap_dir + "/handshake-*.csv");
                         shell.run("rm -rf " + cap_dir + "/handshake-*.netxml");
                     }
-                    if(debug) Log.d("wpa_thread", "wpa_thread finished");
+                    if(debug) Log.d("HIJACKER/wpa_thread", "wpa_thread finished");
                     shell.done();
                 }
             }
@@ -283,7 +284,11 @@ public class MainActivity extends AppCompatActivity{
                     boolean flag = true;
                     while(flag){
                         Thread.sleep(5000);
-                        if(debug) Log.d("watchdog_handler", "Watchdog watching...");
+                        if(System.currentTimeMillis()-last_action < 1000){
+                            if(debug) Log.d("HIJACKER/watchdog", "Watchdog waiting for 1 sec...");
+                            Thread.sleep(1000);
+                        }
+                        if(debug) Log.d("HIJACKER/watchdog", "Watchdog watching...");
                         List<Integer> list;
                         Message msg;
                         list = getPIDs(PROCESS_AIRODUMP);
@@ -352,7 +357,7 @@ public class MainActivity extends AppCompatActivity{
                             }
                         }
                     }
-                }catch(InterruptedException e){ Log.e("watchdog thread", "Exception: " + e.toString()); }
+                }catch(InterruptedException e){ Log.e("HIJACKER/watchdog", "Exception: " + e.toString()); }
             }
         };
         watchdog_thread = new Thread(watchdog_runnable);
@@ -375,14 +380,18 @@ public class MainActivity extends AppCompatActivity{
             dialog.show(getFragmentManager(), "ErrorDialog");
         }
 
-        if(new File("/su").exists()){
-            extract("busybox", false);
-            Shell shell = getFreeShell();
-            shell.run("cp " + path + "/busybox /su/xbin/busybox");
-            shell.run("chmod 755 /su/xbin/busybox");
-            shell.done();
-            if(debug) Log.d("onCreate", "Installed busybox in /su/xbin");
-        }else if(debug) Log.d("onCreate", "No /su to install busybox");
+        String arch = System.getProperty("os.arch");
+        if(arch.equals("armv7l")){
+            if(new File("/su").exists()){
+                if(debug) Log.d("HIJACKER/onCreate", "Installing busybox in /su/xbin...");
+                extract("busybox", false);
+                Shell shell = getFreeShell();
+                shell.run("cp " + path + "/busybox /su/xbin/busybox");
+                shell.run("chmod 755 /su/xbin/busybox");
+                shell.done();
+                if(debug) Log.d("HIJACKER/onCreate", "Installed busybox in /su/xbin");
+            }else if(debug) Log.d("HIJACKER/onCreate", "No /su to install busybox");
+        }else if(debug) Log.d("HIJACKER/onCreate", "Cannot install busybox, arch is " + arch);
 
         if(!pref.getBoolean("disclaimer", false)){
             mDrawerLayout.openDrawer(GravityCompat.START);      //Can't open it later
@@ -407,7 +416,7 @@ public class MainActivity extends AppCompatActivity{
                     runOne("chmod 744 ./files/" + filename);
                 }
             }catch(IOException e){
-                Log.e("FileProvider", "Exception copying from assets", e);
+                Log.e("HIJACKER/FileProvider", "Exception copying from assets", e);
             }
         }
     }
@@ -449,7 +458,7 @@ public class MainActivity extends AppCompatActivity{
             @Override
             public void run(){
                 String cmd = "su -c " + prefix + " " + airodump_dir + " --update 1 " + temp + " " + iface;
-                if(debug) Log.d("startAirodump", cmd);
+                if(debug) Log.d("HIJACKER/startAirodump", cmd);
                 try{
                     Process process = Runtime.getRuntime().exec(cmd);
                     BufferedReader in = new BufferedReader(new InputStreamReader(process.getErrorStream()));
@@ -457,7 +466,7 @@ public class MainActivity extends AppCompatActivity{
                     while(cont && (buffer = in.readLine())!=null){
                         main(buffer, mode);
                     }
-                }catch(IOException e){ Log.e("Exception", "Caught Exception in startAirodump() read block: " + e.toString()); }
+                }catch(IOException e){ Log.e("HIJACKER/Exception", "Caught Exception in startAirodump() read block: " + e.toString()); }
             }
         }).start();
         refresh_thread = new Thread(refresh_runnable);
@@ -471,14 +480,15 @@ public class MainActivity extends AppCompatActivity{
                 notification();
             }
         });
+        last_action = System.currentTimeMillis();
     }
 
     public static void _startAireplay(final String str){
         try{
             String cmd = "su -c " + prefix + " " + aireplay_dir + " --ignore-negative-one " + str + " " + iface;
-            if(debug) Log.d("_startAireplay", cmd);
+            if(debug) Log.d("HIJACKER/_startAireplay", cmd);
             Runtime.getRuntime().exec(cmd);
-        }catch(IOException e){ Log.e("Exception", "Caught Exception in _startAireplay() start block: " + e.toString()); }
+        }catch(IOException e){ Log.e("HIJACKER/Exception", "Caught Exception in _startAireplay() start block: " + e.toString()); }
         runInHandler(new Runnable(){
             @Override
             public void run(){
@@ -487,6 +497,7 @@ public class MainActivity extends AppCompatActivity{
                 notification();
             }
         });
+        last_action = System.currentTimeMillis();
     }
     public static void startAireplay(String mac){
         //Disconnect all clients from mac
@@ -502,7 +513,7 @@ public class MainActivity extends AppCompatActivity{
         //Increase IV generation from ap mac to crack a wep network
         aireplay_running = AIREPLAY_WEP;
         _startAireplay("--fakeauth 0 -a " + ap.mac + " -e " + ap.essid);
-        //_startAireplay("--arpreplay -b " + ap.mac);       //Aireoplay tries to open a file at a read-only system
+        //_startAireplay("--arpreplay -b " + ap.mac);       //Aireplay tries to open a file at a read-only system
         //_startAireplay("--caffe-latte -b " + ap.mac);     //don't know where
     }
 
@@ -514,10 +525,10 @@ public class MainActivity extends AppCompatActivity{
                 try{
                     String cmd = "su -c " + prefix + " " + mdk3_dir + " " + iface + " b -m ";
                     if(str!=null) cmd += str;
-                    if(debug) Log.d("MDK3", cmd);
+                    if(debug) Log.d("HIJACKER/MDK3", cmd);
                     Runtime.getRuntime().exec(cmd);
                     Thread.sleep(500);
-                }catch(IOException | InterruptedException e){ Log.e("Exception", "Caught Exception in startMdk(MDK_BF) start block: " + e.toString()); }
+                }catch(IOException | InterruptedException e){ Log.e("HIJACKER/Exception", "Caught Exception in startMdk(MDK_BF) start block: " + e.toString()); }
                 bf = true;
                 break;
             case MDK_ADOS:
@@ -525,10 +536,10 @@ public class MainActivity extends AppCompatActivity{
                 try{
                     String cmd = "su -c " + prefix + " " + mdk3_dir + " " + iface + " a -m";
                     cmd += str==null ? "" : " -i " + str;
-                    if(debug) Log.d("MDK3", cmd);
+                    if(debug) Log.d("HIJACKER/MDK3", cmd);
                     Runtime.getRuntime().exec(cmd);
                     Thread.sleep(500);
-                }catch(IOException | InterruptedException e){ Log.e("Exception", "Caught Exception in startMdk(MDK_ADOS) start block: " + e.toString()); }
+                }catch(IOException | InterruptedException e){ Log.e("HIJACKER/Exception", "Caught Exception in startMdk(MDK_ADOS) start block: " + e.toString()); }
                 ados = true;
                 break;
         }
@@ -557,6 +568,7 @@ public class MainActivity extends AppCompatActivity{
                 notification();
             }
         });
+        last_action = System.currentTimeMillis();
     }
 
     public static ArrayList<Integer> getPIDs(int pr){
@@ -582,7 +594,7 @@ public class MainActivity extends AppCompatActivity{
                     shell.run("toolbox ps | busybox grep reav; echo ENDOFPS");
                     break;
                 default:
-                    Log.e("getPIDs", "Method called with invalid pr code");
+                    Log.e("HIJACKER/getPIDs", "Method called with invalid pr code");
                     return null;
             }
             BufferedReader shell_out = shell.getShell_out();
@@ -595,7 +607,7 @@ public class MainActivity extends AppCompatActivity{
                 s = shell_out.readLine();
             }
             shell.done();
-        }catch(IOException e){ Log.e("Exception", "Caught Exception in getPIDs(pr): " + e.toString()); }
+        }catch(IOException e){ Log.e("HIJACKER/Exception", "Caught Exception in getPIDs(pr): " + e.toString()); }
         return list;
     }
     public static void stop(int pr){
@@ -657,11 +669,11 @@ public class MainActivity extends AppCompatActivity{
                 break;
         }
         if(pids.isEmpty()){
-            if(debug) Log.d("stop", "Nothing found for " + pr);
+            if(debug) Log.d("HIJACKER/stop", "Nothing found for " + pr);
         }else{
             Shell shell = getFreeShell();
             for(int i = 0; i<pids.size(); i++){
-                if(debug) Log.d("Killing...", Integer.toString(pids.get(i)));
+                if(debug) Log.d("HIJACKER/Killing...", Integer.toString(pids.get(i)));
                 shell.run("busybox kill " + pids.get(i));
             }
             shell.done();
@@ -673,6 +685,7 @@ public class MainActivity extends AppCompatActivity{
                 notification();
             }
         });
+        last_action = System.currentTimeMillis();
     }
 
     //Handlers used for tasks that require the Main thread to update the view, but need to be run by other threads
@@ -692,7 +705,7 @@ public class MainActivity extends AppCompatActivity{
     };
     public Handler watchdog_handler = new Handler(){
         public void handleMessage(Message msg){
-            if(debug) Log.d("watchdog_handler", "Message is " + msg.obj);
+            if(debug) Log.d("HIJACKER/watchdog", "Message is " + msg.obj);
             ErrorDialog dialog = new ErrorDialog();
             dialog.setTitle((String)msg.obj);
             dialog.setMessage(getString(R.string.watchdog_message));
@@ -809,9 +822,9 @@ public class MainActivity extends AppCompatActivity{
 
         path = getFilesDir().getAbsolutePath();
         CustomAction.load();
-        if(debug) Log.d("Main", "path is " + path);
+        if(debug) Log.d("HIJACKER/Main", "path is " + path);
         if(!(new File(path).exists())){
-            Log.e("onCreate", "App file directory doesn't exist");
+            Log.e("HIJACKER/onCreate", "App file directory doesn't exist");
             ErrorDialog dialog = new ErrorDialog();
             dialog.setMessage(getString(R.string.app_dir_notfound1) + path + getString(R.string.app_dir_notfound2));
             dialog.show(fm, "ErrorDialog");
@@ -819,7 +832,7 @@ public class MainActivity extends AppCompatActivity{
     }
     static void load(){
         //Load Preferences
-        if(debug) Log.d("Main", "Loading preferences...");
+        if(debug) Log.d("HIJACKER/Main", "Loading preferences...");
 
         iface = pref.getString("iface", iface);
         prefix = pref.getString("prefix", prefix);
@@ -1180,8 +1193,8 @@ public class MainActivity extends AppCompatActivity{
         }
         Item.filter();
         if(debug){
-            if(is_ap==null) Log.d("Main", "No AP isolated");
-            else Log.d("Main", "AP with MAC " + mac + " isolated");
+            if(is_ap==null) Log.d("HIJACKER/Main", "No AP isolated");
+            else Log.d("HIJACKER/Main", "AP with MAC " + mac + " isolated");
         }
     }
     static void refreshState(){
@@ -1220,7 +1233,7 @@ public class MainActivity extends AppCompatActivity{
                 lastline = buffer;
                 buffer = out.readLine();
             }
-        }catch(IOException e){ Log.e("Exception", "Exception in getLastLine: " + e); }
+        }catch(IOException e){ Log.e("HIJACKER/Exception", "Exception in getLastLine: " + e); }
 
         return lastline;
     }

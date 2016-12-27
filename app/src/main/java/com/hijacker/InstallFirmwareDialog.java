@@ -114,8 +114,8 @@ public class InstallFirmwareDialog extends DialogFragment {
                         Toast.makeText(getActivity(), R.string.dir_notfound_util, Toast.LENGTH_SHORT).show();
                     }else{
                         if(debug){
-                            Log.d("InstallFirmwareDialog", "Installing firmware in " + firm_location);
-                            Log.d("InstallFirmwareDialog", "Installing utility in " + util_location);
+                            Log.d("HIJACKER/InstFirmware", "Installing firmware in " + firm_location);
+                            Log.d("HIJACKER/InstFirmware", "Installing utility in " + util_location);
                         }
                         shell.run("busybox mount -o rw,remount,rw /system");
                         if(((CheckBox)view.findViewById(R.id.backup)).isChecked()){
@@ -143,7 +143,7 @@ public class InstallFirmwareDialog extends DialogFragment {
                             dismiss();
                         }else{
                             Toast.makeText(getActivity(), R.string.fw_not_compatible, Toast.LENGTH_LONG).show();
-                            if(debug) Log.d("InstallFirmwareDialog", "Firmware verification is: " + result);
+                            if(debug) Log.d("HIJACKER/InstFirmware", "Firmware verification is: " + result);
                         }
                     }
                 }
@@ -203,7 +203,7 @@ public class InstallFirmwareDialog extends DialogFragment {
                 shell.run("mv " + path + '/' + filename + " " + dest);
                 shell.run("chmod 755 " + dest);
             }catch(IOException e){
-                Log.e("FileProvider", "Exception copying from assets", e);
+                Log.e("HIJACKER/FileProvider", "Exception copying from assets", e);
             }
         }
     }

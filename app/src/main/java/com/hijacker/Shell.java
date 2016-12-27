@@ -55,9 +55,9 @@ class Shell{
             shell_in = new PrintWriter(shell.getOutputStream());
             shell_out = new BufferedReader(new InputStreamReader(shell.getInputStream()));
         }catch(IOException e){
-            Log.e("Shell", "Error opening shell");
+            Log.e("HIJACKER/Shell", "Error opening shell");
         }
-        if(debug) Log.d("Shell", "New shell: total=" + total + " free:" + free.size());
+        if(debug) Log.d("HIJACKER/Shell", "New shell: total=" + total + " free:" + free.size());
         if(free.size()>5) exitAll();
     }
     BufferedReader getShell_out(){ return this.shell_out; }
@@ -72,7 +72,6 @@ class Shell{
             shell_out.reset();                                      //<--- since this doesn't seem to do the job
         }catch(IOException ignored){}
         free.add(this);
-        if(debug) Log.d("Shell", "Freeing shell: total:" + total + " free:" + free.size());
     }
     static Shell getFreeShell(){
         if(free.isEmpty()) return new Shell();

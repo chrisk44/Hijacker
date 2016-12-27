@@ -101,7 +101,7 @@ public class MDKFragment extends Fragment{
                         }
                     }
                     startMdk(MDK_BF, args);
-                    if(debug) Log.d("MDKFragment", "bf_pid is " + bf_pid);
+                    if(debug) Log.d("HIJACKER/MDKFragment", "bf_pid is " + bf_pid);
                 }else{
                     bf = false;
                     stop(bf_pid);
@@ -116,7 +116,7 @@ public class MDKFragment extends Fragment{
                 //Authentication DoS
                 if(b){
                     startMdk(MDK_ADOS, ados_ap==null ? custom_mac : ados_ap.mac);
-                    if(debug) Log.d("MDKFragment", "ados_pid is " + ados_pid);
+                    if(debug) Log.d("HIJACKER/MDKFragment", "ados_pid is " + ados_pid);
                 }else{
                     ados = false;
                     stop(ados_pid);

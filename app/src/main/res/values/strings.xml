@@ -15,17 +15,8 @@
     <!-- Main -->
     <string name="cap_notfound">cap file not found</string>
     <string name="cap_is">Cap file is </string>
-    <string name="error_opening_shell">Error opening su shell</string>
-    <string name="error_opening_shell2">Error opening su shell to kill remaining processes</string>
     <string name="app_dir_notfound1">App file directory doesn\'t exist: </string>
     <string name="app_dir_notfound2">. Reinstall the app.</string>
-    <string name="stop_bf">Stop Beacon Flooding</string>
-    <string name="stop_ados">Stop Authentication DoS</string>
-    <string name="start_bf">Start Beacon Flooding</string>
-    <string name="start_ados">Start Authentication DoS</string>
-    <string name="drawer_open">Open Drawer</string>
-    <string name="drawer_close">Close Drawer</string>
-    <string name="ados_running">Authentication DoS is already running</string>
     <string name="disconnect_started">Disconnect All started</string>
     <string name="watchdog_message">This could be caused by improper installation of busybox and toolbox or the tools. Go to settings and install the tools, and make sure you have busybox installed and updated.</string>
     <string name="airodump_still_running">Airodump is still running!</string>
@@ -40,7 +31,6 @@
 
     <!-- wpa_thread -->
     <string name="stopped_to_capture">Stopped aireplay to capture handshake…</string>
-    <string name="checking">Checking cap file…</string>
     <string name="handshake_captured">WPA handshake captured. Saved in file </string>
 
     <!-- DisclaimerDialog -->
@@ -67,7 +57,6 @@
     <string name="cancel">Cancel</string>
     <string name="back">Back</string>
     <string name="install">Install</string>
-    <string name="refresh">Refresh</string>
     <string name="find_firmware">Find Firmware</string>
     <string name="yes">Yes</string>
     <string name="no">No</string>
@@ -171,7 +160,6 @@
     <string name="path_to_cap">Path to .cap file</string>
     <string name="path_to_wordlist">Path to wordlist</string>
     <string name="start">Start</string>
-    <string name="capfile_notfound">.cap file not found</string>
     <string name="wordlist_notfound">Wordlist not found</string>
     <string name="select_wpa_wep">Please select WPA/WEP</string>
     <string name="select_wep_bits">Select how many bits the key is</string>
@@ -204,7 +192,6 @@
     <!-- CustomActionFragment -->
     <string name="select_action">Select action</string>
     <string name="select_target">Select target</string>
-    <string name="custom_action_editor">Custom Action Editor</string>
     <string name="custom_action_editor_message">You can use the following variables:\n
         $IFACE, $AIRODUMP_DIR, $AIREPLAY_DIR, $MDK3_DIR, $REAVER_DIR\n
         AP: $MAC, $ESSID, $CH, $ENC, $CIPHER, $AUTH\n

@@ -49,6 +49,7 @@
 
         <activity
             android:name=".SendLogActivity"
+            android:screenOrientation="portrait"
             android:windowSoftInputMode="stateHidden">
             <intent-filter>
                 <action android:name="com.hijacker.SendLogActivity" />

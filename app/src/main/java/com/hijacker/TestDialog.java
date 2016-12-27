@@ -37,6 +37,7 @@ import static com.hijacker.MainActivity.PROCESS_AIREPLAY;
 import static com.hijacker.MainActivity.PROCESS_AIRODUMP;
 import static com.hijacker.MainActivity.PROCESS_MDK;
 import static com.hijacker.MainActivity.PROCESS_REAVER;
+import static com.hijacker.MainActivity.debug;
 import static com.hijacker.MainActivity.iface;
 import static com.hijacker.MainActivity.prefix;
 import static com.hijacker.MainActivity.airodump_dir;
@@ -79,7 +80,7 @@ public class TestDialog extends DialogFragment {
                             stop(PROCESS_AIREPLAY);
                             stop(PROCESS_MDK);
                             String cmd = enable_monMode;
-                            Log.d("test_thread", cmd);
+                            Log.d("HIJACKER/test_thread", cmd);
                             runOne(cmd);
                             try{
                                 Thread.sleep(1000);
@@ -98,7 +99,7 @@ public class TestDialog extends DialogFragment {
                         @Override
                         public void run(){
                             String cmd = "su -c " + prefix + " " + airodump_dir + " " + iface;
-                            Log.d("test_thread", cmd);
+                            Log.d("HIJACKER/test_thread", cmd);
                             try{
                                 Runtime.getRuntime().exec(cmd);
                                 Thread.sleep(1000);
@@ -123,7 +124,7 @@ public class TestDialog extends DialogFragment {
                         @Override
                         public void run(){
                             String cmd = "su -c " + prefix + " " + aireplay_dir + " --deauth 0 -a 11:22:33:44:55:66 " + iface;
-                            Log.d("test_thread", cmd);
+                            Log.d("HIJACKER/test_thread", cmd);
                             try{
                                 Runtime.getRuntime().exec(cmd);
                                 Thread.sleep(1000);
@@ -148,7 +149,7 @@ public class TestDialog extends DialogFragment {
                         @Override
                         public void run(){
                             String cmd = "su -c " + prefix + " " + mdk3_dir + " " + iface + " b -m";
-                            Log.d("test_thread", cmd);
+                            Log.d("HIJACKER/test_thread", cmd);
                             try{
                                 Runtime.getRuntime().exec(cmd);
                                 Thread.sleep(1000);
@@ -173,7 +174,7 @@ public class TestDialog extends DialogFragment {
                         @Override
                         public void run(){
                             String cmd = "su -c " + prefix + " " + reaver_dir + " -i " + iface + " -b 00:11:22:33:44:55 -c 2";
-                            Log.d("test_thread", cmd);
+                            Log.d("HIJACKER/test_thread", cmd);
                             try{
                                 Runtime.getRuntime().exec(cmd);
                                 Thread.sleep(1000);
@@ -205,8 +206,10 @@ public class TestDialog extends DialogFragment {
                                 BufferedReader out = new BufferedReader(new InputStreamReader(dc.getInputStream()));
                                 kali_init = out.readLine()!=null;
                             }catch(IOException ignored){}
-                            Log.d("test_thread", "chroot_dir is " + Boolean.toString(chroot_dir.exists()));
-                            Log.d("test_thread", "kali_init is " + Boolean.toString(kali_init));
+                            if(debug){
+                                Log.d("HIJACKER/test_thread", "chroot_dir is " + Boolean.toString(chroot_dir.exists()));
+                                Log.d("HIJACKER/test_thread", "kali_init is " + Boolean.toString(kali_init));
+                            }
                             if(!chroot_dir.exists() || !kali_init){
                                 status[4].setImageResource(R.drawable.failed);
                                 if(!chroot_dir.exists()) test_cur_cmd.setText(R.string.chroot_notfound);
@@ -229,7 +232,7 @@ public class TestDialog extends DialogFragment {
                         Thread.sleep(100);
                     }
                 }catch(InterruptedException e){
-                    Log.d("test_thread", "Interrupted");
+                    Log.d("HIJACKER/test_thread", "Interrupted");
                 }finally{
                     if(watchdog){
                         watchdog_thread = new Thread(watchdog_runnable);

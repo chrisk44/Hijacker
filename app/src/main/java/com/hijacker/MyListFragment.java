@@ -73,7 +73,7 @@ public class MyListFragment extends ListFragment {
 
             popup.setOnMenuItemClickListener(new PopupMenu.OnMenuItemClickListener() {
                 public boolean onMenuItemClick(android.view.MenuItem item) {
-                    if(debug) Log.d("MyListFragment", "Clicked " + item.getItemId() + " for ap");
+                    if(debug) Log.d("HIJACKER/MyListFragment", "Clicked " + item.getItemId() + " for ap");
                     switch(item.getItemId()) {
                         case 0:
                             //Info
@@ -153,7 +153,7 @@ public class MyListFragment extends ListFragment {
 
             popup.setOnMenuItemClickListener(new PopupMenu.OnMenuItemClickListener() {
                 public boolean onMenuItemClick(android.view.MenuItem item) {
-                    if(debug) Log.d("MyListFragment", "Clicked " + item.getItemId() + " for st");
+                    if(debug) Log.d("HIJACKER/MyListFragment", "Clicked " + item.getItemId() + " for st");
                     switch(item.getItemId()) {
                         case 0:
                             //Info

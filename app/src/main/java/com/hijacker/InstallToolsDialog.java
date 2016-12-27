@@ -94,8 +94,8 @@ public class InstallToolsDialog extends DialogFragment {
                         Toast.makeText(getActivity(), R.string.dir_notfound_lib, Toast.LENGTH_SHORT).show();
                     }else{
                         if(debug){
-                            Log.d("InstallToolsDialog", "Installing Tools in " + tools_location);
-                            Log.d("InstallToolsDialog", "Installing Library in " + lib_location);
+                            Log.d("HIJACKER/InstTools", "Installing Tools in " + tools_location);
+                            Log.d("HIJACKER/InstTools", "Installing Library in " + lib_location);
                         }
                         shell = Shell.getFreeShell();
                         shell.run("busybox mount -o rw,remount,rw /system");
@@ -162,7 +162,7 @@ public class InstallToolsDialog extends DialogFragment {
                 shell.run("chown root " + dest);
                 shell.run("chgrp shell " + dest);
             }catch(IOException e){
-                Log.e("FileProvider", "Exception copying from assets", e);
+                Log.e("HIJACKER/FileProvider", "Exception copying from assets", e);
             }
         }
     }

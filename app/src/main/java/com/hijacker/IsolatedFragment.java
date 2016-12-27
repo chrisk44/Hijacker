@@ -101,7 +101,7 @@ public class IsolatedFragment extends Fragment{
 
                 popup.setOnMenuItemClickListener(new PopupMenu.OnMenuItemClickListener() {
                     public boolean onMenuItemClick(android.view.MenuItem item) {
-                        if(debug) Log.d("MyListFragment", "Clicked " + item.getItemId() + " for st");
+                        if(debug) Log.d("HIJACKER/MyListFragment", "Clicked " + item.getItemId() + " for st");
                         switch(item.getItemId()) {
                             case 0:
                                 //Info

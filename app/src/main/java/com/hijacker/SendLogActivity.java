@@ -60,19 +60,19 @@ public class SendLogActivity extends AppCompatActivity{
         setFinishOnTouchOutside(false); // prevent users from dismissing the dialog by tapping outside
         setContentView(R.layout.activity_send_log);
         stackTrace = getIntent().getStringExtra("exception");
-        Log.e("SendLogActivity", stackTrace);
+        Log.e("HIJACKER/SendLog", stackTrace);
 
         try{
             shell = Runtime.getRuntime().exec("su");
         }catch(IOException e){
-            Log.e("onCreate", "Caught Exception in shell start: " + e.toString());
+            Log.e("HIJACKER/onCreate", "Caught Exception in shell start: " + e.toString());
             Toast.makeText(this, "Couldn't start su shell to stop any remaining processes", Toast.LENGTH_LONG).show();
             return;
         }
         shell_in = new PrintWriter(shell.getOutputStream());
         shell_out = new BufferedReader(new InputStreamReader(shell.getInputStream()));
         if(shell_in==null || shell_out==null){
-            Log.e("onCreate", "Error opening shell_in/shell_out");
+            Log.e("HIJACKER/onCreate", "Error opening shell_in/shell_out");
             Toast.makeText(this, "Couldn't start su shell to stop any remaining processes", Toast.LENGTH_LONG).show();
             return;
         }
@@ -82,7 +82,7 @@ public class SendLogActivity extends AppCompatActivity{
         }
         if(ContextCompat.checkSelfPermission(this, Manifest.permission.WRITE_EXTERNAL_STORAGE)!=PackageManager.PERMISSION_DENIED){
             filename = extractLogToFile();
-            if(filename==null) Log.d("SendLogActivity", "filename is null");
+            if(filename==null) Log.d("HIJACKER/SendLog", "filename is null");
             else{
                 File log = new File(filename);
                 try{
@@ -99,7 +99,7 @@ public class SendLogActivity extends AppCompatActivity{
                 }catch(IOException ignored){}
             }
         }else{
-            Log.e("SendLogActivity", "WRITE_EXTERNAL_STORAGE permission denied");
+            Log.e("HIJACKER/SendLog", "WRITE_EXTERNAL_STORAGE permission denied");
         }
 
         stopAll();
@@ -146,9 +146,9 @@ public class SendLogActivity extends AppCompatActivity{
             cmd += " echo ps---------------------------------------------; su -c ps | busybox grep -e air -e mdk -e reaver;";
             cmd += " echo busybox----------------------------------------; busybox;";
             cmd += " echo toolbox----------------------------------------; toolbox;";
-            cmd += " echo logcat-----------------------------------------; logcat -d -v time;";
+            cmd += " echo logcat-----------------------------------------; logcat -d -v time | busybox grep HIJACKER;";
             cmd += " echo ENDOFLOG\n";
-            Log.d("cmd", cmd);
+            Log.d("HIJACKER/cmd", cmd);
             shell_in.print(cmd);                //Runtime.getRuntime().exec(cmd) just echos the cmd...
             shell_in.flush();
             String buffer = shell_out.readLine();
@@ -170,7 +170,7 @@ public class SendLogActivity extends AppCompatActivity{
     }
     public void onSend(View v){
         if(filename==null){
-            Log.d("SendLogActivity", "filename is null");
+            Log.d("HIJACKER/SendLog", "filename is null");
             Toast.makeText(this, "Report was not created", Toast.LENGTH_LONG).show();
         }else sendLogFile(filename);
     }
@@ -189,11 +189,11 @@ public class SendLogActivity extends AppCompatActivity{
                 }
                 s = shell_out.readLine();
             }
-        }catch(IOException e){ Log.e("Exception", "Caught Exception in getPIDs(pr): " + e.toString()); }
-        if(pids.isEmpty()) Log.d("stopAll", "Nothing found");
+        }catch(IOException e){ Log.e("HIJACKER/Exception", "Caught Exception in getPIDs(pr): " + e.toString()); }
+        if(pids.isEmpty()) Log.d("HIJACKER/stopAll", "Nothing found");
         else{
             for(int i = 0; i<pids.size(); i++){
-                Log.d("Killing...", Integer.toString(pids.get(i)));
+                Log.d("HIJACKER/Killing...", Integer.toString(pids.get(i)));
                 shell_in.print("kill " + pids.get(i) + "\n");
                 shell_in.flush();
             }

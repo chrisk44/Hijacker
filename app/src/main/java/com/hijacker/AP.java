@@ -119,7 +119,7 @@ class AP {
         adapter.notifyDataSetChanged();
         if(this.sec == WEP){
             //wep
-            if(debug) Log.d("AP", "Cracking WEP");
+            if(debug) Log.d("HIJACKER/AP", "Cracking WEP");
             startAirodump("--channel " + this.ch + " --bssid " + this.mac + " --ivs -w " + cap_dir + "/wep_ivs");
             if(!this.essid.equals("<hidden>")) startAireplayWEP(this);
             progress.setIndeterminate(true);
@@ -128,7 +128,7 @@ class AP {
             wpacheckcont = false;           //Make sure wpa threads are not running from previous cracking
             wpa_thread.interrupt();
             while(wpa_thread.isAlive())      //Wait for everything to shutdown
-            if(debug) Log.d("AP", "Cracking WPA/WPA2");
+            if(debug) Log.d("HIJACKER/AP", "Cracking WPA/WPA2");
             startAirodump("--channel " + this.ch + " --bssid " + this.mac + " -w " + cap_dir + "/handshake");
             startAireplay(this.mac);
             wpa_thread = new Thread(wpa_runnable);
@@ -154,12 +154,12 @@ class AP {
     void disconnectAll(){
         if(IsolatedFragment.is_ap==null){
             stop(PROCESS_AIRODUMP);
-            if(debug) Log.d("AP", "Starting airodump for channel " + this.ch);
+            if(debug) Log.d("HIJACKER/AP", "Starting airodump for channel " + this.ch);
             startAirodump("--channel " + this.ch);
         }
         if(debug) {
-            Log.d("AP", "Starting aireplay without targets...");
-            Log.d("AP", this.mac);
+            Log.d("HIJACKER/AP", "Starting aireplay without targets...");
+            Log.d("HIJACKER/AP", this.mac);
         }
         startAireplay(this.mac);
     }

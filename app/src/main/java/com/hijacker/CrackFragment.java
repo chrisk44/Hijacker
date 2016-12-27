@@ -89,7 +89,7 @@ public class CrackFragment extends Fragment{
         runnable = new Runnable(){
             @Override
             public void run(){
-                Log.d("CrackFragment", "in thread");
+                if(debug) Log.d("HIJACKER/CrackFragment", "in thread");
                 try{
                     String cmd = "su -c " + aircrack_dir + " " + capfile + " -l " + path + "/aircrack-out.txt -a " + mode;
                     if(wordlist!=null) cmd += " -w " + wordlist;
@@ -113,14 +113,14 @@ public class CrackFragment extends Fragment{
                                 break;
                         }
                     }
-                    if(debug) Log.d("CrackFragment", cmd);
+                    if(debug) Log.d("HIJACKER/CrackFragment", cmd);
                     Process dc = Runtime.getRuntime().exec(cmd);
                     BufferedReader out = new BufferedReader(new InputStreamReader(dc.getInputStream()));
                     cont = true;
                     while(cont && out.readLine()!=null){
                         Thread.sleep(100);
                     }
-                }catch(IOException | InterruptedException e){ Log.e("Exception", "Caught Exception in CrackFragment: " + e.toString()); }
+                }catch(IOException | InterruptedException e){ Log.e("HIJACKER/Exception", "Caught Exception in CrackFragment: " + e.toString()); }
 
                 stop.obtainMessage().sendToTarget();
             }

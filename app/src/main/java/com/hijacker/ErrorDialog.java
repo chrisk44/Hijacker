@@ -53,7 +53,7 @@ public class ErrorDialog extends DialogFragment {
             builder.setTitle(title);
             builder.setMessage(this.message);
         }else{
-            Log.d("ErrorDialog", "Message not set");
+            Log.d("HIJACKER/ErrorDialog", "Message not set");
             builder.setTitle(R.string.eoe_title);
             builder.setMessage(R.string.eoe_message);
         }

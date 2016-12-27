@@ -107,7 +107,7 @@ class CustomAction{
                 writer.write(Boolean.toString(action.requires_clients || action.requires_connected) + '\n');
                 writer.close();
             }catch(IOException e){
-                Log.e("CustomAction", "In load(): " + e.toString());
+                Log.e("HIJACKER/CustomAction", "In load(): " + e.toString());
                 ErrorDialog dialog = new ErrorDialog();
                 dialog.setMessage("Error while saving " + action.title);
                 dialog.show(fm, "ErrorDialog");
@@ -122,7 +122,7 @@ class CustomAction{
         }
         File actions[] = folder.listFiles();
         if(actions!=null){
-            if(debug) Log.d("CustomAction", "Reading files...");
+            if(debug) Log.d("HIJACKER/CustomAction", "Reading files...");
             FileReader reader0;
             BufferedReader reader;
             for(File file : actions){
@@ -134,7 +134,7 @@ class CustomAction{
                     String stop_cmd = reader.readLine();
                     int type = Integer.parseInt(reader.readLine());
                     boolean requirement = Boolean.parseBoolean(reader.readLine());
-                    if(debug) Log.d("CustomAction", "Read from file " + file.getName() + ": " + title + ", " +
+                    if(debug) Log.d("HIJACKER/CustomAction", "Read from file " + file.getName() + ": " + title + ", " +
                             start_cmd + ", " + stop_cmd + ", " + Integer.toString(type) + ", " + Boolean.toString(requirement));
                     CustomAction action = new CustomAction(title, start_cmd, stop_cmd, type);
                     if(type==TYPE_AP){
@@ -145,7 +145,7 @@ class CustomAction{
                     reader.close();
                     reader0.close();
                 }catch(IOException e){
-                    Log.e("CustomAction", "In load(): " + e.toString());
+                    Log.e("HIJACKER/CustomAction", "In load(): " + e.toString());
                 }
             }
         }

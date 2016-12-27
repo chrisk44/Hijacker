@@ -75,7 +75,7 @@ public class CustomActionEditorFragment extends Fragment{
             }
         });
 
-        ((Button)v.findViewById(R.id.save_button)).setOnClickListener(new View.OnClickListener(){
+        (v.findViewById(R.id.save_button)).setOnClickListener(new View.OnClickListener(){
             @Override
             public void onClick(View view){
                 String title = ((EditText)v.findViewById(R.id.title)).getText().toString();

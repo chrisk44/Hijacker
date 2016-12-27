@@ -51,6 +51,7 @@ import static com.hijacker.MainActivity.currentFragment;
 import static com.hijacker.MainActivity.custom_chroot_cmd;
 import static com.hijacker.MainActivity.debug;
 import static com.hijacker.MainActivity.iface;
+import static com.hijacker.MainActivity.last_action;
 import static com.hijacker.MainActivity.monstart;
 import static com.hijacker.MainActivity.prefix;
 import static com.hijacker.MainActivity.progress;
@@ -85,8 +86,8 @@ public class ReaverFragment extends Fragment{
             kali_init = out.readLine()!=null;
         }catch(IOException ignored){}
         if(debug){
-            Log.d("ReaverFragment", "chroot_dir is " + Boolean.toString(chroot_dir.exists()));
-            Log.d("ReaverFragment", "kali_init is " + Boolean.toString(kali_init));
+            Log.d("HIJACKER/ReaverFragment", "chroot_dir is " + Boolean.toString(chroot_dir.exists()));
+            Log.d("HIJACKER/ReaverFragment", "kali_init is " + Boolean.toString(kali_init));
         }
         if(!chroot_dir.exists() || !kali_init){
             v.findViewById(R.id.pixie_dust).setEnabled(false);
@@ -135,7 +136,7 @@ public class ReaverFragment extends Fragment{
         runnable = new Runnable(){
             @Override
             public void run(){
-                Log.d("ReaverFragment", "in thread");
+                if(debug) Log.d("HIJACKER/ReaverFragment", "in thread");
                 try{
                     BufferedReader out;
                     Message msg;
@@ -172,7 +173,8 @@ public class ReaverFragment extends Fragment{
                         Process dc = Runtime.getRuntime().exec(cmd);
                         out = new BufferedReader(new InputStreamReader(dc.getInputStream()));
                     }
-                    if(debug) Log.d("ReaverFragment", cmd);
+                    last_action = System.currentTimeMillis();
+                    if(debug) Log.d("HIJACKER/ReaverFragment", cmd);
                     cont = true;
                     String buffer;
                     while(cont && (buffer = out.readLine())!=null){
@@ -184,7 +186,7 @@ public class ReaverFragment extends Fragment{
                     msg.obj = "\nDone\n";
                     refresh.sendMessage(msg);
                 }catch(IOException e){
-                    Log.e("Exception", "Caught Exception in ReaverFragment: " + e.toString());
+                    Log.e("HIJACKER/Exception", "Caught Exception in ReaverFragment: " + e.toString());
                 }
 
                 stop.obtainMessage().sendToTarget();

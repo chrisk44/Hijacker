@@ -21,7 +21,7 @@
     <item android:id="@+id/stop_aireplay"
         android:title="@string/stop_aireplay"
         android:icon="@drawable/stop_aireplay"
-        app:showAsAction="ifRoom"/>
+        app:showAsAction="never"/>
 
     <item android:id="@+id/export"
           android:title="@string/export_title"
