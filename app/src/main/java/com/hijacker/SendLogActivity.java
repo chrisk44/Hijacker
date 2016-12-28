@@ -45,6 +45,7 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.util.ArrayList;
+import java.util.Date;
 
 import static com.hijacker.MainActivity.ps;
 
@@ -131,6 +132,7 @@ public class SendLogActivity extends AppCompatActivity{
         FileWriter writer = null;
         try{
             writer = new FileWriter(file);
+            writer.write("Hijacker bug report - " + new Date().toString() + "\n\n");
             writer.write("Android version: " +  Build.VERSION.SDK_INT + "\n");
             writer.write("Device: " + model + "\n");
             writer.write("App version: " + (info == null ? "(null)" : info.versionName) + "\n");
@@ -198,10 +200,5 @@ public class SendLogActivity extends AppCompatActivity{
                 shell_in.flush();
             }
         }
-    }
-    @Override
-    public void onDestroy(){
-        super.onDestroy();
-        System.exit(1);
     }
 }

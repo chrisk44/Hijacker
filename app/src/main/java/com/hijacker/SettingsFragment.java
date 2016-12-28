@@ -90,16 +90,18 @@ public class SettingsFragment extends PreferenceFragment {
                 return false;
             }
         });
-        findPreference("restore_firmware").setOnPreferenceClickListener(new Preference.OnPreferenceClickListener(){
-            @Override
-            public boolean onPreferenceClick(Preference preference){
-                File origFirm = new File(path + "/fw_bcmdhd.orig.bin");
-                if(!origFirm.exists()){
-                    Toast.makeText(getActivity(), R.string.no_backup, Toast.LENGTH_SHORT).show();
-                }else new RestoreFirmwareDialog().show(getFragmentManager(), "RestoreFragmentDialog");
-                return false;
-            }
-        });
+        File origFirm = new File(path + "/fw_bcmdhd.orig.bin");
+        if(!origFirm.exists()){
+            findPreference("restore_firmware").setEnabled(false);
+        }else{
+            findPreference("restore_firmware").setOnPreferenceClickListener(new Preference.OnPreferenceClickListener(){
+                @Override
+                public boolean onPreferenceClick(Preference preference){
+                    new RestoreFirmwareDialog().show(getFragmentManager(), "RestoreFragmentDialog");
+                    return false;
+                }
+            });
+        }
         findPreference("send_feedback").setOnPreferenceClickListener(new Preference.OnPreferenceClickListener(){
             @Override
             public boolean onPreferenceClick(Preference preference){
