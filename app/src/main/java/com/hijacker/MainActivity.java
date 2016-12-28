@@ -115,7 +115,7 @@ public class MainActivity extends AppCompatActivity{
     static NotificationCompat.Builder notif, notif2;
     static NotificationManager nm;
     static FragmentManager fm;
-    static String path;             //App files path (ends with .../files)
+    static String path, version;             //App files path (ends with .../files)
     static boolean init=false;      //True on first run to swap the dialogs for initialization
     private GoogleApiClient client;
     private String[] mPlanetTitles;
@@ -728,6 +728,9 @@ public class MainActivity extends AppCompatActivity{
     }
 
     void setup(){
+        try{
+            version = getPackageManager().getPackageInfo(this.getPackageName(), 0).versionName;
+        }catch(PackageManager.NameNotFoundException ignored){}
         ap_count = (TextView) findViewById(R.id.ap_count);
         st_count = (TextView) findViewById(R.id.st_count);
         fifo = new ArrayList<>();

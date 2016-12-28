@@ -28,6 +28,7 @@ import android.widget.Toast;
 import java.io.File;
 
 import static com.hijacker.MainActivity.FRAGMENT_SETTINGS;
+import static com.hijacker.MainActivity.version;
 import static com.hijacker.MainActivity.watchdog;
 import static com.hijacker.MainActivity.watchdog_runnable;
 import static com.hijacker.MainActivity.watchdog_thread;
@@ -119,6 +120,7 @@ public class SettingsFragment extends PreferenceFragment {
                 return false;
             }
         });
+        findPreference("version").setSummary(version);
     }
     @Override
     public void onDestroy(){

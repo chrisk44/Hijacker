@@ -219,8 +219,8 @@
             android:summary="@string/send_feedback_sum"
             android:key="send_feedback" />
         <Preference
-            android:title="@string/version_title"
-            android:summary="@string/version" />
+            android:key="version"
+            android:title="@string/version_title" />
     </PreferenceCategory>
 
 </PreferenceScreen>
