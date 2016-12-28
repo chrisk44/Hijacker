@@ -19,18 +19,23 @@ package com.hijacker;
 
 import android.app.Dialog;
 import android.app.DialogFragment;
+import android.app.FragmentManager;
 import android.content.DialogInterface;
 import android.os.Bundle;
 import android.support.v7.app.AlertDialog;
 import android.util.Log;
 
-import static com.hijacker.MainActivity.watchdog;
+import static com.hijacker.MainActivity.nm;
+import static com.hijacker.MainActivity.notif2;
+import static com.hijacker.MainActivity.notif_on;
 import static com.hijacker.MainActivity.watchdog_runnable;
 import static com.hijacker.MainActivity.watchdog_thread;
 
 public class ErrorDialog extends DialogFragment {
+    static String notification2_title;
     String message;
     String title=null;
+    boolean watchdog=false;
     @Override
     public Dialog onCreateDialog(Bundle savedInstanceState) {
         if(title==null) title = getString(R.string.error);
@@ -61,4 +66,21 @@ public class ErrorDialog extends DialogFragment {
     }
     public void setMessage(String msg){ this.message = msg; }
     public void setTitle(String title){ this.title = title; }
+    public void setWatchdog(boolean wd){
+        this.watchdog = wd;
+    }
+    @Override
+    public void show(FragmentManager fragmentManager, String tag){
+        if(!notif_on) super.show(fragmentManager, tag);
+        else{
+            if(this.watchdog){
+                notif2.setContentTitle(notification2_title);
+                notif2.setContentText(title);
+            }else{
+                notif2.setContentTitle(title);
+                notif2.setContentText(message);
+            }
+            nm.notify(1, notif2.build());
+        }
+    }
 }

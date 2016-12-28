@@ -142,7 +142,7 @@ class AP {
         ft.replace(R.id.fragment1, new ReaverFragment());
         ft.setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN);
         ft.addToBackStack(null);
-        ft.commit();
+        ft.commitAllowingStateLoss();
         fragmentManager.executePendingTransactions();      //Wait for everything to be set up
         ReaverFragment.start_button.performClick();             //Click start to run reaver
     }

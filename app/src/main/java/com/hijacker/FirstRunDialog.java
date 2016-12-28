@@ -19,11 +19,13 @@ package com.hijacker;
 
 import android.app.Dialog;
 import android.app.DialogFragment;
+import android.app.FragmentManager;
 import android.content.DialogInterface;
 import android.os.Bundle;
 import android.support.v7.app.AlertDialog;
 
 import static com.hijacker.MainActivity.main;
+import static com.hijacker.MainActivity.notif_on;
 
 public class FirstRunDialog extends DialogFragment {
     @Override
@@ -41,7 +43,7 @@ public class FirstRunDialog extends DialogFragment {
         builder.setNegativeButton(R.string.home, new DialogInterface.OnClickListener() {
             public void onClick(DialogInterface dialog, int id) {
                 //return
-                dismiss();
+                dismissAllowingStateLoss();
                 main();
             }
         });
@@ -52,5 +54,9 @@ public class FirstRunDialog extends DialogFragment {
             }
         });
         return builder.create();
+    }
+    @Override
+    public void show(FragmentManager fragmentManager, String tag){
+        if(!notif_on) super.show(fragmentManager, tag);
     }
 }

@@ -19,6 +19,7 @@ package com.hijacker;
 
 import android.app.Dialog;
 import android.app.DialogFragment;
+import android.app.FragmentManager;
 import android.content.DialogInterface;
 import android.os.Bundle;
 import android.support.v7.app.AlertDialog;
@@ -31,6 +32,7 @@ import static com.hijacker.MainActivity.chroot_dir;
 import static com.hijacker.MainActivity.copy;
 import static com.hijacker.MainActivity.iface;
 import static com.hijacker.MainActivity.mdk3_dir;
+import static com.hijacker.MainActivity.notif_on;
 import static com.hijacker.MainActivity.prefix;
 import static com.hijacker.MainActivity.reaver_dir;
 import static com.hijacker.ReaverFragment.get_chroot_env;
@@ -68,9 +70,13 @@ public class CopySampleDialog extends DialogFragment {
                         copy("chroot " + chroot_dir + " /bin/bash -c \'" + get_chroot_env(getActivity()) + "reaver -i " + iface + " -vv -b 00:11:22:33:44:55 --channel 6 -L -E -S\'", getView());
                         break;
                 }
-                dismiss();
+                dismissAllowingStateLoss();
             }
         });
         return builder.create();
+    }
+    @Override
+    public void show(FragmentManager fragmentManager, String tag){
+        if(!notif_on) super.show(fragmentManager, tag);
     }
 }

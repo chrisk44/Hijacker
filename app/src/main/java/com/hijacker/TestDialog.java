@@ -19,6 +19,7 @@ package com.hijacker;
 
 import android.app.Dialog;
 import android.app.DialogFragment;
+import android.app.FragmentManager;
 import android.content.DialogInterface;
 import android.os.Bundle;
 import android.support.v7.app.AlertDialog;
@@ -39,6 +40,7 @@ import static com.hijacker.MainActivity.PROCESS_MDK;
 import static com.hijacker.MainActivity.PROCESS_REAVER;
 import static com.hijacker.MainActivity.debug;
 import static com.hijacker.MainActivity.iface;
+import static com.hijacker.MainActivity.notif_on;
 import static com.hijacker.MainActivity.prefix;
 import static com.hijacker.MainActivity.airodump_dir;
 import static com.hijacker.MainActivity.aireplay_dir;
@@ -274,5 +276,9 @@ public class TestDialog extends DialogFragment {
             }
         });
         return builder.create();
+    }
+    @Override
+    public void show(FragmentManager fragmentManager, String tag){
+        if(!notif_on) super.show(fragmentManager, tag);
     }
 }

@@ -19,6 +19,7 @@ package com.hijacker;
 
 import android.app.Dialog;
 import android.app.DialogFragment;
+import android.app.FragmentManager;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.net.wifi.WifiManager;
@@ -41,6 +42,7 @@ import java.io.InputStream;
 
 import static com.hijacker.MainActivity.debug;
 import static com.hijacker.MainActivity.getLastLine;
+import static com.hijacker.MainActivity.notif_on;
 import static com.hijacker.MainActivity.path;
 
 public class InstallFirmwareDialog extends DialogFragment {
@@ -94,7 +96,7 @@ public class InstallFirmwareDialog extends DialogFragment {
                     extract("nexutil", util_location);
                     shell.run("busybox mount -o ro,remount,ro /system");
                     Toast.makeText(getActivity(), R.string.installed_firm_util, Toast.LENGTH_SHORT).show();
-                    dismiss();
+                    dismissAllowingStateLoss();
                     return false;
                 }
             });
@@ -140,7 +142,7 @@ public class InstallFirmwareDialog extends DialogFragment {
                             shell.run("busybox mount -o ro,remount,ro /system");
                             Toast.makeText(getActivity(), R.string.installed_firm_util, Toast.LENGTH_SHORT).show();
                             wifiManager.setWifiEnabled(true);
-                            dismiss();
+                            dismissAllowingStateLoss();
                         }else{
                             Toast.makeText(getActivity(), R.string.fw_not_compatible, Toast.LENGTH_LONG).show();
                             if(debug) Log.d("HIJACKER/InstFirmware", "Firmware verification is: " + result);
@@ -185,6 +187,10 @@ public class InstallFirmwareDialog extends DialogFragment {
         super.onDismiss(dialog);
         shell.done();
         if(MainActivity.init) new InstallToolsDialog().show(getFragmentManager(), "InstallToolsDialog");
+    }
+    @Override
+    public void show(FragmentManager fragmentManager, String tag){
+        if(!notif_on) super.show(fragmentManager, tag);
     }
     void extract(String filename, String dest){
         File f = new File(path, filename);      //no permissions to write at dest so extract at local directory and then move to target

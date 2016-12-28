@@ -20,6 +20,7 @@ package com.hijacker;
 import android.app.AlertDialog;
 import android.app.Dialog;
 import android.app.DialogFragment;
+import android.app.FragmentManager;
 import android.content.DialogInterface;
 import android.os.Bundle;
 import android.os.Environment;
@@ -28,6 +29,7 @@ import java.io.File;
 
 import static com.hijacker.CustomAction.cmds;
 import static com.hijacker.MainActivity.custom_action_adapter;
+import static com.hijacker.MainActivity.notif_on;
 
 public class ActionDeleteDialog extends DialogFragment{
     int index;
@@ -49,5 +51,9 @@ public class ActionDeleteDialog extends DialogFragment{
             }
         });
         return builder.create();
+    }
+    @Override
+    public void show(FragmentManager fragmentManager, String tag){
+        if(!notif_on) super.show(fragmentManager, tag);
     }
 }

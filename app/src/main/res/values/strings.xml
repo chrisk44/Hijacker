@@ -10,6 +10,7 @@
 
     <!-- Notification -->
     <string name="notification_title">Hijacker is running in the background</string>
+    <string name="notification2_title">Hijacker watchdog detected a problem</string>
     <string name="stop_attacks">Stop attacks</string>
 
     <!-- Main -->

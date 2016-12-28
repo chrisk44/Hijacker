@@ -19,10 +19,12 @@ package com.hijacker;
 
 import android.app.Dialog;
 import android.app.DialogFragment;
+import android.app.FragmentManager;
 import android.content.DialogInterface;
 import android.os.Bundle;
 import android.support.v7.app.AlertDialog;
 
+import static com.hijacker.MainActivity.notif_on;
 import static com.hijacker.MainActivity.pref_edit;
 
 public class DisclaimerDialog extends DialogFragment {
@@ -37,7 +39,7 @@ public class DisclaimerDialog extends DialogFragment {
                 pref_edit.putBoolean("disclaimer", true);
                 pref_edit.commit();
                 new FirstRunDialog().show(getFragmentManager(), "FirstRunDialog");
-                dismiss();
+                dismissAllowingStateLoss();
             }
         });
         builder.setNegativeButton(R.string.not_agree, new DialogInterface.OnClickListener() {
@@ -47,5 +49,9 @@ public class DisclaimerDialog extends DialogFragment {
             }
         });
         return builder.create();
+    }
+    @Override
+    public void show(FragmentManager fragmentManager, String tag){
+        if(!notif_on) super.show(fragmentManager, tag);
     }
 }

@@ -19,11 +19,13 @@ package com.hijacker;
 
 import android.app.Dialog;
 import android.app.DialogFragment;
+import android.app.FragmentManager;
 import android.content.DialogInterface;
 import android.os.Bundle;
 import android.support.v7.app.AlertDialog;
 
 import static com.hijacker.MainActivity.load;
+import static com.hijacker.MainActivity.notif_on;
 import static com.hijacker.MainActivity.pref_edit;
 
 public class ConfirmResetDialog extends DialogFragment {
@@ -53,7 +55,7 @@ public class ConfirmResetDialog extends DialogFragment {
                 pref_edit.putBoolean("delete_extra", Boolean.parseBoolean(getString(R.string.delete_extra)));
                 pref_edit.commit();
                 load();
-                dismiss();
+                dismissAllowingStateLoss();
             }
         });
         builder.setNegativeButton(R.string.no, new DialogInterface.OnClickListener() {
@@ -62,5 +64,9 @@ public class ConfirmResetDialog extends DialogFragment {
             }
         });
         return builder.create();
+    }
+    @Override
+    public void show(FragmentManager fragmentManager, String tag){
+        if(!notif_on) super.show(fragmentManager, tag);
     }
 }

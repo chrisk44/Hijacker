@@ -19,6 +19,7 @@ package com.hijacker;
 
 import android.app.Dialog;
 import android.app.DialogFragment;
+import android.app.FragmentManager;
 import android.content.DialogInterface;
 import android.os.Bundle;
 import android.support.v7.app.AlertDialog;
@@ -34,6 +35,7 @@ import java.io.File;
 import java.io.IOException;
 
 import static com.hijacker.MainActivity.debug;
+import static com.hijacker.MainActivity.notif_on;
 import static com.hijacker.MainActivity.path;
 
 public class RestoreFirmwareDialog extends DialogFragment {
@@ -89,7 +91,7 @@ public class RestoreFirmwareDialog extends DialogFragment {
                         Toast.makeText(getActivity(), R.string.restored, Toast.LENGTH_SHORT).show();
 
                         shell.run("busybox mount -o ro,remount,ro /system");
-                        dismiss();
+                        dismissAllowingStateLoss();
                     }
                 }
             });
@@ -129,5 +131,9 @@ public class RestoreFirmwareDialog extends DialogFragment {
     public void onDismiss(final DialogInterface dialog){
         super.onDismiss(dialog);
         shell.done();
+    }
+    @Override
+    public void show(FragmentManager fragmentManager, String tag){
+        if(!notif_on) super.show(fragmentManager, tag);
     }
 }

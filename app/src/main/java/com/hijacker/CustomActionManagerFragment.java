@@ -61,7 +61,7 @@ public class CustomActionManagerFragment extends Fragment{
                                 ft.replace(R.id.fragment1, fragment);
                                 ft.setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN);
                                 ft.addToBackStack(null);
-                                ft.commit();
+                                ft.commitAllowingStateLoss();
                                 break;
                             case 1:
                                 //delete
@@ -86,7 +86,7 @@ public class CustomActionManagerFragment extends Fragment{
                 ft.replace(R.id.fragment1, new CustomActionEditorFragment());
                 ft.setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN);
                 ft.addToBackStack(null);
-                ft.commit();
+                ft.commitAllowingStateLoss();
             }
         });
 

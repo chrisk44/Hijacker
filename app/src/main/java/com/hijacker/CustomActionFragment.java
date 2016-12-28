@@ -125,7 +125,7 @@ public class CustomActionFragment extends Fragment{
                             ft.replace(R.id.fragment1, new CustomActionManagerFragment());
                             ft.setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN);
                             ft.addToBackStack(null);
-                            ft.commit();
+                            ft.commitAllowingStateLoss();
                         }else{
                             selected_action = cmds.get(item.getItemId());
                             stop.obtainMessage().sendToTarget();

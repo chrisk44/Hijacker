@@ -19,6 +19,7 @@ package com.hijacker;
 
 import android.app.Dialog;
 import android.app.DialogFragment;
+import android.app.FragmentManager;
 import android.content.DialogInterface;
 import android.os.Bundle;
 import android.support.v7.app.AlertDialog;
@@ -37,6 +38,7 @@ import static com.hijacker.MainActivity.debug;
 import static com.hijacker.MainActivity.init;
 import static com.hijacker.MainActivity.load;
 import static com.hijacker.MainActivity.main;
+import static com.hijacker.MainActivity.notif_on;
 import static com.hijacker.MainActivity.path;
 import static com.hijacker.MainActivity.pref_edit;
 
@@ -129,7 +131,7 @@ public class InstallToolsDialog extends DialogFragment {
                         pref_edit.commit();
                         load();
                         Toast.makeText(getActivity(), R.string.prefix_adjusted, Toast.LENGTH_LONG).show();
-                        dismiss();
+                        dismissAllowingStateLoss();
                     }
                 }
             });
@@ -142,6 +144,10 @@ public class InstallToolsDialog extends DialogFragment {
             init = false;
             main();
         }
+    }
+    @Override
+    public void show(FragmentManager fragmentManager, String tag){
+        if(!notif_on) super.show(fragmentManager, tag);
     }
     void extract(String filename, String dest){
         File f = new File(path, filename);      //no permissions to write at dest so extract at local directory and then move to target

@@ -29,11 +29,13 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.graphics.drawable.Drawable;
+import android.media.RingtoneManager;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
+import android.os.Vibrator;
 import android.preference.PreferenceManager;
 import android.support.design.widget.Snackbar;
 import android.support.v4.app.ActivityCompat;
@@ -110,7 +112,7 @@ public class MainActivity extends AppCompatActivity{
     static SharedPreferences pref;
     static SharedPreferences.Editor pref_edit;
     static ClipboardManager clipboard;
-    static NotificationCompat.Builder notif;
+    static NotificationCompat.Builder notif, notif2;
     static NotificationManager nm;
     static FragmentManager fm;
     static String path;             //App files path (ends with .../files)
@@ -143,6 +145,8 @@ public class MainActivity extends AppCompatActivity{
                 intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
                 intent.putExtra("exception", stackTrace);
                 startActivity(intent);
+
+                finish();
 
                 System.exit(1);
             }
@@ -297,7 +301,7 @@ public class MainActivity extends AppCompatActivity{
                             msg.obj = getString(R.string.airodump_not_running);
                             watchdog_handler.sendMessage(msg);
                             flag = false;
-                            airodump_running = 0;
+                            stop(PROCESS_AIRODUMP);
                         }else if(airodump_running==0 && list.size()>0){     //airodump still running
                             stop(PROCESS_AIRODUMP);
                             if(getPIDs(PROCESS_AIRODUMP).size()>0){
@@ -313,7 +317,7 @@ public class MainActivity extends AppCompatActivity{
                             msg.obj = getString(R.string.aireplay_not_running);
                             watchdog_handler.sendMessage(msg);
                             flag = false;
-                            aireplay_running = 0;
+                            stop(PROCESS_AIREPLAY);
                         }else if(aireplay_running==0 && list.size()>0){ //aireplay still running
                             stop(PROCESS_AIREPLAY);
                             if(getPIDs(PROCESS_AIREPLAY).size()>0){
@@ -329,8 +333,7 @@ public class MainActivity extends AppCompatActivity{
                             msg.obj = getString(R.string.mdk_not_running);
                             watchdog_handler.sendMessage(msg);
                             flag = false;
-                            bf = false;
-                            ados = false;
+                            stop(PROCESS_MDK);
                         }else if(!(bf || ados) && list.size()>0){   //mdk still running
                             stop(PROCESS_MDK);
                             if(getPIDs(PROCESS_MDK).size()>0){
@@ -346,7 +349,7 @@ public class MainActivity extends AppCompatActivity{
                             msg.obj = getString(R.string.reaver_not_running);
                             watchdog_handler.sendMessage(msg);
                             flag = false;
-                            ReaverFragment.cont = false;
+                            stop(PROCESS_REAVER);
                         }else if(!ReaverFragment.cont && list.size()>0){   //reaver still running
                             stop(PROCESS_REAVER);
                             if(getPIDs(PROCESS_REAVER).size()>0){
@@ -709,6 +712,7 @@ public class MainActivity extends AppCompatActivity{
             ErrorDialog dialog = new ErrorDialog();
             dialog.setTitle((String)msg.obj);
             dialog.setMessage(getString(R.string.watchdog_message));
+            dialog.setWatchdog(true);
             dialog.show(getFragmentManager(), "ErrorDialog");
         }
     };
@@ -769,7 +773,7 @@ public class MainActivity extends AppCompatActivity{
         cont_on_fail = Boolean.parseBoolean(getString(R.string.cont_on_fail));
         watchdog = Boolean.parseBoolean(getString(R.string.watchdog));
 
-        //Initialize notification
+        //Initialize notifications
         notif = new NotificationCompat.Builder(this);
         notif.setContentTitle(getString(R.string.notification_title));
         notif.setContentText(" ");
@@ -789,6 +793,16 @@ public class MainActivity extends AppCompatActivity{
         PendingIntent click_intent = PendingIntent.getActivity(this, 0, notificationIntent, 0);
         notif.setContentIntent(click_intent);
 
+        notif2 = new NotificationCompat.Builder(this);
+        notif2.setContentTitle(getString(R.string.notification2_title));
+        notif2.setContentText("");
+        notif2.setSmallIcon(R.drawable.ic_notification);
+        if(Build.VERSION.SDK_INT>=Build.VERSION_CODES.M){
+            notif2.setColor(getColor(android.R.color.holo_red_dark));
+        }
+        notif2.setContentIntent(click_intent);
+        notif2.setVibrate(new long[]{500, 500});
+
         nm = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
 
         load();
@@ -796,6 +810,7 @@ public class MainActivity extends AppCompatActivity{
         //Load strings for when they cannot be retrived with getString or R.string...
         ST.not_connected = getString(R.string.not_connected);
         ST.paired = getString(R.string.paired);
+        ErrorDialog.notification2_title = getString(R.string.notification2_title);
 
         //Initialize the drawer
         mPlanetTitles = getResources().getStringArray(R.array.planets_array);
@@ -814,7 +829,7 @@ public class MainActivity extends AppCompatActivity{
         ft.replace(R.id.fragment1, new MyListFragment());
         ft.setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN);
         ft.addToBackStack(null);
-        ft.commit();
+        ft.commitAllowingStateLoss();
         getSupportActionBar().setTitle(mPlanetTitles[currentFragment]);
 
         //Google AppIndex
@@ -899,7 +914,7 @@ public class MainActivity extends AppCompatActivity{
                     ft.replace(R.id.fragment1, new SettingsFragment());
                     ft.setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN);
                     ft.addToBackStack(null);
-                    ft.commit();
+                    ft.commitAllowingStateLoss();
                 }
                 return true;
 
@@ -945,7 +960,6 @@ public class MainActivity extends AppCompatActivity{
             notif_on = true;
             notification();
         }
-        if(watchdog_thread.isAlive()) watchdog_thread.interrupt();
         client.disconnect();
     }
     @Override
@@ -1017,7 +1031,7 @@ public class MainActivity extends AppCompatActivity{
                 }
                 ft.setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN);
                 ft.addToBackStack(null);
-                ft.commit();
+                ft.commitAllowingStateLoss();
                 fm.executePendingTransactions();
 
                 getSupportActionBar().setTitle(mPlanetTitles[position]);
@@ -1179,6 +1193,8 @@ public class MainActivity extends AppCompatActivity{
 
             notif.setContentText(str);
             nm.notify(0, notif.build());
+        }else{
+            nm.cancel(0);
         }
     }
     static void isolate(String mac){
@@ -1189,7 +1205,7 @@ public class MainActivity extends AppCompatActivity{
             ft.replace(R.id.fragment1, new IsolatedFragment());
             ft.setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN);
             ft.addToBackStack(null);
-            ft.commit();
+            ft.commitAllowingStateLoss();
         }
         Item.filter();
         if(debug){
