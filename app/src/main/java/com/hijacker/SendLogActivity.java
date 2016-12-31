@@ -131,7 +131,8 @@ public class SendLogActivity extends AppCompatActivity{
         File file = new File (fullName);
         FileWriter writer = null;
         try{
-            writer = new FileWriter(file);
+            writer = new FileWriter(file, true);
+            writer.write("\n\n--------------------------------------------------------------------------------\n");
             writer.write("Hijacker bug report - " + new Date().toString() + "\n\n");
             writer.write("Android version: " +  Build.VERSION.SDK_INT + "\n");
             writer.write("Device: " + model + "\n");

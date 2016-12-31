@@ -29,13 +29,12 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.graphics.drawable.Drawable;
-import android.media.RingtoneManager;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.Environment;
 import android.os.Handler;
 import android.os.Message;
-import android.os.Vibrator;
 import android.preference.PreferenceManager;
 import android.support.design.widget.Snackbar;
 import android.support.v4.app.ActivityCompat;
@@ -136,6 +135,7 @@ public class MainActivity extends AppCompatActivity{
             public void uncaughtException(Thread thread, Throwable throwable){
                 throwable.printStackTrace();
                 String stackTrace = "";
+                stackTrace += throwable.getMessage() + '\n';
                 for(int i=0;i<throwable.getStackTrace().length;i++){
                     stackTrace += throwable.getStackTrace()[i].toString() + '\n';
                 }
@@ -303,6 +303,7 @@ public class MainActivity extends AppCompatActivity{
                             flag = false;
                             stop(PROCESS_AIRODUMP);
                         }else if(airodump_running==0 && list.size()>0){     //airodump still running
+                            if(debug) Log.d("HIJACKER/watchdog", "Airodump is still running. Trying to kill it...");
                             stop(PROCESS_AIRODUMP);
                             if(getPIDs(PROCESS_AIRODUMP).size()>0){
                                 msg = new Message();
@@ -319,6 +320,7 @@ public class MainActivity extends AppCompatActivity{
                             flag = false;
                             stop(PROCESS_AIREPLAY);
                         }else if(aireplay_running==0 && list.size()>0){ //aireplay still running
+                            if(debug) Log.d("HIJACKER/watchdog", "Aireplay is still running. Trying to kill it...");
                             stop(PROCESS_AIREPLAY);
                             if(getPIDs(PROCESS_AIREPLAY).size()>0){
                                 msg = new Message();
@@ -335,6 +337,7 @@ public class MainActivity extends AppCompatActivity{
                             flag = false;
                             stop(PROCESS_MDK);
                         }else if(!(bf || ados) && list.size()>0){   //mdk still running
+                            if(debug) Log.d("HIJACKER/watchdog", "MDK is still running. Trying to kill it...");
                             stop(PROCESS_MDK);
                             if(getPIDs(PROCESS_MDK).size()>0){
                                 msg = new Message();
@@ -351,6 +354,7 @@ public class MainActivity extends AppCompatActivity{
                             flag = false;
                             stop(PROCESS_REAVER);
                         }else if(!ReaverFragment.cont && list.size()>0){   //reaver still running
+                            if(debug) Log.d("HIJACKER/watchdog", "Reaver is still running. Trying to kill it...");
                             stop(PROCESS_REAVER);
                             if(getPIDs(PROCESS_REAVER).size()>0){
                                 msg = new Message();
@@ -400,6 +404,9 @@ public class MainActivity extends AppCompatActivity{
             mDrawerLayout.openDrawer(GravityCompat.START);      //Can't open it later
             new DisclaimerDialog().show(fm, "Disclaimer");
         }else main();
+
+        File report = new File(Environment.getExternalStorageDirectory() + "/report.txt");
+        if(report.exists()) report.delete();    //Delete old report, it's not needed if no exception is thrown up to this point
     }
     void extract(String filename, boolean chmod){
         File f = new File(getFilesDir(), filename);
@@ -464,6 +471,7 @@ public class MainActivity extends AppCompatActivity{
                 if(debug) Log.d("HIJACKER/startAirodump", cmd);
                 try{
                     Process process = Runtime.getRuntime().exec(cmd);
+                    last_action = System.currentTimeMillis();
                     BufferedReader in = new BufferedReader(new InputStreamReader(process.getErrorStream()));
                     String buffer;
                     while(cont && (buffer = in.readLine())!=null){
@@ -483,7 +491,6 @@ public class MainActivity extends AppCompatActivity{
                 notification();
             }
         });
-        last_action = System.currentTimeMillis();
     }
 
     public static void _startAireplay(final String str){
@@ -491,6 +498,7 @@ public class MainActivity extends AppCompatActivity{
             String cmd = "su -c " + prefix + " " + aireplay_dir + " --ignore-negative-one " + str + " " + iface;
             if(debug) Log.d("HIJACKER/_startAireplay", cmd);
             Runtime.getRuntime().exec(cmd);
+            last_action = System.currentTimeMillis();
         }catch(IOException e){ Log.e("HIJACKER/Exception", "Caught Exception in _startAireplay() start block: " + e.toString()); }
         runInHandler(new Runnable(){
             @Override
@@ -500,7 +508,6 @@ public class MainActivity extends AppCompatActivity{
                 notification();
             }
         });
-        last_action = System.currentTimeMillis();
     }
     public static void startAireplay(String mac){
         //Disconnect all clients from mac
@@ -530,6 +537,7 @@ public class MainActivity extends AppCompatActivity{
                     if(str!=null) cmd += str;
                     if(debug) Log.d("HIJACKER/MDK3", cmd);
                     Runtime.getRuntime().exec(cmd);
+                    last_action = System.currentTimeMillis();
                     Thread.sleep(500);
                 }catch(IOException | InterruptedException e){ Log.e("HIJACKER/Exception", "Caught Exception in startMdk(MDK_BF) start block: " + e.toString()); }
                 bf = true;
@@ -541,6 +549,7 @@ public class MainActivity extends AppCompatActivity{
                     cmd += str==null ? "" : " -i " + str;
                     if(debug) Log.d("HIJACKER/MDK3", cmd);
                     Runtime.getRuntime().exec(cmd);
+                    last_action = System.currentTimeMillis();
                     Thread.sleep(500);
                 }catch(IOException | InterruptedException e){ Log.e("HIJACKER/Exception", "Caught Exception in startMdk(MDK_ADOS) start block: " + e.toString()); }
                 ados = true;
@@ -571,7 +580,6 @@ public class MainActivity extends AppCompatActivity{
                 notification();
             }
         });
-        last_action = System.currentTimeMillis();
     }
 
     public static ArrayList<Integer> getPIDs(int pr){
@@ -615,6 +623,7 @@ public class MainActivity extends AppCompatActivity{
     }
     public static void stop(int pr){
         //0 for airodump-ng, 1 for aireplay-ng, 2 for mdk, 3 for aircrack, 4 for reaver, everything else is considered pid and we kill it
+        if(debug) Log.d("HIJACKER/stop", "stop(" + pr + ") called");
         ArrayList<Integer> pids = new ArrayList<>();
         if(pr<=4) pids = getPIDs(pr);
         switch(pr){
@@ -626,10 +635,6 @@ public class MainActivity extends AppCompatActivity{
                     public void run(){
                         if(menu!=null) menu.getItem(1).setIcon(R.drawable.run);
                         Item.filter();
-                        if(aireplay_running!=0){
-                            stop(PROCESS_AIREPLAY);     //Since airodump is going to stop, arp replays are useless
-                            progress.setIndeterminate(false);
-                        }
                     }
                 });
                 if(wpa_thread.isAlive()){
@@ -648,6 +653,9 @@ public class MainActivity extends AppCompatActivity{
                     @Override
                     public void run(){
                         if(menu!=null) menu.getItem(3).setEnabled(false);
+                        if(aireplay_running==AIREPLAY_WEP){
+                            progress.setIndeterminate(false);
+                        }
                     }
                 });
                 if(delete_extra && aireplay_running==AIREPLAY_WEP){
@@ -679,6 +687,7 @@ public class MainActivity extends AppCompatActivity{
                 if(debug) Log.d("HIJACKER/Killing...", Integer.toString(pids.get(i)));
                 shell.run("busybox kill " + pids.get(i));
             }
+            last_action = System.currentTimeMillis();
             shell.done();
         }
         runInHandler(new Runnable(){
@@ -688,7 +697,6 @@ public class MainActivity extends AppCompatActivity{
                 notification();
             }
         });
-        last_action = System.currentTimeMillis();
     }
 
     //Handlers used for tasks that require the Main thread to update the view, but need to be run by other threads
@@ -888,7 +896,8 @@ public class MainActivity extends AppCompatActivity{
                 ap_count.setText("0");
                 st_count.setText("0");
                 stop(PROCESS_AIRODUMP);
-                startAirodump(null);
+                if(is_ap==null) startAirodump(null);
+                else startAirodump("--channel " + is_ap.ch + " --bssid " + is_ap.mac);
                 return true;
 
             case R.id.stop_run:
