@@ -1256,6 +1256,22 @@ public class MainActivity extends AppCompatActivity{
 
         return lastline;
     }
+    static String getLastSeen(long lastseen){
+        String str = "";
+        long diff = System.currentTimeMillis() - lastseen;
+        if(diff < 1000) return "Just now";
+        diff = diff/1000; //diff is now seconds
+        if(diff/60>0){
+            //minutes = diff/60
+            str += diff/60 + " minute" + (diff/60 > 1 ? "s " : " ");
+            diff = diff%60;
+        }
+        if(diff > 0){
+            str += diff + " second" + (diff > 1 ? "s " : " ");
+        }
+        str += "ago";
+        return str;
+    }
 
     static{
         System.loadLibrary("native-lib");

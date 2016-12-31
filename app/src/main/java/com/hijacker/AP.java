@@ -46,6 +46,7 @@ class AP {
     static List <AP>APs = new ArrayList<>();
     boolean isHidden = false;
     int pwr, beacons, data, ivs, ch, id, sec=UNKNOWN;
+    long lastseen = 0;
     String essid, mac, enc, cipher, auth, manuf;
     List <ST>clients = new ArrayList<>();
     Item item;
@@ -67,6 +68,11 @@ class AP {
             isHidden = true;
             hidden++;
         }
+
+        if(beacons!=this.beacons || data!=this.data || this.lastseen==0){
+            this.lastseen = System.currentTimeMillis();
+        }
+
         this.enc = enc;
         this.cipher = cipher;
         this.auth = auth;

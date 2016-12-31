@@ -35,6 +35,7 @@ class ST {
     static String paired, not_connected;
     static int connected=0;
     int pwr, lost, frames, id;
+    long lastseen = 0;
     boolean added_as_client = false;
     Item item;
     String mac, bssid, manuf;
@@ -49,9 +50,9 @@ class ST {
         if(is_ap==null){
             //need to switch channel only if there is no isolated ap
             stop(PROCESS_AIRODUMP);
+            stop(PROCESS_AIREPLAY);
             startAirodump("--channel " + AP.getAPByMac(this.bssid).ch);
         }
-        stop(PROCESS_AIREPLAY);
         startAireplay(this.bssid, this.mac);
     }
     void update(String bssid, int pwr, int lost, int frames){
@@ -69,6 +70,9 @@ class ST {
                 added_as_client = true;
                 connected++;
             }
+        }
+        if(frames!=this.frames || lost!=this.lost || this.lastseen==0){
+            this.lastseen = System.currentTimeMillis();
         }
 
         this.bssid = bssid;

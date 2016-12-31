@@ -47,6 +47,14 @@
             android:textSize="16sp" />
 
         <TextView
+            android:text="@string/lastseen"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:padding="5dp"
+            android:textColor="?android:attr/textColorPrimary"
+            android:textSize="16sp" />
+
+        <TextView
             android:text="@string/connected_to"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
@@ -77,6 +85,7 @@
             android:layout_height="wrap_content"
             android:id="@+id/mac_st"
             android:padding="5dp"
+            android:onClick="onCopy"
             android:textColor="?android:attr/textColorPrimary"
             android:textSize="16sp" />
 
@@ -105,8 +114,17 @@
         <TextView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:id="@+id/lastseen_st"
+            android:padding="5dp"
+            android:textColor="?android:attr/textColorPrimary"
+            android:textSize="16sp" />
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
             android:id="@+id/bssid_st"
             android:padding="5dp"
+            android:onClick="onCopy"
             android:textColor="?android:attr/textColorPrimary"
             android:textSize="16sp"
             android:lines="1" />
@@ -116,6 +134,7 @@
             android:layout_height="wrap_content"
             android:id="@+id/manuf_st"
             android:padding="5dp"
+            android:onClick="onCopy"
             android:textColor="?android:attr/textColorPrimary"
             android:textSize="16sp" />
     </LinearLayout>

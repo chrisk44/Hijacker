@@ -102,8 +102,8 @@
     <string name="security">AP Security:</string>
     <string name="open">OPEN:</string>
     <string name="misc">Miscellaneous:</string>
-    <string name="hidden">Hidden:</string>
-    <string name="connected">Connected devices:</string>
+    <string name="hidden">Hidden APs:</string>
+    <string name="connected">Connected Stations:</string>
 
     <!-- APDialog (xml) -->
     <string name="mac">MAC:</string>
@@ -116,6 +116,7 @@
     <string name="data">Data:</string>
     <string name="ivs">#s:</string>
     <string name="clients">Clients:</string>
+    <string name="lastseen">Last seen:</string>
     <string name="essid">ESSID:</string>
     <string name="manuf">Manufacturer:</string>
 

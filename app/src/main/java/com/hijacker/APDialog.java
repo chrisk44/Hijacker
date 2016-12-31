@@ -26,12 +26,13 @@ import android.support.v7.app.AlertDialog;
 import android.view.View;
 import android.widget.TextView;
 
+import static com.hijacker.MainActivity.getLastSeen;
 import static com.hijacker.MainActivity.notif_on;
 import static com.hijacker.MainActivity.runInHandler;
 
 public class APDialog extends DialogFragment {
     AP info_ap;
-    TextView ap[] = {null, null, null, null, null, null, null, null, null, null, null, null};
+    TextView ap[] = {null, null, null, null, null, null, null, null, null, null, null, null, null};
     Runnable runnable;
     @Override
     public Dialog onCreateDialog(Bundle savedInstanceState) {
@@ -51,6 +52,7 @@ public class APDialog extends DialogFragment {
             ap[9] = (TextView) view.findViewById(R.id.ivs);
             ap[10] = (TextView) view.findViewById(R.id.clients);
             ap[11] = (TextView) view.findViewById(R.id.manuf);
+            ap[12] = (TextView) view.findViewById(R.id.lastseen);
         }
 
         ap[0].setText(info_ap.essid);
@@ -65,6 +67,7 @@ public class APDialog extends DialogFragment {
         ap[9].setText(Integer.toString(info_ap.ivs));
         ap[10].setText(Integer.toString(info_ap.clients.size()));
         ap[11].setText(info_ap.manuf);
+        ap[12].setText(getLastSeen(info_ap.lastseen));
 
         runnable = new Runnable(){
             @Override
@@ -81,6 +84,7 @@ public class APDialog extends DialogFragment {
                 ap[9].setText(Integer.toString(info_ap.ivs));
                 ap[10].setText(Integer.toString(info_ap.clients.size()));
                 ap[11].setText(info_ap.manuf);
+                ap[12].setText(getLastSeen(info_ap.lastseen));
             }
         };
         new Thread(new Runnable(){

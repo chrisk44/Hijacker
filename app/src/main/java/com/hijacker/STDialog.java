@@ -26,12 +26,13 @@ import android.support.v7.app.AlertDialog;
 import android.view.View;
 import android.widget.TextView;
 
+import static com.hijacker.MainActivity.getLastSeen;
 import static com.hijacker.MainActivity.notif_on;
 import static com.hijacker.MainActivity.runInHandler;
 
 public class STDialog extends DialogFragment {
     ST info_st;
-    TextView st[] = {null, null, null, null, null, null};
+    TextView st[] = {null, null, null, null, null, null, null};
     Runnable runnable;
     @Override
     public Dialog onCreateDialog(Bundle savedInstanceState) {
@@ -45,6 +46,7 @@ public class STDialog extends DialogFragment {
             st[3] = (TextView)view.findViewById(R.id.frames_st);
             st[4] = (TextView)view.findViewById(R.id.lost_st);
             st[5] = (TextView)view.findViewById(R.id.manuf_st);
+            st[6] = (TextView)view.findViewById(R.id.lastseen_st);
         }
 
         st[0].setText(info_st.mac);
@@ -57,6 +59,7 @@ public class STDialog extends DialogFragment {
         st[3].setText(Integer.toString(info_st.frames));
         st[4].setText(Integer.toString(info_st.lost));
         st[5].setText(info_st.manuf);
+        st[6].setText(getLastSeen(info_st.lastseen));
 
         runnable = new Runnable(){
             @Override
@@ -71,6 +74,7 @@ public class STDialog extends DialogFragment {
                 st[3].setText(Integer.toString(info_st.frames));
                 st[4].setText(Integer.toString(info_st.lost));
                 st[5].setText(info_st.manuf);
+                st[6].setText(getLastSeen(info_st.lastseen));
             }
         };
         new Thread(new Runnable(){

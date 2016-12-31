@@ -10,6 +10,7 @@
         android:icon="@mipmap/ic_launcher"
         android:label="@string/app_name"
         android:supportsRtl="true"
+        android:persistent="true"
         android:theme="@style/ThemeAppCompatNoActionBarHoloBlue">
         <provider
             android:name="android.support.v4.content.FileProvider"
