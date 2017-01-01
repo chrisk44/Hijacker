@@ -51,7 +51,7 @@ public class MyListFragment extends ListFragment {
     @Override
     public void onListItemClick(ListView l, final View v, int position, long id){
         super.onListItemClick(l, v, position, id);
-        final Item clicked = Item.items.get(position);
+        final Tile clicked = Tile.tiles.get(position);
         if(clicked.type){
             //AP
             PopupMenu popup = new PopupMenu(getActivity(), v);

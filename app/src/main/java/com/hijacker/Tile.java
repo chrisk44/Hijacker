@@ -36,19 +36,19 @@ import static com.hijacker.MainActivity.show_st;
 import static com.hijacker.MainActivity.wep;
 import static com.hijacker.MainActivity.wpa;
 
-class Item {
+class Tile {
     static int i=0;                                //End of APs in items
-    static ArrayList<Item> items = new ArrayList<>();
-    static List<Item> allItems = new ArrayList<>();
+    static ArrayList<Tile> tiles = new ArrayList<>();
+    static List<Tile> allTiles = new ArrayList<>();
     AP ap=null;
     ST st=null;
     boolean type=true, show=true;        //type: true=AP, false=ST
     String s1, s2, s3, s4;
-    Item(int index, String s1, String s2, String s3, String s4, boolean type, AP _ap, ST _st){
+    Tile(int index, String s1, String s2, String s3, String s4, boolean type, AP _ap, ST _st){
         this.type = type;
         this.ap = _ap;
         this.st = _st;
-        allItems.add(index, this);
+        allTiles.add(index, this);
 
         this.s1 = s1;
         this.s2 = s2;
@@ -58,11 +58,11 @@ class Item {
         this.check();
         if(this.show){
             if(type){
-                items.add(i, this);
+                tiles.add(i, this);
                 adapter.insert(this, i);
                 i++;
             }else{
-                items.add(this);
+                tiles.add(this);
                 adapter.add(this);
             }
         }
@@ -76,11 +76,11 @@ class Item {
             this.check();
             if(this.show){
                 if(type){
-                    items.add(i, this);
+                    tiles.add(i, this);
                     adapter.insert(this, i);
                     i++;
                 }else{
-                    items.add(this);
+                    tiles.add(this);
                     adapter.add(this);
                 }
             }
@@ -107,28 +107,28 @@ class Item {
         }
     }
     static void clear(){
-        allItems.clear();
-        items.clear();
+        allTiles.clear();
+        tiles.clear();
         adapter.clear();
         AP.clear();
         ST.clear();
         i=0;
     }
     static void filter(){
-        items.clear();
+        tiles.clear();
         adapter.clear();
         i=0;
-        Item temp;
-        for(int j=0; j<allItems.size();j++){
-            temp = allItems.get(j);
+        Tile temp;
+        for(int j=0; j<allTiles.size();j++){
+            temp = allTiles.get(j);
             temp.check();
             if(temp.show){
                 if(temp.type){
-                    items.add(i, temp);
+                    tiles.add(i, temp);
                     adapter.insert(temp, i);
                     i++;
                 }else{
-                    items.add(temp);
+                    tiles.add(temp);
                     adapter.add(temp);
                 }
             }

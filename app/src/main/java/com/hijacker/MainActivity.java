@@ -634,7 +634,7 @@ public class MainActivity extends AppCompatActivity{
                     @Override
                     public void run(){
                         if(menu!=null) menu.getItem(1).setIcon(R.drawable.run);
-                        Item.filter();
+                        Tile.filter();
                     }
                 });
                 if(wpa_thread.isAlive()){
@@ -708,8 +708,8 @@ public class MainActivity extends AppCompatActivity{
                 adapter.notifyDataSetChanged();             //for when data is changed, no new data added
                 fifo.remove(0);
             }
-            ap_count.setText(Integer.toString(is_ap==null ? Item.i : 1));
-            st_count.setText(Integer.toString(Item.items.size() - Item.i));
+            ap_count.setText(Integer.toString(is_ap==null ? Tile.i : 1));
+            st_count.setText(Integer.toString(Tile.tiles.size() - Tile.i));
             notification();
             done = true;
         }
@@ -892,7 +892,7 @@ public class MainActivity extends AppCompatActivity{
     public boolean onOptionsItemSelected(MenuItem item){
         switch(item.getItemId()){
             case R.id.reset:
-                Item.clear();
+                Tile.clear();
                 ap_count.setText("0");
                 st_count.setText("0");
                 stop(PROCESS_AIRODUMP);
@@ -1052,7 +1052,7 @@ public class MainActivity extends AppCompatActivity{
             mDrawerLayout.closeDrawer(mDrawerList);
         }
     }
-    class MyListAdapter extends ArrayAdapter<Item>{
+    class MyListAdapter extends ArrayAdapter<Tile>{
         MyListAdapter(){
             super(MainActivity.this, R.layout.listitem);
         }
@@ -1066,26 +1066,26 @@ public class MainActivity extends AppCompatActivity{
             }
 
             // find the item to work with
-            Item currentItem = Item.items.get(position);
+            Tile current = Tile.tiles.get(position);
 
             TextView firstText = (TextView) itemview.findViewById(R.id.top_left);
-            firstText.setText(currentItem.s1);
+            firstText.setText(current.s1);
 
             TextView secondText = (TextView) itemview.findViewById(R.id.bottom_left);
-            secondText.setText(currentItem.s2);
+            secondText.setText(current.s2);
 
             TextView thirdText = (TextView) itemview.findViewById(R.id.bottom_right);
-            thirdText.setText(currentItem.s3);
+            thirdText.setText(current.s3);
 
             TextView text4 = (TextView) itemview.findViewById(R.id.top_right);
-            text4.setText(currentItem.s4);
+            text4.setText(current.s4);
 
             //Image
             ImageView iv = (ImageView) itemview.findViewById(R.id.iv);
-            if(!currentItem.type){
+            if(!current.type){
                 iv.setImageResource(R.drawable.st2);
             }else{
-                if(currentItem.ap.isHidden) iv.setImageResource(R.drawable.ap_hidden);
+                if(current.ap.isHidden) iv.setImageResource(R.drawable.ap_hidden);
                 else iv.setImageResource(R.drawable.ap2);
             }
 
@@ -1094,7 +1094,7 @@ public class MainActivity extends AppCompatActivity{
 
         @Override
         public int getCount(){
-            return Item.items.size();
+            return Tile.tiles.size();
         }
     }
     class CustomActionAdapter extends ArrayAdapter<CustomAction>{
@@ -1189,8 +1189,8 @@ public class MainActivity extends AppCompatActivity{
         if(notif_on && show_notif && !(airodump_running==0 && aireplay_running==0 &&
                 !bf && !ados && !CrackFragment.cont && !ReaverFragment.cont)){
             String str;
-            if(is_ap==null) str = "APs: " + Item.i + " | STs: " + (Item.items.size() - Item.i);
-            else str = is_ap.essid + " | STs: " + (Item.items.size() - Item.i);
+            if(is_ap==null) str = "APs: " + Tile.i + " | STs: " + (Tile.tiles.size() - Tile.i);
+            else str = is_ap.essid + " | STs: " + (Tile.tiles.size() - Tile.i);
 
             if(show_details){
                 if(aireplay_running==AIREPLAY_DEAUTH) str += " | Aireplay deauthenticating...";
@@ -1219,7 +1219,7 @@ public class MainActivity extends AppCompatActivity{
             ft.addToBackStack(null);
             ft.commitAllowingStateLoss();
         }
-        Item.filter();
+        Tile.filter();
         if(debug){
             if(is_ap==null) Log.d("HIJACKER/Main", "No AP isolated");
             else Log.d("HIJACKER/Main", "AP with MAC " + mac + " isolated");

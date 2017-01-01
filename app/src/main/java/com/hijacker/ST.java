@@ -37,7 +37,7 @@ class ST {
     int pwr, lost, frames, id;
     long lastseen = 0;
     boolean added_as_client = false;
-    Item item;
+    Tile tile;
     String mac, bssid, manuf;
     ST(String mac, String bssid, int pwr, int lost, int frames){
         this.mac = mac;
@@ -86,8 +86,8 @@ class ST {
             else b = paired + bssid;
         } else b = not_connected;
         c = "PWR: " + this.pwr + " | Frames: " + this.frames;
-        if(item!=null) item.update(this.mac, b, c, this.manuf);
-        else item = new Item(AP.APs.size() + id, this.mac, b, c, this.manuf, false, null, this);
+        if(tile!=null) tile.update(this.mac, b, c, this.manuf);
+        else tile = new Tile(AP.APs.size() + id, this.mac, b, c, this.manuf, false, null, this);
     }
     void showInfo(FragmentManager fragmentManager){
         STDialog dialog = new STDialog();

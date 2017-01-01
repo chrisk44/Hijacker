@@ -86,7 +86,7 @@ public class IsolatedFragment extends Fragment{
         listview.setOnItemClickListener(new AdapterView.OnItemClickListener(){
             @Override
             public void onItemClick(AdapterView<?> adapterView, final View v, int i, long l){
-                final Item clicked = Item.items.get(i);
+                final Tile clicked = Tile.tiles.get(i);
 
                 //ST
                 PopupMenu popup = new PopupMenu(getActivity(), v);

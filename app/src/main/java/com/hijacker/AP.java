@@ -49,7 +49,7 @@ class AP {
     long lastseen = 0;
     String essid, mac, enc, cipher, auth, manuf;
     List <ST>clients = new ArrayList<>();
-    Item item;
+    Tile tile;
     AP(String essid, String mac, String enc, String cipher, String auth,
        int pwr, int beacons, int data, int ivs, int ch) {
         this.mac = mac;
@@ -104,8 +104,8 @@ class AP {
         }
         String c;
         c = "PWR: " + this.pwr + " | SEC: " + this.enc + " | CH: " + this.ch + " | B:" + this.beacons + " | D:" + this.data;
-        if(item!=null) item.update(this.essid, this.mac, c, this.manuf);
-        else item = new Item(id, this.essid, this.mac, c, this.manuf, true, this, null);
+        if(tile!=null) tile.update(this.essid, this.mac, c, this.manuf);
+        else tile = new Tile(id, this.essid, this.mac, c, this.manuf, true, this, null);
     }
     static AP getAPByMac(String mac){
         if(mac==null) return null;

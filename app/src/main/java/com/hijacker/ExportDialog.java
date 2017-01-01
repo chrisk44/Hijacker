@@ -107,12 +107,12 @@ public class ExportDialog extends DialogFragment{
                 //export visible
                 out.write(ap_str);
                 int i;
-                for(i=0;i<Item.i;i++){
-                    out.write(Item.items.get(i).ap.toString());
+                for(i=0;i<Tile.i;i++){
+                    out.write(Tile.tiles.get(i).ap.toString());
                 }
                 out.write(st_str);
-                for(;i<Item.items.size();i++){
-                    out.write(Item.items.get(i).st.toString());
+                for(;i<Tile.tiles.size();i++){
+                    out.write(Tile.tiles.get(i).st.toString());
                 }
             }
             out.close();

@@ -119,7 +119,7 @@ public class FiltersDialog extends DialogFragment {
 
                 pwr_filter = ((SeekBar)view.findViewById(R.id.seekBar)).getProgress();
 
-                Item.filter();
+                Tile.filter();
             }
         });
         return builder.create();
