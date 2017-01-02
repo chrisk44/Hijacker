@@ -26,16 +26,23 @@ import java.util.List;
 import static com.hijacker.IsolatedFragment.is_ap;
 import static com.hijacker.MainActivity.PROCESS_AIREPLAY;
 import static com.hijacker.MainActivity.PROCESS_AIRODUMP;
+import static com.hijacker.MainActivity.SORT_BEACONS_FRAMES;
+import static com.hijacker.MainActivity.SORT_DATA_FRAMES;
+import static com.hijacker.MainActivity.SORT_ESSID;
+import static com.hijacker.MainActivity.SORT_NOSORT;
+import static com.hijacker.MainActivity.SORT_PWR;
 import static com.hijacker.MainActivity.adapter;
 import static com.hijacker.MainActivity.cap_dir;
 import static com.hijacker.MainActivity.debug;
 import static com.hijacker.MainActivity.getManuf;
 import static com.hijacker.MainActivity.isolate;
 import static com.hijacker.MainActivity.progress;
+import static com.hijacker.MainActivity.sort;
 import static com.hijacker.MainActivity.startAireplay;
 import static com.hijacker.MainActivity.startAireplayWEP;
 import static com.hijacker.MainActivity.startAirodump;
 import static com.hijacker.MainActivity.stop;
+import static com.hijacker.MainActivity.temp_toFilter;
 import static com.hijacker.MainActivity.wpa_runnable;
 import static com.hijacker.MainActivity.wpa_thread;
 import static com.hijacker.MainActivity.wpacheckcont;
@@ -58,11 +65,32 @@ class AP {
         this.update(essid, enc, cipher, auth, pwr, beacons, data, ivs, ch);
 
         APs.add(this);
+        if(sort!=SORT_NOSORT) temp_toFilter = true;
     }
 
     void addClient(ST client){ this.clients.add(client); }
     void update(String essid, String enc, String cipher, String auth,
                               int pwr, int beacons, int data, int ivs, int ch){
+
+        if(!temp_toFilter && sort!=SORT_NOSORT){
+            switch(sort){
+                case SORT_ESSID:
+                    if(essid!=null && this.essid!=null){
+                        temp_toFilter = !this.essid.equals(essid);
+                    }
+                    break;
+                case SORT_BEACONS_FRAMES:
+                    temp_toFilter = this.beacons!=beacons;
+                    break;
+                case SORT_DATA_FRAMES:
+                    temp_toFilter = this.data!=data;
+                    break;
+                case SORT_PWR:
+                    temp_toFilter = this.pwr!=pwr;
+                    break;
+            }
+        }
+
         this.essid = essid;
         if(essid.equals("<hidden>") && !isHidden){
             isHidden = true;

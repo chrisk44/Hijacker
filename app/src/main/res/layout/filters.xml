@@ -233,4 +233,36 @@
         android:indeterminate="false"
         android:layout_weight="1" />
 
+    <LinearLayout
+        android:orientation="horizontal"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_weight="1">
+
+        <TextView
+            android:text="@string/sort"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textColor="@android:color/white"
+            android:textSize="18sp"
+            android:padding="5dp"
+            />
+
+        <CheckBox
+            android:text="@string/reverse_sort"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:id="@+id/sort_reverse"
+            />
+
+        <Button
+            style="?android:attr/buttonBarButtonStyle"
+            android:text="@string/sort_nosort"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:id="@+id/select_sort"
+            />
+
+    </LinearLayout>
+
 </LinearLayout>

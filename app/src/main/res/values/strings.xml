@@ -132,6 +132,14 @@
     <string name="channels">Channels:</string>
     <string name="all">All</string>
     <string name="opn">OPN</string>
+    <string name="sort">Sort:</string>
+    <string name="reverse_sort">Reverse</string>
+    <string name="sort_nosort">No sorting</string>
+    <string name="sort_essid">By ESSID</string>
+    <string name="sort_beacons_frames">By beacons/frames</string>
+    <string name="sort_data_frames">By data/frames</string>
+    <string name="sort_pwr">By power</string>
+
 
     <!-- TestDialog -->
     <string name="testing">Testing tools…</string>

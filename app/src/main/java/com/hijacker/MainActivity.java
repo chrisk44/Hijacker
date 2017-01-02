@@ -88,6 +88,7 @@ public class MainActivity extends AppCompatActivity{
             FRAGMENT_REAVER = 3, FRAGMENT_CUSTOM=4, FRAGMENT_SETTINGS = 5;                     //These need to correspond to the items in the drawer
     static final int PROCESS_AIRODUMP=0, PROCESS_AIREPLAY=1, PROCESS_MDK=2, PROCESS_AIRCRACK=3, PROCESS_REAVER=4;
     static final int MDK_BF=0, MDK_ADOS=1;
+    static final int SORT_NOSORT = 0, SORT_ESSID = 1, SORT_BEACONS_FRAMES = 2, SORT_DATA_FRAMES = 3, SORT_PWR = 4;
     //State variables
     static boolean cont = false, wpacheckcont = false, done = true, notif_on = false;  //done: for calling refreshHandler only when it has stopped
     static int airodump_running = 0, aireplay_running = 0, currentFragment=FRAGMENT_AIRODUMP;         //Set currentFragment in onResume of each Fragment
@@ -95,6 +96,9 @@ public class MainActivity extends AppCompatActivity{
     static boolean show_ap = true, show_st = true, show_na_st = true, wpa = true, wep = true, opn = true;
     static boolean show_ch[] = {true, false, false, false, false, false, false, false, false, false, false, false, false, false, false};
     static int pwr_filter = 120;
+    static int sort = SORT_NOSORT;
+    static boolean sort_reverse = false;
+    static boolean temp_toFilter = false;     //Variable to mark that the list must be sorted, so Tile.filter() must be called
     static TextView ap_count, st_count;                               //AP and ST count textviews in toolbar
     static ProgressBar progress;
     static Toolbar toolbar;
@@ -711,6 +715,7 @@ public class MainActivity extends AppCompatActivity{
             ap_count.setText(Integer.toString(is_ap==null ? Tile.i : 1));
             st_count.setText(Integer.toString(Tile.tiles.size() - Tile.i));
             notification();
+            if(temp_toFilter && !notif_on) Tile.filter();
             done = true;
         }
     };

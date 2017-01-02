@@ -25,10 +25,15 @@ import java.util.List;
 import static com.hijacker.IsolatedFragment.is_ap;
 import static com.hijacker.MainActivity.PROCESS_AIREPLAY;
 import static com.hijacker.MainActivity.PROCESS_AIRODUMP;
+import static com.hijacker.MainActivity.SORT_BEACONS_FRAMES;
+import static com.hijacker.MainActivity.SORT_NOSORT;
+import static com.hijacker.MainActivity.SORT_PWR;
 import static com.hijacker.MainActivity.getManuf;
+import static com.hijacker.MainActivity.sort;
 import static com.hijacker.MainActivity.startAireplay;
 import static com.hijacker.MainActivity.startAirodump;
 import static com.hijacker.MainActivity.stop;
+import static com.hijacker.MainActivity.temp_toFilter;
 
 class ST {
     static List <ST>STs = new ArrayList<>();
@@ -45,6 +50,7 @@ class ST {
         this.manuf = getManuf(this.mac);
         this.update(bssid, pwr, lost, frames);
         STs.add(this);
+        if(sort!=SORT_NOSORT) temp_toFilter = true;
     }
     void disconnect(){
         if(is_ap==null){
@@ -73,6 +79,16 @@ class ST {
         }
         if(frames!=this.frames || lost!=this.lost || this.lastseen==0){
             this.lastseen = System.currentTimeMillis();
+        }
+        if(!temp_toFilter && sort!=SORT_NOSORT){
+            switch(sort){
+                case SORT_BEACONS_FRAMES:
+                    temp_toFilter = this.frames!=frames;
+                    break;
+                case SORT_PWR:
+                    temp_toFilter = this.pwr!=pwr;
+                    break;
+            }
         }
 
         this.bssid = bssid;

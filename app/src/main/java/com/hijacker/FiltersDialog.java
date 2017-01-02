@@ -23,11 +23,18 @@ import android.app.FragmentManager;
 import android.content.DialogInterface;
 import android.os.Bundle;
 import android.support.v7.app.AlertDialog;
+import android.support.v7.widget.PopupMenu;
 import android.view.View;
+import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.SeekBar;
 import android.widget.TextView;
 
+import static com.hijacker.MainActivity.SORT_BEACONS_FRAMES;
+import static com.hijacker.MainActivity.SORT_DATA_FRAMES;
+import static com.hijacker.MainActivity.SORT_ESSID;
+import static com.hijacker.MainActivity.SORT_NOSORT;
+import static com.hijacker.MainActivity.SORT_PWR;
 import static com.hijacker.MainActivity.notif_on;
 import static com.hijacker.MainActivity.opn;
 import static com.hijacker.MainActivity.pwr_filter;
@@ -35,11 +42,14 @@ import static com.hijacker.MainActivity.show_ap;
 import static com.hijacker.MainActivity.show_ch;
 import static com.hijacker.MainActivity.show_na_st;
 import static com.hijacker.MainActivity.show_st;
+import static com.hijacker.MainActivity.sort;
+import static com.hijacker.MainActivity.sort_reverse;
 import static com.hijacker.MainActivity.wep;
 import static com.hijacker.MainActivity.wpa;
 
 public class FiltersDialog extends DialogFragment {
     View view;
+    int temp_sort;
     @Override
     public Dialog onCreateDialog(Bundle savedInstanceState) {
         AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
@@ -83,6 +93,39 @@ public class FiltersDialog extends DialogFragment {
 
         ((TextView)view.findViewById(R.id.pwr)).setText("-" + pwr_filter);
 
+        final Button select_sort = (Button)view.findViewById(R.id.select_sort);
+        final String sort_texts[] = {
+                getString(R.string.sort_nosort),
+                getString(R.string.sort_essid),
+                getString(R.string.sort_beacons_frames),
+                getString(R.string.sort_data_frames),
+                getString(R.string.sort_pwr)
+        };
+        select_sort.setOnClickListener(new View.OnClickListener(){
+            @Override
+            public void onClick(View v){
+                PopupMenu popup = new PopupMenu(getActivity(), v);
+
+                popup.getMenuInflater().inflate(R.menu.popup_menu, popup.getMenu());
+                popup.getMenu().add(0, SORT_NOSORT, 0, sort_texts[SORT_NOSORT]);
+                popup.getMenu().add(0, SORT_ESSID, 1, sort_texts[SORT_ESSID]);
+                popup.getMenu().add(0, SORT_BEACONS_FRAMES, 2, sort_texts[SORT_BEACONS_FRAMES]);
+                popup.getMenu().add(0, SORT_DATA_FRAMES, 3, sort_texts[SORT_DATA_FRAMES]);
+                popup.getMenu().add(0, SORT_PWR, 4, sort_texts[SORT_PWR]);
+                popup.setOnMenuItemClickListener(new PopupMenu.OnMenuItemClickListener() {
+                    public boolean onMenuItemClick(android.view.MenuItem item) {
+                        FiltersDialog.this.temp_sort = item.getItemId();
+                        select_sort.setText(sort_texts[FiltersDialog.this.temp_sort]);
+                        return true;
+                    }
+                });
+                popup.show();
+            }
+        });
+        temp_sort = sort;
+        select_sort.setText(sort_texts[sort]);
+        ((CheckBox)view.findViewById(R.id.sort_reverse)).setChecked(sort_reverse);
+
         builder.setView(view);
         builder.setTitle(R.string.filters);
         builder.setNegativeButton(R.string.cancel, new DialogInterface.OnClickListener() {
@@ -118,6 +161,9 @@ public class FiltersDialog extends DialogFragment {
                 opn = ((CheckBox)view.findViewById(R.id.cb_opn)).isChecked();
 
                 pwr_filter = ((SeekBar)view.findViewById(R.id.seekBar)).getProgress();
+
+                sort = FiltersDialog.this.temp_sort;
+                sort_reverse = ((CheckBox)view.findViewById(R.id.sort_reverse)).isChecked();
 
                 Tile.filter();
             }
