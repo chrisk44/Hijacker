@@ -22,8 +22,10 @@ import android.app.DialogFragment;
 import android.app.FragmentManager;
 import android.content.DialogInterface;
 import android.os.Bundle;
+import android.support.design.widget.Snackbar;
 import android.support.v7.app.AlertDialog;
 import android.util.Log;
+import android.view.HapticFeedbackConstants;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
@@ -38,7 +40,7 @@ import static com.hijacker.MainActivity.debug;
 import static com.hijacker.MainActivity.init;
 import static com.hijacker.MainActivity.load;
 import static com.hijacker.MainActivity.main;
-import static com.hijacker.MainActivity.notif_on;
+import static com.hijacker.MainActivity.background;
 import static com.hijacker.MainActivity.path;
 import static com.hijacker.MainActivity.pref_edit;
 
@@ -50,6 +52,7 @@ public class InstallToolsDialog extends DialogFragment {
         AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
         view = getActivity().getLayoutInflater().inflate(R.layout.install_tools, null);
 
+        //Adjust directories
         if(!(new File("/su").exists())){
             ((EditText)view.findViewById(R.id.tools_location)).setText("/system/xbin");
         }
@@ -57,7 +60,7 @@ public class InstallToolsDialog extends DialogFragment {
             if(new File("/su").exists()){
                 ((EditText) view.findViewById(R.id.lib_location)).setText("/su/lib");
             }else{
-                ((EditText)view.findViewById(R.id.util_location)).setText("/system/lib");
+                ((EditText)view.findViewById(R.id.lib_location)).setText("/system/lib");
             }
         }
 
@@ -77,60 +80,33 @@ public class InstallToolsDialog extends DialogFragment {
         return builder.create();
     }
     @Override
-    public void onStart() {
+    public void onStart(){
         super.onStart();
         //Override positiveButton action to dismiss the fragment only when the directories exist, not on error
         AlertDialog d = (AlertDialog)getDialog();
         if(d != null) {
-            Button positiveButton = d.getButton(Dialog.BUTTON_POSITIVE);
+            final Button positiveButton = d.getButton(Dialog.BUTTON_POSITIVE);
+            positiveButton.setOnLongClickListener(new View.OnLongClickListener(){
+                @Override
+                public boolean onLongClick(View v){
+                    v.performHapticFeedback(HapticFeedbackConstants.LONG_PRESS);
+                    String tools_location = ((EditText) view.findViewById(R.id.tools_location)).getText().toString();
+                    String lib_location = ((EditText) view.findViewById(R.id.lib_location)).getText().toString();
+                    if(check(tools_location, lib_location, true, v)){
+                        install(tools_location, lib_location);
+                        dismissAllowingStateLoss();
+                    }
+                    return false;
+                }
+            });
             positiveButton.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
                     String tools_location = ((EditText)view.findViewById(R.id.tools_location)).getText().toString();
                     String lib_location = ((EditText)view.findViewById(R.id.lib_location)).getText().toString();
-                    File tools = new File(tools_location);
-                    File lib = new File(lib_location);
-                    if(!tools.exists()){
-                        Toast.makeText(getActivity(), R.string.dir_notfound_tools, Toast.LENGTH_SHORT).show();
-                    }else if(!lib.exists()){
-                        Toast.makeText(getActivity(), R.string.dir_notfound_lib, Toast.LENGTH_SHORT).show();
-                    }else{
-                        if(debug){
-                            Log.d("HIJACKER/InstTools", "Installing Tools in " + tools_location);
-                            Log.d("HIJACKER/InstTools", "Installing Library in " + lib_location);
-                        }
-                        shell = Shell.getFreeShell();
-                        shell.run("busybox mount -o rw,remount,rw /system");
-                        shell.run("cd " + path);
-                        shell.run("rm !(oui.txt)");
-                        extract("airbase-ng", tools_location);
-                        extract("aircrack-ng", tools_location);
-                        extract("aireplay-ng", tools_location);
-                        extract("airodump-ng", tools_location);
-                        extract("besside-ng", tools_location);
-                        extract("ivstools", tools_location);
-                        extract("iw", tools_location);
-                        extract("iwconfig", tools_location);
-                        extract("iwlist", tools_location);
-                        extract("iwpriv", tools_location);
-                        extract("kstats", tools_location);
-                        extract("makeivs-ng", tools_location);
-                        extract("mdk3", tools_location);
-                        extract("nc", tools_location);
-                        extract("packetforge-ng", tools_location);
-                        extract("wesside-ng", tools_location);
-                        extract("wpaclean", tools_location);
-                        extract("reaver", tools_location);
-                        extract("reaver-wash", tools_location);
-                        extract("libfakeioctl.so", lib_location);
-                        extract("toolbox", tools_location);
-                        shell.run("busybox mount -o ro,remount,ro /system");
-                        shell.done();
-                        Toast.makeText(getActivity(), R.string.installed_tools_lib, Toast.LENGTH_SHORT).show();
-                        pref_edit.putString("prefix", "LD_PRELOAD=" + lib_location + "/libfakeioctl.so");
-                        pref_edit.commit();
-                        load();
-                        Toast.makeText(getActivity(), R.string.prefix_adjusted, Toast.LENGTH_LONG).show();
+
+                    if(check(tools_location, lib_location, false, v)){
+                        install(tools_location, lib_location);
                         dismissAllowingStateLoss();
                     }
                 }
@@ -147,7 +123,60 @@ public class InstallToolsDialog extends DialogFragment {
     }
     @Override
     public void show(FragmentManager fragmentManager, String tag){
-        if(!notif_on) super.show(fragmentManager, tag);
+        if(!background) super.show(fragmentManager, tag);
+    }
+    boolean check(String tools_location, String lib_location, boolean override, View v){
+        File tools = new File(tools_location);
+        File lib = new File(lib_location);
+        if(!tools.exists()){
+            Snackbar.make(v, R.string.dir_notfound_tools, Snackbar.LENGTH_SHORT).show();
+            return false;
+        }else if(!lib.exists()){
+            Snackbar.make(v, R.string.dir_notfound_lib, Snackbar.LENGTH_SHORT).show();
+            return false;
+        }else if(!override && (tools_location.contains("system") || lib_location.contains("system"))){
+            Snackbar.make(v, R.string.path_contains_system, Snackbar.LENGTH_LONG).show();
+            return false;
+        }
+        return true;
+    }
+    void install(String tools_location, String lib_location){
+        if(debug){
+            Log.d("HIJACKER/InstTools", "Installing Tools in " + tools_location);
+            Log.d("HIJACKER/InstTools", "Installing Library in " + lib_location);
+        }
+        shell = Shell.getFreeShell();
+        shell.run("busybox mount -o rw,remount,rw /system");
+        shell.run("cd " + path);
+        shell.run("rm !(oui.txt)");
+        extract("airbase-ng", tools_location);
+        extract("aircrack-ng", tools_location);
+        extract("aireplay-ng", tools_location);
+        extract("airodump-ng", tools_location);
+        extract("besside-ng", tools_location);
+        extract("ivstools", tools_location);
+        extract("iw", tools_location);
+        extract("iwconfig", tools_location);
+        extract("iwlist", tools_location);
+        extract("iwpriv", tools_location);
+        extract("kstats", tools_location);
+        extract("makeivs-ng", tools_location);
+        extract("mdk3", tools_location);
+        extract("nc", tools_location);
+        extract("packetforge-ng", tools_location);
+        extract("wesside-ng", tools_location);
+        extract("wpaclean", tools_location);
+        extract("reaver", tools_location);
+        extract("reaver-wash", tools_location);
+        extract("libfakeioctl.so", lib_location);
+        extract("toolbox", tools_location);
+        shell.run("busybox mount -o ro,remount,ro /system");
+        shell.done();
+        Toast.makeText(getActivity(), R.string.installed_tools_lib, Toast.LENGTH_SHORT).show();
+        pref_edit.putString("prefix", "LD_PRELOAD=" + lib_location + "/libfakeioctl.so");
+        pref_edit.commit();
+        load();
+        Toast.makeText(getActivity(), R.string.prefix_adjusted, Toast.LENGTH_LONG).show();
     }
     void extract(String filename, String dest){
         File f = new File(path, filename);      //no permissions to write at dest so extract at local directory and then move to target

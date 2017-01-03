@@ -22,6 +22,7 @@ import android.app.DialogFragment;
 import android.app.FragmentManager;
 import android.content.DialogInterface;
 import android.os.Bundle;
+import android.support.design.widget.Snackbar;
 import android.support.v7.app.AlertDialog;
 import android.util.Log;
 import android.view.HapticFeedbackConstants;
@@ -36,7 +37,7 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.util.Date;
 
-import static com.hijacker.MainActivity.notif_on;
+import static com.hijacker.MainActivity.background;
 
 public class ExportDialog extends DialogFragment{
     View view;
@@ -66,7 +67,7 @@ public class ExportDialog extends DialogFragment{
                 @Override
                 public boolean onLongClick(View v){
                     v.performHapticFeedback(HapticFeedbackConstants.LONG_PRESS);
-                    export(new File(((EditText)view.findViewById(R.id.output_file)).getText().toString()));
+                    export(v, new File(((EditText)view.findViewById(R.id.output_file)).getText().toString()));
                     return false;
                 }
             });
@@ -76,17 +77,17 @@ public class ExportDialog extends DialogFragment{
                     File out_file = new File(((EditText) view.findViewById(R.id.output_file)).getText().toString());
 
                     if(out_file.exists()){
-                        Toast.makeText(getActivity(), R.string.output_file_exists, Toast.LENGTH_LONG).show();
-                    }else export(out_file);
+                        Snackbar.make(v, R.string.output_file_exists, Snackbar.LENGTH_LONG).show();
+                    }else export(v, out_file);
                 }
             });
         }
     }
-    void export(File out_file){
+    void export(View v, File out_file){
         try{
             out_file.createNewFile();
             if(!out_file.canWrite()){
-                Toast.makeText(getActivity(), R.string.output_file_cant_write, Toast.LENGTH_SHORT).show();
+                Snackbar.make(v, R.string.output_file_cant_write, Snackbar.LENGTH_SHORT).show();
                 return;
             }
             FileWriter out = new FileWriter(out_file);
@@ -122,6 +123,6 @@ public class ExportDialog extends DialogFragment{
     }
     @Override
     public void show(FragmentManager fragmentManager, String tag){
-        if(!notif_on) super.show(fragmentManager, tag);
+        if(!background) super.show(fragmentManager, tag);
     }
 }

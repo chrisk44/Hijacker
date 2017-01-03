@@ -32,7 +32,7 @@ import static com.hijacker.MainActivity.chroot_dir;
 import static com.hijacker.MainActivity.copy;
 import static com.hijacker.MainActivity.iface;
 import static com.hijacker.MainActivity.mdk3_dir;
-import static com.hijacker.MainActivity.notif_on;
+import static com.hijacker.MainActivity.background;
 import static com.hijacker.MainActivity.prefix;
 import static com.hijacker.MainActivity.reaver_dir;
 import static com.hijacker.ReaverFragment.get_chroot_env;
@@ -77,6 +77,6 @@ public class CopySampleDialog extends DialogFragment {
     }
     @Override
     public void show(FragmentManager fragmentManager, String tag){
-        if(!notif_on) super.show(fragmentManager, tag);
+        if(!background) super.show(fragmentManager, tag);
     }
 }

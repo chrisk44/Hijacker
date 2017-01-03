@@ -99,9 +99,7 @@ public class SendLogActivity extends AppCompatActivity{
                     if(i==400) console.append("...more logcat not displayed here");
                 }catch(IOException ignored){}
             }
-        }else{
-            Log.e("HIJACKER/SendLog", "WRITE_EXTERNAL_STORAGE permission denied");
-        }
+        }else Log.e("HIJACKER/SendLog", "WRITE_EXTERNAL_STORAGE permission denied");
 
         stopAll();
     }
@@ -177,6 +175,11 @@ public class SendLogActivity extends AppCompatActivity{
             Toast.makeText(this, "Report was not created", Toast.LENGTH_LONG).show();
         }else sendLogFile(filename);
     }
+    public void onRestart(View v){
+        Intent intent = new Intent(this, MainActivity.class);
+        startActivity(intent);
+        finish();
+    }
     public void stopAll(){
         ArrayList<Integer> pids = new ArrayList<>();
         try{
@@ -192,7 +195,7 @@ public class SendLogActivity extends AppCompatActivity{
                 }
                 s = shell_out.readLine();
             }
-        }catch(IOException e){ Log.e("HIJACKER/Exception", "Caught Exception in getPIDs(pr): " + e.toString()); }
+        }catch(IOException e){ Log.e("HIJACKER/Exception", "Caught Exception in stopAll(): " + e.toString()); }
         if(pids.isEmpty()) Log.d("HIJACKER/stopAll", "Nothing found");
         else{
             for(int i = 0; i<pids.size(); i++){

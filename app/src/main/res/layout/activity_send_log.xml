@@ -44,11 +44,28 @@
         android:scrollbarAlwaysDrawVerticalTrack="true"
         android:scrollbars="vertical"/>
 
-    <Button
-        style="?android:attr/buttonBarButtonStyle"
-        android:text="@string/send_report"
+    <LinearLayout
+        android:orientation="horizontal"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:id="@+id/start"
-        android:onClick="onSend"/>
+        android:layout_height="wrap_content">
+
+        <Button
+            style="?android:attr/buttonBarButtonStyle"
+            android:text="@string/restart_hijacker"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:id="@+id/restart"
+            android:onClick="onRestart"
+            />
+
+        <Button
+            style="?android:attr/buttonBarButtonStyle"
+            android:text="@string/send_report"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:id="@+id/start"
+            android:onClick="onSend"
+            />
+    </LinearLayout>
+
 </LinearLayout>

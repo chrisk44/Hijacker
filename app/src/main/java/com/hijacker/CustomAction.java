@@ -107,7 +107,7 @@ class CustomAction{
                 writer.write(Boolean.toString(action.requires_clients || action.requires_connected) + '\n');
                 writer.close();
             }catch(IOException e){
-                Log.e("HIJACKER/CustomAction", "In load(): " + e.toString());
+                Log.e("HIJACKER/CustomAction", "In save(): " + e.toString());
                 ErrorDialog dialog = new ErrorDialog();
                 dialog.setMessage("Error while saving " + action.title);
                 dialog.show(fm, "ErrorDialog");

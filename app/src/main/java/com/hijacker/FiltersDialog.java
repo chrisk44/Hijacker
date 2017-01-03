@@ -35,7 +35,7 @@ import static com.hijacker.MainActivity.SORT_DATA_FRAMES;
 import static com.hijacker.MainActivity.SORT_ESSID;
 import static com.hijacker.MainActivity.SORT_NOSORT;
 import static com.hijacker.MainActivity.SORT_PWR;
-import static com.hijacker.MainActivity.notif_on;
+import static com.hijacker.MainActivity.background;
 import static com.hijacker.MainActivity.opn;
 import static com.hijacker.MainActivity.pwr_filter;
 import static com.hijacker.MainActivity.show_ap;
@@ -172,6 +172,6 @@ public class FiltersDialog extends DialogFragment {
     }
     @Override
     public void show(FragmentManager fragmentManager, String tag){
-        if(!notif_on) super.show(fragmentManager, tag);
+        if(!background) super.show(fragmentManager, tag);
     }
 }

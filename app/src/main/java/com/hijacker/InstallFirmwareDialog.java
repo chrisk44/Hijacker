@@ -24,6 +24,7 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.net.wifi.WifiManager;
 import android.os.Bundle;
+import android.support.design.widget.Snackbar;
 import android.support.v7.app.AlertDialog;
 import android.util.Log;
 import android.view.HapticFeedbackConstants;
@@ -42,7 +43,7 @@ import java.io.InputStream;
 
 import static com.hijacker.MainActivity.debug;
 import static com.hijacker.MainActivity.getLastLine;
-import static com.hijacker.MainActivity.notif_on;
+import static com.hijacker.MainActivity.background;
 import static com.hijacker.MainActivity.path;
 
 public class InstallFirmwareDialog extends DialogFragment {
@@ -53,12 +54,14 @@ public class InstallFirmwareDialog extends DialogFragment {
         AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
         view = getActivity().getLayoutInflater().inflate(R.layout.install_firmware, null);
 
+        //Adjust directories
         if(!(new File("/su").exists())){
             ((EditText)view.findViewById(R.id.util_location)).setText("/system/xbin");
         }
         if(new File(path + "/fw_bcmdhd.orig.bin").exists()){
             ((CheckBox)view.findViewById(R.id.backup)).setChecked(false);
         }
+
         shell = Shell.getFreeShell();
 
         builder.setView(view);
@@ -90,13 +93,13 @@ public class InstallFirmwareDialog extends DialogFragment {
                 @Override
                 public boolean onLongClick(View v){
                     v.performHapticFeedback(HapticFeedbackConstants.LONG_PRESS);
-                    String firm_location = ((EditText)view.findViewById(R.id.firm_location)).getText().toString();
-                    String util_location = ((EditText)view.findViewById(R.id.util_location)).getText().toString();
-                    extract("fw_bcmdhd.bin", firm_location);
-                    extract("nexutil", util_location);
-                    shell.run("busybox mount -o ro,remount,ro /system");
-                    Toast.makeText(getActivity(), R.string.installed_firm_util, Toast.LENGTH_SHORT).show();
-                    dismissAllowingStateLoss();
+                    String firm_location = ((EditText) view.findViewById(R.id.firm_location)).getText().toString();
+                    String util_location = ((EditText) view.findViewById(R.id.util_location)).getText().toString();
+
+                    if(check(firm_location, util_location, true, v)){
+                        install(firm_location, util_location);
+                        dismissAllowingStateLoss();
+                    }
                     return false;
                 }
             });
@@ -106,45 +109,16 @@ public class InstallFirmwareDialog extends DialogFragment {
                     String firm_location = ((EditText)view.findViewById(R.id.firm_location)).getText().toString();
                     String util_location = ((EditText)view.findViewById(R.id.util_location)).getText().toString();
 
-                    File firm = new File(firm_location);
-                    File util = new File(util_location);
-                    if(!firm.exists()){
-                        Toast.makeText(getActivity(), R.string.dir_notfound_firm, Toast.LENGTH_SHORT).show();
-                    }else if(!(new File(firm_location + "/fw_bcmdhd.bin").exists())){
-                        Toast.makeText(getActivity(), R.string.firm_notfound, Toast.LENGTH_SHORT).show();
-                    }else if(!util.exists()){
-                        Toast.makeText(getActivity(), R.string.dir_notfound_util, Toast.LENGTH_SHORT).show();
-                    }else{
-                        if(debug){
-                            Log.d("HIJACKER/InstFirmware", "Installing firmware in " + firm_location);
-                            Log.d("HIJACKER/InstFirmware", "Installing utility in " + util_location);
-                        }
-                        shell.run("busybox mount -o rw,remount,rw /system");
-                        if(((CheckBox)view.findViewById(R.id.backup)).isChecked()){
-                            if(new File(path + "/fw_bcmdhd.orig.bin").exists()){
-                                Toast.makeText(getActivity(), R.string.backup_exists, Toast.LENGTH_SHORT).show();
-                            }else{
-                                shell.run("cp -n " + firm_location + "/fw_bcmdhd.bin " + path + "/fw_bcmdhd.orig.bin");
-                                Toast.makeText(getActivity(), R.string.backup_created, Toast.LENGTH_SHORT).show();
-                            }
-                        }
-                        shell.done();                   //clear any existing output
-                        shell = Shell.getFreeShell();
+                    if(check(firm_location, util_location, false, v)){
                         shell.run("strings " + firm_location + "/fw_bcmdhd.bin | busybox grep \"FWID:\"; echo ENDOFSTRINGS");
                         String result = getLastLine(shell.getShell_out(), "ENDOFSTRINGS");
                         result = result.substring(0, 4);
 
                         if(result.equals("4339")){
-                            WifiManager wifiManager = (WifiManager) getActivity().getSystemService(Context.WIFI_SERVICE);
-                            wifiManager.setWifiEnabled(false);
-                            extract("fw_bcmdhd.bin", firm_location);
-                            extract("nexutil", util_location);
-                            shell.run("busybox mount -o ro,remount,ro /system");
-                            Toast.makeText(getActivity(), R.string.installed_firm_util, Toast.LENGTH_SHORT).show();
-                            wifiManager.setWifiEnabled(true);
+                            install(firm_location, util_location);
                             dismissAllowingStateLoss();
                         }else{
-                            Toast.makeText(getActivity(), R.string.fw_not_compatible, Toast.LENGTH_LONG).show();
+                            Snackbar.make(v, R.string.fw_not_compatible, Snackbar.LENGTH_LONG).show();
                             if(debug) Log.d("HIJACKER/InstFirmware", "Firmware verification is: " + result);
                         }
                     }
@@ -157,24 +131,14 @@ public class InstallFirmwareDialog extends DialogFragment {
                     ProgressBar progress = (ProgressBar)view.findViewById(R.id.install_firm_progress);
                     progress.setIndeterminate(true);
                     shell.run("busybox find /system/ -type f -name \"fw_bcmdhd.bin\"; echo ENDOFFIND");
-                    BufferedReader out = shell.getShell_out();
-                    try{
-                        String buffer = null, lastline;
-                        while(buffer==null){
-                            buffer = out.readLine();
-                        }
-                        lastline = buffer;
-                        while(!buffer.equals("ENDOFFIND")){
-                            lastline = buffer;
-                            buffer = out.readLine();
-                        }
-                        if(lastline.equals("ENDOFFIND")){
-                            Toast.makeText(getActivity(), R.string.firm_notfound_bcm, Toast.LENGTH_LONG).show();
-                        }else{
-                            lastline = lastline.substring(0, lastline.length()-14);
-                            ((EditText)view.findViewById(R.id.firm_location)).setText(lastline);
-                        }
-                    }catch(IOException ignored){}
+
+                    String lastline = getLastLine(shell.getShell_out(), "ENDOFFIND");
+                    if(lastline.equals("ENDOFFIND")){
+                        Snackbar.make(v, R.string.firm_notfound_bcm, Snackbar.LENGTH_LONG).show();
+                    }else{
+                        lastline = lastline.substring(0, lastline.length()-14);
+                        ((EditText)view.findViewById(R.id.firm_location)).setText(lastline);
+                    }
 
                     progress.setIndeterminate(false);
                     positiveButton.setActivated(true);
@@ -190,7 +154,51 @@ public class InstallFirmwareDialog extends DialogFragment {
     }
     @Override
     public void show(FragmentManager fragmentManager, String tag){
-        if(!notif_on) super.show(fragmentManager, tag);
+        if(!background) super.show(fragmentManager, tag);
+    }
+    void install(String firm_location, String util_location){
+        if(debug) Log.d("HIJACKER/InstFirmware", "Backing up firmware from " + firm_location);
+        if(((CheckBox)view.findViewById(R.id.backup)).isChecked()){
+            if(new File(path + "/fw_bcmdhd.orig.bin").exists()){
+                Toast.makeText(getActivity(), R.string.backup_exists, Toast.LENGTH_SHORT).show();
+            }else{
+                shell.run("cp -n " + firm_location + "/fw_bcmdhd.bin " + path + "/fw_bcmdhd.orig.bin");
+                Toast.makeText(getActivity(), R.string.backup_created, Toast.LENGTH_SHORT).show();
+            }
+        }
+        shell.done();                   //clear any existing output
+        shell = Shell.getFreeShell();
+
+        if(debug){
+            Log.d("HIJACKER/InstFirmware", "Installing firmware in " + firm_location);
+            Log.d("HIJACKER/InstFirmware", "Installing utility in " + util_location);
+        }
+        WifiManager wifiManager = (WifiManager) getActivity().getSystemService(Context.WIFI_SERVICE);
+        wifiManager.setWifiEnabled(false);
+        shell.run("busybox mount -o rw,remount,rw /system");
+        extract("fw_bcmdhd.bin", firm_location);
+        extract("nexutil", util_location);
+        shell.run("busybox mount -o ro,remount,ro /system");
+        Toast.makeText(getActivity(), R.string.installed_firm_util, Toast.LENGTH_SHORT).show();
+        wifiManager.setWifiEnabled(true);
+    }
+    boolean check(String firm_location, String util_location, boolean override, View v){
+        File firm = new File(firm_location);
+        File util = new File(util_location);
+        if(!firm.exists()){
+            Snackbar.make(v, R.string.dir_notfound_firm, Snackbar.LENGTH_SHORT).show();
+            return false;
+        }else if(!(new File(firm_location + "/fw_bcmdhd.bin").exists())){
+            Snackbar.make(v, R.string.firm_notfound, Snackbar.LENGTH_SHORT).show();
+            return false;
+        }else if(!util.exists()){
+            Snackbar.make(v, R.string.dir_notfound_util, Snackbar.LENGTH_SHORT).show();
+            return false;
+        }else if(!override && (util_location.contains("system") || firm_location.contains("system"))){
+            Snackbar.make(v, R.string.path_contains_system, Snackbar.LENGTH_LONG).show();
+            return false;
+        }
+        return true;
     }
     void extract(String filename, String dest){
         File f = new File(path, filename);      //no permissions to write at dest so extract at local directory and then move to target

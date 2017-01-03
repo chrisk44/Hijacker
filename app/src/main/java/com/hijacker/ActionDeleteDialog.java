@@ -29,7 +29,7 @@ import java.io.File;
 
 import static com.hijacker.CustomAction.cmds;
 import static com.hijacker.MainActivity.custom_action_adapter;
-import static com.hijacker.MainActivity.notif_on;
+import static com.hijacker.MainActivity.background;
 
 public class ActionDeleteDialog extends DialogFragment{
     int index;
@@ -54,6 +54,6 @@ public class ActionDeleteDialog extends DialogFragment{
     }
     @Override
     public void show(FragmentManager fragmentManager, String tag){
-        if(!notif_on) super.show(fragmentManager, tag);
+        if(!background) super.show(fragmentManager, tag);
     }
 }

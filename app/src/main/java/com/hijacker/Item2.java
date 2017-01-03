@@ -17,8 +17,6 @@ package com.hijacker;
     along with this program.  If not, see <http://www.gnu.org/licenses/>
  */
 
-import static com.hijacker.IsolatedFragment.is_ap;
-
 class Item2 {
     int i1, i2, i3, i4 ,i5;
     boolean type;
@@ -50,10 +48,8 @@ class Item2 {
         if(this.type){
             //AP
             AP temp = AP.getAPByMac(str2);
-            if(is_ap==null || temp==is_ap){
-                if(temp==null) new AP(str1, str2, str3, str4, str5, i1, i2, i3, i4, i5);
-                else temp.update(str1, str3, str4, str5, i1, i2, i3, i4, i5);
-            }
+            if(temp==null) new AP(str1, str2, str3, str4, str5, i1, i2, i3, i4, i5);
+            else temp.update(str1, str3, str4, str5, i1, i2, i3, i4, i5);
         }else{
             //ST
             ST temp = ST.getSTByMac(str1);

@@ -42,7 +42,7 @@ import static com.hijacker.MainActivity.startAireplay;
 import static com.hijacker.MainActivity.startAireplayWEP;
 import static com.hijacker.MainActivity.startAirodump;
 import static com.hijacker.MainActivity.stop;
-import static com.hijacker.MainActivity.temp_toFilter;
+import static com.hijacker.MainActivity.toSort;
 import static com.hijacker.MainActivity.wpa_runnable;
 import static com.hijacker.MainActivity.wpa_thread;
 import static com.hijacker.MainActivity.wpacheckcont;
@@ -50,7 +50,7 @@ import static com.hijacker.MainActivity.wpacheckcont;
 class AP {
     static final int WPA=0, WPA2=1, WEP=2, OPN=3, UNKNOWN=4;
     static int wpa=0, wpa2=0, wep=0, opn=0, hidden=0;
-    static List <AP>APs = new ArrayList<>();
+    static List<AP> APs = new ArrayList<>();
     boolean isHidden = false;
     int pwr, beacons, data, ivs, ch, id, sec=UNKNOWN;
     long lastseen = 0;
@@ -65,28 +65,28 @@ class AP {
         this.update(essid, enc, cipher, auth, pwr, beacons, data, ivs, ch);
 
         APs.add(this);
-        if(sort!=SORT_NOSORT) temp_toFilter = true;
+        if(sort!=SORT_NOSORT) toSort = true;
     }
 
     void addClient(ST client){ this.clients.add(client); }
     void update(String essid, String enc, String cipher, String auth,
                               int pwr, int beacons, int data, int ivs, int ch){
 
-        if(!temp_toFilter && sort!=SORT_NOSORT){
+        if(!toSort && sort!=SORT_NOSORT){
             switch(sort){
                 case SORT_ESSID:
                     if(essid!=null && this.essid!=null){
-                        temp_toFilter = !this.essid.equals(essid);
+                        toSort = !this.essid.equals(essid);
                     }
                     break;
                 case SORT_BEACONS_FRAMES:
-                    temp_toFilter = this.beacons!=beacons;
+                    toSort = this.beacons!=beacons;
                     break;
                 case SORT_DATA_FRAMES:
-                    temp_toFilter = this.data!=data;
+                    toSort = this.data!=data;
                     break;
                 case SORT_PWR:
-                    temp_toFilter = this.pwr!=pwr;
+                    toSort = this.pwr!=pwr;
                     break;
             }
         }

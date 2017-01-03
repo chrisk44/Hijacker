@@ -24,7 +24,9 @@ import android.content.DialogInterface;
 import android.os.Bundle;
 import android.support.v7.app.AlertDialog;
 
-import static com.hijacker.MainActivity.notif_on;
+import java.io.File;
+
+import static com.hijacker.MainActivity.background;
 import static com.hijacker.MainActivity.pref_edit;
 
 public class DisclaimerDialog extends DialogFragment {
@@ -52,6 +54,6 @@ public class DisclaimerDialog extends DialogFragment {
     }
     @Override
     public void show(FragmentManager fragmentManager, String tag){
-        if(!notif_on) super.show(fragmentManager, tag);
+        if(!background) super.show(fragmentManager, tag);
     }
 }

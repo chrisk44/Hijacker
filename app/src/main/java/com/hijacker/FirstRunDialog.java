@@ -25,7 +25,7 @@ import android.os.Bundle;
 import android.support.v7.app.AlertDialog;
 
 import static com.hijacker.MainActivity.main;
-import static com.hijacker.MainActivity.notif_on;
+import static com.hijacker.MainActivity.background;
 
 public class FirstRunDialog extends DialogFragment {
     @Override
@@ -57,6 +57,6 @@ public class FirstRunDialog extends DialogFragment {
     }
     @Override
     public void show(FragmentManager fragmentManager, String tag){
-        if(!notif_on) super.show(fragmentManager, tag);
+        if(!background) super.show(fragmentManager, tag);
     }
 }

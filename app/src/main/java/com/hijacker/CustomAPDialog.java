@@ -26,7 +26,7 @@ import android.support.v7.app.AlertDialog;
 import android.view.View;
 import android.widget.EditText;
 
-import static com.hijacker.MainActivity.notif_on;
+import static com.hijacker.MainActivity.background;
 
 public class CustomAPDialog extends DialogFragment {
     static final int FOR_MDK=0, FOR_REAVER=1;
@@ -62,6 +62,6 @@ public class CustomAPDialog extends DialogFragment {
     }
     @Override
     public void show(FragmentManager fragmentManager, String tag){
-        if(!notif_on) super.show(fragmentManager, tag);
+        if(!background) super.show(fragmentManager, tag);
     }
 }

@@ -45,7 +45,7 @@ import static com.hijacker.MainActivity.show_na_st;
 import static com.hijacker.MainActivity.show_st;
 import static com.hijacker.MainActivity.sort;
 import static com.hijacker.MainActivity.sort_reverse;
-import static com.hijacker.MainActivity.temp_toFilter;
+import static com.hijacker.MainActivity.toSort;
 import static com.hijacker.MainActivity.wep;
 import static com.hijacker.MainActivity.wpa;
 
@@ -147,6 +147,9 @@ class Tile {
                 }
             }
         }
+        sort();
+    }
+    static void sort(){
         //sort allTiles 0/i for APs and i/allTiles.size() for STs
         if(sort!=SORT_NOSORT){
             if(debug) Log.d("HIJACKER/Tile", "Sorting: sort is " + sort + ", sort_reverse is " + sort_reverse);
@@ -228,7 +231,7 @@ class Tile {
                     break;
             }
         }
-        temp_toFilter = false;
+        toSort = false;
         MainActivity.refreshHandler.obtainMessage().sendToTarget();
     }
 }

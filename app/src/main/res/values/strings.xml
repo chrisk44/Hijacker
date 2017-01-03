@@ -15,7 +15,7 @@
 
     <!-- Main -->
     <string name="cap_notfound">cap file not found</string>
-    <string name="cap_is">Cap file is </string>
+    <string name="cap_is">Cap file is</string>
     <string name="app_dir_notfound1">App file directory doesn\'t exist: </string>
     <string name="app_dir_notfound2">. Reinstall the app.</string>
     <string name="disconnect_started">Disconnect All started</string>
@@ -29,10 +29,14 @@
     <string name="reaver_still_running">Reaver is still running!</string>
     <string name="reaver_not_running">Reaver is not running</string>
     <string name="oui_not_found">oui.txt file was not extracted. Manufacturer detection will not work. Restart the app to try again.</string>
+    <string name="su_notfound_title">SuperSU not found!</string>
+    <string name="su_notfound">You might be rooted, but at the moment, this application requires SuperSU to function properly.
+        You can continue if you believe that your root solution will work. Please don\'t report bugs.</string>
 
     <!-- wpa_thread -->
     <string name="stopped_to_capture">Stopped aireplay to capture handshake…</string>
-    <string name="handshake_captured">WPA handshake captured. Saved in file </string>
+    <string name="handshake_captured">WPA handshake captured.</string>
+    <string name="saved_in_file">Saved in file </string>
 
     <!-- DisclaimerDialog -->
     <string name="disclaimer_title">Disclaimer</string>
@@ -81,7 +85,8 @@
     <string name="installed_firm_util">Installed firmware and utility</string>
     <string name="firm_notfound_bcm">Firmware not found. Are you sure you have BCM4339?</string>
     <string name="create_backup">Create Backup</string>
-    <string name="fw_not_compatible">Your device does not seem to be compatible with Nexmon (BCM4339). If you want to install it anyway, press and hold Install.</string>
+    <string name="fw_not_compatible">Your device does not seem to be compatible with Nexmon (BCM4339). Long click to override.</string>
+    <string name="path_contains_system">Modifying the system partition can brick some devices. Long click to override.</string>
 
     <!-- InstallToolsDialog -->
     <string name="dir_notfound_tools">Directory for tools doesn\'t exist</string>
@@ -198,6 +203,7 @@
         It contains the app version, the Android version, the model of your device, and a Logcat to help troubleshoot the problem. Below is the report.txt that will be sent.
         Click \"Send report\" to report the problem.</string>
     <string name="send_report">Send report</string>
+    <string name="restart_hijacker">Restart Hijacker</string>
 
     <!-- CustomActionFragment -->
     <string name="select_action">Select action</string>
@@ -380,7 +386,6 @@
     <string name="cont_on_fail_sum">Continue running in chroot in case monstart-nh or the custom command fail</string>
 
     <string name="restore_firmware">Restore firmware</string>
-    <string name="no_backup">There is no backup. It is created when you install the tools through the app.</string>
     <string name="reset_title">Reset Preferences</string>
     <string name="send_feedback_title">Send feedback</string>
     <string name="send_feedback_sum">Via email</string>

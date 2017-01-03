@@ -8,12 +8,6 @@
         <item>Reaver</item>
         <item>Reaver in chroot</item>
     </array>
-    <array name="install_locations">
-        <item>/system/bin</item>
-        <item>/system/xbin</item>
-        <item>/su/bin</item>
-        <item>/su/xbin (recommended)</item>
-    </array>
     <array name="planets_array">
         <item>Airodump</item>
         <item>MDK3</item>

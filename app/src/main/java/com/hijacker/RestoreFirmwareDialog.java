@@ -22,6 +22,7 @@ import android.app.DialogFragment;
 import android.app.FragmentManager;
 import android.content.DialogInterface;
 import android.os.Bundle;
+import android.support.design.widget.Snackbar;
 import android.support.v7.app.AlertDialog;
 import android.util.Log;
 import android.view.View;
@@ -35,7 +36,7 @@ import java.io.File;
 import java.io.IOException;
 
 import static com.hijacker.MainActivity.debug;
-import static com.hijacker.MainActivity.notif_on;
+import static com.hijacker.MainActivity.background;
 import static com.hijacker.MainActivity.path;
 
 public class RestoreFirmwareDialog extends DialogFragment {
@@ -80,9 +81,9 @@ public class RestoreFirmwareDialog extends DialogFragment {
 
                     File firm = new File(firm_location);
                     if(!firm.exists()){
-                        Toast.makeText(getActivity(), R.string.dir_notfound_firm, Toast.LENGTH_SHORT).show();
+                        Snackbar.make(v, R.string.dir_notfound_firm, Snackbar.LENGTH_SHORT).show();
                     }else if(!(new File(firm_location + "/fw_bcmdhd.bin").exists())){
-                        Toast.makeText(getActivity(), R.string.firm_notfound, Toast.LENGTH_SHORT).show();
+                        Snackbar.make(v, R.string.firm_notfound, Snackbar.LENGTH_SHORT).show();
                     }else{
                         if(debug) Log.d("HIJACKER/RestoreFirm", "Restoring firmware in " + firm_location);
                         shell.run("busybox mount -o rw,remount,rw /system");
@@ -114,7 +115,7 @@ public class RestoreFirmwareDialog extends DialogFragment {
                             buffer = out.readLine();
                         }
                         if(lastline.equals("ENDOFFIND")){
-                            Toast.makeText(getActivity(), R.string.firm_notfound_bcm, Toast.LENGTH_LONG).show();
+                            Snackbar.make(v, R.string.firm_notfound_bcm, Snackbar.LENGTH_LONG).show();
                         }else{
                             lastline = lastline.substring(0, lastline.length()-14);
                             ((EditText)view.findViewById(R.id.firm_location)).setText(lastline);
@@ -134,6 +135,6 @@ public class RestoreFirmwareDialog extends DialogFragment {
     }
     @Override
     public void show(FragmentManager fragmentManager, String tag){
-        if(!notif_on) super.show(fragmentManager, tag);
+        if(!background) super.show(fragmentManager, tag);
     }
 }

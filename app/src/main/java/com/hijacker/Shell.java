@@ -71,7 +71,7 @@ class Shell{
             MainActivity.getLastLine(shell_out, "ENDOFCLEAR");      //This will read up to the last line and stop, effectively clearing shell_out
             shell_out.reset();                                      //<--- since this doesn't seem to do the job
         }catch(IOException ignored){}
-        free.add(this);
+        if(!free.contains(this)) free.add(this);
     }
     static Shell getFreeShell(){
         if(free.isEmpty()) return new Shell();

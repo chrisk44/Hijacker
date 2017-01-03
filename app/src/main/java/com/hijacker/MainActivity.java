@@ -90,7 +90,8 @@ public class MainActivity extends AppCompatActivity{
     static final int MDK_BF=0, MDK_ADOS=1;
     static final int SORT_NOSORT = 0, SORT_ESSID = 1, SORT_BEACONS_FRAMES = 2, SORT_DATA_FRAMES = 3, SORT_PWR = 4;
     //State variables
-    static boolean cont = false, wpacheckcont = false, done = true, notif_on = false;  //done: for calling refreshHandler only when it has stopped
+    static boolean cont = false, wpacheckcont = false, done = true;  //done: for calling refreshHandler only when it has stopped
+    static boolean notif_on = false, background = false;    //notif_on: notification should be shown, background: the app is running in the background
     static int airodump_running = 0, aireplay_running = 0, currentFragment=FRAGMENT_AIRODUMP;         //Set currentFragment in onResume of each Fragment
     //Filters
     static boolean show_ap = true, show_st = true, show_na_st = true, wpa = true, wep = true, opn = true;
@@ -98,7 +99,7 @@ public class MainActivity extends AppCompatActivity{
     static int pwr_filter = 120;
     static int sort = SORT_NOSORT;
     static boolean sort_reverse = false;
-    static boolean temp_toFilter = false;     //Variable to mark that the list must be sorted, so Tile.filter() must be called
+    static boolean toSort = false;     //Variable to mark that the list must be sorted, so Tile.sort() must be called
     static TextView ap_count, st_count;                               //AP and ST count textviews in toolbar
     static ProgressBar progress;
     static Toolbar toolbar;
@@ -115,7 +116,7 @@ public class MainActivity extends AppCompatActivity{
     static SharedPreferences pref;
     static SharedPreferences.Editor pref_edit;
     static ClipboardManager clipboard;
-    static NotificationCompat.Builder notif, notif2;
+    static NotificationCompat.Builder notif, error_notif, handshake_notif;
     static NotificationManager nm;
     static FragmentManager fm;
     static String path, version;             //App files path (ends with .../files)
@@ -203,7 +204,7 @@ public class MainActivity extends AppCompatActivity{
                                 public void run(){
                                     if(wpacheckcont){
                                         stop(PROCESS_AIREPLAY);
-                                        if(getCurrentFocus()!=null) Snackbar.make(getCurrentFocus(), getString(R.string.stopped_to_capture), Snackbar.LENGTH_LONG).show();
+                                        if(getCurrentFocus()!=null && !background) Snackbar.make(getCurrentFocus(), getString(R.string.stopped_to_capture), Snackbar.LENGTH_LONG).show();
                                         else Toast.makeText(MainActivity.this, getString(R.string.stopped_to_capture), Toast.LENGTH_SHORT).show();
                                         progress.setIndeterminate(true);
                                     }else{
@@ -233,8 +234,7 @@ public class MainActivity extends AppCompatActivity{
                             Log.d("HIJACKER/wpa_thread", "Returning...");
                         }
                     }else{
-                        if(getCurrentFocus()!=null) Snackbar.make(getCurrentFocus(), getString(R.string.cap_is) + capfile, Snackbar.LENGTH_LONG).show();
-                        else Toast.makeText(MainActivity.this, getString(R.string.cap_is) + capfile, Toast.LENGTH_SHORT).show();
+                        if(getCurrentFocus()!=null) Snackbar.make(getCurrentFocus(), getString(R.string.cap_is) + ' ' + capfile, Snackbar.LENGTH_LONG).show();
                         progress_int = 0;
                         wpacheckcont = true;
                         wpa_subthread.start();
@@ -261,8 +261,11 @@ public class MainActivity extends AppCompatActivity{
                             if(temp==1){
                                 stop(PROCESS_AIRODUMP);
                                 stop(PROCESS_AIREPLAY);
-                                if(getCurrentFocus()!=null) Snackbar.make(getCurrentFocus(), getString(R.string.handshake_captured) + ' ' + capfile, Snackbar.LENGTH_LONG).show();
-                                else Toast.makeText(MainActivity.this, getString(R.string.handshake_captured), Toast.LENGTH_SHORT).show();
+                                if(getCurrentFocus()!=null && !background) Snackbar.make(getCurrentFocus(), getString(R.string.handshake_captured) + ' ' + capfile, Snackbar.LENGTH_LONG).show();
+                                else{
+                                    handshake_notif.setContentText(getString(R.string.saved_in_file) + ' ' + capfile);
+                                    nm.notify(2, handshake_notif.build());
+                                }
                             }
                             progress.setIndeterminate(false);
                             progress.setProgress(deauthWait);
@@ -292,7 +295,7 @@ public class MainActivity extends AppCompatActivity{
                     boolean flag = true;
                     while(flag){
                         Thread.sleep(5000);
-                        if(System.currentTimeMillis()-last_action < 1000){
+                        while(System.currentTimeMillis()-last_action < 1000){
                             if(debug) Log.d("HIJACKER/watchdog", "Watchdog waiting for 1 sec...");
                             Thread.sleep(1000);
                         }
@@ -407,6 +410,13 @@ public class MainActivity extends AppCompatActivity{
         if(!pref.getBoolean("disclaimer", false)){
             mDrawerLayout.openDrawer(GravityCompat.START);      //Can't open it later
             new DisclaimerDialog().show(fm, "Disclaimer");
+            File su = new File("/su");
+            if(!su.exists()){
+                ErrorDialog dialog = new ErrorDialog();
+                dialog.setTitle(getString(R.string.su_notfound_title));
+                dialog.setMessage(getString(R.string.su_notfound));
+                dialog.show(getFragmentManager(), "ErrorDialog");
+            }
         }else main();
 
         File report = new File(Environment.getExternalStorageDirectory() + "/report.txt");
@@ -639,6 +649,7 @@ public class MainActivity extends AppCompatActivity{
                     public void run(){
                         if(menu!=null) menu.getItem(1).setIcon(R.drawable.run);
                         Tile.filter();
+                        if(wpa_thread.isAlive()) progress.setIndeterminate(false);
                     }
                 });
                 if(wpa_thread.isAlive()){
@@ -715,7 +726,7 @@ public class MainActivity extends AppCompatActivity{
             ap_count.setText(Integer.toString(is_ap==null ? Tile.i : 1));
             st_count.setText(Integer.toString(Tile.tiles.size() - Tile.i));
             notification();
-            if(temp_toFilter && !notif_on) Tile.filter();
+            if(toSort && !background) Tile.sort();
             done = true;
         }
     };
@@ -743,7 +754,7 @@ public class MainActivity extends AppCompatActivity{
     void setup(){
         try{
             version = getPackageManager().getPackageInfo(this.getPackageName(), 0).versionName;
-        }catch(PackageManager.NameNotFoundException ignored){}
+        }catch(PackageManager.NameNotFoundException e){ Log.e("setup()", "Exception: " + e.toString()); }
         ap_count = (TextView) findViewById(R.id.ap_count);
         st_count = (TextView) findViewById(R.id.st_count);
         fifo = new ArrayList<>();
@@ -809,15 +820,24 @@ public class MainActivity extends AppCompatActivity{
         PendingIntent click_intent = PendingIntent.getActivity(this, 0, notificationIntent, 0);
         notif.setContentIntent(click_intent);
 
-        notif2 = new NotificationCompat.Builder(this);
-        notif2.setContentTitle(getString(R.string.notification2_title));
-        notif2.setContentText("");
-        notif2.setSmallIcon(R.drawable.ic_notification);
+        error_notif = new NotificationCompat.Builder(this);
+        error_notif.setContentTitle(getString(R.string.notification2_title));
+        error_notif.setContentText("");
+        error_notif.setSmallIcon(R.drawable.ic_notification);
         if(Build.VERSION.SDK_INT>=Build.VERSION_CODES.M){
-            notif2.setColor(getColor(android.R.color.holo_red_dark));
+            error_notif.setColor(getColor(android.R.color.holo_red_dark));
         }
-        notif2.setContentIntent(click_intent);
-        notif2.setVibrate(new long[]{500, 500});
+        error_notif.setContentIntent(click_intent);
+        error_notif.setVibrate(new long[]{500, 500});
+
+        handshake_notif = new NotificationCompat.Builder(this);
+        handshake_notif.setContentTitle(getString(R.string.handshake_captured));
+        if(Build.VERSION.SDK_INT>=Build.VERSION_CODES.M){
+            handshake_notif.setColor(getColor(android.R.color.holo_green_dark));
+        }
+        handshake_notif.setSmallIcon(R.drawable.ic_notification);
+        handshake_notif.setContentIntent(click_intent);
+        handshake_notif.setVibrate(new long[]{500, 500});
 
         nm = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
 
@@ -909,8 +929,6 @@ public class MainActivity extends AppCompatActivity{
                 if(cont){
                     //Running
                     stop(PROCESS_AIRODUMP);
-                    stop(PROCESS_AIREPLAY);
-                    stop(PROCESS_MDK);
                 }else{
                     if(is_ap==null) startAirodump(null);
                     else startAirodump("--channel " + is_ap.ch + " --bssid " + is_ap.mac);
@@ -963,6 +981,7 @@ public class MainActivity extends AppCompatActivity{
     protected void onResume(){
         super.onResume();
         notif_on = false;
+        background = false;
         if(nm!=null) nm.cancelAll();
         if(!watchdog_thread.isAlive() && watchdog){
             watchdog_thread = new Thread(watchdog_runnable);
@@ -973,6 +992,7 @@ public class MainActivity extends AppCompatActivity{
     protected void onStop(){
         super.onStop();
         AppIndex.AppIndexApi.end(client, getIndexApiAction());
+        background = true;
         if(show_notif){
             notif_on = true;
             notification();

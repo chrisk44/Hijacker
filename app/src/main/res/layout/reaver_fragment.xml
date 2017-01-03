@@ -22,6 +22,7 @@
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
+            android:labelFor="@+id/pin_delay"
             android:textColor="?android:attr/textColorPrimary"
             android:textSize="18sp"/>
 
@@ -44,6 +45,7 @@
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
+            android:labelFor="@+id/locked_delay"
             android:textColor="?android:attr/textColorPrimary"
             android:textSize="18sp"/>
 

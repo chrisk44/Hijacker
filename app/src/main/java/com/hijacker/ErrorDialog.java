@@ -26,8 +26,8 @@ import android.support.v7.app.AlertDialog;
 import android.util.Log;
 
 import static com.hijacker.MainActivity.nm;
-import static com.hijacker.MainActivity.notif2;
-import static com.hijacker.MainActivity.notif_on;
+import static com.hijacker.MainActivity.error_notif;
+import static com.hijacker.MainActivity.background;
 import static com.hijacker.MainActivity.watchdog_runnable;
 import static com.hijacker.MainActivity.watchdog_thread;
 
@@ -71,16 +71,16 @@ public class ErrorDialog extends DialogFragment {
     }
     @Override
     public void show(FragmentManager fragmentManager, String tag){
-        if(!notif_on) super.show(fragmentManager, tag);
+        if(!background) super.show(fragmentManager, tag);
         else{
             if(this.watchdog){
-                notif2.setContentTitle(notification2_title);
-                notif2.setContentText(title);
+                error_notif.setContentTitle(notification2_title);
+                error_notif.setContentText(title);
             }else{
-                notif2.setContentTitle(title);
-                notif2.setContentText(message);
+                error_notif.setContentTitle(title);
+                error_notif.setContentText(message);
             }
-            nm.notify(1, notif2.build());
+            nm.notify(1, error_notif.build());
         }
     }
 }
