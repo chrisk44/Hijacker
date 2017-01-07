@@ -42,6 +42,7 @@ import static com.hijacker.MainActivity.FRAGMENT_CUSTOM;
 import static com.hijacker.MainActivity.currentFragment;
 import static com.hijacker.MainActivity.debug;
 import static com.hijacker.MainActivity.progress;
+import static com.hijacker.MainActivity.refreshDrawer;
 
 public class CustomActionFragment extends Fragment{
     static CustomAction selected_action=null;
@@ -224,6 +225,7 @@ public class CustomActionFragment extends Fragment{
         super.onResume();
         console.setText(console_text);
         currentFragment = FRAGMENT_CUSTOM;
+        refreshDrawer();
     }
     @Override
     public void onPause(){

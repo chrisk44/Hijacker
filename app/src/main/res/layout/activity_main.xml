@@ -82,11 +82,10 @@
             android:layout_below="@+id/my_toolbar"
             android:maxHeight="5dp" />
 
-        <fragment
+        <FrameLayout
             android:id="@+id/fragment1"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:name="com.hijacker.MyListFragment"
             android:layout_below="@+id/progressBar"
             android:layout_marginTop="3dp" />
 

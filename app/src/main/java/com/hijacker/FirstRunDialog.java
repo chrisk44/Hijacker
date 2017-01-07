@@ -22,10 +22,14 @@ import android.app.DialogFragment;
 import android.app.FragmentManager;
 import android.content.DialogInterface;
 import android.os.Bundle;
+import android.support.v4.view.GravityCompat;
 import android.support.v7.app.AlertDialog;
 
+import static com.hijacker.MainActivity.arch;
+import static com.hijacker.MainActivity.mDrawerLayout;
 import static com.hijacker.MainActivity.main;
 import static com.hijacker.MainActivity.background;
+import static com.hijacker.MainActivity.startAirodump;
 
 public class FirstRunDialog extends DialogFragment {
     @Override
@@ -36,14 +40,23 @@ public class FirstRunDialog extends DialogFragment {
         builder.setTitle(R.string.first_run_title);
         builder.setPositiveButton(R.string.setup, new DialogInterface.OnClickListener() {
             public void onClick(DialogInterface dialog, int id) {
-                MainActivity.init = true;
-                new InstallFirmwareDialog().show(getFragmentManager(), "InstallFirmwareDialog");
+                if(arch.equals("armv7l")){
+                    MainActivity.init = true;
+                    new InstallFirmwareDialog().show(getFragmentManager(), "InstallFirmwareDialog");
+                }else{
+                    mDrawerLayout.openDrawer(GravityCompat.START);
+                    ErrorDialog errdialog = new ErrorDialog();
+                    errdialog.setMessage(getString(R.string.not_armv7l));
+                    errdialog.show(getFragmentManager(), "ErrorDialog");
+                }
             }
         });
         builder.setNegativeButton(R.string.home, new DialogInterface.OnClickListener() {
             public void onClick(DialogInterface dialog, int id) {
                 //return
                 dismissAllowingStateLoss();
+                mDrawerLayout.openDrawer(GravityCompat.START);
+                startAirodump(null);
                 main();
             }
         });

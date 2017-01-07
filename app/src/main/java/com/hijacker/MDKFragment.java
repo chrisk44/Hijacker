@@ -39,6 +39,7 @@ import static com.hijacker.MainActivity.MDK_ADOS;
 import static com.hijacker.MainActivity.MDK_BF;
 import static com.hijacker.MainActivity.currentFragment;
 import static com.hijacker.MainActivity.debug;
+import static com.hijacker.MainActivity.refreshDrawer;
 import static com.hijacker.MainActivity.runInHandler;
 import static com.hijacker.MainActivity.startMdk;
 import static com.hijacker.MainActivity.stop;
@@ -193,6 +194,7 @@ public class MDKFragment extends Fragment{
     public void onResume() {
         super.onResume();
         currentFragment = FRAGMENT_MDK;
+        refreshDrawer();
     }
     @Override
     public void onPause(){

@@ -20,7 +20,9 @@ package com.hijacker;
 import android.app.Dialog;
 import android.app.DialogFragment;
 import android.app.FragmentManager;
+import android.content.Context;
 import android.content.DialogInterface;
+import android.net.wifi.WifiManager;
 import android.os.Bundle;
 import android.support.design.widget.Snackbar;
 import android.support.v7.app.AlertDialog;
@@ -86,12 +88,15 @@ public class RestoreFirmwareDialog extends DialogFragment {
                         Snackbar.make(v, R.string.firm_notfound, Snackbar.LENGTH_SHORT).show();
                     }else{
                         if(debug) Log.d("HIJACKER/RestoreFirm", "Restoring firmware in " + firm_location);
+                        WifiManager wifiManager = (WifiManager) getActivity().getSystemService(Context.WIFI_SERVICE);
+                        wifiManager.setWifiEnabled(false);
+
                         shell.run("busybox mount -o rw,remount,rw /system");
-
                         shell.run("cp " + path + "/fw_bcmdhd.orig.bin " + firm_location + "/fw_bcmdhd.bin");
-                        Toast.makeText(getActivity(), R.string.restored, Toast.LENGTH_SHORT).show();
-
                         shell.run("busybox mount -o ro,remount,ro /system");
+
+                        Toast.makeText(getActivity(), R.string.restored, Toast.LENGTH_SHORT).show();
+                        wifiManager.setWifiEnabled(true);
                         dismissAllowingStateLoss();
                     }
                 }

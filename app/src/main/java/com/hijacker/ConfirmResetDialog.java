@@ -51,7 +51,6 @@ public class ConfirmResetDialog extends DialogFragment {
                 pref_edit.putBoolean("show_details", Boolean.parseBoolean(getString(R.string.show_details)));
                 pref_edit.putBoolean("airOnStartup", Boolean.parseBoolean(getString(R.string.airOnStartup)));
                 pref_edit.putBoolean("debug", Boolean.parseBoolean(getString(R.string.debug)));
-                pref_edit.putBoolean("confirm_exit", Boolean.parseBoolean(getString(R.string.confirm_exit)));
                 pref_edit.putBoolean("delete_extra", Boolean.parseBoolean(getString(R.string.delete_extra)));
                 pref_edit.commit();
                 load();
@@ -59,9 +58,7 @@ public class ConfirmResetDialog extends DialogFragment {
             }
         });
         builder.setNegativeButton(R.string.no, new DialogInterface.OnClickListener() {
-            public void onClick(DialogInterface dialog, int id) {
-                //return
-            }
+            public void onClick(DialogInterface dialog, int id) {}
         });
         return builder.create();
     }

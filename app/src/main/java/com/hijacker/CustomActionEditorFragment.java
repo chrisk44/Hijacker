@@ -34,6 +34,7 @@ import static com.hijacker.CustomAction.cmds;
 import static com.hijacker.CustomAction.save;
 import static com.hijacker.MainActivity.FRAGMENT_CUSTOM;
 import static com.hijacker.MainActivity.currentFragment;
+import static com.hijacker.MainActivity.refreshDrawer;
 
 public class CustomActionEditorFragment extends Fragment{
     CustomAction action;
@@ -130,5 +131,6 @@ public class CustomActionEditorFragment extends Fragment{
     public void onResume(){
         super.onResume();
         currentFragment = FRAGMENT_CUSTOM;
+        refreshDrawer();
     }
 }

@@ -23,6 +23,7 @@ import android.app.FragmentManager;
 import android.content.DialogInterface;
 import android.os.Bundle;
 import android.support.design.widget.Snackbar;
+import android.support.v4.view.GravityCompat;
 import android.support.v7.app.AlertDialog;
 import android.util.Log;
 import android.view.HapticFeedbackConstants;
@@ -39,6 +40,7 @@ import java.io.InputStream;
 import static com.hijacker.MainActivity.debug;
 import static com.hijacker.MainActivity.init;
 import static com.hijacker.MainActivity.load;
+import static com.hijacker.MainActivity.mDrawerLayout;
 import static com.hijacker.MainActivity.main;
 import static com.hijacker.MainActivity.background;
 import static com.hijacker.MainActivity.path;
@@ -118,6 +120,7 @@ public class InstallToolsDialog extends DialogFragment {
         super.onDismiss(dialog);
         if(init){
             init = false;
+            mDrawerLayout.openDrawer(GravityCompat.START);
             main();
         }
     }

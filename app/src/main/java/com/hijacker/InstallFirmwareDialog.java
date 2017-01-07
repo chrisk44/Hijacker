@@ -35,16 +35,19 @@ import android.widget.EditText;
 import android.widget.ProgressBar;
 import android.widget.Toast;
 
-import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 
+import static com.hijacker.MainActivity.PROCESS_AIRODUMP;
 import static com.hijacker.MainActivity.debug;
 import static com.hijacker.MainActivity.getLastLine;
 import static com.hijacker.MainActivity.background;
+import static com.hijacker.MainActivity.getPIDs;
 import static com.hijacker.MainActivity.path;
+import static com.hijacker.MainActivity.startAirodump;
+import static com.hijacker.MainActivity.stop;
 
 public class InstallFirmwareDialog extends DialogFragment {
     View view;
@@ -58,9 +61,8 @@ public class InstallFirmwareDialog extends DialogFragment {
         if(!(new File("/su").exists())){
             ((EditText)view.findViewById(R.id.util_location)).setText("/system/xbin");
         }
-        if(new File(path + "/fw_bcmdhd.orig.bin").exists()){
-            ((CheckBox)view.findViewById(R.id.backup)).setChecked(false);
-        }
+        ((CheckBox) view.findViewById(R.id.backup)).setChecked(!(new File(path + "/fw_bcmdhd.orig.bin").exists()));
+
 
         shell = Shell.getFreeShell();
 
@@ -157,6 +159,13 @@ public class InstallFirmwareDialog extends DialogFragment {
         if(!background) super.show(fragmentManager, tag);
     }
     void install(String firm_location, String util_location){
+        boolean start_airodump = false;
+        if(getPIDs(PROCESS_AIRODUMP).size()>0){
+            start_airodump = true;
+            stop(0);
+        }
+        WifiManager wifiManager = (WifiManager) getActivity().getSystemService(Context.WIFI_SERVICE);
+        wifiManager.setWifiEnabled(false);
         if(debug) Log.d("HIJACKER/InstFirmware", "Backing up firmware from " + firm_location);
         if(((CheckBox)view.findViewById(R.id.backup)).isChecked()){
             if(new File(path + "/fw_bcmdhd.orig.bin").exists()){
@@ -173,14 +182,14 @@ public class InstallFirmwareDialog extends DialogFragment {
             Log.d("HIJACKER/InstFirmware", "Installing firmware in " + firm_location);
             Log.d("HIJACKER/InstFirmware", "Installing utility in " + util_location);
         }
-        WifiManager wifiManager = (WifiManager) getActivity().getSystemService(Context.WIFI_SERVICE);
-        wifiManager.setWifiEnabled(false);
         shell.run("busybox mount -o rw,remount,rw /system");
         extract("fw_bcmdhd.bin", firm_location);
         extract("nexutil", util_location);
         shell.run("busybox mount -o ro,remount,ro /system");
         Toast.makeText(getActivity(), R.string.installed_firm_util, Toast.LENGTH_SHORT).show();
         wifiManager.setWifiEnabled(true);
+
+        if(start_airodump) startAirodump(null);
     }
     boolean check(String firm_location, String util_location, boolean override, View v){
         File firm = new File(firm_location);

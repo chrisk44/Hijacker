@@ -39,7 +39,8 @@ import static com.hijacker.MainActivity.currentFragment;
 import static com.hijacker.MainActivity.debug;
 import static com.hijacker.MainActivity.iface;
 import static com.hijacker.MainActivity.prefix;
-import static com.hijacker.MainActivity.startAirodump;
+import static com.hijacker.MainActivity.refreshDrawer;
+import static com.hijacker.MainActivity.startAirodumpForAP;
 import static com.hijacker.MainActivity.startMdk;
 
 public class MyListFragment extends ListFragment {
@@ -90,7 +91,7 @@ public class MyListFragment extends ListFragment {
                         case 3:
                             //Watch
                             MainActivity.isolate(clicked.ap.mac);
-                            startAirodump("--channel " + clicked.ap.ch + " --bssid " + clicked.ap.mac);
+                            startAirodumpForAP(clicked.ap, null);
                             break;
                         case 5:
                             //Disconnect client
@@ -183,5 +184,6 @@ public class MyListFragment extends ListFragment {
     public void onResume(){
         super.onResume();
         currentFragment = FRAGMENT_AIRODUMP;
+        refreshDrawer();
     }
 }

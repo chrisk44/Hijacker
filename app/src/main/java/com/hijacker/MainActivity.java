@@ -39,8 +39,8 @@ import android.preference.PreferenceManager;
 import android.support.design.widget.Snackbar;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
-import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
+import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.app.NotificationCompat;
 import android.support.v7.widget.Toolbar;
@@ -119,17 +119,18 @@ public class MainActivity extends AppCompatActivity{
     static NotificationCompat.Builder notif, error_notif, handshake_notif;
     static NotificationManager nm;
     static FragmentManager fm;
-    static String path, version;             //App files path (ends with .../files)
+    static String path, version, arch;             //App files path (ends with .../files)
     static boolean init=false;      //True on first run to swap the dialogs for initialization
+    static ActionBar actionBar;
     private GoogleApiClient client;
-    private String[] mPlanetTitles;
-    private DrawerLayout mDrawerLayout;
-    protected ListView mDrawerList;
+    static String[] mPlanetTitles;
+    static DrawerLayout mDrawerLayout;
+    static ListView mDrawerList;
     //Preferences - Defaults are in strings.xml
     static String iface, prefix, airodump_dir, aireplay_dir, aircrack_dir, mdk3_dir, reaver_dir, cap_dir, chroot_dir,
             enable_monMode, disable_monMode, custom_chroot_cmd;
     static int deauthWait;
-    static boolean show_notif, show_details, airOnStartup, debug, confirm_exit, delete_extra, manuf_while_ados,
+    static boolean show_notif, show_details, airOnStartup, debug, delete_extra, manuf_while_ados,
             monstart, always_cap, cont_on_fail, watchdog;
 
     @Override
@@ -152,7 +153,6 @@ public class MainActivity extends AppCompatActivity{
                 startActivity(intent);
 
                 finish();
-
                 System.exit(1);
             }
         });
@@ -204,7 +204,7 @@ public class MainActivity extends AppCompatActivity{
                                 public void run(){
                                     if(wpacheckcont){
                                         stop(PROCESS_AIREPLAY);
-                                        if(getCurrentFocus()!=null && !background) Snackbar.make(getCurrentFocus(), getString(R.string.stopped_to_capture), Snackbar.LENGTH_LONG).show();
+                                        if(!background) Snackbar.make(findViewById(R.id.fragment1), getString(R.string.stopped_to_capture), Snackbar.LENGTH_SHORT).show();
                                         else Toast.makeText(MainActivity.this, getString(R.string.stopped_to_capture), Toast.LENGTH_SHORT).show();
                                         progress.setIndeterminate(true);
                                     }else{
@@ -234,7 +234,7 @@ public class MainActivity extends AppCompatActivity{
                             Log.d("HIJACKER/wpa_thread", "Returning...");
                         }
                     }else{
-                        if(getCurrentFocus()!=null) Snackbar.make(getCurrentFocus(), getString(R.string.cap_is) + ' ' + capfile, Snackbar.LENGTH_LONG).show();
+                        Snackbar.make(findViewById(R.id.fragment1), getString(R.string.cap_is) + ' ' + capfile, Snackbar.LENGTH_LONG).show();
                         progress_int = 0;
                         wpacheckcont = true;
                         wpa_subthread.start();
@@ -261,7 +261,7 @@ public class MainActivity extends AppCompatActivity{
                             if(temp==1){
                                 stop(PROCESS_AIRODUMP);
                                 stop(PROCESS_AIREPLAY);
-                                if(getCurrentFocus()!=null && !background) Snackbar.make(getCurrentFocus(), getString(R.string.handshake_captured) + ' ' + capfile, Snackbar.LENGTH_LONG).show();
+                                if(!background) Snackbar.make(findViewById(R.id.fragment1), getString(R.string.handshake_captured) + ' ' + capfile, Snackbar.LENGTH_LONG).show();
                                 else{
                                     handshake_notif.setContentText(getString(R.string.saved_in_file) + ' ' + capfile);
                                     nm.notify(2, handshake_notif.build());
@@ -269,7 +269,7 @@ public class MainActivity extends AppCompatActivity{
                             }
                             progress.setIndeterminate(false);
                             progress.setProgress(deauthWait);
-                            if(getCurrentFocus()!=null) ((Button)findViewById(R.id.crack)).setText(getString(R.string.crack));
+                            ((Button)findViewById(R.id.crack)).setText(getString(R.string.crack));
                         }
                     });
                 }catch(IOException | InterruptedException e){
@@ -394,7 +394,6 @@ public class MainActivity extends AppCompatActivity{
             dialog.show(getFragmentManager(), "ErrorDialog");
         }
 
-        String arch = System.getProperty("os.arch");
         if(arch.equals("armv7l")){
             if(new File("/su").exists()){
                 if(debug) Log.d("HIJACKER/onCreate", "Installing busybox in /su/xbin...");
@@ -407,8 +406,30 @@ public class MainActivity extends AppCompatActivity{
             }else if(debug) Log.d("HIJACKER/onCreate", "No /su to install busybox");
         }else if(debug) Log.d("HIJACKER/onCreate", "Cannot install busybox, arch is " + arch);
 
+
+        new Thread(new Runnable(){      //Thread to wait until the drawer is initialized and then highlight airodump
+            @Override
+            public void run(){
+                try{
+                    while(mDrawerList.getChildAt(0)==null){
+                        Thread.sleep(100);
+                    }
+                    runInHandler(new Runnable(){
+                        @Override
+                        public void run(){
+                            refreshDrawer();
+                        }
+                    });
+                }catch(InterruptedException ignored){}
+            }
+        }).start();
+
+        if(watchdog){
+            watchdog_thread = new Thread(watchdog_runnable);
+            watchdog_thread.start();
+        }
+
         if(!pref.getBoolean("disclaimer", false)){
-            mDrawerLayout.openDrawer(GravityCompat.START);      //Can't open it later
             new DisclaimerDialog().show(fm, "Disclaimer");
             File su = new File("/su");
             if(!su.exists()){
@@ -505,6 +526,9 @@ public class MainActivity extends AppCompatActivity{
                 notification();
             }
         });
+    }
+    public static void startAirodumpForAP(AP ap, String extra){
+        startAirodump("--channel " + ap.ch + " --bssid " + ap.mac + (extra==null ? "" : ' ' + extra));
     }
 
     public static void _startAireplay(final String str){
@@ -755,6 +779,7 @@ public class MainActivity extends AppCompatActivity{
         try{
             version = getPackageManager().getPackageInfo(this.getPackageName(), 0).versionName;
         }catch(PackageManager.NameNotFoundException e){ Log.e("setup()", "Exception: " + e.toString()); }
+        arch = System.getProperty("os.arch");
         ap_count = (TextView) findViewById(R.id.ap_count);
         st_count = (TextView) findViewById(R.id.st_count);
         fifo = new ArrayList<>();
@@ -764,6 +789,7 @@ public class MainActivity extends AppCompatActivity{
         clipboard = (ClipboardManager) getSystemService(CLIPBOARD_SERVICE);
         fm = getFragmentManager();
         toolbar = (Toolbar) findViewById(R.id.my_toolbar);
+        actionBar = getSupportActionBar();
         overflow[0] = getDrawable(R.drawable.overflow0);
         overflow[1] = getDrawable(R.drawable.overflow1);
         overflow[2] = getDrawable(R.drawable.overflow2);
@@ -790,7 +816,6 @@ public class MainActivity extends AppCompatActivity{
         show_details = Boolean.parseBoolean(getString(R.string.show_details));
         airOnStartup = Boolean.parseBoolean(getString(R.string.airOnStartup));
         debug = Boolean.parseBoolean(getString(R.string.debug));
-        confirm_exit = Boolean.parseBoolean(getString(R.string.confirm_exit));
         delete_extra = Boolean.parseBoolean(getString(R.string.delete_extra));
         manuf_while_ados = Boolean.parseBoolean(getString(R.string.manuf_while_ados));
         always_cap = Boolean.parseBoolean(getString(R.string.always_cap));
@@ -866,7 +891,6 @@ public class MainActivity extends AppCompatActivity{
         ft.setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN);
         ft.addToBackStack(null);
         ft.commitAllowingStateLoss();
-        getSupportActionBar().setTitle(mPlanetTitles[currentFragment]);
 
         //Google AppIndex
         client = new GoogleApiClient.Builder(this).addApi(AppIndex.API).build();
@@ -883,7 +907,7 @@ public class MainActivity extends AppCompatActivity{
     }
     static void load(){
         //Load Preferences
-        if(debug) Log.d("HIJACKER/Main", "Loading preferences...");
+        if(debug) Log.d("HIJACKER/load", "Loading preferences...");
 
         iface = pref.getString("iface", iface);
         prefix = pref.getString("prefix", prefix);
@@ -903,7 +927,6 @@ public class MainActivity extends AppCompatActivity{
         airOnStartup = pref.getBoolean("airOnStartup", airOnStartup);
         debug = pref.getBoolean("debug", debug);
         watchdog = pref.getBoolean("watchdog", watchdog);
-        confirm_exit = pref.getBoolean("confirm_exit", confirm_exit);
         delete_extra = pref.getBoolean("delete_extra", delete_extra);
         manuf_while_ados = pref.getBoolean("manuf_while_ados", manuf_while_ados);
         always_cap = pref.getBoolean("always_cap", always_cap);
@@ -922,7 +945,7 @@ public class MainActivity extends AppCompatActivity{
                 st_count.setText("0");
                 stop(PROCESS_AIRODUMP);
                 if(is_ap==null) startAirodump(null);
-                else startAirodump("--channel " + is_ap.ch + " --bssid " + is_ap.mac);
+                else startAirodumpForAP(is_ap, null);
                 return true;
 
             case R.id.stop_run:
@@ -931,7 +954,7 @@ public class MainActivity extends AppCompatActivity{
                     stop(PROCESS_AIRODUMP);
                 }else{
                     if(is_ap==null) startAirodump(null);
-                    else startAirodump("--channel " + is_ap.ch + " --bssid " + is_ap.mac);
+                    else startAirodumpForAP(is_ap, null);
                 }
                 return true;
 
@@ -983,10 +1006,6 @@ public class MainActivity extends AppCompatActivity{
         notif_on = false;
         background = false;
         if(nm!=null) nm.cancelAll();
-        if(!watchdog_thread.isAlive() && watchdog){
-            watchdog_thread = new Thread(watchdog_runnable);
-            watchdog_thread.start();
-        }
     }
     @Override
     protected void onStop(){
@@ -1005,12 +1024,8 @@ public class MainActivity extends AppCompatActivity{
             if(mDrawerLayout.isDrawerOpen(mDrawerList)){
                 mDrawerLayout.closeDrawer(mDrawerList);
             }else if(getFragmentManager().getBackStackEntryCount()>1){
-                mDrawerList.getChildAt(currentFragment).setBackgroundResource(R.color.colorPrimary);
-                getFragmentManager().popBackStack();
-                getFragmentManager().executePendingTransactions();                  //need to wait for currentFragment to update
-                getSupportActionBar().setTitle(mPlanetTitles[currentFragment]);
-                mDrawerList.getChildAt(currentFragment).setBackgroundResource(R.color.colorAccent);
-            }else if(confirm_exit){
+                getFragmentManager().popBackStackImmediate();
+            }else{
                 new ExitDialog().show(fm, "ExitDialog");
             }
             return true;
@@ -1035,7 +1050,7 @@ public class MainActivity extends AppCompatActivity{
         AppIndex.AppIndexApi.start(client, getIndexApiAction());
     }
     public Action getIndexApiAction(){
-        Thing object = new Thing.Builder().setName("Home Screen")
+        Thing object = new Thing.Builder().setName("AirodumpGUI")
                 .setUrl(Uri.parse("https://github.com/chrisk44/Hijacker")).build();
         return new Action.Builder(Action.TYPE_VIEW).setObject(object).setActionStatus(Action.STATUS_TYPE_COMPLETED).build();
     }
@@ -1044,7 +1059,6 @@ public class MainActivity extends AppCompatActivity{
         @Override
         public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
             if(currentFragment!=position){
-                mDrawerList.getChildAt(currentFragment).setBackgroundResource(R.color.colorPrimary);
                 FragmentTransaction ft = fm.beginTransaction();
                 switch(position){
                     case FRAGMENT_AIRODUMP:
@@ -1070,9 +1084,6 @@ public class MainActivity extends AppCompatActivity{
                 ft.addToBackStack(null);
                 ft.commitAllowingStateLoss();
                 fm.executePendingTransactions();
-
-                getSupportActionBar().setTitle(mPlanetTitles[position]);
-                mDrawerList.getChildAt(currentFragment).setBackgroundResource(R.color.colorAccent);
             }
             mDrawerLayout.closeDrawer(mDrawerList);
         }
@@ -1176,11 +1187,13 @@ public class MainActivity extends AppCompatActivity{
     public void onCrack(View v){
         //Clicked crack with isolated ap
         if(wpa_thread.isAlive()){
+            wpa_thread.interrupt();
             stop(PROCESS_AIRODUMP);
             stop(PROCESS_AIREPLAY);
             ((TextView)v).setText(R.string.crack);
             progress.setIndeterminate(false);
             progress.setProgress(deauthWait);
+            startAirodumpForAP(is_ap, null);
         }else{
             is_ap.crack();
             ((TextView)v).setText(R.string.stop);
@@ -1305,6 +1318,15 @@ public class MainActivity extends AppCompatActivity{
         }
         str += "ago";
         return str;
+    }
+    static void refreshDrawer(){
+        if(mDrawerList.getChildAt(0)!=null){        //Ensure that the Drawer is initialized
+            for(int i = 0; i<6; i++){
+                mDrawerList.getChildAt(i).setBackgroundResource(R.color.colorPrimary);
+            }
+            mDrawerList.getChildAt(currentFragment).setBackgroundResource(R.color.colorAccent);
+        }
+        actionBar.setTitle(mPlanetTitles[currentFragment]);
     }
 
     static{

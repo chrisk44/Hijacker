@@ -56,6 +56,7 @@ import static com.hijacker.MainActivity.monstart;
 import static com.hijacker.MainActivity.prefix;
 import static com.hijacker.MainActivity.progress;
 import static com.hijacker.MainActivity.reaver_dir;
+import static com.hijacker.MainActivity.refreshDrawer;
 import static com.hijacker.MainActivity.runInHandler;
 import static com.hijacker.MainActivity.stop;
 import static com.hijacker.Shell.runOne;
@@ -234,6 +235,7 @@ public class ReaverFragment extends Fragment{
     public void onResume() {
         super.onResume();
         currentFragment = FRAGMENT_REAVER;
+        refreshDrawer();
         console.setText(console_text);
         ((EditText)v.findViewById(R.id.pin_delay)).setText(pin_delay);
         ((EditText)v.findViewById(R.id.locked_delay)).setText(locked_delay);

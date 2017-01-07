@@ -24,8 +24,6 @@ import android.content.DialogInterface;
 import android.os.Bundle;
 import android.support.v7.app.AlertDialog;
 
-import java.io.File;
-
 import static com.hijacker.MainActivity.background;
 import static com.hijacker.MainActivity.pref_edit;
 

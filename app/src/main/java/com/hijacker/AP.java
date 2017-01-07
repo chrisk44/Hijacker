@@ -41,6 +41,7 @@ import static com.hijacker.MainActivity.sort;
 import static com.hijacker.MainActivity.startAireplay;
 import static com.hijacker.MainActivity.startAireplayWEP;
 import static com.hijacker.MainActivity.startAirodump;
+import static com.hijacker.MainActivity.startAirodumpForAP;
 import static com.hijacker.MainActivity.stop;
 import static com.hijacker.MainActivity.toSort;
 import static com.hijacker.MainActivity.wpa_runnable;
@@ -154,7 +155,7 @@ class AP {
         if(this.sec == WEP){
             //wep
             if(debug) Log.d("HIJACKER/AP", "Cracking WEP");
-            startAirodump("--channel " + this.ch + " --bssid " + this.mac + " --ivs -w " + cap_dir + "/wep_ivs");
+            startAirodumpForAP(this, "--ivs -w " + cap_dir + "/wep_ivs");
             if(!this.essid.equals("<hidden>")) startAireplayWEP(this);
             progress.setIndeterminate(true);
         }else if(this.sec == WPA || this.sec == WPA2){
@@ -163,7 +164,7 @@ class AP {
             wpa_thread.interrupt();
             while(wpa_thread.isAlive())      //Wait for everything to shutdown
             if(debug) Log.d("HIJACKER/AP", "Cracking WPA/WPA2");
-            startAirodump("--channel " + this.ch + " --bssid " + this.mac + " -w " + cap_dir + "/handshake");
+            startAirodumpForAP(this, "-w " + cap_dir + "/handshake");
             startAireplay(this.mac);
             wpa_thread = new Thread(wpa_runnable);
             wpa_thread.start();

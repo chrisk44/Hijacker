@@ -27,6 +27,8 @@ import android.preference.PreferenceFragment;
 import java.io.File;
 
 import static com.hijacker.MainActivity.FRAGMENT_SETTINGS;
+import static com.hijacker.MainActivity.arch;
+import static com.hijacker.MainActivity.refreshDrawer;
 import static com.hijacker.MainActivity.version;
 import static com.hijacker.MainActivity.watchdog;
 import static com.hijacker.MainActivity.watchdog_runnable;
@@ -43,7 +45,6 @@ public class SettingsFragment extends PreferenceFragment {
         // Load the preferences from an XML resource
         addPreferencesFromResource(R.xml.preferences);
 
-        String arch = System.getProperty("os.arch");
         if(!arch.equals("armv7l")){
             Preference temp;
             String options[] = {"install_tools", "install_nexmon", "restore_firmware"};
@@ -132,6 +133,7 @@ public class SettingsFragment extends PreferenceFragment {
     public void onResume() {
         super.onResume();
         currentFragment = FRAGMENT_SETTINGS;
+        refreshDrawer();
         listener = new SharedPreferences.OnSharedPreferenceChangeListener() {
             @Override
             public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key) {

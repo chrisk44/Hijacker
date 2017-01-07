@@ -52,6 +52,8 @@
         You need to use a custom firmware (bcmon, Nexmon) so that your wireless adapter can be used in Monitor Mode. External adapters can also be used.
         You can configure your interface\'s name in Settings. This app requires root privileges to run the tools.
         If you don\'t grant them, it will hang. Don\'t ask me why…\nYou can install the tools and firmware (only nexmon) now, or you can go to the Home Screen and use the defaults.</string>
+    <string name="not_armv7l">The tools and nexmon firmware included in this app are not compatible with your device (not armv7l architecture).
+        You will have to download and install them manually to use this app.</string>
 
     <!-- Toolbar -->
     <string name="stop_aireplay">Stop Aireplay</string>
@@ -263,7 +265,6 @@
     <string name="show_details" translatable="false">true</string>
     <string name="airOnStartup" translatable="false">true</string>
     <string name="debug" translatable="false">true</string>
-    <string name="confirm_exit" translatable="false">true</string>
     <string name="delete_extra" translatable="false">true</string>
     <string name="manuf_while_ados" translatable="false">false</string>
     <string name="always_cap" translatable="false">false</string>
@@ -322,9 +323,6 @@
     <string name="watchdog_title">Watchdog</string>
     <string name="watchdog_sum">Run a background thread to verify that the tools that are supposed to be running, are actually running.
         Disable this if you are getting false positives.</string>
-
-    <string name="exit_title">Confirm Exit</string>
-    <string name="exit_sum">Show a confirmation dialog when pressing back from the home screen</string>
 
     <string name="airc_title" translatable="false">Aircrack</string>
     <string name="airc_sum">aircrack-ng absolute path</string>

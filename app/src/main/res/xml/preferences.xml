@@ -70,11 +70,6 @@
             android:title="@string/watchdog_title"
             android:summary="@string/watchdog_sum"
             android:key="watchdog"/>
-        <SwitchPreference
-            android:defaultValue="@string/confirm_exit"
-            android:title="@string/exit_title"
-            android:key="confirm_exit"
-            android:summary="@string/exit_sum" />
     </PreferenceCategory>
     <PreferenceCategory android:title="Interface">
 

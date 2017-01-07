@@ -48,6 +48,7 @@ import static com.hijacker.MainActivity.debug;
 import static com.hijacker.MainActivity.getLastLine;
 import static com.hijacker.MainActivity.path;
 import static com.hijacker.MainActivity.progress;
+import static com.hijacker.MainActivity.refreshDrawer;
 import static com.hijacker.MainActivity.stop;
 
 public class CrackFragment extends Fragment{
@@ -207,6 +208,7 @@ public class CrackFragment extends Fragment{
     public void onResume() {
         super.onResume();
         currentFragment = FRAGMENT_CRACK;
+        refreshDrawer();
         console.setText(console_text);
     }
     @Override

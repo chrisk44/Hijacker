@@ -40,10 +40,13 @@ import static com.hijacker.MainActivity.PROCESS_AIRODUMP;
 import static com.hijacker.MainActivity.aireplay_dir;
 import static com.hijacker.MainActivity.copy;
 import static com.hijacker.MainActivity.currentFragment;
+import static com.hijacker.MainActivity.deauthWait;
 import static com.hijacker.MainActivity.debug;
 import static com.hijacker.MainActivity.iface;
 import static com.hijacker.MainActivity.isolate;
 import static com.hijacker.MainActivity.prefix;
+import static com.hijacker.MainActivity.progress;
+import static com.hijacker.MainActivity.refreshDrawer;
 import static com.hijacker.MainActivity.startAirodump;
 import static com.hijacker.MainActivity.stop;
 import static com.hijacker.MainActivity.wpa_thread;
@@ -146,6 +149,7 @@ public class IsolatedFragment extends Fragment{
     public void onResume() {
         super.onResume();
         currentFragment = FRAGMENT_AIRODUMP;
+        refreshDrawer();
         thread = new Thread(runnable);
         thread.start();
         ((Button)view.findViewById(R.id.crack)).setText(wpa_thread.isAlive() ? R.string.stop : R.string.crack);
@@ -165,9 +169,12 @@ public class IsolatedFragment extends Fragment{
         cont = false;
         if(getFragmentManager().getBackStackEntryCount()==exit_on){
             isolate(null);
+            Tile.filter();
             stop(PROCESS_AIRODUMP);
             stop(PROCESS_AIREPLAY);
             startAirodump(null);
+            progress.setIndeterminate(false);
+            progress.setProgress(deauthWait);
         }
     }
 }
