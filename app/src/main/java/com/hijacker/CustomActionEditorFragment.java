@@ -19,14 +19,18 @@ package com.hijacker;
 
 import android.app.Fragment;
 import android.os.Bundle;
+import android.os.Environment;
 import android.support.design.widget.Snackbar;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.CheckBox;
+import android.widget.CompoundButton;
 import android.widget.EditText;
 import android.widget.RadioButton;
 import android.widget.RadioGroup;
+
+import java.io.File;
 
 import static com.hijacker.CustomAction.TYPE_AP;
 import static com.hijacker.CustomAction.TYPE_ST;
@@ -34,6 +38,7 @@ import static com.hijacker.CustomAction.cmds;
 import static com.hijacker.CustomAction.save;
 import static com.hijacker.MainActivity.FRAGMENT_CUSTOM;
 import static com.hijacker.MainActivity.currentFragment;
+import static com.hijacker.MainActivity.custom_action_adapter;
 import static com.hijacker.MainActivity.refreshDrawer;
 
 public class CustomActionEditorFragment extends Fragment{
@@ -56,11 +61,16 @@ public class CustomActionEditorFragment extends Fragment{
                 ((CheckBox)v.findViewById(R.id.requirement)).setChecked(action.requires_connected());
                 ((CheckBox)v.findViewById(R.id.requirement)).setText(R.string.requires_associated);
             }
+            if(action.hasProcessName()){
+                ((CheckBox)v.findViewById(R.id.has_process_name)).setChecked(true);
+                ((EditText)v.findViewById(R.id.process_name)).setText(action.getProcess_name());
+            }
             v.findViewById(R.id.title).setEnabled(true);
             v.findViewById(R.id.start_cmd).setEnabled(true);
             v.findViewById(R.id.stop_cmd).setEnabled(true);
             v.findViewById(R.id.requirement).setEnabled(true);
             v.findViewById(R.id.save_button).setEnabled(true);
+            v.findViewById(R.id.has_process_name).setEnabled(true);
         }
 
         ((RadioGroup)v.findViewById(R.id.radio_group)).setOnCheckedChangeListener(new RadioGroup.OnCheckedChangeListener(){
@@ -71,7 +81,15 @@ public class CustomActionEditorFragment extends Fragment{
                 v.findViewById(R.id.stop_cmd).setEnabled(true);
                 v.findViewById(R.id.requirement).setEnabled(true);
                 v.findViewById(R.id.save_button).setEnabled(true);
+                v.findViewById(R.id.has_process_name).setEnabled(true);
                 ((CheckBox)v.findViewById(R.id.requirement)).setText(i==R.id.st_rb ? R.string.requires_associated : R.string.requires_clients);
+            }
+        });
+
+        ((CheckBox)v.findViewById(R.id.has_process_name)).setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener(){
+            @Override
+            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked){
+                v.findViewById(R.id.process_name).setEnabled(isChecked);
             }
         });
 
@@ -81,12 +99,21 @@ public class CustomActionEditorFragment extends Fragment{
                 String title = ((EditText)v.findViewById(R.id.title)).getText().toString();
                 String start_cmd = ((EditText)v.findViewById(R.id.start_cmd)).getText().toString();
                 String stop_cmd = ((EditText)v.findViewById(R.id.stop_cmd)).getText().toString();
+                String process_name = ((EditText)v.findViewById(R.id.process_name)).getText().toString();
                 if(title.equals("")){
                     Snackbar.make(v, getString(R.string.title_empty), Snackbar.LENGTH_SHORT).show();
                 }else if(start_cmd.equals("")){
                     Snackbar.make(v, getString(R.string.start_cmd_empty), Snackbar.LENGTH_SHORT).show();
+                }else if(process_name.equals("") && ((CheckBox)v.findViewById(R.id.has_process_name)).isChecked()){
+                    Snackbar.make(v, getString(R.string.process_name_empty), Snackbar.LENGTH_SHORT).show();
                 }else if(action!=null){
                     //update existing action
+                    boolean load = false;
+                    if(!action.getTitle().equals(title)){
+                        new File(Environment.getExternalStorageDirectory() + "/Hijacker-actions/" + action.getTitle() + ".action").delete();
+                        cmds.add(action);
+                        load = true;
+                    }
                     action.setTitle(title);
                     action.setStart_cmd(start_cmd);
                     action.setStop_cmd(stop_cmd);
@@ -96,6 +123,7 @@ public class CustomActionEditorFragment extends Fragment{
                         action.setRequires_connected(((CheckBox) v.findViewById(R.id.requirement)).isChecked());
                     }
                     save();
+                    if(load) CustomAction.load();
                     Snackbar.make(v, getString(R.string.saved) + " " + action.getTitle(), Snackbar.LENGTH_SHORT).show();
                 }else{
                     boolean found = false;
@@ -111,11 +139,11 @@ public class CustomActionEditorFragment extends Fragment{
                         //create new action
                         if(((RadioGroup) v.findViewById(R.id.radio_group)).getCheckedRadioButtonId()==R.id.ap_rb){
                             //this action is for ap
-                            action = new CustomAction(title, start_cmd, stop_cmd, TYPE_AP);
+                            action = new CustomAction(title, start_cmd, stop_cmd, process_name, TYPE_AP);
                             action.setRequires_clients(((CheckBox) v.findViewById(R.id.requirement)).isChecked());
                         }else{
                             //this action is for st
-                            action = new CustomAction(title, start_cmd, stop_cmd, TYPE_ST);
+                            action = new CustomAction(title, start_cmd, stop_cmd, process_name, TYPE_ST);
                             action.setRequires_connected(((CheckBox) v.findViewById(R.id.requirement)).isChecked());
                         }
                         save();

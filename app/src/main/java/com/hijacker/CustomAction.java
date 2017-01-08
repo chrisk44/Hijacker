@@ -32,6 +32,7 @@ import static com.hijacker.MainActivity.aireplay_dir;
 import static com.hijacker.MainActivity.airodump_dir;
 import static com.hijacker.MainActivity.debug;
 import static com.hijacker.MainActivity.fm;
+import static com.hijacker.MainActivity.getPIDs;
 import static com.hijacker.MainActivity.iface;
 import static com.hijacker.MainActivity.mdk3_dir;
 import static com.hijacker.MainActivity.prefix;
@@ -40,13 +41,15 @@ import static com.hijacker.MainActivity.reaver_dir;
 class CustomAction{
     static final int TYPE_AP=0, TYPE_ST=1;
     static List<CustomAction> cmds = new ArrayList<>();
-    private String title, start_cmd, stop_cmd;
+    private String title, start_cmd, stop_cmd, process_name;
     private int type;
-    private boolean requires_clients=false, requires_connected=false;
-    CustomAction(String title, String start_cmd, String stop_cmd, int type){
+    private boolean requires_clients=false, requires_connected=false, has_process_name=false;
+    CustomAction(String title, String start_cmd, String stop_cmd, String process_name, int type){
         this.title = title;
         this.start_cmd = start_cmd;
         this.stop_cmd = stop_cmd;
+        this.process_name = process_name;
+        if(!process_name.equals("")) has_process_name = true;
         this.type = type;
         cmds.add(this);
     }
@@ -54,8 +57,10 @@ class CustomAction{
     String getTitle(){ return title; }
     String getStart_cmd(){ return start_cmd; }
     String getStop_cmd(){ return stop_cmd; }
+    String getProcess_name(){ return process_name; }
     boolean requires_clients(){ return requires_clients; }
     boolean requires_connected(){ return requires_connected; }
+    boolean hasProcessName(){ return has_process_name; }
     int getType(){ return type; }
     void setTitle(String title){ this.title = title; }
     void setStart_cmd(String start_cmd){ this.start_cmd = start_cmd; }
@@ -87,7 +92,21 @@ class CustomAction{
         CustomActionFragment.thread.start();
     }
     void stop(){
-        CustomActionFragment.shell.run(stop_cmd);
+        Shell shell = Shell.getFreeShell();     //Can't use the CustomActionFragment.shell as it is used by the action
+        shell.run(stop_cmd);
+        if(has_process_name){
+            ArrayList<Integer> list = getPIDs(process_name);
+            for(int i=0;i<list.size();i++){
+                shell.run("busybox kill " + list.get(i));
+            }
+            try{
+                Thread.sleep(100);  //Make sure that the processes have been killed
+            }catch(InterruptedException ignored){
+            }finally{
+                shell.done();
+            }
+        }
+        shell.done();
     }
     static void save(){
         //Save current cmds list to permanent storage
@@ -105,6 +124,7 @@ class CustomAction{
                 writer.write(action.stop_cmd + '\n');
                 writer.write(Integer.toString(action.type) + '\n');
                 writer.write(Boolean.toString(action.requires_clients || action.requires_connected) + '\n');
+                writer.write(action.process_name + '\n');
                 writer.close();
             }catch(IOException e){
                 Log.e("HIJACKER/CustomAction", "In save(): " + e.toString());
@@ -116,6 +136,7 @@ class CustomAction{
     }
     static void load(){
         //load custom actions from storage to cmds
+        cmds.clear();
         File folder = new File(Environment.getExternalStorageDirectory() + "/Hijacker-actions");
         if(!folder.exists()){
             folder.mkdir();
@@ -134,9 +155,11 @@ class CustomAction{
                     String stop_cmd = reader.readLine();
                     int type = Integer.parseInt(reader.readLine());
                     boolean requirement = Boolean.parseBoolean(reader.readLine());
+                    String process_name = reader.readLine();
+                    if(process_name==null) process_name = "";   //For files that were created before process_name was implemented
                     if(debug) Log.d("HIJACKER/CustomAction", "Read from file " + file.getName() + ": " + title + ", " +
-                            start_cmd + ", " + stop_cmd + ", " + Integer.toString(type) + ", " + Boolean.toString(requirement));
-                    CustomAction action = new CustomAction(title, start_cmd, stop_cmd, type);
+                            start_cmd + ", " + stop_cmd + ", " + Integer.toString(type) + ", " + Boolean.toString(requirement) + ", " + process_name);
+                    CustomAction action = new CustomAction(title, start_cmd, stop_cmd, process_name, type);
                     if(type==TYPE_AP){
                         action.setRequires_clients(requirement);
                     }else{

@@ -211,7 +211,12 @@ public class CustomActionFragment extends Fragment{
                 }else{
                     //started
                     console.append("Running: " + selected_action.getStop_cmd() + '\n');
+                    if(selected_action.hasProcessName()){
+                        console.append("Killing process named " + selected_action.getProcess_name() + '\n');
+                        if(debug) Log.d("HIJACKER/CustomCMDFrag", "Killing process named " + selected_action.getProcess_name());
+                    }
                     if(debug) Log.d("HIJACKER/CustomCMDFrag", "Running: " + selected_action.getStop_cmd());
+                    cont = false;
                     selected_action.stop();
                     stop.obtainMessage().sendToTarget();
                 }

@@ -84,12 +84,27 @@
         android:enabled="false"/>
 
     <CheckBox
+        android:text="@string/kill_process_on_stop"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:id="@+id/has_process_name"
+        android:enabled="false"/>
+
+    <EditText
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:inputType="text"
+        android:ems="10"
+        android:id="@+id/process_name"
+        android:hint="my_app"
+        android:enabled="false"/>
+
+    <CheckBox
         android:text="@string/requires_clients"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:id="@+id/requirement"
-        android:enabled="false"
-        />
+        android:enabled="false"/>
 
     <Space
         android:layout_width="match_parent"

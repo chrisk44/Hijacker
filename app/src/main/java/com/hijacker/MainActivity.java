@@ -625,7 +625,7 @@ public class MainActivity extends AppCompatActivity{
 
         Shell shell = getFreeShell();
         ArrayList<Integer> list = new ArrayList<>();
-        shell.run("pidof " + process_name + "; echo ENDOFPIDOF");
+        shell.run("busybox pidof " + process_name + "; echo ENDOFPIDOF");
         BufferedReader out = shell.getShell_out();
         String buffer = null;
         try{
@@ -1287,9 +1287,7 @@ public class MainActivity extends AppCompatActivity{
     static String getLastLine(BufferedReader out, String end){
         String lastline=null, buffer = null;
         try{
-            while(buffer==null){
-                buffer = out.readLine();
-            }
+            while(buffer==null) buffer = out.readLine();
             lastline = buffer;
             while(!end.equals(buffer)){
                 lastline = buffer;

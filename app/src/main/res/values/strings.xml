@@ -234,6 +234,8 @@
     <string name="access_point">Access Point</string>
     <string name="station">Station</string>
     <string name="action_exists">An action with this name already exists</string>
+    <string name="kill_process_on_stop">Has process to kill when implicitly stopping the action</string>
+    <string name="process_name_empty">Process name cannot be empty</string>
 
     <!-- ExportDialog -->
     <string name="export">Export</string>
