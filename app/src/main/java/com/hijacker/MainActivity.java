@@ -620,50 +620,51 @@ public class MainActivity extends AppCompatActivity{
         });
     }
 
-    public static ArrayList<Integer> getPIDs(int pr){
+    public static ArrayList<Integer> getPIDs(String process_name){
+        if(process_name==null) return null;
+
+        Shell shell = getFreeShell();
         ArrayList<Integer> list = new ArrayList<>();
+        shell.run("pidof " + process_name + "; echo ENDOFPIDOF");
+        BufferedReader out = shell.getShell_out();
+        String buffer = null;
         try{
-            Shell shell = getFreeShell();
-            int pid;
-            String s = null;
-            switch(pr){
-                case PROCESS_AIRODUMP:
-                    shell.run("toolbox ps | busybox grep airo; echo ENDOFPS");
-                    break;
-                case PROCESS_AIREPLAY:
-                    shell.run("toolbox ps | busybox grep aire; echo ENDOFPS");
-                    break;
-                case PROCESS_MDK:
-                    shell.run("toolbox ps | busybox grep mdk3; echo ENDOFPS");
-                    break;
-                case PROCESS_AIRCRACK:
-                    shell.run("toolbox ps | busybox grep airc; echo ENDOFPS");
-                    break;
-                case PROCESS_REAVER:
-                    shell.run("toolbox ps | busybox grep reav; echo ENDOFPS");
-                    break;
-                default:
-                    Log.e("HIJACKER/getPIDs", "Method called with invalid pr code");
-                    return null;
-            }
-            BufferedReader shell_out = shell.getShell_out();
-            while(s==null){ s = shell_out.readLine(); } //for some reason sometimes s remains null
-            while(!s.equals("ENDOFPS")){
-                pid = ps(s);
-                if(pid!=0){
-                    list.add(pid);
+            while(buffer==null) buffer = out.readLine();
+            while(!buffer.equals("ENDOFPIDOF")){
+                String[] temp = buffer.split(" ");
+                for(String tmp : temp){
+                    list.add(Integer.parseInt(tmp));
                 }
-                s = shell_out.readLine();
+                buffer = out.readLine();
             }
+        }catch(IOException e){
+            Log.e("HIJACKER/getPIDs", "Exception: " + e.toString());
+            return null;
+        }finally{
             shell.done();
-        }catch(IOException e){ Log.e("HIJACKER/Exception", "Caught Exception in getPIDs(pr): " + e.toString()); }
+        }
         return list;
+    }
+    public static ArrayList<Integer> getPIDs(int pr){
+        switch(pr){
+            case PROCESS_AIRODUMP:
+                return getPIDs("airodump-ng");
+            case PROCESS_AIREPLAY:
+                return getPIDs("aireplay-ng");
+            case PROCESS_MDK:
+                return getPIDs("mdk3");
+            case PROCESS_AIRCRACK:
+                return getPIDs("aircrack-ng");
+            case PROCESS_REAVER:
+                return getPIDs("reaver");
+            default:
+                Log.e("HIJACKER/getPIDs", "Method called with invalid pr code");
+                return null;
+            }
     }
     public static void stop(int pr){
         //0 for airodump-ng, 1 for aireplay-ng, 2 for mdk, 3 for aircrack, 4 for reaver, everything else is considered pid and we kill it
         if(debug) Log.d("HIJACKER/stop", "stop(" + pr + ") called");
-        ArrayList<Integer> pids = new ArrayList<>();
-        if(pr<=4) pids = getPIDs(pr);
         switch(pr){
             case PROCESS_AIRODUMP:
                 cont = false;
@@ -686,6 +687,7 @@ public class MainActivity extends AppCompatActivity{
                     runOne("busybox rm -rf " + cap_dir + "/cap-*.netxml");
                 }
                 airodump_running = 0;
+                runOne("busybox kill $(busybox pidof airodump-ng)");
                 break;
             case PROCESS_AIREPLAY:
                 runInHandler(new Runnable(){
@@ -703,32 +705,26 @@ public class MainActivity extends AppCompatActivity{
                 }
                 aireplay_running = 0;
                 progress_int = deauthWait;
+                runOne("busybox kill $(busybox pidof aireplay-ng)");
                 break;
             case PROCESS_MDK:
                 ados = false;
                 bf = false;
+                runOne("busybox kill $(busybox pidof mdk3)");
                 break;
             case PROCESS_AIRCRACK:
                 CrackFragment.cont = false;
+                runOne("busybox kill $(busybox pidof aircrack-ng)");
                 break;
             case PROCESS_REAVER:
                 ReaverFragment.cont = false;
+                runOne("busybox kill $(busybox pidof reaver)");
                 break;
             default:
-                pids.add(pr);
+                runOne("busybox kill " + pr);
                 break;
         }
-        if(pids.isEmpty()){
-            if(debug) Log.d("HIJACKER/stop", "Nothing found for " + pr);
-        }else{
-            Shell shell = getFreeShell();
-            for(int i = 0; i<pids.size(); i++){
-                if(debug) Log.d("HIJACKER/Killing...", Integer.toString(pids.get(i)));
-                shell.run("busybox kill " + pids.get(i));
-            }
-            last_action = System.currentTimeMillis();
-            shell.done();
-        }
+        last_action = System.currentTimeMillis();
         runInHandler(new Runnable(){
             @Override
             public void run(){
