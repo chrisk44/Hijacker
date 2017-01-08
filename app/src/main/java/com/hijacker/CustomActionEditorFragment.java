@@ -38,7 +38,6 @@ import static com.hijacker.CustomAction.cmds;
 import static com.hijacker.CustomAction.save;
 import static com.hijacker.MainActivity.FRAGMENT_CUSTOM;
 import static com.hijacker.MainActivity.currentFragment;
-import static com.hijacker.MainActivity.custom_action_adapter;
 import static com.hijacker.MainActivity.refreshDrawer;
 
 public class CustomActionEditorFragment extends Fragment{
@@ -71,6 +70,7 @@ public class CustomActionEditorFragment extends Fragment{
             v.findViewById(R.id.requirement).setEnabled(true);
             v.findViewById(R.id.save_button).setEnabled(true);
             v.findViewById(R.id.has_process_name).setEnabled(true);
+            v.findViewById(R.id.process_name).setEnabled(action.hasProcessName());
         }
 
         ((RadioGroup)v.findViewById(R.id.radio_group)).setOnCheckedChangeListener(new RadioGroup.OnCheckedChangeListener(){
@@ -108,11 +108,10 @@ public class CustomActionEditorFragment extends Fragment{
                     Snackbar.make(v, getString(R.string.process_name_empty), Snackbar.LENGTH_SHORT).show();
                 }else if(action!=null){
                     //update existing action
-                    boolean load = false;
                     if(!action.getTitle().equals(title)){
-                        new File(Environment.getExternalStorageDirectory() + "/Hijacker-actions/" + action.getTitle() + ".action").delete();
-                        cmds.add(action);
-                        load = true;
+                        String filename_before = Environment.getExternalStorageDirectory() + "/Hijacker-actions/" + action.getTitle() + ".action";
+                        String filename_after = Environment.getExternalStorageDirectory() + "/Hijacker-actions/" + title + ".action";
+                        new File(filename_before).renameTo(new File(filename_after));
                     }
                     action.setTitle(title);
                     action.setStart_cmd(start_cmd);
@@ -123,8 +122,8 @@ public class CustomActionEditorFragment extends Fragment{
                         action.setRequires_connected(((CheckBox) v.findViewById(R.id.requirement)).isChecked());
                     }
                     save();
-                    if(load) CustomAction.load();
                     Snackbar.make(v, getString(R.string.saved) + " " + action.getTitle(), Snackbar.LENGTH_SHORT).show();
+                    getFragmentManager().popBackStackImmediate();
                 }else{
                     boolean found = false;
                     for(int i=0;i<cmds.size();i++){
@@ -148,6 +147,7 @@ public class CustomActionEditorFragment extends Fragment{
                         }
                         save();
                         Snackbar.make(v, getString(R.string.saved) + " " + action.getTitle(), Snackbar.LENGTH_SHORT).show();
+                        getFragmentManager().popBackStackImmediate();
                     }
                 }
             }

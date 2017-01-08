@@ -476,10 +476,6 @@ public class MainActivity extends AppCompatActivity{
         stop(PROCESS_REAVER);
         if(airOnStartup) startAirodump(null);
         else if(menu!=null) menu.getItem(1).setIcon(R.drawable.run);
-        if(watchdog){
-            watchdog_thread = new Thread(watchdog_runnable);
-            watchdog_thread.start();
-        }
     }
 
     public static void startAirodump(String params){
@@ -699,13 +695,15 @@ public class MainActivity extends AppCompatActivity{
                         }
                     }
                 });
+                Shell shell = getFreeShell();
                 if(delete_extra && aireplay_running==AIREPLAY_WEP){
-                    runOne("busybox rm -rf " + cap_dir + "/wep_ivs-*.csv");
-                    runOne("busybox rm -rf " + cap_dir + "/wep_ivs-*.netxml");
+                    shell.run("busybox rm -rf " + cap_dir + "/wep_ivs-*.csv");
+                    shell.run("busybox rm -rf " + cap_dir + "/wep_ivs-*.netxml");
                 }
                 aireplay_running = 0;
                 progress_int = deauthWait;
-                runOne("busybox kill $(busybox pidof aireplay-ng)");
+                shell.run("busybox kill $(busybox pidof aireplay-ng)");
+                shell.done();
                 break;
             case PROCESS_MDK:
                 ados = false;

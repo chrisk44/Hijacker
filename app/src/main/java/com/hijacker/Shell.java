@@ -46,6 +46,7 @@ class Shell{
     private BufferedReader shell_out;
     private static List<Shell> free = new ArrayList<>();
     private static int total=0;
+    private static boolean wait = false;        //To handle simultaneous calls to getFreeShell();
     Shell(){
         total++;
         try{
@@ -66,18 +67,19 @@ class Shell{
         this.shell_in.flush();
     }
     void done(){
-        try{
-            run("echo; echo ENDOFCLEAR");
-            MainActivity.getLastLine(shell_out, "ENDOFCLEAR");      //This will read up to the last line and stop, effectively clearing shell_out
-            shell_out.reset();                                      //<--- since this doesn't seem to do the job
-        }catch(IOException ignored){}
+        String term_str = "ENDOFCLEAR" + System.currentTimeMillis();    //Use unique string
+        run("echo; echo " + term_str);
+        MainActivity.getLastLine(shell_out, term_str);      //This will read up to the last line and stop, effectively clearing shell_out
         if(!free.contains(this)) free.add(this);
     }
     static Shell getFreeShell(){
+        while(wait){}
         if(free.isEmpty()) return new Shell();
         else{
+            wait = true;
             Shell temp = free.get(0);
             free.remove(0);
+            wait = false;
             return temp;
         }
     }

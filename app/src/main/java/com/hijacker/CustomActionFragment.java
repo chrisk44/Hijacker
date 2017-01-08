@@ -101,9 +101,7 @@ public class CustomActionFragment extends Fragment{
             start_button.setEnabled(true);
             select_target.setText(st.mac + ((st.bssid==null) ? "" : " (" + AP.getAPByMac(st.bssid).essid + ")"));
         }
-        if(thread.isAlive()){
-            start_button.setText(R.string.stop);
-        }
+        start_button.setText(thread.isAlive() ? R.string.stop : R.string.start);
 
         select_action.setOnClickListener(new View.OnClickListener(){
             @Override

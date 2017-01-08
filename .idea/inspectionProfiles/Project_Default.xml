@@ -8,6 +8,9 @@
       <option name="m_ignoreTestCases" value="true" />
       <option name="m_ignoreIgnoreParameter" value="true" />
     </inspection_tool>
+    <inspection_tool class="EmptyStatementBody" enabled="false" level="WARNING" enabled_by_default="false">
+      <option name="m_reportEmptyBlocks" value="true" />
+    </inspection_tool>
     <inspection_tool class="FieldCanBeLocal" enabled="false" level="WARNING" enabled_by_default="false" />
     <inspection_tool class="LoggerInitializedWithForeignClass" enabled="false" level="WARNING" enabled_by_default="false">
       <option name="loggerClassName" value="org.apache.log4j.Logger,org.slf4j.LoggerFactory,org.apache.commons.logging.LogFactory,java.util.logging.Logger" />
