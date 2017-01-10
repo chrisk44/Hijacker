@@ -261,14 +261,11 @@
     <string name="enable_monMode" translatable="false">nexutil -m true</string>
     <string name="disable_monMode" translatable="false">nexutil -m false</string>
     <string name="deauthWait" translatable="false">20</string>
-    <string name="aireplay_sleep" translatable="false">0</string>
-    <string name="showLog" translatable="false">false</string>
     <string name="show_notif" translatable="false">true</string>
     <string name="show_details" translatable="false">true</string>
     <string name="airOnStartup" translatable="false">true</string>
     <string name="debug" translatable="false">true</string>
     <string name="delete_extra" translatable="false">true</string>
-    <string name="manuf_while_ados" translatable="false">false</string>
     <string name="always_cap" translatable="false">false</string>
     <string name="cont_on_fail" translatable="false">false</string>
     <string name="watchdog" translatable="false">true</string>
@@ -309,9 +306,6 @@
     <string name="deauthWait_title">WPA Deauth wait (sec)</string>
     <string name="deauthWait_sum">Time to deauthenticate clients when cracking WPA</string>
     <string name="deauthWait_desc">How long aireplay-ng --deauth will be run when cracking a WPA network before it stops to capture the handshake.</string>
-
-    <string name="manuf_while_ados_title">Look up manufacturer while ADoS is running</string>
-    <string name="manuf_while_ados_sum">This will cause the app to lag (even cause anr) because each lookup takes about a second</string>
 
     <string name="notif_title">Notification</string>
     <string name="notif_sum">Show notification when the app is in the background</string>

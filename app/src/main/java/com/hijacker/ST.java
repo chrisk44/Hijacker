@@ -29,7 +29,9 @@ import static com.hijacker.MainActivity.SORT_BEACONS_FRAMES;
 import static com.hijacker.MainActivity.SORT_DATA_FRAMES;
 import static com.hijacker.MainActivity.SORT_NOSORT;
 import static com.hijacker.MainActivity.SORT_PWR;
+import static com.hijacker.MainActivity.completed;
 import static com.hijacker.MainActivity.getManuf;
+import static com.hijacker.MainActivity.runInHandler;
 import static com.hijacker.MainActivity.sort;
 import static com.hijacker.MainActivity.startAireplay;
 import static com.hijacker.MainActivity.startAirodump;
@@ -101,14 +103,21 @@ class ST {
         this.lost = lost;
         this.frames = frames;
 
-        String b, c;
+        final String b, c;
         if (bssid != null){
             if(AP.getAPByMac(bssid) != null) b = paired + bssid + " (" + AP.getAPByMac(bssid).essid + ")";
             else b = paired + bssid;
         } else b = not_connected;
         c = "PWR: " + this.pwr + " | Frames: " + this.getFrames();
-        if(tile!=null) tile.update(this.mac, b, c, this.manuf);
-        else tile = new Tile(AP.APs.size() + id, this.mac, b, c, this.manuf, false, null, this);
+        runInHandler(new Runnable(){
+            @Override
+            public void run(){
+                if(tile!=null) tile.update(ST.this.mac, b, c, ST.this.manuf);
+                else tile = new Tile(AP.APs.size() + id, ST.this.mac, b, c, ST.this.manuf, false, null, ST.this);
+                if(tile.st==null) tile = null;
+                completed = true;
+            }
+        });
     }
     void showInfo(FragmentManager fragmentManager){
         STDialog dialog = new STDialog();

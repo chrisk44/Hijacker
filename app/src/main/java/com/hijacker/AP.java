@@ -33,10 +33,12 @@ import static com.hijacker.MainActivity.SORT_NOSORT;
 import static com.hijacker.MainActivity.SORT_PWR;
 import static com.hijacker.MainActivity.adapter;
 import static com.hijacker.MainActivity.cap_dir;
+import static com.hijacker.MainActivity.completed;
 import static com.hijacker.MainActivity.debug;
 import static com.hijacker.MainActivity.getManuf;
 import static com.hijacker.MainActivity.isolate;
 import static com.hijacker.MainActivity.progress;
+import static com.hijacker.MainActivity.runInHandler;
 import static com.hijacker.MainActivity.sort;
 import static com.hijacker.MainActivity.startAireplay;
 import static com.hijacker.MainActivity.startAireplayWEP;
@@ -132,10 +134,17 @@ class AP {
                     break;
             }
         }
-        String c;
+        final String c;
         c = "PWR: " + this.pwr + " | SEC: " + this.enc + " | CH: " + this.ch + " | B:" + this.getBeacons() + " | D:" + this.getData();
-        if(tile!=null) tile.update(this.essid, this.mac, c, this.manuf);
-        else tile = new Tile(id, this.essid, this.mac, c, this.manuf, true, this, null);
+        runInHandler(new Runnable(){
+            @Override
+            public void run(){
+                if(tile!=null) tile.update(AP.this.essid, AP.this.mac, c, AP.this.manuf);
+                else tile = new Tile(id, AP.this.essid, AP.this.mac, c, AP.this.manuf, true, AP.this, null);
+                if(tile.ap==null) tile = null;
+                completed = true;
+            }
+        });
     }
     static AP getAPByMac(String mac){
         if(mac==null) return null;

@@ -36,6 +36,7 @@ import static com.hijacker.MainActivity.SORT_ESSID;
 import static com.hijacker.MainActivity.SORT_NOSORT;
 import static com.hijacker.MainActivity.SORT_PWR;
 import static com.hijacker.MainActivity.adapter;
+import static com.hijacker.MainActivity.clearing;
 import static com.hijacker.MainActivity.debug;
 import static com.hijacker.MainActivity.opn;
 import static com.hijacker.MainActivity.pwr_filter;
@@ -58,6 +59,10 @@ class Tile {
     boolean type=true, show=true;        //type: true=AP, false=ST
     String s1, s2, s3, s4;
     Tile(int index, String s1, String s2, String s3, String s4, boolean type, AP _ap, ST _st){
+        if(index > allTiles.size() || clearing){
+            if(debug) Log.d("HIJACKER/Tile", "Rejected tile");
+            return;
+        }
         this.type = type;
         this.ap = _ap;
         this.st = _st;
@@ -232,6 +237,6 @@ class Tile {
             }
         }
         toSort = false;
-        MainActivity.refreshHandler.obtainMessage().sendToTarget();
+        adapter.notifyDataSetChanged();
     }
 }

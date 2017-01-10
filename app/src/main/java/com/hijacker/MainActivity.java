@@ -90,7 +90,7 @@ public class MainActivity extends AppCompatActivity{
     static final int MDK_BF=0, MDK_ADOS=1;
     static final int SORT_NOSORT = 0, SORT_ESSID = 1, SORT_BEACONS_FRAMES = 2, SORT_DATA_FRAMES = 3, SORT_PWR = 4;
     //State variables
-    static boolean cont = false, wpacheckcont = false, done = true;  //done: for calling refreshHandler only when it has stopped
+    static boolean cont = false, wpacheckcont = false, completed = true, clearing = false;
     static boolean notif_on = false, background = false;    //notif_on: notification should be shown, background: the app is running in the background
     static int airodump_running = 0, aireplay_running = 0, currentFragment=FRAGMENT_AIRODUMP;         //Set currentFragment in onResume of each Fragment
     //Filters
@@ -130,7 +130,7 @@ public class MainActivity extends AppCompatActivity{
     static String iface, prefix, airodump_dir, aireplay_dir, aircrack_dir, mdk3_dir, reaver_dir, cap_dir, chroot_dir,
             enable_monMode, disable_monMode, custom_chroot_cmd;
     static int deauthWait;
-    static boolean show_notif, show_details, airOnStartup, debug, delete_extra, manuf_while_ados,
+    static boolean show_notif, show_details, airOnStartup, debug, delete_extra,
             monstart, always_cap, cont_on_fail, watchdog;
 
     @Override
@@ -170,10 +170,34 @@ public class MainActivity extends AppCompatActivity{
                 if(debug) Log.d("HIJACKER/refresh_thread", "refresh_thread running");
                 try{
                     while(cont){
-                        if(done) refreshHandler.obtainMessage().sendToTarget();
+                        while(fifo.size()>0){
+                            fifo.get(0).add();
+                            if(!fifo.isEmpty()) fifo.remove(0);
+                            while(!completed){      //Wait for the update request to complete
+                                Thread.sleep(10);
+                            }
+                        }
+                        runInHandler(new Runnable(){
+                            @Override
+                            public void run(){
+                                adapter.notifyDataSetChanged();             //for when data is changed, no new data added
+                                ap_count.setText(Integer.toString(is_ap==null ? Tile.i : 1));
+                                st_count.setText(Integer.toString(Tile.tiles.size() - Tile.i));
+                                notification();
+                                if(toSort && !background) Tile.sort();
+                            }
+                        });
                         Thread.sleep(1000);
                     }
-                }catch(InterruptedException e){ Log.e("HIJACKER/Exception", "Caught Exception in main() refresh_thread block: " + e.toString()); }
+                }catch(InterruptedException e){
+                    Log.e("HIJACKER/Exception", "Caught Exception in main() refresh_thread block: " + e.toString());
+                    fifo.clear();
+                    try{
+                        while(!completed){      //Wait for running request to complete
+                            Thread.sleep(10);
+                        }
+                    }catch(InterruptedException ignored){}
+                }
                 if(debug) Log.d("HIJACKER/refresh_thread", "refresh_thread done");
             }
         };
@@ -735,21 +759,6 @@ public class MainActivity extends AppCompatActivity{
     }
 
     //Handlers used for tasks that require the Main thread to update the view, but need to be run by other threads
-    public static Handler refreshHandler = new Handler(){
-        public void handleMessage(Message msg){
-            done = false;
-            while(fifo.size()>0){
-                fifo.get(0).add();
-                adapter.notifyDataSetChanged();             //for when data is changed, no new data added
-                fifo.remove(0);
-            }
-            ap_count.setText(Integer.toString(is_ap==null ? Tile.i : 1));
-            st_count.setText(Integer.toString(Tile.tiles.size() - Tile.i));
-            notification();
-            if(toSort && !background) Tile.sort();
-            done = true;
-        }
-    };
     public Handler watchdog_handler = new Handler(){
         public void handleMessage(Message msg){
             if(debug) Log.d("HIJACKER/watchdog", "Message is " + msg.obj);
@@ -760,15 +769,9 @@ public class MainActivity extends AppCompatActivity{
             dialog.show(getFragmentManager(), "ErrorDialog");
         }
     };
-    public static Handler handler = new Handler(){
-        public void handleMessage(Message msg){
-            ((Runnable)msg.obj).run();
-        }
-    };
+    public static Handler handler = new Handler();
     public static void runInHandler(Runnable runnable){
-        Message msg = new Message();
-        msg.obj = runnable;
-        handler.sendMessage(msg);
+        handler.post(runnable);
     }
 
     void setup(){
@@ -813,7 +816,6 @@ public class MainActivity extends AppCompatActivity{
         airOnStartup = Boolean.parseBoolean(getString(R.string.airOnStartup));
         debug = Boolean.parseBoolean(getString(R.string.debug));
         delete_extra = Boolean.parseBoolean(getString(R.string.delete_extra));
-        manuf_while_ados = Boolean.parseBoolean(getString(R.string.manuf_while_ados));
         always_cap = Boolean.parseBoolean(getString(R.string.always_cap));
         chroot_dir = getString(R.string.chroot_dir);
         monstart = Boolean.parseBoolean(getString(R.string.monstart));
@@ -924,7 +926,6 @@ public class MainActivity extends AppCompatActivity{
         debug = pref.getBoolean("debug", debug);
         watchdog = pref.getBoolean("watchdog", watchdog);
         delete_extra = pref.getBoolean("delete_extra", delete_extra);
-        manuf_while_ados = pref.getBoolean("manuf_while_ados", manuf_while_ados);
         always_cap = pref.getBoolean("always_cap", always_cap);
         custom_chroot_cmd = pref.getString("custom_chroot_cmd", custom_chroot_cmd);
         cont_on_fail = pref.getBoolean("cont_on_fail", cont_on_fail);
@@ -936,12 +937,19 @@ public class MainActivity extends AppCompatActivity{
     public boolean onOptionsItemSelected(MenuItem item){
         switch(item.getItemId()){
             case R.id.reset:
+                clearing = true;
+                stop(PROCESS_AIRODUMP);
+                try{
+                    while(!completed || !fifo.isEmpty()){
+                        Thread.sleep(10);       //Wait for requests to complete before clearing the view
+                    }
+                }catch(InterruptedException ignored){}
                 Tile.clear();
                 ap_count.setText("0");
                 st_count.setText("0");
-                stop(PROCESS_AIRODUMP);
                 if(is_ap==null) startAirodump(null);
                 else startAirodumpForAP(is_ap, null);
+                clearing = false;
                 return true;
 
             case R.id.stop_run:
@@ -1272,8 +1280,6 @@ public class MainActivity extends AppCompatActivity{
         }
     }
     static String getManuf(String mac){
-        if(ados && !manuf_while_ados) return "ADoS running";
-
         String temp = mac.subSequence(0, 2).toString() + mac.subSequence(3, 5).toString() + mac.subSequence(6, 8).toString();
         Shell shell = getFreeShell();
         shell.run("busybox grep -m 1 -i " + temp + " " + path + "/oui.txt; echo ENDOFGREP");

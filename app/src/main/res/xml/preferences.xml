@@ -45,11 +45,6 @@
             android:dialogTitle="@string/deauthWait_title"
             android:dialogMessage="@string/deauthWait_desc" />
         <SwitchPreference
-            android:defaultValue="false"
-            android:title="@string/manuf_while_ados_title"
-            android:key="manuf_while_ados"
-            android:summary="@string/manuf_while_ados_sum"/>
-        <SwitchPreference
             android:defaultValue="@string/show_notif"
             android:title="@string/notif_title"
             android:key="show_notif"
