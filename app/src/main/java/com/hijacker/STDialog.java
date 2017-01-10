@@ -56,8 +56,8 @@ public class STDialog extends DialogFragment {
         else st[1].setText(info_st.bssid);
 
         st[2].setText(Integer.toString(info_st.pwr));
-        st[3].setText(Integer.toString(info_st.frames));
-        st[4].setText(Integer.toString(info_st.lost));
+        st[3].setText(Integer.toString(info_st.getFrames()));
+        st[4].setText(Integer.toString(info_st.getLost()));
         st[5].setText(info_st.manuf);
         st[6].setText(getLastSeen(info_st.lastseen));
 
@@ -71,8 +71,8 @@ public class STDialog extends DialogFragment {
                 else st[1].setText(info_st.bssid);
 
                 st[2].setText(Integer.toString(info_st.pwr));
-                st[3].setText(Integer.toString(info_st.frames));
-                st[4].setText(Integer.toString(info_st.lost));
+                st[3].setText(Integer.toString(info_st.getFrames()));
+                st[4].setText(Integer.toString(info_st.getLost()));
                 st[5].setText(info_st.manuf);
                 st[6].setText(getLastSeen(info_st.lastseen));
             }

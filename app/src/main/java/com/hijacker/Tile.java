@@ -174,8 +174,8 @@ class Tile {
                         Collections.sort(ap_sublist, new Comparator<Tile>(){
                             @Override
                             public int compare(Tile o1, Tile o2){
-                                if(sort_reverse) return o1.ap.beacons - o2.ap.beacons;
-                                else return o2.ap.beacons - o1.ap.beacons;
+                                if(sort_reverse) return o1.ap.getBeacons() - o2.ap.getBeacons();
+                                else return o2.ap.getBeacons() - o1.ap.getBeacons();
                             }
                         });
                     }
@@ -183,8 +183,8 @@ class Tile {
                         Collections.sort(st_sublist, new Comparator<Tile>(){
                             @Override
                             public int compare(Tile o1, Tile o2){
-                                if(sort_reverse) return o1.st.frames - o2.st.frames;
-                                else return o2.st.frames - o1.st.frames;
+                                if(sort_reverse) return o1.st.getFrames() - o2.st.getFrames();
+                                else return o2.st.getFrames() - o1.st.getFrames();
                             }
                         });
                     }
@@ -194,8 +194,8 @@ class Tile {
                         Collections.sort(ap_sublist, new Comparator<Tile>(){
                             @Override
                             public int compare(Tile o1, Tile o2){
-                                if(sort_reverse) return o1.ap.data - o2.ap.data;
-                                else return o2.ap.data - o1.ap.data;
+                                if(sort_reverse) return o1.ap.getData() - o2.ap.getData();
+                                else return o2.ap.getData() - o1.ap.getData();
                             }
                         });
                     }
@@ -203,8 +203,8 @@ class Tile {
                         Collections.sort(st_sublist, new Comparator<Tile>(){
                             @Override
                             public int compare(Tile o1, Tile o2){
-                                if(sort_reverse) return o1.st.frames - o2.st.frames;
-                                else return o2.st.frames - o1.st.frames;
+                                if(sort_reverse) return o1.st.getFrames() - o2.st.getFrames();
+                                else return o2.st.getFrames() - o1.st.getFrames();
                             }
                         });
                     }

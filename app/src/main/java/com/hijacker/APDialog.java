@@ -62,9 +62,9 @@ public class APDialog extends DialogFragment {
         ap[4].setText(info_ap.enc);
         ap[5].setText(info_ap.auth);
         ap[6].setText(info_ap.cipher);
-        ap[7].setText(Integer.toString(info_ap.beacons));
-        ap[8].setText(Integer.toString(info_ap.data));
-        ap[9].setText(Integer.toString(info_ap.ivs));
+        ap[7].setText(Integer.toString(info_ap.getBeacons()));
+        ap[8].setText(Integer.toString(info_ap.getData()));
+        ap[9].setText(Integer.toString(info_ap.getIvs()));
         ap[10].setText(Integer.toString(info_ap.clients.size()));
         ap[11].setText(info_ap.manuf);
         ap[12].setText(getLastSeen(info_ap.lastseen));
@@ -79,9 +79,9 @@ public class APDialog extends DialogFragment {
                 ap[4].setText(info_ap.enc);
                 ap[5].setText(info_ap.auth);
                 ap[6].setText(info_ap.cipher);
-                ap[7].setText(Integer.toString(info_ap.beacons));
-                ap[8].setText(Integer.toString(info_ap.data));
-                ap[9].setText(Integer.toString(info_ap.ivs));
+                ap[7].setText(Integer.toString(info_ap.getBeacons()));
+                ap[8].setText(Integer.toString(info_ap.getData()));
+                ap[9].setText(Integer.toString(info_ap.getIvs()));
                 ap[10].setText(Integer.toString(info_ap.clients.size()));
                 ap[11].setText(info_ap.manuf);
                 ap[12].setText(getLastSeen(info_ap.lastseen));

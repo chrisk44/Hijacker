@@ -40,7 +40,8 @@ class ST {
     static List <ST>STs = new ArrayList<>();
     static String paired, not_connected;
     static int connected=0;
-    int pwr, lost, frames, id;
+    int pwr, id;
+    private int frames, lost, total_frames=0, total_lost=0;
     long lastseen = 0;
     boolean added_as_client = false;
     Tile tile;
@@ -105,7 +106,7 @@ class ST {
             if(AP.getAPByMac(bssid) != null) b = paired + bssid + " (" + AP.getAPByMac(bssid).essid + ")";
             else b = paired + bssid;
         } else b = not_connected;
-        c = "PWR: " + this.pwr + " | Frames: " + this.frames;
+        c = "PWR: " + this.pwr + " | Frames: " + this.getFrames();
         if(tile!=null) tile.update(this.mac, b, c, this.manuf);
         else tile = new Tile(AP.APs.size() + id, this.mac, b, c, this.manuf, false, null, this);
     }
@@ -115,7 +116,19 @@ class ST {
         dialog.show(fragmentManager, "STDialog");
     }
     public String toString(){
-        return mac + '\t' + (bssid==null ? "(not associated)" : bssid) + '\t' + pwr + '\t' + frames + '\t' + lost + '\t' + manuf + '\n';
+        return mac + '\t' + (bssid==null ? "(not associated)" : bssid) + '\t' + pwr + '\t' + getFrames() + '\t' + getLost() + '\t' + manuf + '\n';
+    }
+    public int getFrames(){ return total_frames + frames; }
+    public int getLost(){ return total_lost + lost; }
+    public static void saveData(){
+        ST temp;
+        for(int i=0;i<ST.STs.size();i++){
+            temp = ST.STs.get(i);
+            temp.total_frames += temp.frames;
+            temp.total_lost += temp.lost;
+            temp.frames = 0;
+            temp.lost = 0;
+        }
     }
     static ST getSTByMac(String mac){
         for(int i=STs.size()-1;i>=0;i--){

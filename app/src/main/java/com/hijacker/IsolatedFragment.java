@@ -140,7 +140,7 @@ public class IsolatedFragment extends Fragment{
                 manuf.setText(is_ap.manuf);
                 mac.setText(is_ap.mac);
                 sec1.setText("Enc: " + is_ap.enc + " | Auth: " + is_ap.auth + " | Cipher: " + is_ap.cipher);
-                numbers.setText("B: " + is_ap.beacons + " | D: " + is_ap.data + " | #s: " + is_ap.ivs);
+                numbers.setText("B: " + is_ap.getBeacons() + " | D: " + is_ap.getData() + " | #s: " + is_ap.getIvs());
                 sec2.setText("PWR: " + is_ap.pwr + " | Channel: " + is_ap.ch);
             }
         }

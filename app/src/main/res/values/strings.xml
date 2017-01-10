@@ -155,7 +155,7 @@
     <string name="done">Done</string>
 
     <!-- ST -->
-    <string name="paired">Paired: </string>
+    <string name="paired">Paired:</string>
     <string name="not_connected">Not Connected</string>
 
     <!-- MDKFragment -->

@@ -53,7 +53,8 @@ class AP {
     static int wpa=0, wpa2=0, wep=0, opn=0, hidden=0;
     static List<AP> APs = new ArrayList<>();
     boolean isHidden = false;
-    int pwr, beacons, data, ivs, ch, id, sec=UNKNOWN;
+    int pwr, ch, id, sec=UNKNOWN;
+    private int beacons, data, ivs, total_beacons=0, total_data=0, total_ivs=0;
     long lastseen = 0;
     String essid, mac, enc, cipher, auth, manuf;
     List <ST>clients = new ArrayList<>();
@@ -132,7 +133,7 @@ class AP {
             }
         }
         String c;
-        c = "PWR: " + this.pwr + " | SEC: " + this.enc + " | CH: " + this.ch + " | B:" + this.beacons + " | D:" + this.data;
+        c = "PWR: " + this.pwr + " | SEC: " + this.enc + " | CH: " + this.ch + " | B:" + this.getBeacons() + " | D:" + this.getData();
         if(tile!=null) tile.update(this.essid, this.mac, c, this.manuf);
         else tile = new Tile(id, this.essid, this.mac, c, this.manuf, true, this, null);
     }
@@ -199,8 +200,23 @@ class AP {
         startAireplay(this.mac);
     }
     public String toString(){
-        return mac + '\t' + pwr + '\t' + ch + '\t' + beacons + '\t' + data + '\t' + ivs + '\t' +
+        return mac + '\t' + pwr + '\t' + ch + '\t' + getBeacons() + '\t' + getData() + '\t' + getIvs() + '\t' +
                 enc + '\t' + auth + '\t' + cipher + '\t' + (isHidden ? "Yes" : "No") + '\t' + essid + '\t' + manuf + '\n';
+    }
+    public int getBeacons(){ return total_beacons + beacons; }
+    public int getData(){ return total_data + data; }
+    public int getIvs(){ return total_ivs + ivs; }
+    public static void saveData(){
+        AP temp;
+        for(int i=0;i<AP.APs.size();i++){
+            temp = AP.APs.get(i);
+            temp.total_beacons += temp.beacons;
+            temp.total_data += temp.data;
+            temp.total_ivs += temp.ivs;
+            temp.beacons = 0;
+            temp.data = 0;
+            temp.ivs = 0;
+        }
     }
 
     static void clear(){
