@@ -74,19 +74,6 @@ public class CrackFragment extends Fragment{
             wep_rg.getChildAt(i).setEnabled(false);
         }
 
-        if(capfile_text!=null){
-            ((EditText)v.findViewById(R.id.capfile)).setText(capfile_text);
-        }else{
-            Shell shell = Shell.getFreeShell();
-            shell.run("busybox ls -1 " + cap_dir + "/handshake-*.cap; echo ENDOFLS");
-            capfile = getLastLine(shell.getShell_out(), "ENDOFLS");
-            if(!capfile.equals("ENDOFLS") && capfile.charAt(0)!='l'){
-                ((EditText)v.findViewById(R.id.capfile)).setText(capfile);
-            }
-            shell.done();
-        }
-        if(wordlist_text!=null) ((EditText)v.findViewById(R.id.wordlist)).setText(wordlist_text);
-
         runnable = new Runnable(){
             @Override
             public void run(){
@@ -208,8 +195,20 @@ public class CrackFragment extends Fragment{
     public void onResume() {
         super.onResume();
         currentFragment = FRAGMENT_CRACK;
-        refreshDrawer();
+        if(capfile_text!=null){
+            ((EditText)v.findViewById(R.id.capfile)).setText(capfile_text);
+        }else{
+            Shell shell = Shell.getFreeShell();
+            shell.run("busybox ls -1 " + cap_dir + "/handshake-*.cap; echo ENDOFLS");
+            capfile = getLastLine(shell.getShell_out(), "ENDOFLS");
+            if(!capfile.equals("ENDOFLS") && capfile.charAt(0)!='l'){
+                ((EditText)v.findViewById(R.id.capfile)).setText(capfile);
+            }
+            shell.done();
+        }
+        if(wordlist_text!=null) ((EditText)v.findViewById(R.id.wordlist)).setText(wordlist_text);
         console.setText(console_text);
+        refreshDrawer();
     }
     @Override
     public void onPause(){

@@ -54,7 +54,8 @@ class AP {
     static final int WPA=0, WPA2=1, WEP=2, OPN=3, UNKNOWN=4;
     static int wpa=0, wpa2=0, wep=0, opn=0, hidden=0;
     static List<AP> APs = new ArrayList<>();
-    boolean isHidden = false;
+    static List<AP> marked = new ArrayList<>();
+    boolean isHidden = false, isMarked = false;
     int pwr, ch, id, sec=UNKNOWN;
     private int beacons, data, ivs, total_beacons=0, total_data=0, total_ivs=0;
     long lastseen = 0;
@@ -207,6 +208,20 @@ class AP {
             Log.d("HIJACKER/AP", this.mac);
         }
         startAireplay(this.mac);
+    }
+    void mark(){
+        if(!marked.contains(this)){
+            marked.add(this);
+        }
+        this.isMarked = true;
+        Tile.filter();
+    }
+    void unmark(){
+        if(marked.contains(this)){
+            marked.remove(this);
+        }
+        this.isMarked = false;
+        Tile.filter();
     }
     public String toString(){
         return mac + '\t' + pwr + '\t' + ch + '\t' + getBeacons() + '\t' + getData() + '\t' + getIvs() + '\t' +

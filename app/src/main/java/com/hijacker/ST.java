@@ -39,13 +39,14 @@ import static com.hijacker.MainActivity.stop;
 import static com.hijacker.MainActivity.toSort;
 
 class ST {
-    static List <ST>STs = new ArrayList<>();
+    static List<ST> STs = new ArrayList<>();
+    static List<ST> marked = new ArrayList<>();
     static String paired, not_connected;
     static int connected=0;
     int pwr, id;
     private int frames, lost, total_frames=0, total_lost=0;
     long lastseen = 0;
-    boolean added_as_client = false;
+    boolean added_as_client = false, isMarked = false;
     Tile tile;
     String mac, bssid, manuf;
     ST(String mac, String bssid, int pwr, int lost, int frames){
@@ -123,6 +124,20 @@ class ST {
         STDialog dialog = new STDialog();
         dialog.info_st = this;
         dialog.show(fragmentManager, "STDialog");
+    }
+    void mark(){
+        if(!marked.contains(this)){
+            marked.add(this);
+        }
+        this.isMarked = true;
+        Tile.filter();
+    }
+    void unmark(){
+        if(marked.contains(this)){
+            marked.remove(this);
+        }
+        this.isMarked = false;
+        Tile.filter();
     }
     public String toString(){
         return mac + '\t' + (bssid==null ? "(not associated)" : bssid) + '\t' + pwr + '\t' + getFrames() + '\t' + getLost() + '\t' + manuf + '\n';

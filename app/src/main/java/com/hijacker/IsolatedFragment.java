@@ -44,6 +44,7 @@ import static com.hijacker.MainActivity.deauthWait;
 import static com.hijacker.MainActivity.debug;
 import static com.hijacker.MainActivity.iface;
 import static com.hijacker.MainActivity.isolate;
+import static com.hijacker.MainActivity.menu;
 import static com.hijacker.MainActivity.prefix;
 import static com.hijacker.MainActivity.progress;
 import static com.hijacker.MainActivity.refreshDrawer;
@@ -156,12 +157,14 @@ public class IsolatedFragment extends Fragment{
         view.findViewById(R.id.crack).setEnabled(is_ap.sec==WPA || is_ap.sec==WPA2 || is_ap.sec==WEP);
         ((Button)view.findViewById(R.id.dos)).setText(MDKFragment.ados ? R.string.stop : R.string.dos);
         refresh.obtainMessage().sendToTarget();
+        menu.findItem(R.id.reset).setVisible(false);
     }
     @Override
     public void onPause(){
         super.onPause();
         cont = false;
         thread.interrupt();
+        menu.findItem(R.id.reset).setVisible(true);
     }
     @Override
     public void onDestroy(){

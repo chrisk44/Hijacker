@@ -41,37 +41,11 @@ import static com.hijacker.MainActivity.currentFragment;
 import static com.hijacker.MainActivity.refreshDrawer;
 
 public class CustomActionEditorFragment extends Fragment{
+    View v;
     CustomAction action;
     @Override
     public View onCreateView(LayoutInflater inflater, final ViewGroup container, Bundle savedInstanceState){
-        final View v = inflater.inflate(R.layout.custom_action_editor, container, false);
-
-        if(action!=null){
-            ((EditText)v.findViewById(R.id.title)).setText(action.getTitle());
-            ((EditText)v.findViewById(R.id.start_cmd)).setText(action.getStart_cmd());
-            ((EditText)v.findViewById(R.id.stop_cmd)).setText(action.getStop_cmd());
-            if(action.getType()==TYPE_AP){
-                ((RadioButton)v.findViewById(R.id.ap_rb)).setChecked(true);
-                v.findViewById(R.id.st_rb).setEnabled(false);
-                ((CheckBox)v.findViewById(R.id.requirement)).setChecked(action.requires_clients());
-            }else{
-                ((RadioButton) v.findViewById(R.id.st_rb)).setChecked(true);
-                v.findViewById(R.id.ap_rb).setEnabled(false);
-                ((CheckBox)v.findViewById(R.id.requirement)).setChecked(action.requires_connected());
-                ((CheckBox)v.findViewById(R.id.requirement)).setText(R.string.requires_associated);
-            }
-            if(action.hasProcessName()){
-                ((CheckBox)v.findViewById(R.id.has_process_name)).setChecked(true);
-                ((EditText)v.findViewById(R.id.process_name)).setText(action.getProcess_name());
-            }
-            v.findViewById(R.id.title).setEnabled(true);
-            v.findViewById(R.id.start_cmd).setEnabled(true);
-            v.findViewById(R.id.stop_cmd).setEnabled(true);
-            v.findViewById(R.id.requirement).setEnabled(true);
-            v.findViewById(R.id.save_button).setEnabled(true);
-            v.findViewById(R.id.has_process_name).setEnabled(true);
-            v.findViewById(R.id.process_name).setEnabled(action.hasProcessName());
-        }
+        v = inflater.inflate(R.layout.custom_action_editor, container, false);
 
         ((RadioGroup)v.findViewById(R.id.radio_group)).setOnCheckedChangeListener(new RadioGroup.OnCheckedChangeListener(){
             @Override
@@ -158,7 +132,33 @@ public class CustomActionEditorFragment extends Fragment{
     @Override
     public void onResume(){
         super.onResume();
-        currentFragment = FRAGMENT_CUSTOM;
+        currentFragment = FRAGMENT_CUSTOM;if(action!=null){
+            ((EditText)v.findViewById(R.id.title)).setText(action.getTitle());
+            ((EditText)v.findViewById(R.id.start_cmd)).setText(action.getStart_cmd());
+            ((EditText)v.findViewById(R.id.stop_cmd)).setText(action.getStop_cmd());
+            if(action.getType()==TYPE_AP){
+                ((RadioButton)v.findViewById(R.id.ap_rb)).setChecked(true);
+                v.findViewById(R.id.st_rb).setEnabled(false);
+                ((CheckBox)v.findViewById(R.id.requirement)).setChecked(action.requires_clients());
+            }else{
+                ((RadioButton) v.findViewById(R.id.st_rb)).setChecked(true);
+                v.findViewById(R.id.ap_rb).setEnabled(false);
+                ((CheckBox)v.findViewById(R.id.requirement)).setChecked(action.requires_connected());
+                ((CheckBox)v.findViewById(R.id.requirement)).setText(R.string.requires_associated);
+            }
+            if(action.hasProcessName()){
+                ((CheckBox)v.findViewById(R.id.has_process_name)).setChecked(true);
+                ((EditText)v.findViewById(R.id.process_name)).setText(action.getProcess_name());
+            }
+            v.findViewById(R.id.title).setEnabled(true);
+            v.findViewById(R.id.start_cmd).setEnabled(true);
+            v.findViewById(R.id.stop_cmd).setEnabled(true);
+            v.findViewById(R.id.requirement).setEnabled(true);
+            v.findViewById(R.id.save_button).setEnabled(true);
+            v.findViewById(R.id.has_process_name).setEnabled(true);
+            v.findViewById(R.id.process_name).setEnabled(action.hasProcessName());
+        }
+
         refreshDrawer();
     }
 }

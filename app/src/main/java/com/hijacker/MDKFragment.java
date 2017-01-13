@@ -59,7 +59,6 @@ public class MDKFragment extends Fragment{
         v = inflater.inflate(R.layout.mdk_fragment, container, false);
 
         bf_switch = (Switch)v.findViewById(R.id.bf_switch);
-        bf_switch.setChecked(bf);
         bf_switch.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener(){
             @Override
             public void onCheckedChanged(CompoundButton compoundButton, boolean b){
@@ -110,7 +109,6 @@ public class MDKFragment extends Fragment{
             }
         });
         ados_switch = (Switch)v.findViewById(R.id.ados_switch);
-        ados_switch.setChecked(ados);
         ados_switch.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener(){
             @Override
             public void onCheckedChanged(CompoundButton compoundButton, boolean b){
@@ -125,8 +123,6 @@ public class MDKFragment extends Fragment{
             }
         });
         select_button = (Button)v.findViewById(R.id.select_ap_ados);
-        if(custom_mac!=null) select_button.setText(custom_mac);
-        else if(ados_ap!=null) select_button.setText(ados_ap.essid + " (" + ados_ap.mac + ')');
         select_button.setOnClickListener(new View.OnClickListener(){
             @Override
             public void onClick(View view){
@@ -167,7 +163,18 @@ public class MDKFragment extends Fragment{
                 popup.show();
             }
         });
+
+        return v;
+    }
+    @Override
+    public void onResume() {
+        super.onResume();
+        currentFragment = FRAGMENT_MDK;
         //Restore options
+        bf_switch.setChecked(bf);
+        ados_switch.setChecked(ados);
+        if(custom_mac!=null) select_button.setText(custom_mac);
+        else if(ados_ap!=null) select_button.setText(ados_ap.essid + " (" + ados_ap.mac + ')');
         if(ssid_file!=null) ((EditText)v.findViewById(R.id.ssid_file)).setText(ssid_file);
         CompoundButton.OnCheckedChangeListener listener = new CompoundButton.OnCheckedChangeListener(){
             @Override
@@ -187,13 +194,6 @@ public class MDKFragment extends Fragment{
         ((CheckBox)v.findViewById(R.id.tkip)).setOnCheckedChangeListener(listener);
         ((CheckBox)v.findViewById(R.id.aes)).setChecked(aes);
         ((CheckBox)v.findViewById(R.id.aes)).setOnCheckedChangeListener(listener);
-
-        return v;
-    }
-    @Override
-    public void onResume() {
-        super.onResume();
-        currentFragment = FRAGMENT_MDK;
         refreshDrawer();
     }
     @Override

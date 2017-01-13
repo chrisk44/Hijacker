@@ -60,17 +60,18 @@ public class MyListFragment extends ListFragment {
 
             //add(groupId, itemId, order, title)
             popup.getMenu().add(0, 0, 0, "Info");
-            popup.getMenu().add(0, 1, 1, "Copy MAC");
-            popup.getMenu().add(0, 9, 2, "Copy disconnect command");
-            popup.getMenu().add(0, 2, 3, "Disconnect...");
-            popup.getMenu().add(0, 3, 5, "Watch");
-            if(clicked.ap.clients.size()>0) popup.getMenu().add(0, 5, 4 , "Disconnect Client");
-            popup.getMenu().add(0, 6, 6, "DoS");
+            popup.getMenu().add(0, 11, 1, clicked.ap.isMarked ? "Unmark" : "Mark");
+            popup.getMenu().add(0, 1, 2, "Copy MAC");
+            popup.getMenu().add(0, 9, 3, "Copy disconnect command");
+            popup.getMenu().add(0, 2, 4, "Disconnect...");
+            if(clicked.ap.clients.size()>0) popup.getMenu().add(0, 5, 5, "Disconnect Client");
+            popup.getMenu().add(0, 3, 6, "Watch");
+            popup.getMenu().add(0, 6, 7, "DoS");
             if(clicked.ap.sec==WPA || clicked.ap.sec==WPA2 || clicked.ap.sec==WEP){
-                popup.getMenu().add(0, 7, 7, "Crack");
-                popup.getMenu().add(0, 8, 8, "Copy crack command");
+                popup.getMenu().add(0, 7, 8, "Crack");
+                popup.getMenu().add(0, 8, 9, "Copy crack command");
             }
-            popup.getMenu().add(0, 10, 9, "Crack with Reaver");
+            popup.getMenu().add(0, 10, 10, "Crack with Reaver");
 
             popup.setOnMenuItemClickListener(new PopupMenu.OnMenuItemClickListener() {
                 public boolean onMenuItemClick(android.view.MenuItem item) {
@@ -135,6 +136,14 @@ public class MyListFragment extends ListFragment {
                             //crack with reaver
                             clicked.ap.crackReaver(getFragmentManager());
                             break;
+                        case 11:
+                            //mark or unmark
+                            if(clicked.ap.isMarked){
+                                clicked.ap.unmark();
+                            }else{
+                                clicked.ap.mark();
+                            }
+                            break;
                     }
                     return true;
                 }
@@ -146,10 +155,11 @@ public class MyListFragment extends ListFragment {
             popup.getMenuInflater().inflate(R.menu.popup_menu, popup.getMenu());
 
             popup.getMenu().add(0, 0, 0, "Info");
-            popup.getMenu().add(0, 1, 1, "Copy MAC");
+            popup.getMenu().add(0, 4, 1, clicked.st.isMarked ? "Unmark" : "Mark");
+            popup.getMenu().add(0, 1, 2, "Copy MAC");
             if(clicked.st.bssid!=null){
-                popup.getMenu().add(0, 2, 2, "Disconnect");
-                popup.getMenu().add(0, 3, 3, "Copy disconnect command");
+                popup.getMenu().add(0, 2, 3, "Disconnect");
+                popup.getMenu().add(0, 3, 4, "Copy disconnect command");
             }
 
             popup.setOnMenuItemClickListener(new PopupMenu.OnMenuItemClickListener() {
@@ -172,6 +182,14 @@ public class MyListFragment extends ListFragment {
                             //copy disconnect command to clipboard
                             String str = prefix + " " + aireplay_dir + " --ignore-negative-one --deauth 0 -a " + clicked.st.bssid + " -c " + clicked.st.mac + " " + iface;
                             copy(str, v);
+                            break;
+                        case 4:
+                            //mark or unmark
+                            if(clicked.st.isMarked){
+                                clicked.st.unmark();
+                            }else{
+                                clicked.st.mark();
+                            }
                             break;
                     }
                     return true;

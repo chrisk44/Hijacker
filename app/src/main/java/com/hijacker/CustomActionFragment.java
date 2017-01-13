@@ -89,20 +89,6 @@ public class CustomActionFragment extends Fragment{
         select_target = (Button)v.findViewById(R.id.select_target);
         select_action = (Button)v.findViewById(R.id.select_action);
 
-        if(selected_action!=null){
-            select_action.setText(selected_action.getTitle());
-            select_target.setEnabled(true);
-        }
-        if(ap!=null){
-            start_button.setEnabled(true);
-            select_target.setText(ap.essid + " (" + ap.mac + ")");
-        }
-        if(st!=null){
-            start_button.setEnabled(true);
-            select_target.setText(st.mac + ((st.bssid==null) ? "" : " (" + AP.getAPByMac(st.bssid).essid + ")"));
-        }
-        start_button.setText(thread.isAlive() ? R.string.stop : R.string.start);
-
         select_action.setOnClickListener(new View.OnClickListener(){
             @Override
             public void onClick(View view){
@@ -226,8 +212,21 @@ public class CustomActionFragment extends Fragment{
     @Override
     public void onResume(){
         super.onResume();
-        console.setText(console_text);
         currentFragment = FRAGMENT_CUSTOM;
+        console.setText(console_text);
+        if(selected_action!=null){
+            select_action.setText(selected_action.getTitle());
+            select_target.setEnabled(true);
+        }
+        if(ap!=null){
+            start_button.setEnabled(true);
+            select_target.setText(ap.essid + " (" + ap.mac + ")");
+        }
+        if(st!=null){
+            start_button.setEnabled(true);
+            select_target.setText(st.mac + ((st.bssid==null) ? "" : " (" + AP.getAPByMac(st.bssid).essid + ")"));
+        }
+        start_button.setText(thread.isAlive() ? R.string.stop : R.string.start);
         refreshDrawer();
     }
     @Override

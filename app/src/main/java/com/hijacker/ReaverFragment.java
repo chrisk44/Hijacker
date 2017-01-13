@@ -97,8 +97,6 @@ public class ReaverFragment extends Fragment{
         }
 
         select_button = (Button)v.findViewById(R.id.select_ap);
-        if(custom_mac!=null) select_button.setText(custom_mac);
-        else if(ap!=null) select_button.setText(ap.essid + " (" + ap.mac + ')');
         select_button.setOnClickListener(new View.OnClickListener(){
             @Override
             public void onClick(View view){
@@ -196,7 +194,6 @@ public class ReaverFragment extends Fragment{
         if(thread==null) thread = new Thread(runnable);
 
         start_button = (Button)v.findViewById(R.id.start_button);
-        start_button.setText(thread.isAlive() ? R.string.stop : R.string.start);
         start_button.setOnClickListener(new View.OnClickListener(){
             @Override
             public void onClick(View view){
@@ -242,6 +239,9 @@ public class ReaverFragment extends Fragment{
         ((CheckBox)v.findViewById(R.id.ignore_locked)).setChecked(ignore_locked);
         ((CheckBox)v.findViewById(R.id.eap_fail)).setChecked(eap_fail);
         ((CheckBox)v.findViewById(R.id.small_dh)).setChecked(small_dh);
+        if(custom_mac!=null) select_button.setText(custom_mac);
+        else if(ap!=null) select_button.setText(ap.essid + " (" + ap.mac + ')');
+        start_button.setText(thread.isAlive() ? R.string.stop : R.string.start);
     }
     @Override
     public void onPause(){

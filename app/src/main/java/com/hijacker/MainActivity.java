@@ -1124,9 +1124,11 @@ public class MainActivity extends AppCompatActivity{
             ImageView iv = (ImageView) itemview.findViewById(R.id.iv);
             if(!current.type){
                 iv.setImageResource(R.drawable.st2);
+                firstText.setTextColor(getColor(current.st.isMarked ? R.color.colorAccent : android.R.color.white));
             }else{
                 if(current.ap.isHidden) iv.setImageResource(R.drawable.ap_hidden);
                 else iv.setImageResource(R.drawable.ap2);
+                firstText.setTextColor(getColor(current.ap.isMarked ? R.color.colorAccent : android.R.color.white));
             }
 
             return itemview;
