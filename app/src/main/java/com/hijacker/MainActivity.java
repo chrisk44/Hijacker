@@ -71,6 +71,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
+import java.util.LinkedList;
 import java.util.List;
 
 import static com.hijacker.CustomAction.TYPE_ST;
@@ -110,7 +111,7 @@ public class MainActivity extends AppCompatActivity{
     static Thread refresh_thread, wpa_thread, watchdog_thread;
     static Runnable refresh_runnable, wpa_runnable, watchdog_runnable;
     static Menu menu;
-    static List<Item2> fifo;                    //List used as FIFO for handling calls to addAP/addST in an order
+    final static LinkedList<Item2> fifo = new LinkedList<>();                    //List used as FIFO for handling calls to addAP/addST in an order
     static MyListAdapter adapter;
     static CustomActionAdapter custom_action_adapter;
     static SharedPreferences pref;
@@ -170,9 +171,10 @@ public class MainActivity extends AppCompatActivity{
                 if(debug) Log.d("HIJACKER/refresh_thread", "refresh_thread running");
                 try{
                     while(cont){
-                        while(fifo.size()>0){
-                            fifo.get(0).add();
-                            if(!fifo.isEmpty()) fifo.remove(0);
+                        while(!fifo.isEmpty()){
+                            synchronized(fifo){
+                                fifo.pop().add();
+                            }
                             while(!completed){      //Wait for the update request to complete
                                 Thread.sleep(10);
                             }
@@ -781,7 +783,8 @@ public class MainActivity extends AppCompatActivity{
         arch = System.getProperty("os.arch");
         ap_count = (TextView) findViewById(R.id.ap_count);
         st_count = (TextView) findViewById(R.id.st_count);
-        fifo = new ArrayList<>();
+        //fifo = new ArrayList<>();
+        //fifo = new LinkedList<>();
         progress = (ProgressBar) findViewById(R.id.progressBar);
         pref = PreferenceManager.getDefaultSharedPreferences(this);
         pref_edit = pref.edit();

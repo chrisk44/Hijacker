@@ -112,14 +112,27 @@ public class CustomActionFragment extends Fragment{
                             ft.addToBackStack(null);
                             ft.commitAllowingStateLoss();
                         }else{
+                            int prev_type = -1;
+                            if(selected_action!=null){
+                                prev_type = selected_action.getType();
+                            }
                             selected_action = cmds.get(item.getItemId());
-                            stop.obtainMessage().sendToTarget();
                             select_action.setText(selected_action.getTitle());
+                            if(prev_type==-1){
+                                ap = null;
+                                st = null;
+                            }else{
+                                if(selected_action.getType()==TYPE_AP && prev_type==TYPE_ST){
+                                    st = null;
+                                }else if(selected_action.getType()==TYPE_ST && prev_type==TYPE_AP){
+                                    ap = null;
+                                }
+                            }
                             select_target.setEnabled(true);
                             select_target.setText(R.string.select_target);
                             start_button.setEnabled(false);
-                            ap = null;
-                            st = null;
+                            setTarget();
+                            stop.obtainMessage().sendToTarget();
                         }
                         return true;
                     }
@@ -217,14 +230,7 @@ public class CustomActionFragment extends Fragment{
         if(selected_action!=null){
             select_action.setText(selected_action.getTitle());
             select_target.setEnabled(true);
-        }
-        if(ap!=null){
-            start_button.setEnabled(true);
-            select_target.setText(ap.essid + " (" + ap.mac + ")");
-        }
-        if(st!=null){
-            start_button.setEnabled(true);
-            select_target.setText(st.mac + ((st.bssid==null) ? "" : " (" + AP.getAPByMac(st.bssid).essid + ")"));
+            setTarget();
         }
         start_button.setText(thread.isAlive() ? R.string.stop : R.string.start);
         refreshDrawer();
@@ -233,6 +239,30 @@ public class CustomActionFragment extends Fragment{
     public void onPause(){
         super.onPause();
         console_text = console.getText().toString();
+    }
+    void setTarget(){
+        if(ap!=null){
+            start_button.setEnabled(true);
+            select_target.setText(ap.essid + " (" + ap.mac + ")");
+            return;
+        }
+        if(st!=null){
+            start_button.setEnabled(true);
+            select_target.setText(st.mac + ((st.bssid==null) ? "" : " (" + AP.getAPByMac(st.bssid).essid + ")"));
+            return;
+        }
+        if(selected_action.getType()==TYPE_AP && !AP.marked.isEmpty()){
+            start_button.setEnabled(true);
+
+            ap = AP.marked.get(AP.marked.size()-1);
+            select_target.setText(ap.essid + " (" + ap.mac + ")");
+
+        }else if(selected_action.getType()==TYPE_ST && !ST.marked.isEmpty()){
+            start_button.setEnabled(true);
+
+            st = ST.marked.get(ST.marked.size()-1);
+            select_target.setText(st.mac + ((st.bssid==null) ? "" : " (" + AP.getAPByMac(st.bssid).essid + ")"));
+        }
     }
 
     public Handler stop = new Handler(){

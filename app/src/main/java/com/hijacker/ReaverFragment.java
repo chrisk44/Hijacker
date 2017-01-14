@@ -241,6 +241,10 @@ public class ReaverFragment extends Fragment{
         ((CheckBox)v.findViewById(R.id.small_dh)).setChecked(small_dh);
         if(custom_mac!=null) select_button.setText(custom_mac);
         else if(ap!=null) select_button.setText(ap.essid + " (" + ap.mac + ')');
+        else if(!AP.marked.isEmpty()){
+            ap = AP.marked.get(AP.marked.size()-1);
+            select_button.setText(ap.essid + " (" + ap.mac + ')');
+        }
         start_button.setText(thread.isAlive() ? R.string.stop : R.string.start);
     }
     @Override

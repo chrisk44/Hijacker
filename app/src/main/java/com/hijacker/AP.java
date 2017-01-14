@@ -245,6 +245,7 @@ class AP {
 
     static void clear(){
         APs.clear();
+        marked.clear();
         wpa = 0;
         wpa2 = 0;
         wep = 0;

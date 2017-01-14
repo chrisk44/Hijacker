@@ -164,6 +164,7 @@ class ST {
     }
     static void clear(){
         STs.clear();
+        marked.clear();
         connected = 0;
     }
 }

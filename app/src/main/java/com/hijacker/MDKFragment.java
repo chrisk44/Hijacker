@@ -175,6 +175,10 @@ public class MDKFragment extends Fragment{
         ados_switch.setChecked(ados);
         if(custom_mac!=null) select_button.setText(custom_mac);
         else if(ados_ap!=null) select_button.setText(ados_ap.essid + " (" + ados_ap.mac + ')');
+        else if(!AP.marked.isEmpty()){
+            ados_ap = AP.marked.get(AP.marked.size()-1);
+            select_button.setText(ados_ap.essid + " (" + ados_ap.mac + ')');
+        }
         if(ssid_file!=null) ((EditText)v.findViewById(R.id.ssid_file)).setText(ssid_file);
         CompoundButton.OnCheckedChangeListener listener = new CompoundButton.OnCheckedChangeListener(){
             @Override
