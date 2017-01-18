@@ -17,9 +17,12 @@ package com.hijacker;
     along with this program.  If not, see <http://www.gnu.org/licenses/>
  */
 
+import static com.hijacker.CustomAction.TYPE_AP;
+import static com.hijacker.CustomAction.TYPE_ST;
+
 class Item2 {
     int i1, i2, i3, i4 ,i5;
-    boolean type;
+    int type;
     String str1, str2, str3, str4, str5;
     Item2(String str1, String str2, String str3, String str4, String str5, int i1, int i2, int i3, int i4, int i5){
         //AP
@@ -33,7 +36,7 @@ class Item2 {
         this.i3 = i3;
         this.i4 = i4;
         this.i5 = i5;
-        this.type = true;
+        this.type = TYPE_AP;
     }
     Item2(String str1, String str2, int i1, int i2, int i3){
         //ST
@@ -42,10 +45,10 @@ class Item2 {
         this.i1 = i1;
         this.i2 = i2;
         this.i3 = i3;
-        this.type = false;
+        this.type = TYPE_ST;
     }
     void add(){
-        if(this.type){
+        if(this.type==TYPE_AP){
             //AP
             AP temp = AP.getAPByMac(str2);
             if(temp==null) new AP(str1, str2, str3, str4, str5, i1, i2, i3, i4, i5);

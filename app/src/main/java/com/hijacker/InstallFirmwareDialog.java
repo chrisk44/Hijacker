@@ -42,6 +42,7 @@ import java.io.InputStream;
 
 import static com.hijacker.MainActivity.PROCESS_AIRODUMP;
 import static com.hijacker.MainActivity.debug;
+import static com.hijacker.MainActivity.firm_backup_file;
 import static com.hijacker.MainActivity.getLastLine;
 import static com.hijacker.MainActivity.background;
 import static com.hijacker.MainActivity.getPIDs;
@@ -61,7 +62,7 @@ public class InstallFirmwareDialog extends DialogFragment {
         if(!(new File("/su").exists())){
             ((EditText)view.findViewById(R.id.util_location)).setText("/system/xbin");
         }
-        ((CheckBox) view.findViewById(R.id.backup)).setChecked(!(new File(path + "/fw_bcmdhd.orig.bin").exists()));
+        ((CheckBox) view.findViewById(R.id.backup)).setChecked(!(new File(firm_backup_file).exists()));
 
 
         shell = Shell.getFreeShell();
@@ -168,10 +169,10 @@ public class InstallFirmwareDialog extends DialogFragment {
         wifiManager.setWifiEnabled(false);
         if(debug) Log.d("HIJACKER/InstFirmware", "Backing up firmware from " + firm_location);
         if(((CheckBox)view.findViewById(R.id.backup)).isChecked()){
-            if(new File(path + "/fw_bcmdhd.orig.bin").exists()){
+            if(new File(firm_backup_file).exists()){
                 Toast.makeText(getActivity(), R.string.backup_exists, Toast.LENGTH_SHORT).show();
             }else{
-                shell.run("cp -n " + firm_location + "/fw_bcmdhd.bin " + path + "/fw_bcmdhd.orig.bin");
+                shell.run("cp -n " + firm_location + "/fw_bcmdhd.bin " + firm_backup_file);
                 Toast.makeText(getActivity(), R.string.backup_created, Toast.LENGTH_SHORT).show();
             }
         }

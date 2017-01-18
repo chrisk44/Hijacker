@@ -70,6 +70,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.text.NumberFormat;
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
@@ -101,13 +102,14 @@ public class MainActivity extends AppCompatActivity{
     static int sort = SORT_NOSORT;
     static boolean sort_reverse = false;
     static boolean toSort = false;     //Variable to mark that the list must be sorted, so Tile.sort() must be called
+    //Views that need to be accessible globally
     static TextView ap_count, st_count;                               //AP and ST count textviews in toolbar
     static ProgressBar progress;
     static Toolbar toolbar;
     static Drawable overflow[] = {null, null, null, null, null, null, null, null};      //Drawables to use for overflow button icon
     static ImageView[] status = {null, null, null, null, null};                         //Icons in TestDialog, set in TestDialog class
     static int progress_int;
-    static long last_action;
+    static long last_action;                        //Timestamp for the last action. Used in watchdog to avoid false positives
     static Thread refresh_thread, wpa_thread, watchdog_thread;
     static Runnable refresh_runnable, wpa_runnable, watchdog_runnable;
     static Menu menu;
@@ -118,9 +120,9 @@ public class MainActivity extends AppCompatActivity{
     static SharedPreferences.Editor pref_edit;
     static ClipboardManager clipboard;
     static NotificationCompat.Builder notif, error_notif, handshake_notif;
-    static NotificationManager nm;
-    static FragmentManager fm;
-    static String path, version, arch;             //App files path (ends with .../files)
+    static NotificationManager mNotificationManager;
+    static FragmentManager mFragmentManager;
+    static String path, firm_backup_file, version, arch;             //path: App files path (ends with .../files)
     static boolean init=false;      //True on first run to swap the dialogs for initialization
     static ActionBar actionBar;
     private GoogleApiClient client;
@@ -164,6 +166,8 @@ public class MainActivity extends AppCompatActivity{
         setContentView(R.layout.activity_main);
         setSupportActionBar((Toolbar) findViewById(R.id.my_toolbar));
         setup();
+
+        if(debug) Log.d("HIJACKER/Main", "path is " + path);
 
         refresh_runnable = new Runnable(){
             @Override
@@ -290,7 +294,7 @@ public class MainActivity extends AppCompatActivity{
                                 if(!background) Snackbar.make(findViewById(R.id.fragment1), getString(R.string.handshake_captured) + ' ' + capfile, Snackbar.LENGTH_LONG).show();
                                 else{
                                     handshake_notif.setContentText(getString(R.string.saved_in_file) + ' ' + capfile);
-                                    nm.notify(2, handshake_notif.build());
+                                    mNotificationManager.notify(2, handshake_notif.build());
                                 }
                             }
                             progress.setIndeterminate(false);
@@ -432,7 +436,7 @@ public class MainActivity extends AppCompatActivity{
             }else if(debug) Log.d("HIJACKER/onCreate", "No /su to install busybox");
         }else if(debug) Log.d("HIJACKER/onCreate", "Cannot install busybox, arch is " + arch);
 
-
+        //Thread to wait for the drawer to be initialized, so that the first option (airodump) can be highlighted
         new Thread(new Runnable(){      //Thread to wait until the drawer is initialized and then highlight airodump
             @Override
             public void run(){
@@ -456,9 +460,17 @@ public class MainActivity extends AppCompatActivity{
         }
 
         if(!pref.getBoolean("disclaimer", false)){
-            new DisclaimerDialog().show(fm, "Disclaimer");
-            File su = new File("/su");
-            if(!su.exists()){
+            new DisclaimerDialog().show(getFragmentManager(), "Disclaimer");
+            Shell shell = getFreeShell();
+            shell.run("busybox; echo ENDOFBUSYBOX");
+            if(getLastLine(shell.getShell_out(), "ENDOFBUSYBOX").equals("ENDOFBUSYBOX")){
+                ErrorDialog dialog = new ErrorDialog();
+                dialog.setTitle(getString(R.string.busybox_notfound_title));
+                dialog.setMessage(getString(R.string.busybox_notfound));
+                dialog.show(getFragmentManager(), "ErrorDialog");
+            }
+            shell.done();
+            if(!new File("/su").exists()){
                 ErrorDialog dialog = new ErrorDialog();
                 dialog.setTitle(getString(R.string.su_notfound_title));
                 dialog.setMessage(getString(R.string.su_notfound));
@@ -471,24 +483,23 @@ public class MainActivity extends AppCompatActivity{
     }
     void extract(String filename, boolean chmod){
         File f = new File(getFilesDir(), filename);
-        if(!f.exists()){
-            try{
-                InputStream in = getResources().getAssets().open(filename);
-                FileOutputStream out = new FileOutputStream(f);
+        if(f.exists()) f.delete();          //Delete file in case it's outdated
+        try{
+            InputStream in = getResources().getAssets().open(filename);
+            FileOutputStream out = new FileOutputStream(f);
 
-                byte[] buf = new byte[1024];
-                int len;
-                while((len = in.read(buf))>0){
-                    out.write(buf, 0, len);
-                }
-                in.close();
-                out.close();
-                if(chmod){
-                    runOne("chmod 744 ./files/" + filename);
-                }
-            }catch(IOException e){
-                Log.e("HIJACKER/FileProvider", "Exception copying from assets", e);
+            byte[] buf = new byte[1024];
+            int len;
+            while((len = in.read(buf))>0){
+                out.write(buf, 0, len);
             }
+            in.close();
+            out.close();
+            if(chmod){
+                runOne("chmod 744 ./files/" + filename);
+            }
+        }catch(IOException e){
+            Log.e("HIJACKER/FileProvider", "Exception copying from assets", e);
         }
     }
     public static void main(){
@@ -654,8 +665,12 @@ public class MainActivity extends AppCompatActivity{
             while(buffer==null) buffer = out.readLine();
             while(!buffer.equals("ENDOFPIDOF")){
                 String[] temp = buffer.split(" ");
-                for(String tmp : temp){
-                    list.add(Integer.parseInt(tmp));
+                try{
+                    for(String tmp : temp){
+                        list.add(Integer.parseInt(tmp));
+                    }
+                }catch(NumberFormatException e){
+                    Log.e("HIJACKER/getPIDs", "Exception: " + e.toString());
                 }
                 buffer = out.readLine();
             }
@@ -783,15 +798,8 @@ public class MainActivity extends AppCompatActivity{
         arch = System.getProperty("os.arch");
         ap_count = (TextView) findViewById(R.id.ap_count);
         st_count = (TextView) findViewById(R.id.st_count);
-        //fifo = new ArrayList<>();
-        //fifo = new LinkedList<>();
         progress = (ProgressBar) findViewById(R.id.progressBar);
-        pref = PreferenceManager.getDefaultSharedPreferences(this);
-        pref_edit = pref.edit();
-        clipboard = (ClipboardManager) getSystemService(CLIPBOARD_SERVICE);
-        fm = getFragmentManager();
         toolbar = (Toolbar) findViewById(R.id.my_toolbar);
-        actionBar = getSupportActionBar();
         overflow[0] = getDrawable(R.drawable.overflow0);
         overflow[1] = getDrawable(R.drawable.overflow1);
         overflow[2] = getDrawable(R.drawable.overflow2);
@@ -801,6 +809,14 @@ public class MainActivity extends AppCompatActivity{
         overflow[6] = getDrawable(R.drawable.overflow6);
         overflow[7] = getDrawable(R.drawable.overflow7);
         toolbar.setOverflowIcon(overflow[0]);
+        pref = PreferenceManager.getDefaultSharedPreferences(this);
+        pref_edit = pref.edit();
+        clipboard = (ClipboardManager) getSystemService(CLIPBOARD_SERVICE);
+        mNotificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
+        mFragmentManager = getFragmentManager();
+        actionBar = getSupportActionBar();
+        path = getFilesDir().getAbsolutePath();
+        firm_backup_file = Environment.getExternalStorageDirectory() + "/fw_bcmdhd.orig.bin";
 
         //Load defaults
         iface = getString(R.string.iface);
@@ -827,6 +843,14 @@ public class MainActivity extends AppCompatActivity{
         watchdog = Boolean.parseBoolean(getString(R.string.watchdog));
 
         //Initialize notifications
+            //Create intents
+        Intent cancel_intent = new Intent(this, DismissReceiver.class);
+        Intent stop_intent = new Intent(this, StopReceiver.class);
+        Intent notificationIntent = new Intent(this, MainActivity.class);
+        notificationIntent.setFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT);
+        PendingIntent click_intent = PendingIntent.getActivity(this, 0, notificationIntent, 0);
+
+            //Create 'running' notification
         notif = new NotificationCompat.Builder(this);
         notif.setContentTitle(getString(R.string.notification_title));
         notif.setContentText(" ");
@@ -834,18 +858,11 @@ public class MainActivity extends AppCompatActivity{
         if(Build.VERSION.SDK_INT>=Build.VERSION_CODES.M){
             notif.setColor(getColor(R.color.colorAccent));
         }
-
-        Intent cancel_intent = new Intent(this, DismissReceiver.class);
         notif.setDeleteIntent(PendingIntent.getBroadcast(this.getApplicationContext(), 0, cancel_intent, 0));
-
-        Intent stop_intent = new Intent(this, StopReceiver.class);
         notif.addAction(R.drawable.stop, getString(R.string.stop_attacks), PendingIntent.getBroadcast(this.getApplicationContext(), 0, stop_intent, 0));
-
-        Intent notificationIntent = new Intent(this, MainActivity.class);
-        notificationIntent.setFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT);
-        PendingIntent click_intent = PendingIntent.getActivity(this, 0, notificationIntent, 0);
         notif.setContentIntent(click_intent);
 
+            //Crate 'error' notification (used by watchdog)
         error_notif = new NotificationCompat.Builder(this);
         error_notif.setContentTitle(getString(R.string.notification2_title));
         error_notif.setContentText("");
@@ -856,6 +873,7 @@ public class MainActivity extends AppCompatActivity{
         error_notif.setContentIntent(click_intent);
         error_notif.setVibrate(new long[]{500, 500});
 
+            //Create 'handshake captured' notification (used by wpa_thread)
         handshake_notif = new NotificationCompat.Builder(this);
         handshake_notif.setContentTitle(getString(R.string.handshake_captured));
         if(Build.VERSION.SDK_INT>=Build.VERSION_CODES.M){
@@ -865,14 +883,9 @@ public class MainActivity extends AppCompatActivity{
         handshake_notif.setContentIntent(click_intent);
         handshake_notif.setVibrate(new long[]{500, 500});
 
-        nm = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
-
-        load();
-
         //Load strings for when they cannot be retrived with getString or R.string...
         ST.not_connected = getString(R.string.not_connected);
         ST.paired = getString(R.string.paired) + ' ';
-        ErrorDialog.notification2_title = getString(R.string.notification2_title);
 
         //Initialize the drawer
         mPlanetTitles = getResources().getStringArray(R.array.planets_array);
@@ -887,7 +900,8 @@ public class MainActivity extends AppCompatActivity{
             }
         });
 
-        FragmentTransaction ft = fm.beginTransaction();
+        //Load default fragment (airodump)
+        FragmentTransaction ft = getFragmentManager().beginTransaction();
         ft.replace(R.id.fragment1, new MyListFragment());
         ft.setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN);
         ft.addToBackStack(null);
@@ -896,14 +910,14 @@ public class MainActivity extends AppCompatActivity{
         //Google AppIndex
         client = new GoogleApiClient.Builder(this).addApi(AppIndex.API).build();
 
-        path = getFilesDir().getAbsolutePath();
-        CustomAction.load();
-        if(debug) Log.d("HIJACKER/Main", "path is " + path);
+        load();                     //Load preferences
+        CustomAction.load();        //Load custom actions
+
         if(!(new File(path).exists())){
             Log.e("HIJACKER/onCreate", "App file directory doesn't exist");
             ErrorDialog dialog = new ErrorDialog();
             dialog.setMessage(getString(R.string.app_dir_notfound1) + path + getString(R.string.app_dir_notfound2));
-            dialog.show(fm, "ErrorDialog");
+            dialog.show(getFragmentManager(), "ErrorDialog");
         }
     }
     static void load(){
@@ -970,12 +984,12 @@ public class MainActivity extends AppCompatActivity{
                 return true;
 
             case R.id.filter:
-                new FiltersDialog().show(fm, "FiltersDialog");
+                new FiltersDialog().show(getFragmentManager(), "FiltersDialog");
                 return true;
 
             case R.id.settings:
                 if(currentFragment!=FRAGMENT_SETTINGS){
-                    FragmentTransaction ft = fm.beginTransaction();
+                    FragmentTransaction ft = getFragmentManager().beginTransaction();
                     ft.replace(R.id.fragment1, new SettingsFragment());
                     ft.setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN);
                     ft.addToBackStack(null);
@@ -994,7 +1008,7 @@ public class MainActivity extends AppCompatActivity{
     @Override
     protected void onDestroy(){
         notif_on = false;
-        nm.cancelAll();
+        mNotificationManager.cancelAll();
         CustomAction.save();
         watchdog_thread.interrupt();
         stop(PROCESS_AIRODUMP);
@@ -1012,7 +1026,7 @@ public class MainActivity extends AppCompatActivity{
         super.onResume();
         notif_on = false;
         background = false;
-        if(nm!=null) nm.cancelAll();
+        if(mNotificationManager!=null) mNotificationManager.cancelAll();
     }
     @Override
     protected void onStop(){
@@ -1033,7 +1047,7 @@ public class MainActivity extends AppCompatActivity{
             }else if(getFragmentManager().getBackStackEntryCount()>1){
                 getFragmentManager().popBackStackImmediate();
             }else{
-                new ExitDialog().show(fm, "ExitDialog");
+                new ExitDialog().show(getFragmentManager(), "ExitDialog");
             }
             return true;
         }
@@ -1066,7 +1080,7 @@ public class MainActivity extends AppCompatActivity{
         @Override
         public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
             if(currentFragment!=position){
-                FragmentTransaction ft = fm.beginTransaction();
+                FragmentTransaction ft = getFragmentManager().beginTransaction();
                 switch(position){
                     case FRAGMENT_AIRODUMP:
                         ft.replace(R.id.fragment1, is_ap==null ? new MyListFragment() : new IsolatedFragment());
@@ -1090,7 +1104,7 @@ public class MainActivity extends AppCompatActivity{
                 ft.setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN);
                 ft.addToBackStack(null);
                 ft.commitAllowingStateLoss();
-                fm.executePendingTransactions();
+                getFragmentManager().executePendingTransactions();
             }
             mDrawerLayout.closeDrawer(mDrawerList);
         }
@@ -1192,7 +1206,7 @@ public class MainActivity extends AppCompatActivity{
     public static void addST(String mac, String bssid, int pwr, int lost, int frames){
         fifo.add(new Item2(mac, bssid, pwr, lost, frames));
     }
-    public void onAPStats(View v){ new StatsDialog().show(fm, "StatsDialog"); }
+    public void onAPStats(View v){ new StatsDialog().show(getFragmentManager(), "StatsDialog"); }
     public void onCrack(View v){
         //Clicked crack with isolated ap
         if(wpa_thread.isAlive()){
@@ -1251,16 +1265,16 @@ public class MainActivity extends AppCompatActivity{
             }
 
             notif.setContentText(str);
-            nm.notify(0, notif.build());
+            mNotificationManager.notify(0, notif.build());
         }else{
-            nm.cancel(0);
+            mNotificationManager.cancel(0);
         }
     }
     static void isolate(String mac){
         is_ap = AP.getAPByMac(mac);
         if(is_ap!=null){
-            IsolatedFragment.exit_on = fm.getBackStackEntryCount();
-            FragmentTransaction ft = fm.beginTransaction();
+            IsolatedFragment.exit_on = mFragmentManager.getBackStackEntryCount();
+            FragmentTransaction ft = mFragmentManager.beginTransaction();
             ft.replace(R.id.fragment1, new IsolatedFragment());
             ft.setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN);
             ft.addToBackStack(null);
@@ -1296,6 +1310,7 @@ public class MainActivity extends AppCompatActivity{
         return manuf;
     }
     static String getLastLine(BufferedReader out, String end){
+        //Returns the last line printed in out BEFORE end. If no other line is present, end is returned.
         String lastline=null, buffer = null;
         try{
             while(buffer==null) buffer = out.readLine();

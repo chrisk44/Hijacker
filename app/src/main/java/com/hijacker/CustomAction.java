@@ -31,7 +31,7 @@ import java.util.List;
 import static com.hijacker.MainActivity.aireplay_dir;
 import static com.hijacker.MainActivity.airodump_dir;
 import static com.hijacker.MainActivity.debug;
-import static com.hijacker.MainActivity.fm;
+import static com.hijacker.MainActivity.mFragmentManager;
 import static com.hijacker.MainActivity.getPIDs;
 import static com.hijacker.MainActivity.iface;
 import static com.hijacker.MainActivity.mdk3_dir;
@@ -130,7 +130,7 @@ class CustomAction{
                 Log.e("HIJACKER/CustomAction", "In save(): " + e.toString());
                 ErrorDialog dialog = new ErrorDialog();
                 dialog.setMessage("Error while saving " + action.title);
-                dialog.show(fm, "ErrorDialog");
+                dialog.show(mFragmentManager, "ErrorDialog");
             }
         }
     }

@@ -25,14 +25,13 @@ import android.os.Bundle;
 import android.support.v7.app.AlertDialog;
 import android.util.Log;
 
-import static com.hijacker.MainActivity.nm;
+import static com.hijacker.MainActivity.mNotificationManager;
 import static com.hijacker.MainActivity.error_notif;
 import static com.hijacker.MainActivity.background;
 import static com.hijacker.MainActivity.watchdog_runnable;
 import static com.hijacker.MainActivity.watchdog_thread;
 
 public class ErrorDialog extends DialogFragment {
-    static String notification2_title;
     String message;
     String title=null;
     boolean watchdog=false;
@@ -58,29 +57,26 @@ public class ErrorDialog extends DialogFragment {
             builder.setTitle(title);
             builder.setMessage(this.message);
         }else{
-            Log.d("HIJACKER/ErrorDialog", "Message not set");
-            builder.setTitle(R.string.eoe_title);
-            builder.setMessage(R.string.eoe_message);
+            builder.setTitle("");
+            builder.setMessage("");
         }
         return builder.create();
     }
     public void setMessage(String msg){ this.message = msg; }
     public void setTitle(String title){ this.title = title; }
-    public void setWatchdog(boolean wd){
-        this.watchdog = wd;
-    }
+    public void setWatchdog(boolean wd){ this.watchdog = wd; }
     @Override
     public void show(FragmentManager fragmentManager, String tag){
         if(!background) super.show(fragmentManager, tag);
         else{
             if(this.watchdog){
-                error_notif.setContentTitle(notification2_title);
+                error_notif.setContentTitle(getString(R.string.notification2_title));
                 error_notif.setContentText(title);
             }else{
                 error_notif.setContentTitle(title);
                 error_notif.setContentText(message);
             }
-            nm.notify(1, error_notif.build());
+            mNotificationManager.notify(1, error_notif.build());
         }
     }
 }

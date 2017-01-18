@@ -36,6 +36,7 @@ import static com.hijacker.MainActivity.SORT_ESSID;
 import static com.hijacker.MainActivity.SORT_NOSORT;
 import static com.hijacker.MainActivity.SORT_PWR;
 import static com.hijacker.MainActivity.adapter;
+import static com.hijacker.MainActivity.ap_count;
 import static com.hijacker.MainActivity.clearing;
 import static com.hijacker.MainActivity.debug;
 import static com.hijacker.MainActivity.opn;
@@ -46,6 +47,7 @@ import static com.hijacker.MainActivity.show_na_st;
 import static com.hijacker.MainActivity.show_st;
 import static com.hijacker.MainActivity.sort;
 import static com.hijacker.MainActivity.sort_reverse;
+import static com.hijacker.MainActivity.st_count;
 import static com.hijacker.MainActivity.toSort;
 import static com.hijacker.MainActivity.wep;
 import static com.hijacker.MainActivity.wpa;
@@ -153,6 +155,8 @@ class Tile {
             }
         }
         sort();
+        ap_count.setText(Integer.toString(is_ap==null ? Tile.i : 1));
+        st_count.setText(Integer.toString(Tile.tiles.size() - Tile.i));
     }
     static void sort(){
         //sort allTiles 0/i for APs and i/allTiles.size() for STs

@@ -28,6 +28,7 @@ import java.io.File;
 
 import static com.hijacker.MainActivity.FRAGMENT_SETTINGS;
 import static com.hijacker.MainActivity.arch;
+import static com.hijacker.MainActivity.firm_backup_file;
 import static com.hijacker.MainActivity.refreshDrawer;
 import static com.hijacker.MainActivity.version;
 import static com.hijacker.MainActivity.watchdog;
@@ -90,7 +91,7 @@ public class SettingsFragment extends PreferenceFragment {
                 return false;
             }
         });
-        File origFirm = new File(path + "/fw_bcmdhd.orig.bin");
+        File origFirm = new File(firm_backup_file);
         if(!origFirm.exists()){
             findPreference("restore_firmware").setEnabled(false);
         }else{

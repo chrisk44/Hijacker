@@ -39,6 +39,7 @@ import java.io.IOException;
 
 import static com.hijacker.MainActivity.debug;
 import static com.hijacker.MainActivity.background;
+import static com.hijacker.MainActivity.firm_backup_file;
 import static com.hijacker.MainActivity.path;
 
 public class RestoreFirmwareDialog extends DialogFragment {
@@ -92,7 +93,7 @@ public class RestoreFirmwareDialog extends DialogFragment {
                         wifiManager.setWifiEnabled(false);
 
                         shell.run("busybox mount -o rw,remount,rw /system");
-                        shell.run("cp " + path + "/fw_bcmdhd.orig.bin " + firm_location + "/fw_bcmdhd.bin");
+                        shell.run("cp " + firm_backup_file + " " + firm_location + "/fw_bcmdhd.bin");
                         shell.run("busybox mount -o ro,remount,ro /system");
 
                         Toast.makeText(getActivity(), R.string.restored, Toast.LENGTH_SHORT).show();
