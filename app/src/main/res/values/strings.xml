@@ -124,6 +124,7 @@
     <string name="lastseen">Last seen:</string>
     <string name="essid">ESSID:</string>
     <string name="manuf">Manufacturer:</string>
+    <string name="probes">Probes:</string>
 
     <!-- STDialog (xml) -->
     <string name="frames">Frames:</string>

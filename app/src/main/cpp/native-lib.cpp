@@ -75,7 +75,7 @@ extern "C" jint Java_com_hijacker_MainActivity_main(JNIEnv* env, jobject obj, js
 
     jclass jclass1 = env->FindClass("com/hijacker/MainActivity");
     jmethodID method_ap = env->GetStaticMethodID(jclass1, "addAP", "(Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;IIIII)V");
-    jmethodID method_st = env->GetStaticMethodID(jclass1, "addST", "(Ljava/lang/String;Ljava/lang/String;III)V");
+    jmethodID method_st = env->GetStaticMethodID(jclass1, "addST", "(Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;III)V");
 
     if( buffer[3]==':' || buffer[3]=='o' ){
         //logd("Found ':' or 'o' @ 3");
@@ -93,7 +93,7 @@ extern "C" jint Java_com_hijacker_MainActivity_main(JNIEnv* env, jobject obj, js
         }
         if(buffer[22]==':'){
             //st
-            char st_mac[18], bssid[18], pwr_c[5], lost_c[7], frames_c[10];
+            char st_mac[18], bssid[18], pwr_c[5], lost_c[7], frames_c[10], probes[100];
             int pwr, lost, frames;
 
             strncpy(st_mac, buffer+20, 17);
@@ -115,9 +115,13 @@ extern "C" jint Java_com_hijacker_MainActivity_main(JNIEnv* env, jobject obj, js
             frames_c[9]='\0';
             frames = atoi(frames_c);
 
+            strncpy(probes, buffer+69, 100);
+            probes[100] = '\0';
+
             jstring s1 = env->NewStringUTF(st_mac);
             jstring s2 = env->NewStringUTF(bssid);
-            env->CallStaticVoidMethod(jclass1, method_st, s1, s2, pwr, lost, frames);
+            jstring s3 = env->NewStringUTF(probes);
+            env->CallStaticVoidMethod(jclass1, method_st, s1, s2, s3, pwr, lost, frames);
         }else{
             //ap
             char bssid[18], pwr_c[6], beacons_c[10], data_c[10], ivs_c[6], ch_c[3], enc[5], cipher[5], auth[5], essid[50];

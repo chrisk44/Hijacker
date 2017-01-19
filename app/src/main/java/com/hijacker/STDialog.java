@@ -32,7 +32,7 @@ import static com.hijacker.MainActivity.runInHandler;
 
 public class STDialog extends DialogFragment {
     ST info_st;
-    TextView st[] = {null, null, null, null, null, null, null};
+    TextView st[] = {null, null, null, null, null, null, null, null};
     Runnable runnable;
     @Override
     public Dialog onCreateDialog(Bundle savedInstanceState) {
@@ -47,6 +47,7 @@ public class STDialog extends DialogFragment {
             st[4] = (TextView)view.findViewById(R.id.lost_st);
             st[5] = (TextView)view.findViewById(R.id.manuf_st);
             st[6] = (TextView)view.findViewById(R.id.lastseen_st);
+            st[7] = (TextView)view.findViewById(R.id.probes_st);
         }
 
         st[0].setText(info_st.mac);
@@ -60,6 +61,7 @@ public class STDialog extends DialogFragment {
         st[4].setText(Integer.toString(info_st.getLost()));
         st[5].setText(info_st.manuf);
         st[6].setText(getLastSeen(info_st.lastseen));
+        st[7].setText(info_st.probes);
 
         runnable = new Runnable(){
             @Override
@@ -75,6 +77,7 @@ public class STDialog extends DialogFragment {
                 st[4].setText(Integer.toString(info_st.getLost()));
                 st[5].setText(info_st.manuf);
                 st[6].setText(getLastSeen(info_st.lastseen));
+                st[7].setText(info_st.probes);
             }
         };
         new Thread(new Runnable(){

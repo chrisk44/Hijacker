@@ -48,12 +48,12 @@ class ST {
     long lastseen = 0;
     boolean added_as_client = false, isMarked = false;
     Tile tile;
-    String mac, bssid, manuf;
-    ST(String mac, String bssid, int pwr, int lost, int frames){
+    String mac, bssid, manuf, probes;
+    ST(String mac, String bssid, int pwr, int lost, int frames, String probes){
         this.mac = mac;
         this.id = STs.size();
         this.manuf = getManuf(this.mac);
-        this.update(bssid, pwr, lost, frames);
+        this.update(bssid, pwr, lost, frames, probes);
         STs.add(this);
         if(sort!=SORT_NOSORT) toSort = true;
     }
@@ -66,7 +66,7 @@ class ST {
         }
         startAireplay(this.bssid, this.mac);
     }
-    void update(String bssid, int pwr, int lost, int frames){
+    void update(String bssid, int pwr, int lost, int frames, String probes){
         if(bssid=="na") bssid=null;
 
         if(added_as_client && bssid==null){
@@ -103,6 +103,7 @@ class ST {
         this.pwr = pwr;
         this.lost = lost;
         this.frames = frames;
+        this.probes = probes.equals("") ? "No probes" : probes;
 
         final String b, c;
         if (bssid != null){

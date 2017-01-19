@@ -38,10 +38,11 @@ class Item2 {
         this.i5 = i5;
         this.type = TYPE_AP;
     }
-    Item2(String str1, String str2, int i1, int i2, int i3){
+    Item2(String str1, String str2, String str3, int i1, int i2, int i3){
         //ST
         this.str1 = str1;
         this.str2 = str2;
+        this.str3 = str3;
         this.i1 = i1;
         this.i2 = i2;
         this.i3 = i3;
@@ -57,8 +58,8 @@ class Item2 {
             //ST
             ST temp = ST.getSTByMac(str1);
             if (str2.equals("na")) str2=null;
-            if (temp == null) new ST(str1, str2, i1, i2, i3);
-            else temp.update(str2, i1, i2, i3);
+            if (temp == null) new ST(str1, str2, i1, i2, i3, str3);
+            else temp.update(str2, i1, i2, i3, str3);
         }
     }
 }

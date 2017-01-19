@@ -1203,8 +1203,8 @@ public class MainActivity extends AppCompatActivity{
     public static void addAP(String essid, String mac, String enc, String cipher, String auth, int pwr, int beacons, int data, int ivs, int ch){
         fifo.add(new Item2(essid, mac, enc, cipher, auth, pwr, beacons, data, ivs, ch));
     }
-    public static void addST(String mac, String bssid, int pwr, int lost, int frames){
-        fifo.add(new Item2(mac, bssid, pwr, lost, frames));
+    public static void addST(String mac, String bssid, String probes, int pwr, int lost, int frames){
+        fifo.add(new Item2(mac, bssid, probes, pwr, lost, frames));
     }
     public void onAPStats(View v){ new StatsDialog().show(getFragmentManager(), "StatsDialog"); }
     public void onCrack(View v){

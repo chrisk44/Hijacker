@@ -68,7 +68,16 @@
             android:layout_height="wrap_content"
             android:padding="5dp"
             android:textColor="?android:attr/textColorPrimary"
-            android:textSize="16sp" />
+            android:textSize="16sp"
+            android:lines="1"/>
+
+        <TextView
+            android:text="@string/probes"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:padding="5dp"
+            android:textColor="?android:attr/textColorPrimary"
+            android:textSize="16sp"/>
 
     </LinearLayout>
 
@@ -136,6 +145,15 @@
             android:padding="5dp"
             android:onClick="onCopy"
             android:textColor="?android:attr/textColorPrimary"
-            android:textSize="16sp" />
+            android:textSize="16sp"
+            android:lines="1"/>
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:id="@+id/probes_st"
+            android:padding="5dp"
+            android:textColor="?android:attr/textColorPrimary"
+            android:textSize="16sp"/>
     </LinearLayout>
 </LinearLayout>
