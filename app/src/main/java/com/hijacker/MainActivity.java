@@ -299,7 +299,9 @@ public class MainActivity extends AppCompatActivity{
                             }
                             progress.setIndeterminate(false);
                             progress.setProgress(deauthWait);
-                            ((Button)findViewById(R.id.crack)).setText(getString(R.string.crack));
+                            if(is_ap!=null && currentFragment==FRAGMENT_AIRODUMP){
+                                ((Button) findViewById(R.id.crack)).setText(getString(R.string.crack));
+                            }
                         }
                     });
                 }catch(IOException | InterruptedException e){
