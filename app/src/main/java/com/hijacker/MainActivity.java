@@ -945,7 +945,12 @@ public class MainActivity extends AppCompatActivity{
         debug = pref.getBoolean("debug", debug);
         watchdog = pref.getBoolean("watchdog", watchdog);
         delete_extra = pref.getBoolean("delete_extra", delete_extra);
-        always_cap = pref.getBoolean("always_cap", always_cap);
+        try{
+            always_cap = pref.getBoolean("always_cap", always_cap);
+        }catch(ClassCastException e){
+            pref_edit.putBoolean("always_cap", false);
+            pref_edit.commit();
+        }
         custom_chroot_cmd = pref.getString("custom_chroot_cmd", custom_chroot_cmd);
         cont_on_fail = pref.getBoolean("cont_on_fail", cont_on_fail);
         progress.setMax(deauthWait);
