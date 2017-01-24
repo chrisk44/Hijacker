@@ -20,11 +20,11 @@ package com.hijacker;
 import static com.hijacker.CustomAction.TYPE_AP;
 import static com.hijacker.CustomAction.TYPE_ST;
 
-class Item2 {
+class UpdateRequest {
     int i1, i2, i3, i4 ,i5;
     int type;
     String str1, str2, str3, str4, str5;
-    Item2(String str1, String str2, String str3, String str4, String str5, int i1, int i2, int i3, int i4, int i5){
+    UpdateRequest(String str1, String str2, String str3, String str4, String str5, int i1, int i2, int i3, int i4, int i5){
         //AP
         this.str1 = str1;
         this.str2 = str2;
@@ -38,7 +38,7 @@ class Item2 {
         this.i5 = i5;
         this.type = TYPE_AP;
     }
-    Item2(String str1, String str2, String str3, int i1, int i2, int i3){
+    UpdateRequest(String str1, String str2, String str3, int i1, int i2, int i3){
         //ST
         this.str1 = str1;
         this.str2 = str2;

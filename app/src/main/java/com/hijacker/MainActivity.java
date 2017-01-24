@@ -113,7 +113,7 @@ public class MainActivity extends AppCompatActivity{
     static Thread refresh_thread, wpa_thread, watchdog_thread;
     static Runnable refresh_runnable, wpa_runnable, watchdog_runnable;
     static Menu menu;
-    final static LinkedList<Item2> fifo = new LinkedList<>();                    //List used as FIFO for handling calls to addAP/addST in an order
+    final static LinkedList<UpdateRequest> fifo = new LinkedList<>();                    //List used as FIFO for handling calls to addAP/addST in an order
     static MyListAdapter adapter;
     static CustomActionAdapter custom_action_adapter;
     static SharedPreferences pref;
@@ -977,6 +977,7 @@ public class MainActivity extends AppCompatActivity{
                 return true;
 
             case R.id.stop_run:
+                //if(Airodump.isRunning()){
                 if(cont){
                     //Running
                     stop(PROCESS_AIRODUMP);
@@ -1208,10 +1209,10 @@ public class MainActivity extends AppCompatActivity{
         }
     }
     public static void addAP(String essid, String mac, String enc, String cipher, String auth, int pwr, int beacons, int data, int ivs, int ch){
-        fifo.add(new Item2(essid, mac, enc, cipher, auth, pwr, beacons, data, ivs, ch));
+        fifo.add(new UpdateRequest(essid, mac, enc, cipher, auth, pwr, beacons, data, ivs, ch));
     }
     public static void addST(String mac, String bssid, String probes, int pwr, int lost, int frames){
-        fifo.add(new Item2(mac, bssid, probes, pwr, lost, frames));
+        fifo.add(new UpdateRequest(mac, bssid, probes, pwr, lost, frames));
     }
     public void onAPStats(View v){ new StatsDialog().show(getFragmentManager(), "StatsDialog"); }
     public void onCrack(View v){
