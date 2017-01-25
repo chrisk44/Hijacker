@@ -19,7 +19,7 @@
     <string name="app_dir_notfound1">App file directory doesn\'t exist: </string>
     <string name="app_dir_notfound2">. Reinstall the app.</string>
     <string name="disconnect_started">Disconnect All started</string>
-    <string name="watchdog_message">This could be caused by improper installation of busybox and toolbox or the tools. Go to settings and install the tools, and make sure you have busybox installed and updated.</string>
+    <string name="watchdog_message">This could be caused by improper installation of busybox or the tools. Go to settings and install the tools, and make sure you have busybox installed and updated.</string>
     <string name="airodump_still_running">Airodump is still running!</string>
     <string name="airodump_not_running">Airodump is not running!</string>
     <string name="aireplay_still_running">Aireplay is still running!</string>
@@ -34,6 +34,8 @@
         You can continue if you believe that your root solution will work. Please don\'t report bugs.</string>
     <string name="busybox_notfound_title">Busybox not found!</string>
     <string name="busybox_notfound">There is no busybox installed on your device. This application requires busybox to function properly.</string>
+    <string name="bin_not_created">Directory \'bin\' could not be created</string>
+    <string name="lib_not_created">Directory \'lib\' could not be created</string>
 
     <!-- wpa_thread -->
     <string name="stopped_to_capture">Stopped aireplay to capture handshake…</string>
@@ -248,12 +250,6 @@
 
     <!-- Default Preferences -->
     <string name="iface" translatable="false">wlan0</string>
-    <string name="prefix" translatable="false">LD_PRELOAD=/vendor/lib/libfakeioctl.so</string>
-    <string name="airodump_dir" translatable="false">airodump-ng</string>
-    <string name="aireplay_dir" translatable="false">aireplay-ng -D</string>
-    <string name="aircrack_dir" translatable="false">aircrack-ng</string>
-    <string name="mdk3_dir" translatable="false">mdk3</string>
-    <string name="reaver_dir" translatable="false">reaver</string>
     <string name="chroot_dir" translatable="false">/data/local/nhsystem/kali-armhf</string>
     <string name="monstart" translatable="false">true</string>
     <string name="cap_dir" translatable="false">/sdcard/cap</string>
@@ -288,10 +284,6 @@
     <string name="mm2_sum">Command to disable monitor mode (leave blank if none)</string>
     <string name="mm2_desc">Command to disable monitor mode specific to your interface. Will be run AS ROOT when the app is being killed.</string>
 
-    <string name="prefix_title">Prefix</string>
-    <string name="prefix_sum">Prefix for every command</string>
-    <string name="prefix_desc">A prefix for every command that is run and needs monitor mode. (LD_PRELOAD)</string>
-
     <string name="cap_title">Cap files directory</string>
     <string name="cap_sum">Directory to save cap files (eg. /sdcard/cap)</string>
     <string name="cap_desc">The directory to save the cap file when cracking WPA or WEP. This needs to be a directory that you have access to and won\'t be deleted (eg. not a tmp folder). It will be created and written to, and also a \"rm -rf …\" is ran in it as root so be careful what you enter here. Don\'t end it with /</string>
@@ -319,33 +311,10 @@
     <string name="watchdog_sum">Run a background thread to verify that the tools that are supposed to be running, are actually running.
         Disable this if you are getting false positives.</string>
 
-    <string name="airc_title" translatable="false">Aircrack</string>
-    <string name="airc_sum">aircrack-ng absolute path</string>
-    <string name="airc_desc">If aircrack-ng is not installed somewhere that PATH points to, you need to specify the absolute aircrack-ng filename here. Options can be used too. Make sure the file is executable.</string>
-
-    <string name="aird_title" translatable="false">Airodump</string>
-    <string name="aird_sum">airodump-ng absolute path</string>
-    <string name="aird_desc">If airodump-ng is not installed somewhere that PATH points to, you need to specify the absolute airodump-ng filename here. Options can be used too. Make sure the file is executable.</string>
-
-    <string name="aire_title" translatable="false">Aireplay</string>
-    <string name="aire_sum">aireplay-ng absolute path</string>
-    <string name="aire_desc">If aireplay-ng is not installed somewhere that PATH points to, you need to specify the absolute aireplay-ng filename here. Options can be used too. Make sure the file is executable.</string>
-
-    <string name="mdk_title" translatable="false">MDK3</string>
-    <string name="mdk_sum">mdk3 absolute path</string>
-    <string name="mdk_desc">If mdk3 is not installed somewhere that PATH points to, you need to specify the absolute mdk3 filename here. Options can be used too. Make sure the file is executable.</string>
-
-    <string name="reaver_title" translatable="false">Reaver</string>
-    <string name="reaver_sum">Reaver absolute path</string>
-    <string name="reaver_desc">If reaver is not installed somewhere that PATH points to, you need to specify the absolute reaver filename here. Options can be used too. Make sure the file is executable.</string>
-
     <string name="copy_sample_title">Copy test command</string>
 
     <string name="test_title">Test tools</string>
     <string name="test_sum">Run all the tools to make sure that the settings are correct. Any running tasks will be stopped.</string>
-
-    <string name="install_tools_title">Install tools</string>
-    <string name="install_tools_sum">Install the required tools (aircrack-ng suite, mdk3, wireless tools)</string>
 
     <string name="install_nexmon_title">Install Nexmon</string>
     <string name="install_nexmon_sum">Install the Nexmon driver and its management utility (nexutil at /su/xbin)</string>
@@ -355,11 +324,6 @@
     <string name="util_location_text">Management Utility Location</string>
     <string name="firm_location_default">/vendor/firmware</string>
     <string name="util_location_default">/su/xbin</string>
-
-    <string name="tools_location_text">Tools Location</string>
-    <string name="lib_location_text">Library Location</string>
-    <string name="tools_location_default">/su/xbin</string>
-    <string name="lib_location_default">/vendor/lib</string>
 
     <string name="chroot">Chroot</string>
 

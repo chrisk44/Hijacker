@@ -25,6 +25,7 @@ import android.content.DialogInterface;
 import android.net.wifi.WifiManager;
 import android.os.Bundle;
 import android.support.design.widget.Snackbar;
+import android.support.v4.view.GravityCompat;
 import android.support.v7.app.AlertDialog;
 import android.util.Log;
 import android.view.HapticFeedbackConstants;
@@ -46,6 +47,9 @@ import static com.hijacker.MainActivity.firm_backup_file;
 import static com.hijacker.MainActivity.getLastLine;
 import static com.hijacker.MainActivity.background;
 import static com.hijacker.MainActivity.getPIDs;
+import static com.hijacker.MainActivity.init;
+import static com.hijacker.MainActivity.mDrawerLayout;
+import static com.hijacker.MainActivity.main;
 import static com.hijacker.MainActivity.path;
 import static com.hijacker.MainActivity.startAirodump;
 import static com.hijacker.MainActivity.stop;
@@ -153,7 +157,11 @@ public class InstallFirmwareDialog extends DialogFragment {
     public void onDismiss(final DialogInterface dialog) {
         super.onDismiss(dialog);
         shell.done();
-        if(MainActivity.init) new InstallToolsDialog().show(getFragmentManager(), "InstallToolsDialog");
+        if(init){
+            init = false;
+            mDrawerLayout.openDrawer(GravityCompat.START);
+            main();
+        }
     }
     @Override
     public void show(FragmentManager fragmentManager, String tag){

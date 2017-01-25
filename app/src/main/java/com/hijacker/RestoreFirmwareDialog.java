@@ -40,7 +40,6 @@ import java.io.IOException;
 import static com.hijacker.MainActivity.debug;
 import static com.hijacker.MainActivity.background;
 import static com.hijacker.MainActivity.firm_backup_file;
-import static com.hijacker.MainActivity.path;
 
 public class RestoreFirmwareDialog extends DialogFragment {
     View view;

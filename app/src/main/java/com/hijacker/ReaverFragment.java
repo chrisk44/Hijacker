@@ -52,6 +52,7 @@ import static com.hijacker.MainActivity.custom_chroot_cmd;
 import static com.hijacker.MainActivity.debug;
 import static com.hijacker.MainActivity.iface;
 import static com.hijacker.MainActivity.last_action;
+import static com.hijacker.MainActivity.mFragmentManager;
 import static com.hijacker.MainActivity.monstart;
 import static com.hijacker.MainActivity.prefix;
 import static com.hijacker.MainActivity.progress;
@@ -123,7 +124,7 @@ public class ReaverFragment extends Fragment{
                             //Clcked custom
                             CustomAPDialog dialog = new CustomAPDialog();
                             dialog.mode = FOR_REAVER;
-                            dialog.show(getFragmentManager(), "CustomAPDialog");
+                            dialog.show(mFragmentManager, "CustomAPDialog");
                         }
                         return true;
                     }

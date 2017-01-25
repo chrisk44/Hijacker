@@ -38,6 +38,7 @@ import static com.hijacker.CustomAction.cmds;
 import static com.hijacker.CustomAction.save;
 import static com.hijacker.MainActivity.FRAGMENT_CUSTOM;
 import static com.hijacker.MainActivity.currentFragment;
+import static com.hijacker.MainActivity.mFragmentManager;
 import static com.hijacker.MainActivity.refreshDrawer;
 
 public class CustomActionEditorFragment extends Fragment{
@@ -97,7 +98,7 @@ public class CustomActionEditorFragment extends Fragment{
                     }
                     save();
                     Snackbar.make(v, getString(R.string.saved) + " " + action.getTitle(), Snackbar.LENGTH_SHORT).show();
-                    getFragmentManager().popBackStackImmediate();
+                    mFragmentManager.popBackStackImmediate();
                 }else{
                     boolean found = false;
                     for(int i=0;i<cmds.size();i++){
@@ -121,7 +122,7 @@ public class CustomActionEditorFragment extends Fragment{
                         }
                         save();
                         Snackbar.make(v, getString(R.string.saved) + " " + action.getTitle(), Snackbar.LENGTH_SHORT).show();
-                        getFragmentManager().popBackStackImmediate();
+                        mFragmentManager.popBackStackImmediate();
                     }
                 }
             }

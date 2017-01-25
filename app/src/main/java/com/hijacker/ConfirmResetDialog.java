@@ -36,12 +36,6 @@ public class ConfirmResetDialog extends DialogFragment {
         builder.setPositiveButton(R.string.yes, new DialogInterface.OnClickListener() {
             public void onClick(DialogInterface dialog, int id) {
                 pref_edit.putString("iface", getString(R.string.iface));
-                pref_edit.putString("prefix", getString(R.string.prefix));
-                pref_edit.putString("aircrack_dir", getString(R.string.aircrack_dir));
-                pref_edit.putString("airodump_dir", getString(R.string.airodump_dir));
-                pref_edit.putString("aireplay_dir", getString(R.string.aireplay_dir));
-                pref_edit.putString("mdk3_dir", getString(R.string.mdk3_dir));
-                pref_edit.putString("reaver_dir", getString(R.string.reaver_dir));
                 pref_edit.putString("cap_dir", getString(R.string.cap_dir));
                 pref_edit.putString("enable_monMode", getString(R.string.enable_monMode));
                 pref_edit.putString("disable_monMode", getString(R.string.disable_monMode));

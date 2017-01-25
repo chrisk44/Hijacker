@@ -38,7 +38,6 @@ import android.os.Message;
 import android.preference.PreferenceManager;
 import android.support.design.widget.Snackbar;
 import android.support.v4.app.ActivityCompat;
-import android.support.v4.content.ContextCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
@@ -70,7 +69,6 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.text.NumberFormat;
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
@@ -166,6 +164,7 @@ public class MainActivity extends AppCompatActivity{
         setContentView(R.layout.activity_main);
         setSupportActionBar((Toolbar) findViewById(R.id.my_toolbar));
         setup();
+        installTools();
 
         if(debug) Log.d("HIJACKER/Main", "path is " + path);
 
@@ -315,6 +314,17 @@ public class MainActivity extends AppCompatActivity{
                     }
                     if(debug) Log.d("HIJACKER/wpa_thread", "wpa_thread finished");
                     shell.done();
+                    runInHandler(new Runnable(){
+                        @Override
+                        public void run(){
+                            progress.setProgress(deauthWait);
+                            Button crack_btn = (Button) findViewById(R.id.crack);
+                            if(crack_btn!=null){
+                                //We are in IsolatedFragment
+                                crack_btn.setText(getString(R.string.crack));
+                            }
+                        }
+                    });
                 }
             }
         };
@@ -408,28 +418,24 @@ public class MainActivity extends AppCompatActivity{
         };
         watchdog_thread = new Thread(watchdog_runnable);
 
-        if(ContextCompat.checkSelfPermission(this, Manifest.permission.WRITE_EXTERNAL_STORAGE)==PackageManager.PERMISSION_DENIED){
-            ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE}, 0);
-        }
-        if(ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_WIFI_STATE)==PackageManager.PERMISSION_DENIED){
-            ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.ACCESS_WIFI_STATE}, 0);
-        }
-        if(ContextCompat.checkSelfPermission(this, Manifest.permission.CHANGE_WIFI_STATE)==PackageManager.PERMISSION_DENIED){
-            ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.CHANGE_WIFI_STATE}, 0);
-        }
+        ActivityCompat.requestPermissions(this, new String[]{
+                Manifest.permission.CHANGE_WIFI_STATE,
+                Manifest.permission.ACCESS_WIFI_STATE,
+                Manifest.permission.WRITE_EXTERNAL_STORAGE
+        }, 0);
 
-        extract("oui.txt", true);
+        extract("oui.txt", path, false);
         File oui = new File(path + "/oui.txt");
         if(!oui.exists()){
             ErrorDialog dialog = new ErrorDialog();
             dialog.setMessage(getString(R.string.oui_not_found));
-            dialog.show(getFragmentManager(), "ErrorDialog");
+            dialog.show(mFragmentManager, "ErrorDialog");
         }
 
         if(arch.equals("armv7l")){
             if(new File("/su").exists()){
                 if(debug) Log.d("HIJACKER/onCreate", "Installing busybox in /su/xbin...");
-                extract("busybox", false);
+                extract("busybox", path, false);
                 Shell shell = getFreeShell();
                 shell.run("cp " + path + "/busybox /su/xbin/busybox");
                 shell.run("chmod 755 /su/xbin/busybox");
@@ -462,29 +468,29 @@ public class MainActivity extends AppCompatActivity{
         }
 
         if(!pref.getBoolean("disclaimer", false)){
-            new DisclaimerDialog().show(getFragmentManager(), "Disclaimer");
+            new DisclaimerDialog().show(mFragmentManager, "Disclaimer");
             Shell shell = getFreeShell();
             shell.run("busybox; echo ENDOFBUSYBOX");
             if(getLastLine(shell.getShell_out(), "ENDOFBUSYBOX").equals("ENDOFBUSYBOX")){
                 ErrorDialog dialog = new ErrorDialog();
                 dialog.setTitle(getString(R.string.busybox_notfound_title));
                 dialog.setMessage(getString(R.string.busybox_notfound));
-                dialog.show(getFragmentManager(), "ErrorDialog");
+                dialog.show(mFragmentManager, "ErrorDialog");
             }
             shell.done();
             if(!new File("/su").exists()){
                 ErrorDialog dialog = new ErrorDialog();
                 dialog.setTitle(getString(R.string.su_notfound_title));
                 dialog.setMessage(getString(R.string.su_notfound));
-                dialog.show(getFragmentManager(), "ErrorDialog");
+                dialog.show(mFragmentManager, "ErrorDialog");
             }
         }else main();
 
         File report = new File(Environment.getExternalStorageDirectory() + "/report.txt");
         if(report.exists()) report.delete();    //Delete old report, it's not needed if no exception is thrown up to this point
     }
-    void extract(String filename, boolean chmod){
-        File f = new File(getFilesDir(), filename);
+    void extract(String filename, String out_dir, boolean chmod){
+        File f = new File(out_dir, filename);
         if(f.exists()) f.delete();          //Delete file in case it's outdated
         try{
             InputStream in = getResources().getAssets().open(filename);
@@ -498,7 +504,7 @@ public class MainActivity extends AppCompatActivity{
             in.close();
             out.close();
             if(chmod){
-                runOne("chmod 744 ./files/" + filename);
+                runOne("chmod 755 " + out_dir + "/" + filename);
             }
         }catch(IOException e){
             Log.e("HIJACKER/FileProvider", "Exception copying from assets", e);
@@ -515,6 +521,48 @@ public class MainActivity extends AppCompatActivity{
         stop(PROCESS_REAVER);
         if(airOnStartup) startAirodump(null);
         else if(menu!=null) menu.getItem(1).setIcon(R.drawable.run);
+    }
+    void installTools(){
+        File bin = new File(path + "/bin");
+        File lib = new File(path + "/lib");
+        if(!bin.exists()){
+            if(!bin.mkdir()){
+                ErrorDialog dialog = new ErrorDialog();
+                dialog.setMessage(getString(R.string.bin_not_created));
+                dialog.show(mFragmentManager, "ErrorDialog");
+                return;
+            }
+        }
+        if(!lib.exists()){
+            if(!lib.mkdir()){
+                ErrorDialog dialog = new ErrorDialog();
+                dialog.setMessage(getString(R.string.lib_not_created));
+                dialog.show(mFragmentManager, "ErrorDialog");
+                return;
+            }
+        }
+        String tools_location = path + "/bin/";
+        String lib_location = path + "/lib/";
+        extract("airbase-ng", tools_location, true);
+        extract("aircrack-ng", tools_location, true);
+        extract("aireplay-ng", tools_location, true);
+        extract("airodump-ng", tools_location, true);
+        extract("besside-ng", tools_location, true);
+        extract("ivstools", tools_location, true);
+        extract("iw", tools_location, true);
+        extract("iwconfig", tools_location, true);
+        extract("iwlist", tools_location, true);
+        extract("iwpriv", tools_location, true);
+        extract("kstats", tools_location, true);
+        extract("makeivs-ng", tools_location, true);
+        extract("mdk3", tools_location, true);
+        extract("nc", tools_location, true);
+        extract("packetforge-ng", tools_location, true);
+        extract("reaver", tools_location, true);
+        extract("reaver-wash", tools_location, true);
+        extract("wesside-ng", tools_location, true);
+        extract("wpaclean", tools_location, true);
+        extract("libfakeioctl.so", lib_location, true);
     }
 
     public static void startAirodump(String params){
@@ -751,6 +799,10 @@ public class MainActivity extends AppCompatActivity{
                 shell.done();
                 break;
             case PROCESS_MDK:
+                if(currentFragment==FRAGMENT_MDK){
+                    MDKFragment.bf_switch.setChecked(false);
+                    MDKFragment.ados_switch.setChecked(false);
+                }
                 ados = false;
                 bf = false;
                 runOne("busybox kill $(busybox pidof mdk3)");
@@ -785,7 +837,7 @@ public class MainActivity extends AppCompatActivity{
             dialog.setTitle((String)msg.obj);
             dialog.setMessage(getString(R.string.watchdog_message));
             dialog.setWatchdog(true);
-            dialog.show(getFragmentManager(), "ErrorDialog");
+            dialog.show(mFragmentManager, "ErrorDialog");
         }
     };
     public static Handler handler = new Handler();
@@ -822,12 +874,6 @@ public class MainActivity extends AppCompatActivity{
 
         //Load defaults
         iface = getString(R.string.iface);
-        prefix = getString(R.string.prefix);
-        aircrack_dir = getString(R.string.aircrack_dir);
-        airodump_dir = getString(R.string.airodump_dir);
-        aireplay_dir = getString(R.string.aireplay_dir);
-        mdk3_dir = getString(R.string.mdk3_dir);
-        reaver_dir = getString(R.string.reaver_dir);
         cap_dir = getString(R.string.cap_dir);
         enable_monMode = getString(R.string.enable_monMode);
         disable_monMode = getString(R.string.disable_monMode);
@@ -843,6 +889,13 @@ public class MainActivity extends AppCompatActivity{
         custom_chroot_cmd = "";
         cont_on_fail = Boolean.parseBoolean(getString(R.string.cont_on_fail));
         watchdog = Boolean.parseBoolean(getString(R.string.watchdog));
+
+        prefix = "LD_PRELOAD=" + path + "/lib/libfakeioctl.so";
+        airodump_dir = path + "/bin/airodump-ng";
+        aireplay_dir = path + "/bin/aireplay-ng";
+        aircrack_dir = path + "/bin/aircrack-ng";
+        mdk3_dir = path + "/bin/mdk3";
+        reaver_dir = path + "/bin/reaver";
 
         //Initialize notifications
             //Create intents
@@ -903,7 +956,7 @@ public class MainActivity extends AppCompatActivity{
         });
 
         //Load default fragment (airodump)
-        FragmentTransaction ft = getFragmentManager().beginTransaction();
+        FragmentTransaction ft = mFragmentManager.beginTransaction();
         ft.replace(R.id.fragment1, new MyListFragment());
         ft.setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN);
         ft.addToBackStack(null);
@@ -919,7 +972,7 @@ public class MainActivity extends AppCompatActivity{
             Log.e("HIJACKER/onCreate", "App file directory doesn't exist");
             ErrorDialog dialog = new ErrorDialog();
             dialog.setMessage(getString(R.string.app_dir_notfound1) + path + getString(R.string.app_dir_notfound2));
-            dialog.show(getFragmentManager(), "ErrorDialog");
+            dialog.show(mFragmentManager, "ErrorDialog");
         }
     }
     static void load(){
@@ -927,13 +980,7 @@ public class MainActivity extends AppCompatActivity{
         if(debug) Log.d("HIJACKER/load", "Loading preferences...");
 
         iface = pref.getString("iface", iface);
-        prefix = pref.getString("prefix", prefix);
         deauthWait = Integer.parseInt(pref.getString("deauthWait", Integer.toString(deauthWait)));
-        airodump_dir = pref.getString("airodump_dir", airodump_dir);
-        aireplay_dir = pref.getString("aireplay_dir", aireplay_dir);
-        aircrack_dir = pref.getString("aircrack_dir", aircrack_dir);
-        mdk3_dir = pref.getString("mdk3_dir", mdk3_dir);
-        reaver_dir = pref.getString("reaver_dir", reaver_dir);
         chroot_dir = pref.getString("chroot_dir", chroot_dir);
         monstart = pref.getBoolean("monstart", monstart);
         cap_dir = pref.getString("cap_dir", cap_dir);
@@ -992,12 +1039,12 @@ public class MainActivity extends AppCompatActivity{
                 return true;
 
             case R.id.filter:
-                new FiltersDialog().show(getFragmentManager(), "FiltersDialog");
+                new FiltersDialog().show(mFragmentManager, "FiltersDialog");
                 return true;
 
             case R.id.settings:
                 if(currentFragment!=FRAGMENT_SETTINGS){
-                    FragmentTransaction ft = getFragmentManager().beginTransaction();
+                    FragmentTransaction ft = mFragmentManager.beginTransaction();
                     ft.replace(R.id.fragment1, new SettingsFragment());
                     ft.setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN);
                     ft.addToBackStack(null);
@@ -1006,7 +1053,7 @@ public class MainActivity extends AppCompatActivity{
                 return true;
 
             case R.id.export:
-                new ExportDialog().show(getFragmentManager(), "ExportDialog");
+                new ExportDialog().show(mFragmentManager, "ExportDialog");
                 return true;
 
             default:
@@ -1052,10 +1099,10 @@ public class MainActivity extends AppCompatActivity{
         if(keyCode==KeyEvent.KEYCODE_BACK){
             if(mDrawerLayout.isDrawerOpen(mDrawerList)){
                 mDrawerLayout.closeDrawer(mDrawerList);
-            }else if(getFragmentManager().getBackStackEntryCount()>1){
-                getFragmentManager().popBackStackImmediate();
+            }else if(mFragmentManager.getBackStackEntryCount()>1){
+                mFragmentManager.popBackStackImmediate();
             }else{
-                new ExitDialog().show(getFragmentManager(), "ExitDialog");
+                new ExitDialog().show(mFragmentManager, "ExitDialog");
             }
             return true;
         }
@@ -1088,7 +1135,7 @@ public class MainActivity extends AppCompatActivity{
         @Override
         public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
             if(currentFragment!=position){
-                FragmentTransaction ft = getFragmentManager().beginTransaction();
+                FragmentTransaction ft = mFragmentManager.beginTransaction();
                 switch(position){
                     case FRAGMENT_AIRODUMP:
                         ft.replace(R.id.fragment1, is_ap==null ? new MyListFragment() : new IsolatedFragment());
@@ -1112,7 +1159,7 @@ public class MainActivity extends AppCompatActivity{
                 ft.setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN);
                 ft.addToBackStack(null);
                 ft.commitAllowingStateLoss();
-                getFragmentManager().executePendingTransactions();
+                mFragmentManager.executePendingTransactions();
             }
             mDrawerLayout.closeDrawer(mDrawerList);
         }
@@ -1214,7 +1261,7 @@ public class MainActivity extends AppCompatActivity{
     public static void addST(String mac, String bssid, String probes, int pwr, int lost, int frames){
         fifo.add(new UpdateRequest(mac, bssid, probes, pwr, lost, frames));
     }
-    public void onAPStats(View v){ new StatsDialog().show(getFragmentManager(), "StatsDialog"); }
+    public void onAPStats(View v){ new StatsDialog().show(mFragmentManager, "StatsDialog"); }
     public void onCrack(View v){
         //Clicked crack with isolated ap
         if(wpa_thread.isAlive()){
@@ -1257,22 +1304,24 @@ public class MainActivity extends AppCompatActivity{
     static void notification(){
         if(notif_on && show_notif && !(airodump_running==0 && aireplay_running==0 &&
                 !bf && !ados && !CrackFragment.cont && !ReaverFragment.cont)){
-            String str;
-            if(is_ap==null) str = "APs: " + Tile.i + " | STs: " + (Tile.tiles.size() - Tile.i);
-            else str = is_ap.essid + " | STs: " + (Tile.tiles.size() - Tile.i);
-
             if(show_details){
-                if(aireplay_running==AIREPLAY_DEAUTH) str += " | Aireplay deauthenticating...";
-                else if(aireplay_running==AIREPLAY_WEP) str += " | Aireplay replaying for wep...";
-                if(wpa_thread.isAlive()) str += " | WPA cracking...";
-                if(bf) str += " | MDK3 Beacon Flooding...";
-                if(ados) str += " | MDK3 Authentication DoS...";
-                if(ReaverFragment.cont) str += " | Reaver running...";
-                if(CrackFragment.cont) str += " | Cracking .cap file...";
-                if(CustomActionFragment.cont) str += " | Running action " + CustomActionFragment.selected_action.getTitle() + "...";
-            }
+                String str;
+                if(is_ap==null) str = "APs: " + Tile.i + " | STs: " + (Tile.tiles.size() - Tile.i);
+                else str = is_ap.essid + " | STs: " + (Tile.tiles.size() - Tile.i);
 
-            notif.setContentText(str);
+                if(show_details){
+                    if(aireplay_running==AIREPLAY_DEAUTH) str += " | Aireplay deauthenticating...";
+                    else if(aireplay_running==AIREPLAY_WEP) str += " | Aireplay replaying for wep...";
+                    if(wpa_thread.isAlive()) str += " | WPA cracking...";
+                    if(bf) str += " | MDK3 Beacon Flooding...";
+                    if(ados) str += " | MDK3 Authentication DoS...";
+                    if(ReaverFragment.cont) str += " | Reaver running...";
+                    if(CrackFragment.cont) str += " | Cracking .cap file...";
+                    if(CustomActionFragment.cont) str += " | Running action " + CustomActionFragment.selected_action.getTitle() + "...";
+                }
+
+                notif.setContentText(str);
+            }else notif.setContentText(null);
             mNotificationManager.notify(0, notif.build());
         }else{
             mNotificationManager.cancel(0);
@@ -1305,6 +1354,15 @@ public class MainActivity extends AppCompatActivity{
             progress.setIndeterminate(false);
             progress.setProgress(deauthWait);
         }
+    }
+    static void refreshDrawer(){
+        if(mDrawerList.getChildAt(0)!=null){        //Ensure that the Drawer is initialized
+            for(int i = 0; i<6; i++){
+                mDrawerList.getChildAt(i).setBackgroundResource(R.color.colorPrimary);
+            }
+            mDrawerList.getChildAt(currentFragment).setBackgroundResource(R.color.colorAccent);
+        }
+        actionBar.setTitle(mPlanetTitles[currentFragment]);
     }
     static String getManuf(String mac){
         String temp = mac.subSequence(0, 2).toString() + mac.subSequence(3, 5).toString() + mac.subSequence(6, 8).toString();
@@ -1346,15 +1404,6 @@ public class MainActivity extends AppCompatActivity{
         }
         str += "ago";
         return str;
-    }
-    static void refreshDrawer(){
-        if(mDrawerList.getChildAt(0)!=null){        //Ensure that the Drawer is initialized
-            for(int i = 0; i<6; i++){
-                mDrawerList.getChildAt(i).setBackgroundResource(R.color.colorPrimary);
-            }
-            mDrawerList.getChildAt(currentFragment).setBackgroundResource(R.color.colorAccent);
-        }
-        actionBar.setTitle(mPlanetTitles[currentFragment]);
     }
 
     static{

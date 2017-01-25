@@ -39,6 +39,7 @@ import static com.hijacker.MainActivity.MDK_ADOS;
 import static com.hijacker.MainActivity.MDK_BF;
 import static com.hijacker.MainActivity.currentFragment;
 import static com.hijacker.MainActivity.debug;
+import static com.hijacker.MainActivity.mFragmentManager;
 import static com.hijacker.MainActivity.refreshDrawer;
 import static com.hijacker.MainActivity.runInHandler;
 import static com.hijacker.MainActivity.startMdk;
@@ -47,7 +48,7 @@ import static com.hijacker.MainActivity.stop;
 public class MDKFragment extends Fragment{
     View v;
     static AP ados_ap=null;
-    Switch bf_switch, ados_switch;
+    static Switch bf_switch, ados_switch;
     static Button select_button;
     static String custom_mac=null, ssid_file=null;
     static boolean managed=true, adhoc=true, opn=true, wep=true, tkip=true, aes=true;
@@ -155,7 +156,7 @@ public class MDKFragment extends Fragment{
                             //Clcked custom
                             CustomAPDialog dialog = new CustomAPDialog();
                             dialog.mode = FOR_MDK;
-                            dialog.show(getFragmentManager(), "CustomAPDialog");
+                            dialog.show(mFragmentManager, "CustomAPDialog");
                         }
                         return true;
                     }

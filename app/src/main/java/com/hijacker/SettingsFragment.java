@@ -29,6 +29,7 @@ import java.io.File;
 import static com.hijacker.MainActivity.FRAGMENT_SETTINGS;
 import static com.hijacker.MainActivity.arch;
 import static com.hijacker.MainActivity.firm_backup_file;
+import static com.hijacker.MainActivity.mFragmentManager;
 import static com.hijacker.MainActivity.refreshDrawer;
 import static com.hijacker.MainActivity.version;
 import static com.hijacker.MainActivity.watchdog;
@@ -36,7 +37,6 @@ import static com.hijacker.MainActivity.watchdog_runnable;
 import static com.hijacker.MainActivity.watchdog_thread;
 import static com.hijacker.MainActivity.currentFragment;
 import static com.hijacker.MainActivity.load;
-import static com.hijacker.MainActivity.path;
 
 public class SettingsFragment extends PreferenceFragment {
     SharedPreferences.OnSharedPreferenceChangeListener listener;
@@ -48,7 +48,7 @@ public class SettingsFragment extends PreferenceFragment {
 
         if(!arch.equals("armv7l")){
             Preference temp;
-            String options[] = {"install_tools", "install_nexmon", "restore_firmware"};
+            String options[] = {"install_nexmon", "restore_firmware"};
             for(int i=0;i<3;i++){
                 temp = findPreference(options[i]);
                 temp.setSummary(R.string.incorrect_arch + arch);
@@ -59,35 +59,28 @@ public class SettingsFragment extends PreferenceFragment {
         findPreference("test_tools").setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
             @Override
             public boolean onPreferenceClick(Preference preference) {
-                new TestDialog().show(getFragmentManager(), "TestDialog");
+                new TestDialog().show(mFragmentManager, "TestDialog");
                 return false;
             }
         });
         findPreference("reset_pref").setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
             @Override
             public boolean onPreferenceClick(Preference preference) {
-                new ConfirmResetDialog().show(getFragmentManager(), "ConfirmResetDialog");
+                new ConfirmResetDialog().show(mFragmentManager, "ConfirmResetDialog");
                 return false;
             }
         });
         findPreference("copy_sample_button").setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
             @Override
             public boolean onPreferenceClick(Preference preference) {
-                new CopySampleDialog().show(getFragmentManager(), "CopySampleDialog");
-                return false;
-            }
-        });
-        findPreference("install_tools").setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
-            @Override
-            public boolean onPreferenceClick(Preference preference) {
-                new InstallToolsDialog().show(getFragmentManager(), "InstallToolsDialog");
+                new CopySampleDialog().show(mFragmentManager, "CopySampleDialog");
                 return false;
             }
         });
         findPreference("install_nexmon").setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
             @Override
             public boolean onPreferenceClick(Preference preference) {
-                new InstallFirmwareDialog().show(getFragmentManager(), "InstallFirmwareDialog");
+                new InstallFirmwareDialog().show(mFragmentManager, "InstallFirmwareDialog");
                 return false;
             }
         });
@@ -98,7 +91,7 @@ public class SettingsFragment extends PreferenceFragment {
             findPreference("restore_firmware").setOnPreferenceClickListener(new Preference.OnPreferenceClickListener(){
                 @Override
                 public boolean onPreferenceClick(Preference preference){
-                    new RestoreFirmwareDialog().show(getFragmentManager(), "RestoreFragmentDialog");
+                    new RestoreFirmwareDialog().show(mFragmentManager, "RestoreFragmentDialog");
                     return false;
                 }
             });
@@ -124,11 +117,6 @@ public class SettingsFragment extends PreferenceFragment {
             }
         });
         findPreference("version").setSummary(version);
-    }
-    @Override
-    public void onDestroy(){
-        super.onDestroy();
-        load();
     }
     @Override
     public void onResume() {

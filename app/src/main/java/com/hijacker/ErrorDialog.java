@@ -23,7 +23,6 @@ import android.app.FragmentManager;
 import android.content.DialogInterface;
 import android.os.Bundle;
 import android.support.v7.app.AlertDialog;
-import android.util.Log;
 
 import static com.hijacker.MainActivity.mNotificationManager;
 import static com.hijacker.MainActivity.error_notif;

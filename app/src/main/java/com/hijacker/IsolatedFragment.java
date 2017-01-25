@@ -44,6 +44,7 @@ import static com.hijacker.MainActivity.deauthWait;
 import static com.hijacker.MainActivity.debug;
 import static com.hijacker.MainActivity.iface;
 import static com.hijacker.MainActivity.isolate;
+import static com.hijacker.MainActivity.mFragmentManager;
 import static com.hijacker.MainActivity.menu;
 import static com.hijacker.MainActivity.prefix;
 import static com.hijacker.MainActivity.progress;
@@ -109,7 +110,7 @@ public class IsolatedFragment extends Fragment{
                         switch(item.getItemId()) {
                             case 0:
                                 //Info
-                                clicked.st.showInfo(getFragmentManager());
+                                clicked.st.showInfo(mFragmentManager);
                                 break;
                             case 1:
                                 //copy to clipboard
@@ -170,7 +171,7 @@ public class IsolatedFragment extends Fragment{
     public void onDestroy(){
         super.onDestroy();
         cont = false;
-        if(getFragmentManager().getBackStackEntryCount()==exit_on){
+        if(mFragmentManager.getBackStackEntryCount()==exit_on){
             isolate(null);
             Tile.filter();
             stop(PROCESS_AIRODUMP);

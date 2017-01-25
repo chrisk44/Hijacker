@@ -6,7 +6,7 @@
             android:defaultValue="@string/airOnStartup"
             android:title="@string/startup_title"
             android:key="airOnStartup" />
-        <EditTextPreference
+ <!--       <EditTextPreference
             android:defaultValue="@string/prefix"
             android:selectAllOnFocus="true"
             android:singleLine="true"
@@ -14,7 +14,7 @@
             android:key="prefix"
             android:summary="@string/prefix_sum"
             android:dialogMessage="@string/prefix_desc"
-            android:dialogTitle="@string/prefix_title" />
+            android:dialogTitle="@string/prefix_title" />   -->
         <EditTextPreference
             android:defaultValue="@string/cap_dir"
             android:selectAllOnFocus="true"
@@ -97,16 +97,16 @@
             android:defaultValue="@string/disable_monMode" />
     </PreferenceCategory>
     <PreferenceCategory android:title="@string/tools">
-        <Preference
+<!--        <Preference
             android:title="@string/install_tools_title"
             android:summary="@string/install_tools_sum"
-            android:key="install_tools" />
+            android:key="install_tools" /> -->
 
         <Preference
             android:title="@string/install_nexmon_title"
             android:summary="@string/install_nexmon_sum"
             android:key="install_nexmon" />
-
+<!--
         <EditTextPreference
             android:defaultValue="@string/aircrack_dir"
             android:selectAllOnFocus="true"
@@ -151,14 +151,14 @@
             android:summary="@string/reaver_sum"
             android:dialogMessage="@string/reaver_desc"
             android:dialogTitle="@string/reaver_title"
-            android:key="reaver_dir"/>
-        <Preference
-            android:title="@string/copy_sample_title"
-            android:key="copy_sample_button" />
+            android:key="reaver_dir"/> -->
         <Preference
             android:title="@string/test_title"
             android:summary="@string/test_sum"
             android:key="test_tools" />
+        <Preference
+            android:title="@string/copy_sample_title"
+            android:key="copy_sample_button" />
     </PreferenceCategory>
     <PreferenceCategory
         android:title="@string/chroot">

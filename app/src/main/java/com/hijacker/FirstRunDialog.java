@@ -27,6 +27,7 @@ import android.support.v7.app.AlertDialog;
 
 import static com.hijacker.MainActivity.arch;
 import static com.hijacker.MainActivity.mDrawerLayout;
+import static com.hijacker.MainActivity.mFragmentManager;
 import static com.hijacker.MainActivity.main;
 import static com.hijacker.MainActivity.background;
 import static com.hijacker.MainActivity.startAirodump;
@@ -42,12 +43,12 @@ public class FirstRunDialog extends DialogFragment {
             public void onClick(DialogInterface dialog, int id) {
                 if(arch.equals("armv7l")){
                     MainActivity.init = true;
-                    new InstallFirmwareDialog().show(getFragmentManager(), "InstallFirmwareDialog");
+                    new InstallFirmwareDialog().show(mFragmentManager, "InstallFirmwareDialog");
                 }else{
                     mDrawerLayout.openDrawer(GravityCompat.START);
                     ErrorDialog errdialog = new ErrorDialog();
                     errdialog.setMessage(getString(R.string.not_armv7l));
-                    errdialog.show(getFragmentManager(), "ErrorDialog");
+                    errdialog.show(mFragmentManager, "ErrorDialog");
                 }
             }
         });

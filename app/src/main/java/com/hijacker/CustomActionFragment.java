@@ -41,6 +41,7 @@ import static com.hijacker.CustomAction.cmds;
 import static com.hijacker.MainActivity.FRAGMENT_CUSTOM;
 import static com.hijacker.MainActivity.currentFragment;
 import static com.hijacker.MainActivity.debug;
+import static com.hijacker.MainActivity.mFragmentManager;
 import static com.hijacker.MainActivity.progress;
 import static com.hijacker.MainActivity.refreshDrawer;
 
@@ -106,7 +107,7 @@ public class CustomActionFragment extends Fragment{
                     public boolean onMenuItemClick(android.view.MenuItem item){
                         if(item.getGroupId()==-1){
                             //Open actions manager
-                            FragmentTransaction ft = getFragmentManager().beginTransaction();
+                            FragmentTransaction ft = mFragmentManager.beginTransaction();
                             ft.replace(R.id.fragment1, new CustomActionManagerFragment());
                             ft.setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN);
                             ft.addToBackStack(null);
