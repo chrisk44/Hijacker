@@ -486,6 +486,8 @@ public class MainActivity extends AppCompatActivity{
             }
         }else main();
 
+        startService(new Intent(this, PersistenceService.class));
+
         File report = new File(Environment.getExternalStorageDirectory() + "/report.txt");
         if(report.exists()) report.delete();    //Delete old report, it's not needed if no exception is thrown up to this point
     }
@@ -1073,6 +1075,7 @@ public class MainActivity extends AppCompatActivity{
         stop(PROCESS_REAVER);
         runOne(disable_monMode);
         Shell.exitAll();
+        stopService(new Intent(this, PersistenceService.class));
         super.onDestroy();
         System.exit(0);
     }
