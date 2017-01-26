@@ -125,18 +125,20 @@ public class SendLogActivity extends AppCompatActivity{
             writer = new FileWriter(file, true);
             writer.write("\n--------------------------------------------------------------------------------\n");
             writer.write("Hijacker bug report - " + new Date().toString() + "\n\n");
-            writer.write("Android version: " +  Build.VERSION.SDK_INT + "\n");
-            writer.write("Device: " + model + "\n");
-            writer.write("App version: " + (info == null ? "(null)" : info.versionName) + "\n");
+            writer.write("Android version: " +  Build.VERSION.SDK_INT + '\n');
+            writer.write("Device: " + model + '\n');
+            writer.write("App version: " + (info == null ? "(null)" : info.versionName) + '\n');
+            writer.write("App data path: " + getFilesDir().getAbsolutePath() + '\n');
             writer.write("\nStack trace:\n" + stackTrace + '\n');
 
-            String cmd = "echo pref_file--------------------------------------; su -c cat /data/user/0/com.hijacker/shared_prefs/com.hijacker_preferences.xml;";
+            String cmd = "echo pref_file--------------------------------------; su -c cat /data/data/com.hijacker/shared_prefs/com.hijacker_preferences.xml;";
+            cmd += " echo app directory----------------------------------; busybox ls -lR " + getFilesDir().getAbsolutePath() + ';';
             cmd += " echo fw_bcmdhd--------------------------------------; su -c strings /vendor/firmware/fw_bcmdhd.bin | grep \"FWID:\";";
             cmd += " echo ps---------------------------------------------; su -c ps | busybox grep -e air -e mdk -e reaver;";
             cmd += " echo busybox----------------------------------------; busybox;";
             cmd += " echo logcat-----------------------------------------; logcat -d -v time | busybox grep HIJACKER;";
             cmd += " echo ENDOFLOG\n";
-            Log.d("HIJACKER/cmd", cmd);
+            Log.d("HIJACKER/SendLog", cmd);
             shell_in.print(cmd);                //Runtime.getRuntime().exec(cmd) just echos the cmd...
             shell_in.flush();
             String buffer = shell_out.readLine();
@@ -177,9 +179,12 @@ public class SendLogActivity extends AppCompatActivity{
                 "reaver",
                 "reaver-wash"
         };
+        String cmd = "busybox pidof";
         for(String process_name : processes){
-            shell_in.print("busybox pidof " + process_name + '\n');
+            cmd += ' ' + process_name;
         }
+        cmd += "; echo ENDOFPIDOF\n";
+        shell_in.print(cmd);
         shell_in.flush();
         String buffer = null;
         try{

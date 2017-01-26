@@ -848,7 +848,7 @@ public class MainActivity extends AppCompatActivity{
     void setup(){
         try{
             version = getPackageManager().getPackageInfo(this.getPackageName(), 0).versionName;
-        }catch(PackageManager.NameNotFoundException e){ Log.e("setup()", "Exception: " + e.toString()); }
+        }catch(PackageManager.NameNotFoundException e){ Log.e("HIJACKER/setup", "Exception: " + e.toString()); }
         arch = System.getProperty("os.arch");
         ap_count = (TextView) findViewById(R.id.ap_count);
         st_count = (TextView) findViewById(R.id.st_count);
@@ -1404,6 +1404,14 @@ public class MainActivity extends AppCompatActivity{
         }
         str += "ago";
         return str;
+    }
+    static String getDirectory(String str){
+        if(str==null) return null;
+        if(str.length()==0) return str;
+
+        if(str.charAt(str.length()-1)=='/'){
+            return str;
+        }else return str + '/';
     }
 
     static{

@@ -51,7 +51,7 @@ public class SettingsFragment extends PreferenceFragment {
             String options[] = {"install_nexmon", "restore_firmware"};
             for(int i=0;i<3;i++){
                 temp = findPreference(options[i]);
-                temp.setSummary(R.string.incorrect_arch + arch);
+                temp.setSummary(R.string.incorrect_arch + ' ' + arch);
                 temp.setEnabled(false);
             }
         }

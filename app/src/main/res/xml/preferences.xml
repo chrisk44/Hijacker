@@ -6,15 +6,6 @@
             android:defaultValue="@string/airOnStartup"
             android:title="@string/startup_title"
             android:key="airOnStartup" />
- <!--       <EditTextPreference
-            android:defaultValue="@string/prefix"
-            android:selectAllOnFocus="true"
-            android:singleLine="true"
-            android:title="@string/prefix_title"
-            android:key="prefix"
-            android:summary="@string/prefix_sum"
-            android:dialogMessage="@string/prefix_desc"
-            android:dialogTitle="@string/prefix_title" />   -->
         <EditTextPreference
             android:defaultValue="@string/cap_dir"
             android:selectAllOnFocus="true"
@@ -97,61 +88,10 @@
             android:defaultValue="@string/disable_monMode" />
     </PreferenceCategory>
     <PreferenceCategory android:title="@string/tools">
-<!--        <Preference
-            android:title="@string/install_tools_title"
-            android:summary="@string/install_tools_sum"
-            android:key="install_tools" /> -->
-
         <Preference
             android:title="@string/install_nexmon_title"
             android:summary="@string/install_nexmon_sum"
             android:key="install_nexmon" />
-<!--
-        <EditTextPreference
-            android:defaultValue="@string/aircrack_dir"
-            android:selectAllOnFocus="true"
-            android:singleLine="true"
-            android:title="@string/airc_title"
-            android:key="aircrack_dir"
-            android:summary="@string/airc_sum"
-            android:dialogMessage="@string/airc_desc"
-            android:dialogTitle="@string/airc_title" />
-        <EditTextPreference
-            android:defaultValue="@string/airodump_dir"
-            android:selectAllOnFocus="true"
-            android:singleLine="true"
-            android:title="@string/aird_title"
-            android:key="airodump_dir"
-            android:summary="@string/aird_sum"
-            android:dialogMessage="@string/aird_desc"
-            android:dialogTitle="@string/aird_title" />
-        <EditTextPreference
-            android:defaultValue="@string/aireplay_dir"
-            android:selectAllOnFocus="true"
-            android:singleLine="true"
-            android:title="@string/aire_title"
-            android:key="aireplay_dir"
-            android:summary="@string/aire_sum"
-            android:dialogMessage="@string/aire_desc"
-            android:dialogTitle="@string/aire_title" />
-        <EditTextPreference
-            android:defaultValue="@string/mdk3_dir"
-            android:selectAllOnFocus="true"
-            android:singleLine="true"
-            android:title="@string/mdk_title"
-            android:key="mdk3_dir"
-            android:summary="@string/mdk_sum"
-            android:dialogMessage="@string/mdk_desc"
-            android:dialogTitle="@string/mdk_title" />
-        <EditTextPreference
-            android:defaultValue="@string/reaver_dir"
-            android:selectAllOnFocus="true"
-            android:singleLine="true"
-            android:title="@string/reaver_title"
-            android:summary="@string/reaver_sum"
-            android:dialogMessage="@string/reaver_desc"
-            android:dialogTitle="@string/reaver_title"
-            android:key="reaver_dir"/> -->
         <Preference
             android:title="@string/test_title"
             android:summary="@string/test_sum"

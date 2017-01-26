@@ -1,69 +1,11 @@
 <resources>
     <string name="app_name" translatable="false">Hijacker</string>
 
-    <!-- ExitDialog -->
-    <string name="exit_dialog_title">Exit?</string>
-    <string name="exit_dialog_message">Airodump, aireplay and mdk will stop. Are you sure?</string>
-
-    <!-- ConfirmResetDialog -->
-    <string name="reset_dialog_title">Reset Preferences?</string>
-
-    <!-- Notification -->
-    <string name="notification_title">Hijacker is running in the background</string>
-    <string name="notification2_title">Hijacker watchdog detected a problem</string>
-    <string name="stop_attacks">Stop attacks</string>
-
-    <!-- Main -->
-    <string name="cap_notfound">cap file not found</string>
-    <string name="cap_is">Cap file is</string>
-    <string name="app_dir_notfound1">App file directory doesn\'t exist: </string>
-    <string name="app_dir_notfound2">. Reinstall the app.</string>
-    <string name="disconnect_started">Disconnect All started</string>
-    <string name="watchdog_message">This could be caused by improper installation of busybox or the tools. Go to settings and install the tools, and make sure you have busybox installed and updated.</string>
-    <string name="airodump_still_running">Airodump is still running!</string>
-    <string name="airodump_not_running">Airodump is not running!</string>
-    <string name="aireplay_still_running">Aireplay is still running!</string>
-    <string name="aireplay_not_running">Aireplay is not running!</string>
-    <string name="mdk_still_running">MDK3 is still running!</string>
-    <string name="mdk_not_running">MDK3 is not running!</string>
-    <string name="reaver_still_running">Reaver is still running!</string>
-    <string name="reaver_not_running">Reaver is not running</string>
-    <string name="oui_not_found">oui.txt file was not extracted. Manufacturer detection will not work. Restart the app to try again.</string>
-    <string name="su_notfound_title">SuperSU not found!</string>
-    <string name="su_notfound">You might be rooted, but at the moment, this application requires SuperSU to function properly.
-        You can continue if you believe that your root solution will work. Please don\'t report bugs.</string>
-    <string name="busybox_notfound_title">Busybox not found!</string>
-    <string name="busybox_notfound">There is no busybox installed on your device. This application requires busybox to function properly.</string>
-    <string name="bin_not_created">Directory \'bin\' could not be created</string>
-    <string name="lib_not_created">Directory \'lib\' could not be created</string>
-
-    <!-- wpa_thread -->
-    <string name="stopped_to_capture">Stopped aireplay to capture handshake…</string>
-    <string name="handshake_captured">WPA handshake captured.</string>
-    <string name="saved_in_file">Saved in file </string>
-
-    <!-- DisclaimerDialog -->
-    <string name="disclaimer_title">Disclaimer</string>
-    <string name="disclaimer">It is extremely illegal to use this application against networks for which you don\'t have permission.
-        You can use it only on YOUR network or a network that you are authorized to.
-        I am not responsible for how you use this application and any damages you may cause.\nConsider yourself warned.</string>
-    <string name="agree">I agree</string>
-    <string name="not_agree">I don\'t agree</string>
-
-    <!-- FirstRunDialog -->
-    <string name="first_run_title">Set up tools</string>
-    <string name="first_run">This application is a Graphical User Interface for the wireless auditing tools airodump-ng, aireplay-ng, aircrack-ng and mdk3 and requires a Monitor Mode enabled WiFi interface. Only some android devices support this but none of them natively.
-        You need to use a custom firmware (bcmon, Nexmon) so that your wireless adapter can be used in Monitor Mode. External adapters can also be used.
-        You can configure your interface\'s name in Settings. This app requires root privileges to run the tools.
-        If you don\'t grant them, it will hang. Don\'t ask me why…\nYou can install the tools and firmware (only nexmon) now, or you can go to the Home Screen and use the defaults.</string>
-    <string name="not_armv7l">The tools and nexmon firmware included in this app are not compatible with your device (not armv7l architecture).
-        You will have to download and install them manually to use this app.</string>
-
     <!-- Toolbar -->
     <string name="stop_aireplay">Stop Aireplay</string>
 
     <!-- Generic text -->
-    <string name="incorrect_arch">Available only on armv7l, this is </string>
+    <string name="incorrect_arch">Available only on armv7l, this is</string>
     <string name="close">Close</string>
     <string name="cancel">Cancel</string>
     <string name="back">Back</string>
@@ -82,36 +24,6 @@
     <string name="clear">Clear</string>
     <string name="settings">Settings</string>
 
-    <!-- InstallFirmwareDialog -->
-    <string name="dir_notfound_firm">Directory for Firmware doesn\'t exist</string>
-    <string name="dir_notfound_util">Directory for Utility doesn\'t exist</string>
-    <string name="firm_notfound">There is no fw_bcmdhd.bin in there</string>
-    <string name="backup_exists">A backup already exists</string>
-    <string name="backup_created">Backup created</string>
-    <string name="installed_firm_util">Installed firmware and utility</string>
-    <string name="firm_notfound_bcm">Firmware not found. Are you sure you have BCM4339?</string>
-    <string name="create_backup">Create Backup</string>
-    <string name="fw_not_compatible">Your device does not seem to be compatible with Nexmon (BCM4339). Long click to override.</string>
-    <string name="path_contains_system">Modifying the system partition can brick some devices. Long click to override.</string>
-
-    <!-- InstallToolsDialog -->
-    <string name="dir_notfound_tools">Directory for tools doesn\'t exist</string>
-    <string name="dir_notfound_lib">Directory for library doesn\'t exist</string>
-    <string name="installed_tools_lib">Installed Tools and Library</string>
-    <string name="prefix_adjusted">Command Prefix adjusted for library path</string>
-
-    <!-- RestoreFirmwareDialog -->
-    <string name="restore">Restore</string>
-    <string name="restored">Backup restored</string>
-
-    <!-- StatsDialog -->
-    <string name="ap_stats">Statistics</string>
-    <string name="security">AP Security:</string>
-    <string name="open">OPEN:</string>
-    <string name="misc">Miscellaneous:</string>
-    <string name="hidden">Hidden APs:</string>
-    <string name="connected">Connected Stations:</string>
-
     <!-- APDialog (xml) -->
     <string name="mac">MAC:</string>
     <string name="channel">Channel:</string>
@@ -128,51 +40,8 @@
     <string name="manuf">Manufacturer:</string>
     <string name="probes">Probes:</string>
 
-    <!-- STDialog (xml) -->
-    <string name="frames">Frames:</string>
-    <string name="lost">Lost:</string>
-    <string name="connected_to">Connected To:</string>
-
-    <!-- FiltersDialog (xml) -->
-    <string name="show_ap">Show Access Points</string>
-    <string name="show_st">Show Stations</string>
-    <string name="show_st_na">Show non-associated stations</string>
-    <string name="channels">Channels:</string>
-    <string name="all">All</string>
-    <string name="opn">OPN</string>
-    <string name="sort">Sort:</string>
-    <string name="reverse_sort">Reverse</string>
-    <string name="sort_nosort">No sorting</string>
-    <string name="sort_essid">By ESSID</string>
-    <string name="sort_beacons_frames">By beacons/frames</string>
-    <string name="sort_data_frames">By data/frames</string>
-    <string name="sort_pwr">By power</string>
-
-
-    <!-- TestDialog -->
-    <string name="testing">Testing tools…</string>
-    <string name="make_sure_wifi">Make sure that WiFi is enabled</string>
-    <string name="checking_chroot">Checking chroot…</string>
-    <string name="done">Done</string>
-
-    <!-- ST -->
-    <string name="paired">Paired:</string>
-    <string name="not_connected">Not Connected</string>
-
-    <!-- MDKFragment -->
-    <string name="bf_title">Beacon Flooding</string>
-    <string name="ados_title">Authentication DoS</string>
-    <string name="ssid_file">SSID file</string>
-    <string name="managed">Managed</string>
-    <string name="ad_hoc">Ad-hoc</string>
-    <string name="select_enc">Select at least one encryption</string>
-    <string name="select_type">Select at least one type of network</string>
-
-    <!-- IsolatedFragment (xml) -->
-    <string name="crack">Crack</string>
-    <string name="stop">Stop</string>
-    <string name="disconnect_all">Disconnect All</string>
-    <string name="dos">DoS</string>
+    <!-- ConfirmResetDialog -->
+    <string name="reset_dialog_title">Reset Preferences?</string>
 
     <!-- CrackFragment -->
     <string name="path_to_cap">Path to .cap file</string>
@@ -181,32 +50,6 @@
     <string name="wordlist_notfound">Wordlist not found</string>
     <string name="select_wpa_wep">Please select WPA/WEP</string>
     <string name="select_wep_bits">Select how many bits the key is</string>
-
-    <!-- ReaverFragment -->
-    <string name="select_ap">Select Access Point</string>
-    <string name="pixie_dust">Use pixie-dust (requires NetHunter chroot)</string>
-    <string name="ignore_locked">Ignore Locked State reported by the AP</string>
-    <string name="eap_fail">Terminate each session with EAP FAIL</string>
-    <string name="small_dh">Use small DH keys to improve crack speed</string>
-    <string name="chroot_notfound">Chroot directory not found</string>
-    <string name="kali_notfound">bootkali_init not found</string>
-    <string name="chroot_warning">!!!!!!  Kali chroot doesn\'t currently support monitor mode through the internal wireless interface.
-        If you are on NetHunterOS it may work, otherwise you have to use an external adapter.
-        The command monstart-nh will be executed in chroot. !!!!!!</string>
-    <string name="pin_delay">PIN delay</string>
-    <string name="locked_delay">Locked Delay</string>
-    <!-- CustomAPDialog -->
-    <string name="custom_ap_title">Custom AP</string>
-    <string name="mac_address">MAC Address</string>
-    <string name="custom_chroot_cmd_illegal">The custom command can\'t contain the character \'</string>
-
-    <!-- SendLogActivity -->
-    <string name="unexpected_error_title">Unexpected Error</string>
-    <string name="unexpected_error_message">An unexpected error has occurred. A report has been generated in your external storage directory.
-        It contains the app version, the Android version, the model of your device, and a Logcat to help troubleshoot the problem. Below is the report.txt that will be sent.
-        Click \"Send report\" to report the problem.</string>
-    <string name="send_report">Send report</string>
-    <string name="restart_hijacker">Restart Hijacker</string>
 
     <!-- CustomActionFragment -->
     <string name="select_action">Select action</string>
@@ -238,15 +81,165 @@
     <string name="kill_process_on_stop">Has process to kill when implicitly stopping the action</string>
     <string name="process_name_empty">Process name cannot be empty</string>
 
+    <!-- CustomAPDialog -->
+    <string name="custom_ap_title">Custom AP</string>
+    <string name="mac_address">MAC Address</string>
+    <string name="custom_chroot_cmd_illegal">The custom command can\'t contain the character \'</string>
+
+    <!-- DisclaimerDialog -->
+    <string name="disclaimer_title">Disclaimer</string>
+    <string name="disclaimer">It is extremely illegal to use this application against networks for which you don\'t have permission.
+        You can use it only on YOUR network or a network that you are authorized to.
+        I am not responsible for how you use this application and any damages you may cause.\nConsider yourself warned.</string>
+    <string name="agree">I agree</string>
+    <string name="not_agree">I don\'t agree</string>
+
+    <!-- ExitDialog -->
+    <string name="exit_dialog_title">Exit?</string>
+    <string name="exit_dialog_message">Airodump, aireplay and mdk will stop. Are you sure?</string>
+
     <!-- ExportDialog -->
     <string name="export">Export</string>
     <string name="export_title">Export…</string>
     <string name="output_file_title">Output file</string>
     <string name="output_file_hint">/sdcard/output.txt</string>
     <string name="visible">Visible</string>
-    <string name="output_file_exists">File already exists. Press and hold Export to overwrite.</string>
+    <string name="output_file_exists">File already exists. Long click to overwrite.</string>
     <string name="output_file_cant_write">Can\'t write to that file</string>
     <string name="output_file_exported">Exported</string>
+
+    <!-- FiltersDialog (xml) -->
+    <string name="show_ap">Show Access Points</string>
+    <string name="show_st">Show Stations</string>
+    <string name="show_st_na">Show non-associated stations</string>
+    <string name="channels">Channels:</string>
+    <string name="all">All</string>
+    <string name="opn">OPN</string>
+    <string name="sort">Sort:</string>
+    <string name="reverse_sort">Reverse</string>
+    <string name="sort_nosort">No sorting</string>
+    <string name="sort_essid">By ESSID</string>
+    <string name="sort_beacons_frames">By beacons/frames</string>
+    <string name="sort_data_frames">By data/frames</string>
+    <string name="sort_pwr">By power</string>
+
+    <!-- FirstRunDialog -->
+    <string name="first_run_title">Welcome</string>
+    <string name="first_run">This application is a Graphical User Interface for the wireless auditing tools airodump-ng, aireplay-ng, aircrack-ng, mdk3 and reaver, and requires a Monitor Mode enabled WiFi interface.
+        Only some android devices support this but none of them natively.
+        You need to use a custom firmware (bcmon, Nexmon) so that your wireless adapter can be used in Monitor Mode. External adapters can also be used.
+        You can configure your interface\'s name in Settings. This app requires root privileges to run the tools.
+        If you don\'t grant them, it will hang. Don\'t ask me why…\nYou can install the Nexmon firmware now, or you can go to the Home Screen.</string>
+    <string name="not_armv7l">The nexmon firmware included in this app is not compatible with your device (not armv7l architecture).
+        You will have to download and install it manually to use this app.</string>
+    <string name="install_firmware">Install Nexmon</string>
+
+    <!-- InstallFirmwareDialog -->
+    <string name="dir_notfound_firm">Directory for Firmware doesn\'t exist</string>
+    <string name="dir_notfound_util">Directory for Utility doesn\'t exist</string>
+    <string name="firm_notfound">There is no fw_bcmdhd.bin in there</string>
+    <string name="backup_exists">A backup already exists</string>
+    <string name="backup_created">Backup created</string>
+    <string name="installed_firm_util">Installed firmware and utility</string>
+    <string name="firm_notfound_bcm">Firmware not found. Are you sure you have BCM4339?</string>
+    <string name="create_backup">Create Backup</string>
+    <string name="fw_not_compatible">Your device does not seem to be compatible with Nexmon (BCM4339). Long click to override.</string>
+    <string name="path_contains_system">Modifying the system partition can brick some devices. Long click to override.</string>
+
+    <!-- IsolatedFragment (xml) -->
+    <string name="crack">Crack</string>
+    <string name="stop">Stop</string>
+    <string name="disconnect_all">Disconnect All</string>
+    <string name="dos">DoS</string>
+
+    <!-- Main -->
+    <string name="cap_notfound">cap file not found</string>
+    <string name="cap_is">Cap file is</string>
+    <string name="app_dir_notfound1">App file directory doesn\'t exist: </string>
+    <string name="app_dir_notfound2">. Reinstall the app.</string>
+    <string name="disconnect_started">Disconnect All started</string>
+    <string name="watchdog_message">This could be caused by improper installation of busybox. Make sure you have busybox installed and updated.</string>
+    <string name="airodump_still_running">Airodump is still running!</string>
+    <string name="airodump_not_running">Airodump is not running!</string>
+    <string name="aireplay_still_running">Aireplay is still running!</string>
+    <string name="aireplay_not_running">Aireplay is not running!</string>
+    <string name="mdk_still_running">MDK3 is still running!</string>
+    <string name="mdk_not_running">MDK3 is not running!</string>
+    <string name="reaver_still_running">Reaver is still running!</string>
+    <string name="reaver_not_running">Reaver is not running</string>
+    <string name="oui_not_found">oui.txt file was not extracted. Manufacturer detection will not work. Restart the app to try again.</string>
+    <string name="su_notfound_title">SuperSU not found!</string>
+    <string name="su_notfound">You might be rooted, but at the moment, this application requires SuperSU to function properly.
+        You can continue if you believe that your root solution will work. Please don\'t report bugs.</string>
+    <string name="busybox_notfound_title">Busybox not found!</string>
+    <string name="busybox_notfound">There is no busybox installed on your device. This application requires busybox to function properly.</string>
+    <string name="bin_not_created">Directory \'bin\' could not be created</string>
+    <string name="lib_not_created">Directory \'lib\' could not be created</string>
+        <!-- Notification -->
+        <string name="notification_title">Hijacker is running in the background</string>
+        <string name="notification2_title">Hijacker watchdog detected a problem</string>
+        <string name="stop_attacks">Stop attacks</string>
+        <!-- wpa_thread -->
+        <string name="stopped_to_capture">Stopped aireplay to capture handshake…</string>
+        <string name="handshake_captured">WPA handshake captured.</string>
+        <string name="saved_in_file">Saved in file </string>
+
+    <!-- MDKFragment -->
+    <string name="bf_title">Beacon Flooding</string>
+    <string name="ados_title">Authentication DoS</string>
+    <string name="ssid_file">SSID file</string>
+    <string name="managed">Managed</string>
+    <string name="ad_hoc">Ad-hoc</string>
+    <string name="select_enc">Select at least one encryption</string>
+    <string name="select_type">Select at least one type of network</string>
+
+    <!-- ReaverFragment -->
+    <string name="select_ap">Select Access Point</string>
+    <string name="pixie_dust">Use pixie-dust (requires NetHunter chroot)</string>
+    <string name="ignore_locked">Ignore Locked State reported by the AP</string>
+    <string name="eap_fail">Terminate each session with EAP FAIL</string>
+    <string name="small_dh">Use small DH keys to improve crack speed</string>
+    <string name="chroot_notfound">Chroot directory not found</string>
+    <string name="kali_notfound">bootkali_init not found</string>
+    <string name="chroot_warning">!!!!!!  Kali chroot doesn\'t currently support monitor mode through the internal wireless interface.
+        If you are on NetHunterOS it may work, otherwise you have to use an external adapter.
+        The command \"source monstart-nh\" will be executed in chroot. !!!!!!</string>
+    <string name="pin_delay">PIN delay</string>
+    <string name="locked_delay">Locked Delay</string>
+
+    <!-- RestoreFirmwareDialog -->
+    <string name="restore">Restore</string>
+    <string name="restored">Backup restored</string>
+
+    <!-- SendLogActivity -->
+    <string name="unexpected_error_title">Unexpected Error</string>
+    <string name="unexpected_error_message">An unexpected error has occurred. A report has been generated in your external storage directory.
+        It contains the app version, the Android version, the model of your device, and a Logcat to help troubleshoot the problem. Below is the report.txt that will be sent.
+        Click \"Send report\" to report the problem.</string>
+    <string name="send_report">Send report</string>
+    <string name="restart_hijacker">Restart Hijacker</string>
+
+    <!-- ST -->
+    <string name="paired">Paired:</string>
+    <string name="not_connected">Not Connected</string>
+        <!-- STDialog (xml) -->
+        <string name="frames">Frames:</string>
+        <string name="lost">Lost:</string>
+        <string name="connected_to">Connected To:</string>
+
+    <!-- StatsDialog -->
+    <string name="ap_stats">Statistics</string>
+    <string name="security">AP Security:</string>
+    <string name="open">OPEN:</string>
+    <string name="misc">Miscellaneous:</string>
+    <string name="hidden">Hidden APs:</string>
+    <string name="connected">Connected Stations:</string>
+
+    <!-- TestDialog -->
+    <string name="testing">Testing tools…</string>
+    <string name="make_sure_wifi">Make sure that WiFi is enabled</string>
+    <string name="checking_chroot">Checking chroot…</string>
+    <string name="done">Done</string>
 
     <!-- Default Preferences -->
     <string name="iface" translatable="false">wlan0</string>
@@ -266,33 +259,20 @@
     <string name="watchdog" translatable="false">true</string>
 
     <!-- Settings -->
+
+    <!-- General -->
     <string name="general">General</string>
-    <string name="tools">Tools</string>
-    <string name="other">Other</string>
-
     <string name="startup_title">Run Airodump on startup</string>
-
-    <string name="iface_title">Interface</string>
-    <string name="iface_sum">Monitor Mode interface</string>
-    <string name="iface_desc">The WiFi interface that is Monitor Mode enabled.</string>
-
-    <string name="mm_title">Enable Monitor Mode</string>
-    <string name="mm_sum">Command to enable monitor mode (leave blank if none)</string>
-    <string name="mm_desc">Command to enable monitor mode specific to your interface. Will be run AS ROOT every time airodump-ng starts.</string>
-
-    <string name="mm2_title">Disable Monitor Mode</string>
-    <string name="mm2_sum">Command to disable monitor mode (leave blank if none)</string>
-    <string name="mm2_desc">Command to disable monitor mode specific to your interface. Will be run AS ROOT when the app is being killed.</string>
 
     <string name="cap_title">Cap files directory</string>
     <string name="cap_sum">Directory to save cap files (eg. /sdcard/cap)</string>
     <string name="cap_desc">The directory to save the cap file when cracking WPA or WEP. This needs to be a directory that you have access to and won\'t be deleted (eg. not a tmp folder). It will be created and written to, and also a \"rm -rf …\" is ran in it as root so be careful what you enter here. Don\'t end it with /</string>
 
-    <string name="always_cap_title">Save all packets</string>
-    <string name="always_cap_sum">Create a .cap file every time airodump-ng starts</string>
-
     <string name="delete_extra_title">Delete extra cap files</string>
     <string name="delete_extra_sum">Delete .csv and .netxml files created by airodump when saving to .cap file</string>
+
+    <string name="always_cap_title">Save all packets</string>
+    <string name="always_cap_sum">Create a .cap file every time airodump-ng starts</string>
 
     <string name="deauthWait_title">WPA Deauth wait (sec)</string>
     <string name="deauthWait_sum">Time to deauthenticate clients when cracking WPA</string>
@@ -311,20 +291,35 @@
     <string name="watchdog_sum">Run a background thread to verify that the tools that are supposed to be running, are actually running.
         Disable this if you are getting false positives.</string>
 
-    <string name="copy_sample_title">Copy test command</string>
+    <!-- Interface -->
+    <string name="iface_title">Interface</string>
+    <string name="iface_sum">Monitor Mode interface</string>
+    <string name="iface_desc">The WiFi interface that is Monitor Mode enabled.</string>
+
+    <string name="mm_title">Enable Monitor Mode</string>
+    <string name="mm_sum">Command to enable monitor mode (leave blank if none)</string>
+    <string name="mm_desc">Command to enable monitor mode specific to your interface. Will be run AS ROOT every time airodump-ng starts.</string>
+
+    <string name="mm2_title">Disable Monitor Mode</string>
+    <string name="mm2_sum">Command to disable monitor mode (leave blank if none)</string>
+    <string name="mm2_desc">Command to disable monitor mode specific to your interface. Will be run AS ROOT when the app is being killed.</string>
+
+    <!-- Tools -->
+    <string name="tools">Tools</string>
+    <string name="install_nexmon_title">Install Nexmon</string>
+    <string name="install_nexmon_sum">Install the Nexmon driver and its management utility (nexutil at /su/xbin)</string>
+        <!-- xml -->
+        <string name="firm_location_text">Firmware Location</string>
+        <string name="util_location_text">Management Utility Location</string>
+        <string name="firm_location_default">/vendor/firmware</string>
+        <string name="util_location_default">/su/xbin</string>
 
     <string name="test_title">Test tools</string>
     <string name="test_sum">Run all the tools to make sure that the settings are correct. Any running tasks will be stopped.</string>
 
-    <string name="install_nexmon_title">Install Nexmon</string>
-    <string name="install_nexmon_sum">Install the Nexmon driver and its management utility (nexutil at /su/xbin)</string>
-    <string name="install_message">Don\'t end the directories with /</string>
+    <string name="copy_sample_title">Copy test command</string>
 
-    <string name="firm_location_text">Firmware Location</string>
-    <string name="util_location_text">Management Utility Location</string>
-    <string name="firm_location_default">/vendor/firmware</string>
-    <string name="util_location_default">/su/xbin</string>
-
+    <!-- Chroot -->
     <string name="chroot">Chroot</string>
 
     <string name="chroot_title">Chroot directory</string>
@@ -339,9 +334,12 @@
         Can be used to initialize devices, variables etc.
         For many commands, create a shell script inside the chroot environment and run it from here.
         Don\'t use the character \'.</string>
+
     <string name="cont_on_fail_title">Ignore failed commands</string>
     <string name="cont_on_fail_sum">Continue running in chroot in case monstart-nh or the custom command fail</string>
 
+    <!-- Other -->
+    <string name="other">Other</string>
     <string name="restore_firmware">Restore firmware</string>
     <string name="reset_title">Reset Preferences</string>
     <string name="send_feedback_title">Send feedback</string>

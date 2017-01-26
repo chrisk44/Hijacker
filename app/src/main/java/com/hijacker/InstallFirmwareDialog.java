@@ -44,6 +44,7 @@ import java.io.InputStream;
 import static com.hijacker.MainActivity.PROCESS_AIRODUMP;
 import static com.hijacker.MainActivity.debug;
 import static com.hijacker.MainActivity.firm_backup_file;
+import static com.hijacker.MainActivity.getDirectory;
 import static com.hijacker.MainActivity.getLastLine;
 import static com.hijacker.MainActivity.background;
 import static com.hijacker.MainActivity.getPIDs;
@@ -73,7 +74,6 @@ public class InstallFirmwareDialog extends DialogFragment {
 
         builder.setView(view);
         builder.setTitle(R.string.install_nexmon_title);
-        builder.setMessage(R.string.install_message);
         builder.setNegativeButton(R.string.cancel, new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int which) {}
@@ -102,6 +102,8 @@ public class InstallFirmwareDialog extends DialogFragment {
                     v.performHapticFeedback(HapticFeedbackConstants.LONG_PRESS);
                     String firm_location = ((EditText) view.findViewById(R.id.firm_location)).getText().toString();
                     String util_location = ((EditText) view.findViewById(R.id.util_location)).getText().toString();
+                    firm_location = getDirectory(firm_location);
+                    util_location = getDirectory(util_location);
 
                     if(check(firm_location, util_location, true, v)){
                         install(firm_location, util_location);
@@ -115,9 +117,11 @@ public class InstallFirmwareDialog extends DialogFragment {
                 public void onClick(View v) {
                     String firm_location = ((EditText)view.findViewById(R.id.firm_location)).getText().toString();
                     String util_location = ((EditText)view.findViewById(R.id.util_location)).getText().toString();
+                    firm_location = getDirectory(firm_location);
+                    util_location = getDirectory(util_location);
 
                     if(check(firm_location, util_location, false, v)){
-                        shell.run("strings " + firm_location + "/fw_bcmdhd.bin | busybox grep \"FWID:\"; echo ENDOFSTRINGS");
+                        shell.run("strings " + firm_location + "fw_bcmdhd.bin | busybox grep \"FWID:\"; echo ENDOFSTRINGS");
                         String result = getLastLine(shell.getShell_out(), "ENDOFSTRINGS");
                         result = result.substring(0, 4);
 
@@ -180,7 +184,7 @@ public class InstallFirmwareDialog extends DialogFragment {
             if(new File(firm_backup_file).exists()){
                 Toast.makeText(getActivity(), R.string.backup_exists, Toast.LENGTH_SHORT).show();
             }else{
-                shell.run("cp -n " + firm_location + "/fw_bcmdhd.bin " + firm_backup_file);
+                shell.run("cp -n " + firm_location + "fw_bcmdhd.bin " + firm_backup_file);
                 Toast.makeText(getActivity(), R.string.backup_created, Toast.LENGTH_SHORT).show();
             }
         }
@@ -195,6 +199,7 @@ public class InstallFirmwareDialog extends DialogFragment {
         extract("fw_bcmdhd.bin", firm_location);
         extract("nexutil", util_location);
         shell.run("busybox mount -o ro,remount,ro /system");
+
         Toast.makeText(getActivity(), R.string.installed_firm_util, Toast.LENGTH_SHORT).show();
         wifiManager.setWifiEnabled(true);
 
@@ -206,7 +211,7 @@ public class InstallFirmwareDialog extends DialogFragment {
         if(!firm.exists()){
             Snackbar.make(v, R.string.dir_notfound_firm, Snackbar.LENGTH_SHORT).show();
             return false;
-        }else if(!(new File(firm_location + "/fw_bcmdhd.bin").exists())){
+        }else if(!(new File(firm_location + "fw_bcmdhd.bin").exists())){
             Snackbar.make(v, R.string.firm_notfound, Snackbar.LENGTH_SHORT).show();
             return false;
         }else if(!util.exists()){
@@ -220,7 +225,7 @@ public class InstallFirmwareDialog extends DialogFragment {
     }
     void extract(String filename, String dest){
         File f = new File(path, filename);      //no permissions to write at dest so extract at local directory and then move to target
-        dest = dest + '/' + filename;
+        dest = dest + filename;
         if(!f.exists()){
             try{
                 InputStream in = getResources().getAssets().open(filename);

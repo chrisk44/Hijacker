@@ -39,7 +39,7 @@ public class FirstRunDialog extends DialogFragment {
         AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
         builder.setMessage(R.string.first_run);
         builder.setTitle(R.string.first_run_title);
-        builder.setPositiveButton(R.string.setup, new DialogInterface.OnClickListener() {
+        builder.setPositiveButton(R.string.install_firmware, new DialogInterface.OnClickListener() {
             public void onClick(DialogInterface dialog, int id) {
                 if(arch.equals("armv7l")){
                     MainActivity.init = true;
@@ -57,7 +57,6 @@ public class FirstRunDialog extends DialogFragment {
                 //return
                 dismissAllowingStateLoss();
                 mDrawerLayout.openDrawer(GravityCompat.START);
-                startAirodump(null);
                 main();
             }
         });
