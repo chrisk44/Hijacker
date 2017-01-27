@@ -22,9 +22,7 @@ import android.app.FragmentManager;
 import java.util.ArrayList;
 import java.util.List;
 
-import static com.hijacker.IsolatedFragment.is_ap;
 import static com.hijacker.MainActivity.PROCESS_AIREPLAY;
-import static com.hijacker.MainActivity.PROCESS_AIRODUMP;
 import static com.hijacker.MainActivity.SORT_BEACONS_FRAMES;
 import static com.hijacker.MainActivity.SORT_DATA_FRAMES;
 import static com.hijacker.MainActivity.SORT_NOSORT;
@@ -34,7 +32,6 @@ import static com.hijacker.MainActivity.getManuf;
 import static com.hijacker.MainActivity.runInHandler;
 import static com.hijacker.MainActivity.sort;
 import static com.hijacker.MainActivity.startAireplay;
-import static com.hijacker.MainActivity.startAirodump;
 import static com.hijacker.MainActivity.stop;
 import static com.hijacker.MainActivity.toSort;
 
@@ -58,17 +55,14 @@ class ST {
         if(sort!=SORT_NOSORT) toSort = true;
     }
     void disconnect(){
-        if(is_ap==null){
-            //need to switch channel only if there is no isolated ap
-            stop(PROCESS_AIRODUMP);
+        if(Airodump.getChannel() != AP.getAPByMac(this.bssid).ch){
+            //switch channel only if airodump is running elsewhere
             stop(PROCESS_AIREPLAY);
-            startAirodump("--channel " + AP.getAPByMac(this.bssid).ch);
+            Airodump.startClean(AP.getAPByMac(this.bssid).ch);
         }
         startAireplay(this.bssid, this.mac);
     }
     void update(String bssid, int pwr, int lost, int frames, String probes){
-        if(bssid=="na") bssid=null;
-
         if(added_as_client && bssid==null){
             connected--;
             added_as_client = false;

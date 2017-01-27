@@ -68,11 +68,10 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.util.ArrayList;
-import java.util.LinkedList;
 import java.util.List;
 
+import static com.hijacker.Airodump.fifo;
 import static com.hijacker.CustomAction.TYPE_ST;
 import static com.hijacker.IsolatedFragment.is_ap;
 import static com.hijacker.MDKFragment.ados;
@@ -90,9 +89,9 @@ public class MainActivity extends AppCompatActivity{
     static final int MDK_BF=0, MDK_ADOS=1;
     static final int SORT_NOSORT = 0, SORT_ESSID = 1, SORT_BEACONS_FRAMES = 2, SORT_DATA_FRAMES = 3, SORT_PWR = 4;
     //State variables
-    static boolean cont = false, wpacheckcont = false, completed = true, clearing = false;
+    static boolean wpacheckcont = false, completed = true, clearing = false;
     static boolean notif_on = false, background = false;    //notif_on: notification should be shown, background: the app is running in the background
-    static int airodump_running = 0, aireplay_running = 0, currentFragment=FRAGMENT_AIRODUMP;         //Set currentFragment in onResume of each Fragment
+    static int aireplay_running = 0, currentFragment=FRAGMENT_AIRODUMP;         //Set currentFragment in onResume of each Fragment
     //Filters
     static boolean show_ap = true, show_st = true, show_na_st = true, wpa = true, wep = true, opn = true;
     static boolean show_ch[] = {true, false, false, false, false, false, false, false, false, false, false, false, false, false, false};
@@ -109,10 +108,9 @@ public class MainActivity extends AppCompatActivity{
     static ImageView[] status = {null, null, null, null, null};                         //Icons in TestDialog, set in TestDialog class
     static int progress_int;
     static long last_action;                        //Timestamp for the last action. Used in watchdog to avoid false positives
-    static Thread refresh_thread, wpa_thread, watchdog_thread;
-    static Runnable refresh_runnable, wpa_runnable, watchdog_runnable;
+    static Thread wpa_thread, watchdog_thread;
+    static Runnable wpa_runnable, watchdog_runnable;
     static Menu menu;
-    final static LinkedList<UpdateRequest> fifo = new LinkedList<>();                    //List used as FIFO for handling calls to addAP/addST in an order
     static MyListAdapter adapter;
     static CustomActionAdapter custom_action_adapter;
     static SharedPreferences pref;
@@ -133,7 +131,7 @@ public class MainActivity extends AppCompatActivity{
             enable_monMode, disable_monMode, custom_chroot_cmd;
     static int deauthWait;
     static boolean show_notif, show_details, airOnStartup, debug, delete_extra,
-            monstart, always_cap, cont_on_fail, watchdog;
+            monstart, always_cap, cont_on_fail, watchdog, target_deauth;
 
     @Override
     protected void onCreate(Bundle savedInstanceState){
@@ -168,46 +166,6 @@ public class MainActivity extends AppCompatActivity{
         installTools();
 
         if(debug) Log.d("HIJACKER/Main", "path is " + path);
-
-        refresh_runnable = new Runnable(){
-            @Override
-            public void run(){
-                if(debug) Log.d("HIJACKER/refresh_thread", "refresh_thread running");
-                try{
-                    while(cont){
-                        while(!fifo.isEmpty()){
-                            synchronized(fifo){
-                                fifo.pop().add();
-                            }
-                            while(!completed){      //Wait for the update request to complete
-                                Thread.sleep(10);
-                            }
-                        }
-                        runInHandler(new Runnable(){
-                            @Override
-                            public void run(){
-                                adapter.notifyDataSetChanged();             //for when data is changed, no new data added
-                                ap_count.setText(Integer.toString(is_ap==null ? Tile.i : 1));
-                                st_count.setText(Integer.toString(Tile.tiles.size() - Tile.i));
-                                notification();
-                                if(toSort && !background) Tile.sort();
-                            }
-                        });
-                        Thread.sleep(1000);
-                    }
-                }catch(InterruptedException e){
-                    Log.e("HIJACKER/Exception", "Caught Exception in main() refresh_thread block: " + e.toString());
-                    fifo.clear();
-                    try{
-                        while(!completed){      //Wait for running request to complete
-                            Thread.sleep(10);
-                        }
-                    }catch(InterruptedException ignored){}
-                }
-                if(debug) Log.d("HIJACKER/refresh_thread", "refresh_thread done");
-            }
-        };
-        refresh_thread = new Thread(refresh_runnable);
 
         wpa_runnable = new Runnable(){
             @Override
@@ -253,18 +211,15 @@ public class MainActivity extends AppCompatActivity{
                 int result = 0;
                 Shell shell = getFreeShell();
                 try{
-                    Thread.sleep(1000);
-                    shell.run("busybox ls -1 " + cap_dir + "/handshake-*.cap; echo ENDOFLS");
-                    capfile = getLastLine(shell.getShell_out(), "ENDOFLS");
+                    capfile = Airodump.getCapFile();
 
-                    if(debug) Log.d("HIJACKER/wpa_thread", capfile);
-                    if(capfile.equals("ENDOFLS")){
+                    if(capfile==null){
                         if(debug){
                             Log.d("HIJACKER/wpa_thread", "cap file not found, airodump is probably not running...");
                             Log.d("HIJACKER/wpa_thread", "Returning...");
                         }
                     }else{
-                        Snackbar.make(findViewById(R.id.fragment1), getString(R.string.cap_is) + ' ' + capfile, Snackbar.LENGTH_LONG).show();
+                        if(debug) Log.d("HIJACKER/wpa_thread", capfile);
                         progress_int = 0;
                         wpacheckcont = true;
                         wpa_subthread.start();
@@ -346,13 +301,13 @@ public class MainActivity extends AppCompatActivity{
                         List<Integer> list;
                         Message msg;
                         list = getPIDs(PROCESS_AIRODUMP);
-                        if(airodump_running!=0 && list.size()==0){          //airodump not running
+                        if(Airodump.isRunning() && list.size()==0){          //airodump not running
                             msg = new Message();
                             msg.obj = getString(R.string.airodump_not_running);
                             watchdog_handler.sendMessage(msg);
                             flag = false;
                             stop(PROCESS_AIRODUMP);
-                        }else if(airodump_running==0 && list.size()>0){     //airodump still running
+                        }else if(!Airodump.isRunning() && list.size()>0){     //airodump still running
                             if(debug) Log.d("HIJACKER/watchdog", "Airodump is still running. Trying to kill it...");
                             stop(PROCESS_AIRODUMP);
                             if(getPIDs(PROCESS_AIRODUMP).size()>0){
@@ -425,6 +380,7 @@ public class MainActivity extends AppCompatActivity{
                 Manifest.permission.WRITE_EXTERNAL_STORAGE
         }, 0);
 
+        //Extract and verify oui.txt for Manufacturer look-up
         extract("oui.txt", path, false);
         File oui = new File(path + "/oui.txt");
         if(!oui.exists()){
@@ -433,6 +389,7 @@ public class MainActivity extends AppCompatActivity{
             dialog.show(mFragmentManager, "ErrorDialog");
         }
 
+        //Install busybox
         if(arch.equals("armv7l")){
             if(new File("/su").exists()){
                 if(debug) Log.d("HIJACKER/onCreate", "Installing busybox in /su/xbin...");
@@ -468,8 +425,10 @@ public class MainActivity extends AppCompatActivity{
             watchdog_thread.start();
         }
 
+        //First start
         if(!pref.getBoolean("disclaimer", false)){
             new DisclaimerDialog().show(mFragmentManager, "Disclaimer");
+            //Check for busybox
             Shell shell = getFreeShell();
             shell.run("busybox; echo ENDOFBUSYBOX");
             if(getLastLine(shell.getShell_out(), "ENDOFBUSYBOX").equals("ENDOFBUSYBOX")){
@@ -479,6 +438,7 @@ public class MainActivity extends AppCompatActivity{
                 dialog.show(mFragmentManager, "ErrorDialog");
             }
             shell.done();
+            //Check for SuperSU
             if(!new File("/su").exists()){
                 ErrorDialog dialog = new ErrorDialog();
                 dialog.setTitle(getString(R.string.su_notfound_title));
@@ -487,10 +447,12 @@ public class MainActivity extends AppCompatActivity{
             }
         }else main();
 
+        //Start background service so the app won't get killed if it goes to the background
         startService(new Intent(this, PersistenceService.class));
 
+        //Delete old report, it's not needed if no exception is thrown up to this point
         File report = new File(Environment.getExternalStorageDirectory() + "/report.txt");
-        if(report.exists()) report.delete();    //Delete old report, it's not needed if no exception is thrown up to this point
+        if(report.exists()) report.delete();
     }
     void extract(String filename, String out_dir, boolean chmod){
         File f = new File(out_dir, filename);
@@ -522,10 +484,7 @@ public class MainActivity extends AppCompatActivity{
         stop(PROCESS_MDK);
         stop(PROCESS_AIRCRACK);
         stop(PROCESS_REAVER);
-        if(airOnStartup){
-            startAirodump(null);
-            //Airodump.startClean();
-        }
+        if(airOnStartup) Airodump.startClean();
         else if(menu!=null) menu.getItem(1).setIcon(R.drawable.run);
     }
     void installTools(){
@@ -571,65 +530,9 @@ public class MainActivity extends AppCompatActivity{
         extract("libfakeioctl.so", lib_location, true);
     }
 
-    public static void startAirodump(String params){
-        final String temp;
-        final int mode;
-        if(params==null){
-            temp = always_cap ? " -w " + cap_dir + "/cap" : "";
-            mode = 0;
-        }else{
-            if(!(params.contains("handshake") || params.contains("wep_ivs")) && always_cap){
-                temp = params + " -w " + cap_dir + "/cap";
-            }else{
-                temp = params;
-            }
-            mode = 1;
-        }
-        runOne(enable_monMode);
-        stop(PROCESS_AIRODUMP);
-        cont = true;
-        new Thread(new Runnable(){
-            @Override
-            public void run(){
-                String cmd = "su -c " + prefix + " " + airodump_dir + " --update 1 " + temp + " " + iface;
-                if(debug) Log.d("HIJACKER/startAirodump", cmd);
-                try{
-                    Process process = Runtime.getRuntime().exec(cmd);
-                    last_action = System.currentTimeMillis();
-                    BufferedReader in = new BufferedReader(new InputStreamReader(process.getErrorStream()));
-                    String buffer;
-                    while(cont && (buffer = in.readLine())!=null){
-                        main(buffer, mode);
-                    }
-                }catch(IOException e){ Log.e("HIJACKER/Exception", "Caught Exception in startAirodump() read block: " + e.toString()); }
-            }
-        }).start();
-        refresh_thread = new Thread(refresh_runnable);
-        refresh_thread.start();
-        airodump_running = 1;
-        runInHandler(new Runnable(){
-            @Override
-            public void run(){
-                if(menu!=null) menu.getItem(1).setIcon(R.drawable.stop);
-                refreshState();
-                notification();
-            }
-        });
-    }
-    public static void startAirodumpForAP(AP ap, String extra){
-        //if(extra!=null){
-            startAirodump("--channel " + ap.ch + " --bssid " + ap.mac + (extra==null ? "" : ' ' + extra));
-        /*}else{
-            Airodump.reset();
-            Airodump.setChannel(ap.ch);
-            Airodump.setMac(ap.mac);
-            Airodump.start();
-        }*/
-    }
-
     public static void _startAireplay(final String str){
         try{
-            String cmd = "su -c " + prefix + " " + aireplay_dir + " --ignore-negative-one " + str + " " + iface;
+            String cmd = "su -c " + prefix + " " + aireplay_dir + " -D --ignore-negative-one " + str + " " + iface;
             if(debug) Log.d("HIJACKER/_startAireplay", cmd);
             Runtime.getRuntime().exec(cmd);
             last_action = System.currentTimeMillis();
@@ -648,10 +551,10 @@ public class MainActivity extends AppCompatActivity{
         aireplay_running = AIREPLAY_DEAUTH;
         _startAireplay("--deauth 0 -a " + mac);
     }
-    public static void startAireplay(String mac1, String mac2){
-        //Disconnect client mac2 from ap mac1
+    public static void startAireplay(String target, String client){
+        //Disconnect client client from ap target
         aireplay_running = AIREPLAY_DEAUTH;
-        _startAireplay("--deauth 0 -a " + mac1 + " -c " + mac2);
+        _startAireplay("--deauth 0 -a " + target + " -c " + client);
     }
     public static void startAireplayWEP(AP ap){
         //Increase IV generation from ap mac to crack a wep network
@@ -767,30 +670,8 @@ public class MainActivity extends AppCompatActivity{
         if(debug) Log.d("HIJACKER/stop", "stop(" + pr + ") called");
         switch(pr){
             case PROCESS_AIRODUMP:
-                cont = false;
-                refresh_thread.interrupt();
-                runInHandler(new Runnable(){
-                    @Override
-                    public void run(){
-                        if(menu!=null) menu.getItem(1).setIcon(R.drawable.run);
-                        Tile.filter();
-                        if(wpa_thread.isAlive()) progress.setIndeterminate(false);
-                    }
-                });
-                if(wpa_thread.isAlive()){
-                    IsolatedFragment.cont = false;
-                    wpacheckcont = false;
-                    wpa_thread.interrupt();
-                }
-                if(delete_extra && always_cap){
-                    runOne("busybox rm -rf " + cap_dir + "/cap-*.csv");
-                    runOne("busybox rm -rf " + cap_dir + "/cap-*.netxml");
-                }
-                airodump_running = 0;
-                runOne("busybox kill $(busybox pidof airodump-ng)");
-                AP.saveData();
-                ST.saveData();
-                break;
+                Airodump.stop();
+                return;
             case PROCESS_AIREPLAY:
                 runInHandler(new Runnable(){
                     @Override
@@ -806,10 +687,14 @@ public class MainActivity extends AppCompatActivity{
                     shell.run("busybox rm -rf " + cap_dir + "/wep_ivs-*.csv");
                     shell.run("busybox rm -rf " + cap_dir + "/wep_ivs-*.netxml");
                 }
-                aireplay_running = 0;
                 progress_int = deauthWait;
                 shell.run("busybox kill $(busybox pidof aireplay-ng)");
                 shell.done();
+                if(is_ap==null && aireplay_running==AIREPLAY_DEAUTH){
+                    //Aireplay was just deauthenticating so airodump has locked a channel, no more needed
+                    Airodump.startClean();
+                }
+                aireplay_running = 0;
                 break;
             case PROCESS_MDK:
                 if(currentFragment==FRAGMENT_MDK){
@@ -903,6 +788,7 @@ public class MainActivity extends AppCompatActivity{
         custom_chroot_cmd = "";
         cont_on_fail = Boolean.parseBoolean(getString(R.string.cont_on_fail));
         watchdog = Boolean.parseBoolean(getString(R.string.watchdog));
+        target_deauth = Boolean.parseBoolean(getString(R.string.target_deauth));
 
         prefix = "LD_PRELOAD=" + path + "/lib/libfakeioctl.so";
         airodump_dir = path + "/bin/airodump-ng";
@@ -1005,6 +891,7 @@ public class MainActivity extends AppCompatActivity{
         airOnStartup = pref.getBoolean("airOnStartup", airOnStartup);
         debug = pref.getBoolean("debug", debug);
         watchdog = pref.getBoolean("watchdog", watchdog);
+        target_deauth = pref.getBoolean("target_deauth", target_deauth);
         delete_extra = pref.getBoolean("delete_extra", delete_extra);
         try{
             always_cap = pref.getBoolean("always_cap", always_cap);
@@ -1032,19 +919,15 @@ public class MainActivity extends AppCompatActivity{
                 Tile.clear();
                 ap_count.setText("0");
                 st_count.setText("0");
-                if(is_ap==null) startAirodump(null);
-                else startAirodumpForAP(is_ap, null);
+                Airodump.startClean();
                 clearing = false;
                 return true;
 
             case R.id.stop_run:
-                //if(Airodump.isRunning()){
-                if(cont){
-                    //Running
+                if(Airodump.isRunning()){
                     stop(PROCESS_AIRODUMP);
                 }else{
-                    if(is_ap==null) startAirodump(null);
-                    else startAirodumpForAP(is_ap, null);
+                    Airodump.start();
                 }
                 return true;
 
@@ -1270,23 +1153,16 @@ public class MainActivity extends AppCompatActivity{
             return CustomAction.cmds.size();
         }
     }
-    public static void addAP(String essid, String mac, String enc, String cipher, String auth, int pwr, int beacons, int data, int ivs, int ch){
-        fifo.add(new UpdateRequest(essid, mac, enc, cipher, auth, pwr, beacons, data, ivs, ch));
-    }
-    public static void addST(String mac, String bssid, String probes, int pwr, int lost, int frames){
-        fifo.add(new UpdateRequest(mac, bssid, probes, pwr, lost, frames));
-    }
     public void onAPStats(View v){ new StatsDialog().show(mFragmentManager, "StatsDialog"); }
     public void onCrack(View v){
         //Clicked crack with isolated ap
         if(wpa_thread.isAlive()){
             wpa_thread.interrupt();
-            stop(PROCESS_AIRODUMP);
             stop(PROCESS_AIREPLAY);
             ((TextView)v).setText(R.string.crack);
             progress.setIndeterminate(false);
             progress.setProgress(deauthWait);
-            startAirodumpForAP(is_ap, null);
+            Airodump.startClean(is_ap);
         }else{
             is_ap.crack();
             ((TextView)v).setText(R.string.stop);
@@ -1317,7 +1193,7 @@ public class MainActivity extends AppCompatActivity{
         if(view!=null) Snackbar.make(view, "\"" + str + "\" copied to clipboard", Snackbar.LENGTH_SHORT).show();
     }
     static void notification(){
-        if(notif_on && show_notif && !(airodump_running==0 && aireplay_running==0 &&
+        if(notif_on && show_notif && !(!Airodump.isRunning() && aireplay_running==0 &&
                 !bf && !ados && !CrackFragment.cont && !ReaverFragment.cont)){
             if(show_details){
                 String str;
@@ -1360,7 +1236,7 @@ public class MainActivity extends AppCompatActivity{
     }
     static void refreshState(){
         //refresh overflow icon to show what is running
-        int state = airodump_running;
+        int state = Airodump.isRunning() ? 1 : 0;
         if(aireplay_running!=0) state += 2;
         if(bf || ados) state += 4;
         toolbar.setOverflowIcon(overflow[state]);
@@ -1421,6 +1297,7 @@ public class MainActivity extends AppCompatActivity{
         return str;
     }
     static String getDirectory(String str){
+        //Returns a directory that ends with /
         if(str==null) return null;
         if(str.length()==0) return str;
 
@@ -1432,8 +1309,5 @@ public class MainActivity extends AppCompatActivity{
     static{
         System.loadLibrary("native-lib");
     }
-    public static native int ps(String str);
-    public static native boolean aireplay(String buf);
-    public static native int main(String str, int off);
     public static native int checkwpa(String str);
 }

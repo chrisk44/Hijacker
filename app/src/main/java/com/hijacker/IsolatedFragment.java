@@ -36,7 +36,6 @@ import static com.hijacker.AP.WPA;
 import static com.hijacker.AP.WPA2;
 import static com.hijacker.MainActivity.FRAGMENT_AIRODUMP;
 import static com.hijacker.MainActivity.PROCESS_AIREPLAY;
-import static com.hijacker.MainActivity.PROCESS_AIRODUMP;
 import static com.hijacker.MainActivity.aireplay_dir;
 import static com.hijacker.MainActivity.copy;
 import static com.hijacker.MainActivity.currentFragment;
@@ -49,7 +48,6 @@ import static com.hijacker.MainActivity.menu;
 import static com.hijacker.MainActivity.prefix;
 import static com.hijacker.MainActivity.progress;
 import static com.hijacker.MainActivity.refreshDrawer;
-import static com.hijacker.MainActivity.startAirodump;
 import static com.hijacker.MainActivity.stop;
 import static com.hijacker.MainActivity.wpa_thread;
 
@@ -174,9 +172,8 @@ public class IsolatedFragment extends Fragment{
         if(mFragmentManager.getBackStackEntryCount()==exit_on){
             isolate(null);
             Tile.filter();
-            stop(PROCESS_AIRODUMP);
             stop(PROCESS_AIREPLAY);
-            startAirodump(null);
+            Airodump.startClean();
             progress.setIndeterminate(false);
             progress.setProgress(deauthWait);
         }

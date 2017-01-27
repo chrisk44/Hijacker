@@ -51,6 +51,7 @@ public class ConfirmResetDialog extends DialogFragment {
                 pref_edit.putString("custom_chroot_cmd", "");
                 pref_edit.putBoolean("cont_on_fail", Boolean.parseBoolean(getString(R.string.cont_on_fail)));
                 pref_edit.putBoolean("watchdog", Boolean.parseBoolean(getString(R.string.watchdog)));
+                pref_edit.putBoolean("target_deauth", Boolean.parseBoolean(getString(R.string.target_deauth)));
                 pref_edit.commit();
                 load();
                 dismissAllowingStateLoss();

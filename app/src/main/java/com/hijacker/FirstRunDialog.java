@@ -30,7 +30,6 @@ import static com.hijacker.MainActivity.mDrawerLayout;
 import static com.hijacker.MainActivity.mFragmentManager;
 import static com.hijacker.MainActivity.main;
 import static com.hijacker.MainActivity.background;
-import static com.hijacker.MainActivity.startAirodump;
 
 public class FirstRunDialog extends DialogFragment {
     @Override

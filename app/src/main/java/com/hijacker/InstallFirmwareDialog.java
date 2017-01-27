@@ -52,7 +52,6 @@ import static com.hijacker.MainActivity.init;
 import static com.hijacker.MainActivity.mDrawerLayout;
 import static com.hijacker.MainActivity.main;
 import static com.hijacker.MainActivity.path;
-import static com.hijacker.MainActivity.startAirodump;
 import static com.hijacker.MainActivity.stop;
 
 public class InstallFirmwareDialog extends DialogFragment {
@@ -175,7 +174,7 @@ public class InstallFirmwareDialog extends DialogFragment {
         boolean start_airodump = false;
         if(getPIDs(PROCESS_AIRODUMP).size()>0){
             start_airodump = true;
-            stop(0);
+            stop(PROCESS_AIRODUMP);
         }
         WifiManager wifiManager = (WifiManager) getActivity().getSystemService(Context.WIFI_SERVICE);
         wifiManager.setWifiEnabled(false);
@@ -203,7 +202,7 @@ public class InstallFirmwareDialog extends DialogFragment {
         Toast.makeText(getActivity(), R.string.installed_firm_util, Toast.LENGTH_SHORT).show();
         wifiManager.setWifiEnabled(true);
 
-        if(start_airodump) startAirodump(null);
+        if(start_airodump) Airodump.startClean();
     }
     boolean check(String firm_location, String util_location, boolean override, View v){
         File firm = new File(firm_location);

@@ -32,7 +32,6 @@ import static com.hijacker.MainActivity.SORT_ESSID;
 import static com.hijacker.MainActivity.SORT_NOSORT;
 import static com.hijacker.MainActivity.SORT_PWR;
 import static com.hijacker.MainActivity.adapter;
-import static com.hijacker.MainActivity.cap_dir;
 import static com.hijacker.MainActivity.completed;
 import static com.hijacker.MainActivity.debug;
 import static com.hijacker.MainActivity.getManuf;
@@ -42,9 +41,8 @@ import static com.hijacker.MainActivity.runInHandler;
 import static com.hijacker.MainActivity.sort;
 import static com.hijacker.MainActivity.startAireplay;
 import static com.hijacker.MainActivity.startAireplayWEP;
-import static com.hijacker.MainActivity.startAirodump;
-import static com.hijacker.MainActivity.startAirodumpForAP;
 import static com.hijacker.MainActivity.stop;
+import static com.hijacker.MainActivity.target_deauth;
 import static com.hijacker.MainActivity.toSort;
 import static com.hijacker.MainActivity.wpa_runnable;
 import static com.hijacker.MainActivity.wpa_thread;
@@ -166,7 +164,10 @@ class AP {
         if(this.sec == WEP){
             //wep
             if(debug) Log.d("HIJACKER/AP", "Cracking WEP");
-            startAirodumpForAP(this, "--ivs -w " + cap_dir + "/wep_ivs");
+            Airodump.reset();
+            Airodump.setAP(this);
+            Airodump.setForWEP(true);
+            Airodump.start();
             if(!this.essid.equals("<hidden>")) startAireplayWEP(this);
             progress.setIndeterminate(true);
         }else if(this.sec == WPA || this.sec == WPA2){
@@ -175,7 +176,10 @@ class AP {
             wpa_thread.interrupt();
             while(wpa_thread.isAlive())      //Wait for everything to shutdown
             if(debug) Log.d("HIJACKER/AP", "Cracking WPA/WPA2");
-            startAirodumpForAP(this, "-w " + cap_dir + "/handshake");
+            Airodump.reset();
+            Airodump.setAP(this);
+            Airodump.setForWPA(true);
+            Airodump.start();
             startAireplay(this.mac);
             wpa_thread = new Thread(wpa_runnable);
             wpa_thread.start();
@@ -198,16 +202,23 @@ class AP {
         dialog.show(fragmentManager, "APDialog");
     }
     void disconnectAll(){
-        if(IsolatedFragment.is_ap==null){
-            stop(PROCESS_AIRODUMP);
+        if(Airodump.getChannel() != this.ch){
             if(debug) Log.d("HIJACKER/AP", "Starting airodump for channel " + this.ch);
-            startAirodump("--channel " + this.ch);
+            Airodump.startClean(this.ch);
         }
-        if(debug) {
-            Log.d("HIJACKER/AP", "Starting aireplay without targets...");
-            Log.d("HIJACKER/AP", this.mac);
+        if(target_deauth){
+            if(debug) Log.d("HIJACKER/AP", "Starting targeted deauthentication...");
+            int i;
+            for(i=0;i<this.clients.size();i++){
+                startAireplay(this.mac, this.clients.get(i).mac);
+            }
+        }else{
+            if(debug) {
+                Log.d("HIJACKER/AP", "Starting aireplay without targets...");
+                Log.d("HIJACKER/AP", this.mac);
+            }
+            startAireplay(this.mac);
         }
-        startAireplay(this.mac);
     }
     void mark(){
         if(!marked.contains(this)){

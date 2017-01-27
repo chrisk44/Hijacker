@@ -23,37 +23,38 @@ import android.util.Log;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.util.LinkedList;
 
 import static com.hijacker.IsolatedFragment.is_ap;
-import static com.hijacker.MainActivity.PROCESS_AIRODUMP;
 import static com.hijacker.MainActivity.adapter;
 import static com.hijacker.MainActivity.airodump_dir;
-import static com.hijacker.MainActivity.airodump_running;
 import static com.hijacker.MainActivity.always_cap;
 import static com.hijacker.MainActivity.ap_count;
 import static com.hijacker.MainActivity.background;
 import static com.hijacker.MainActivity.cap_dir;
 import static com.hijacker.MainActivity.completed;
-import static com.hijacker.MainActivity.cont;
 import static com.hijacker.MainActivity.debug;
+import static com.hijacker.MainActivity.delete_extra;
 import static com.hijacker.MainActivity.enable_monMode;
-import static com.hijacker.MainActivity.fifo;
 import static com.hijacker.MainActivity.getLastLine;
 import static com.hijacker.MainActivity.iface;
 import static com.hijacker.MainActivity.last_action;
-import static com.hijacker.MainActivity.main;
 import static com.hijacker.MainActivity.notification;
 import static com.hijacker.MainActivity.prefix;
+import static com.hijacker.MainActivity.progress;
 import static com.hijacker.MainActivity.refreshState;
 import static com.hijacker.MainActivity.rootView;
 import static com.hijacker.MainActivity.runInHandler;
 import static com.hijacker.MainActivity.st_count;
 import static com.hijacker.MainActivity.toSort;
 import static com.hijacker.MainActivity.menu;
+import static com.hijacker.MainActivity.wpa_thread;
+import static com.hijacker.MainActivity.wpacheckcont;
 import static com.hijacker.Shell.getFreeShell;
 import static com.hijacker.Shell.runOne;
 
 public class Airodump{
+    final static LinkedList<UpdateRequest> fifo = new LinkedList<>();                    //List used as FIFO for handling calls to addAP/addST in an order
     private static int channel = 0;
     private static boolean forWPA = false, forWEP = false, running = false;
     private static String mac = null;
@@ -63,29 +64,34 @@ public class Airodump{
         public void run(){
             if(debug) Log.d("HIJACKER/refresh_thread", "refresh_thread running");
             try{
-                while(cont){
+                int served;
+                while(Airodump.isRunning()){
+                    served = 0;
                     while(!fifo.isEmpty()){
                         synchronized(fifo){
+                            completed = false;
                             fifo.pop().add();
+                            served++;
                         }
                         while(!completed){      //Wait for the update request to complete
-                            Thread.sleep(10);
+                            Thread.sleep(5);
                         }
                     }
-                    runInHandler(new Runnable(){
-                        @Override
-                        public void run(){
-                            adapter.notifyDataSetChanged();             //for when data is changed, no new data added
-                            ap_count.setText(Integer.toString(is_ap==null ? Tile.i : 1));
-                            st_count.setText(Integer.toString(Tile.tiles.size() - Tile.i));
-                            notification();
-                            if(toSort && !background) Tile.sort();
-                        }
-                    });
-                    Thread.sleep(1000);
+                    if(served>0){
+                        runInHandler(new Runnable(){
+                            @Override
+                            public void run(){
+                                adapter.notifyDataSetChanged();             //for when data is changed, no new data added
+                                ap_count.setText(Integer.toString(is_ap==null ? Tile.i : 1));
+                                st_count.setText(Integer.toString(Tile.tiles.size() - Tile.i));
+                                notification();
+                                if(toSort && !background) Tile.sort();
+                            }
+                        });
+                    }
                 }
             }catch(InterruptedException e){
-                Log.e("HIJACKER/Exception", "Caught Exception in main() refresh_thread block: " + e.toString());
+                Log.e("HIJACKER/Exception", "Caught Exception in refresh_thread: " + e.toString());
                 fifo.clear();
                 try{
                     while(!completed){      //Wait for running request to complete
@@ -129,6 +135,7 @@ public class Airodump{
         }
     };
     static Thread cap_thread = new Thread(cap_runnable);
+
     static void reset(){
         stop();
         channel = 0;
@@ -183,18 +190,32 @@ public class Airodump{
     }
     static int getChannel(){ return channel; }
     static String getMac(){ return mac; }
-    static String getCapFile(){ return capFile; }
-    static boolean writingToFile(){ return capFile!=null; }
+    static String getCapFile(){
+        while(cap_thread.isAlive()){}
+        return capFile;
+    }
+    static boolean writingToFile(){ return getCapFile()!=null; }
     static void startClean(){
         reset();
         start();
     }
+    static void startClean(AP ap){
+        reset();
+        setAP(ap);
+        start();
+    }
+    static void startClean(int ch){
+        reset();
+        setChannel(ch);
+        start();
+    }
     static void start(){
         fifo.clear();
+
         String cmd = "su -c " + prefix + " " + airodump_dir + " --update 1 ";
 
         if(forWPA) cmd += "-w " + cap_dir + "/handshake ";
-        else if(forWEP) cmd += "-w " + cap_dir + "/wep_ivs ";
+        else if(forWEP) cmd += "--ivs -w " + cap_dir + "/wep_ivs ";
         else if(always_cap) cmd += "-w " + cap_dir + "/cap ";
 
         if(channel!=0) cmd += "--channel " + channel + " ";
@@ -207,19 +228,18 @@ public class Airodump{
         stop();
 
         final String final_cmd = cmd;
-        cont = true;
+        running = true;
         new Thread(new Runnable(){
             @Override
             public void run(){
-                if(debug) Log.d("HIJACKER/startAirodump", final_cmd);
+                if(debug) Log.d("HIJACKER/Airodump.start", final_cmd);
                 try{
                     int mode = channel==0 ? 0 : 1;
                     Process process = Runtime.getRuntime().exec(final_cmd);
-                    running = true;
                     last_action = System.currentTimeMillis();
                     BufferedReader in = new BufferedReader(new InputStreamReader(process.getErrorStream()));
                     String buffer;
-                    while(cont && (buffer = in.readLine())!=null){
+                    while(Airodump.isRunning() && (buffer = in.readLine())!=null){
                         main(buffer, mode);
                     }
                 }catch(IOException e){ Log.e("HIJACKER/Exception", "Caught Exception in Airodump.start() read thread: " + e.toString()); }
@@ -235,7 +255,6 @@ public class Airodump{
             cap_thread = new Thread(cap_runnable);
             cap_thread.start();
         }
-        airodump_running = 1;
         runInHandler(new Runnable(){
             @Override
             public void run(){
@@ -246,10 +265,47 @@ public class Airodump{
         });
     }
     static void stop(){
-        MainActivity.stop(PROCESS_AIRODUMP);
         running = false;
+        refresh_thread.interrupt();
+        runInHandler(new Runnable(){
+            @Override
+            public void run(){
+                if(menu!=null) menu.getItem(1).setIcon(R.drawable.run);
+                Tile.filter();
+                if(wpa_thread.isAlive()) progress.setIndeterminate(false);
+            }
+        });
+        if(wpa_thread.isAlive()){
+            IsolatedFragment.cont = false;
+            wpacheckcont = false;
+            wpa_thread.interrupt();
+        }
+        if(delete_extra && always_cap){
+            runOne("busybox rm -rf " + cap_dir + "/cap-*.csv");
+            runOne("busybox rm -rf " + cap_dir + "/cap-*.netxml");
+        }
+        runOne("busybox kill $(busybox pidof airodump-ng)");
+        last_action = System.currentTimeMillis();
+        AP.saveData();
+        ST.saveData();
+
+        runInHandler(new Runnable(){
+            @Override
+            public void run(){
+                refreshState();
+                notification();
+            }
+        });
     }
     static boolean isRunning(){
         return running;
     }
+    public static void addAP(String essid, String mac, String enc, String cipher, String auth, int pwr, int beacons, int data, int ivs, int ch){
+        fifo.add(new UpdateRequest(essid, mac, enc, cipher, auth, pwr, beacons, data, ivs, ch));
+    }
+    public static void addST(String mac, String bssid, String probes, int pwr, int lost, int frames){
+        fifo.add(new UpdateRequest(mac, bssid, probes, pwr, lost, frames));
+    }
+
+    public static native int main(String str, int off);
 }

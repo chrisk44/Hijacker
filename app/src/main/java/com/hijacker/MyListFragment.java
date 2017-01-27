@@ -42,7 +42,6 @@ import static com.hijacker.MainActivity.iface;
 import static com.hijacker.MainActivity.mFragmentManager;
 import static com.hijacker.MainActivity.prefix;
 import static com.hijacker.MainActivity.refreshDrawer;
-import static com.hijacker.MainActivity.startAirodumpForAP;
 import static com.hijacker.MainActivity.startMdk;
 
 public class MyListFragment extends ListFragment {
@@ -90,7 +89,7 @@ public class MyListFragment extends ListFragment {
                         case 3:
                             //Watch
                             MainActivity.isolate(clicked.ap.mac);
-                            startAirodumpForAP(clicked.ap, null);
+                            Airodump.startClean(clicked.ap);
                             break;
                         case 4:
                             //attack

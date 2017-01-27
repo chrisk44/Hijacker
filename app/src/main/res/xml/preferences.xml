@@ -56,6 +56,11 @@
             android:title="@string/watchdog_title"
             android:summary="@string/watchdog_sum"
             android:key="watchdog"/>
+        <SwitchPreference
+            android:defaultValue="@string/target_deauth"
+            android:title="@string/target_deauth_title"
+            android:summary="@string/target_deauth_sum"
+            android:key="target_deauth"/>
     </PreferenceCategory>
     <PreferenceCategory android:title="Interface">
 

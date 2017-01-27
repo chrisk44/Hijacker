@@ -257,6 +257,7 @@
     <string name="always_cap" translatable="false">false</string>
     <string name="cont_on_fail" translatable="false">false</string>
     <string name="watchdog" translatable="false">true</string>
+    <string name="target_deauth" translatable="false">false</string>
 
     <!-- Settings -->
 
@@ -290,6 +291,9 @@
     <string name="watchdog_title">Watchdog</string>
     <string name="watchdog_sum">Run a background thread to verify that the tools that are supposed to be running, are actually running.
         Disable this if you are getting false positives.</string>
+
+    <string name="target_deauth_title">Targeted deauthentication</string>
+    <string name="target_deauth_sum">Spawn many targeted deauthentication processes instead of one when disconnecting everyone from a network</string>
 
     <!-- Interface -->
     <string name="iface_title">Interface</string>
