@@ -841,6 +841,7 @@ public class MainActivity extends AppCompatActivity{
         //Load strings for when they cannot be retrived with getString or R.string...
         ST.not_connected = getString(R.string.not_connected);
         ST.paired = getString(R.string.paired) + ' ';
+        ErrorDialog.notification2_title =  getString(R.string.notification2_title);
 
         //Initialize the drawer
         mPlanetTitles = getResources().getStringArray(R.array.planets_array);
