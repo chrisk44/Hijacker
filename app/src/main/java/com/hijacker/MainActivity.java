@@ -104,6 +104,7 @@ public class MainActivity extends AppCompatActivity{
     static TextView ap_count, st_count;                               //AP and ST count textviews in toolbar
     static ProgressBar progress;
     static Toolbar toolbar;
+    static View rootView;
     static Drawable overflow[] = {null, null, null, null, null, null, null, null};      //Drawables to use for overflow button icon
     static ImageView[] status = {null, null, null, null, null};                         //Icons in TestDialog, set in TestDialog class
     static int progress_int;
@@ -521,7 +522,10 @@ public class MainActivity extends AppCompatActivity{
         stop(PROCESS_MDK);
         stop(PROCESS_AIRCRACK);
         stop(PROCESS_REAVER);
-        if(airOnStartup) startAirodump(null);
+        if(airOnStartup){
+            startAirodump(null);
+            //Airodump.startClean();
+        }
         else if(menu!=null) menu.getItem(1).setIcon(R.drawable.run);
     }
     void installTools(){
@@ -613,7 +617,14 @@ public class MainActivity extends AppCompatActivity{
         });
     }
     public static void startAirodumpForAP(AP ap, String extra){
-        startAirodump("--channel " + ap.ch + " --bssid " + ap.mac + (extra==null ? "" : ' ' + extra));
+        //if(extra!=null){
+            startAirodump("--channel " + ap.ch + " --bssid " + ap.mac + (extra==null ? "" : ' ' + extra));
+        /*}else{
+            Airodump.reset();
+            Airodump.setChannel(ap.ch);
+            Airodump.setMac(ap.mac);
+            Airodump.start();
+        }*/
     }
 
     public static void _startAireplay(final String str){
@@ -856,6 +867,7 @@ public class MainActivity extends AppCompatActivity{
         st_count = (TextView) findViewById(R.id.st_count);
         progress = (ProgressBar) findViewById(R.id.progressBar);
         toolbar = (Toolbar) findViewById(R.id.my_toolbar);
+        rootView = findViewById(R.id.fragment1);
         overflow[0] = getDrawable(R.drawable.overflow0);
         overflow[1] = getDrawable(R.drawable.overflow1);
         overflow[2] = getDrawable(R.drawable.overflow2);

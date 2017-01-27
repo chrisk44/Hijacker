@@ -17,6 +17,7 @@ package com.hijacker;
     along with this program.  If not, see <http://www.gnu.org/licenses/>
  */
 
+import android.support.design.widget.Snackbar;
 import android.util.Log;
 
 import java.io.BufferedReader;
@@ -37,23 +38,26 @@ import static com.hijacker.MainActivity.cont;
 import static com.hijacker.MainActivity.debug;
 import static com.hijacker.MainActivity.enable_monMode;
 import static com.hijacker.MainActivity.fifo;
+import static com.hijacker.MainActivity.getLastLine;
 import static com.hijacker.MainActivity.iface;
 import static com.hijacker.MainActivity.last_action;
 import static com.hijacker.MainActivity.main;
 import static com.hijacker.MainActivity.notification;
 import static com.hijacker.MainActivity.prefix;
 import static com.hijacker.MainActivity.refreshState;
+import static com.hijacker.MainActivity.rootView;
 import static com.hijacker.MainActivity.runInHandler;
 import static com.hijacker.MainActivity.st_count;
 import static com.hijacker.MainActivity.toSort;
 import static com.hijacker.MainActivity.menu;
+import static com.hijacker.Shell.getFreeShell;
 import static com.hijacker.Shell.runOne;
 
 public class Airodump{
-    static int channel = 0;
-    static boolean forWPA = false, forWEP = false, running = false;
-    static String mac = null;
-    static Thread refresh_thread;
+    private static int channel = 0;
+    private static boolean forWPA = false, forWEP = false, running = false;
+    private static String mac = null;
+    private static String capFile = null;
     static Runnable refresh_runnable = new Runnable(){
         @Override
         public void run(){
@@ -92,61 +96,101 @@ public class Airodump{
             if(debug) Log.d("HIJACKER/refresh_thread", "refresh_thread done");
         }
     };
-    static void reset(){
-        if(isRunning()){
-            Log.e("HIJACKER/Airodump", "Can't reset while airodump is running");
-            return;
+    static Thread refresh_thread = new Thread(refresh_runnable);
+    static Runnable cap_runnable = new Runnable(){
+        @Override
+        public void run(){
+            /*
+                This runnable will find the .cap file that is created by airodump and save it in capFile
+                This gets called only if airodump is actually writing to a file
+            */
+            Shell shell = getFreeShell();
+            try{
+                Thread.sleep(1000);
+
+                String file_prefix;
+                if(forWPA) file_prefix = "/handshake";
+                else if(forWEP) file_prefix = "/wep_ivs";
+                else if(always_cap) file_prefix = "/cap";
+                else throw new IllegalStateException("Airodump is not supposed to be writing to a file");
+
+                shell.run("ls " + cap_dir + file_prefix + "*.cap; echo ENDOFLS");
+                capFile = getLastLine(shell.getShell_out(), "ENDOFLS");
+
+                if(capFile.equals("ENDOFLS")){
+                    capFile = null;
+                }else{
+                    Snackbar.make(rootView, "Cap file is " + capFile, Snackbar.LENGTH_LONG).show();
+                }
+            }catch(InterruptedException ignored){
+            }finally{
+                shell.done();
+            }
         }
+    };
+    static Thread cap_thread = new Thread(cap_runnable);
+    static void reset(){
+        stop();
         channel = 0;
         forWPA = false;
         forWEP = false;
         mac = null;
+        capFile = null;
     }
     static void setChannel(int ch){
         if(isRunning()){
             Log.e("HIJACKER/Airodump", "Can't change settings while airodump is running");
-            return;
+            throw new IllegalStateException("Airodump is still running");
         }
         channel = ch;
     }
     static void setMac(String new_mac){
         if(isRunning()){
             Log.e("HIJACKER/Airodump", "Can't change settings while airodump is running");
-            return;
+            throw new IllegalStateException("Airodump is still running");
         }
         mac = new_mac;
     }
     static void setForWPA(boolean bool){
         if(isRunning()){
             Log.e("HIJACKER/Airodump", "Can't change settings while airodump is running");
-            return;
+            throw new IllegalStateException("Airodump is still running");
         }
         if(forWEP){
             Log.e("HIJACKER/Airodump", "Can't set forWPA when forWEP is enabled");
-            return;
+            throw new IllegalStateException("Tried to set forWPA when forWEP is enabled");
         }
         forWPA = bool;
     }
     static void setForWEP(boolean bool){
         if(isRunning()){
             Log.e("HIJACKER/Airodump", "Can't change setting while airodump is running");
-            return;
+            throw new IllegalStateException("Airodump is still running");
         }
         if(forWPA){
             Log.e("HIJACKER/Airodump", "Can't set forWEP when forWPA is enabled");
-            return;
+            throw new IllegalStateException("Tried to set forWEP when forWPA is enabled");
         }
         forWEP = bool;
     }
     static void setAP(AP ap){
         if(isRunning()){
             Log.e("HIJACKER/Airodump", "Can't change setting while airodump is running");
-            return;
+            throw new IllegalStateException("Airodump is still running");
         }
         mac = ap.mac;
         channel = ap.ch;
     }
+    static int getChannel(){ return channel; }
+    static String getMac(){ return mac; }
+    static String getCapFile(){ return capFile; }
+    static boolean writingToFile(){ return capFile!=null; }
+    static void startClean(){
+        reset();
+        start();
+    }
     static void start(){
+        fifo.clear();
         String cmd = "su -c " + prefix + " " + airodump_dir + " --update 1 ";
 
         if(forWPA) cmd += "-w " + cap_dir + "/handshake ";
@@ -169,7 +213,7 @@ public class Airodump{
             public void run(){
                 if(debug) Log.d("HIJACKER/startAirodump", final_cmd);
                 try{
-                    int mode = forWEP || forWPA ? 1 : 0;
+                    int mode = channel==0 ? 0 : 1;
                     Process process = Runtime.getRuntime().exec(final_cmd);
                     running = true;
                     last_action = System.currentTimeMillis();
@@ -178,11 +222,19 @@ public class Airodump{
                     while(cont && (buffer = in.readLine())!=null){
                         main(buffer, mode);
                     }
-                }catch(IOException e){ Log.e("HIJACKER/Exception", "Caught Exception in startAirodump() read block: " + e.toString()); }
+                }catch(IOException e){ Log.e("HIJACKER/Exception", "Caught Exception in Airodump.start() read thread: " + e.toString()); }
             }
         }).start();
         refresh_thread = new Thread(refresh_runnable);
         refresh_thread.start();
+        if(forWPA || forWEP || always_cap){
+            if(cap_thread.isAlive()){
+                //Need to restart it so it will wait again for airodump to start
+                cap_thread.interrupt();
+            }
+            cap_thread = new Thread(cap_runnable);
+            cap_thread.start();
+        }
         airodump_running = 1;
         runInHandler(new Runnable(){
             @Override
@@ -195,7 +247,7 @@ public class Airodump{
     }
     static void stop(){
         MainActivity.stop(PROCESS_AIRODUMP);
-        reset();
+        running = false;
     }
     static boolean isRunning(){
         return running;
