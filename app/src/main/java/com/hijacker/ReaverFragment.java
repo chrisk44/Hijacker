@@ -46,6 +46,7 @@ import static com.hijacker.CustomAPDialog.FOR_REAVER;
 import static com.hijacker.MainActivity.FRAGMENT_REAVER;
 import static com.hijacker.MainActivity.PROCESS_AIRODUMP;
 import static com.hijacker.MainActivity.PROCESS_REAVER;
+import static com.hijacker.MainActivity.background;
 import static com.hijacker.MainActivity.cont_on_fail;
 import static com.hijacker.MainActivity.currentFragment;
 import static com.hijacker.MainActivity.custom_chroot_cmd;
@@ -226,7 +227,11 @@ public class ReaverFragment extends Fragment{
     };
     public Handler refresh = new Handler(){
         public void handleMessage(Message msg){
-            console.append((String)msg.obj + '\n');
+            if(currentFragment==FRAGMENT_REAVER && !background){
+                console.append((String)msg.obj + '\n');
+            }else{
+                console_text += (String)msg.obj + '\n';
+            }
         }
     };
     @Override

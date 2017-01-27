@@ -39,6 +39,7 @@ import static com.hijacker.CustomAction.TYPE_AP;
 import static com.hijacker.CustomAction.TYPE_ST;
 import static com.hijacker.CustomAction.cmds;
 import static com.hijacker.MainActivity.FRAGMENT_CUSTOM;
+import static com.hijacker.MainActivity.background;
 import static com.hijacker.MainActivity.currentFragment;
 import static com.hijacker.MainActivity.debug;
 import static com.hijacker.MainActivity.mFragmentManager;
@@ -277,7 +278,11 @@ public class CustomActionFragment extends Fragment{
     };
     public Handler refresh = new Handler(){
         public void handleMessage(Message msg){
-            console.append((String)msg.obj + '\n');
+            if(currentFragment==FRAGMENT_CUSTOM && !background){
+                console.append((String)msg.obj + '\n');
+            }else{
+                console_text += (String)msg.obj + '\n';
+            }
         }
     };
 }

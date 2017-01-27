@@ -85,6 +85,8 @@ class Tile {
                 tiles.add(this);
                 adapter.add(this);
             }
+            ap_count.setText(Integer.toString(is_ap==null ? Tile.i : 1));
+            st_count.setText(Integer.toString(Tile.tiles.size() - Tile.i));
         }
     }
     void update(String s1, String s2, String s3, String s4){
@@ -103,6 +105,8 @@ class Tile {
                     tiles.add(this);
                     adapter.add(this);
                 }
+                ap_count.setText(Integer.toString(is_ap==null ? Tile.i : 1));
+                st_count.setText(Integer.toString(Tile.tiles.size() - Tile.i));
             }
         }else{
             this.check();
