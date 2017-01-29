@@ -54,6 +54,25 @@
     <!-- CustomActionFragment -->
     <string name="select_action">Select action</string>
     <string name="select_target">Select target</string>
+    <string name="delete">Delete</string>
+    <string name="delete_title">Delete Action?</string>
+    <string name="delete_message">This action will be permanently deleted. Are you sure?</string>
+    <string name="manage_actions">Manage actions…</string>
+    <string name="edit">Edit…</string>
+
+    <!-- CustomActionEditorFragment -->
+    <string name="requires_associated">Requires associated</string>
+    <string name="requires_clients">Requires clients</string>
+    <string name="title_empty">Title cannot be empty</string>
+    <string name="start_cmd_empty">Start command cannot be empty</string>
+    <string name="title_newline">Title cannot contain a newLine character</string>
+    <string name="start_cmd_newline">Start command cannot contain a newLine character</string>
+    <string name="stop_cmd_newline">Stop command cannot contain a newLine character</string>
+    <string name="process_name_newline">Process name cannot contain a newLine character</string>
+    <string name="process_name_empty">Process name cannot be empty</string>
+    <string name="saved">Saved action</string>
+    <string name="action_exists">An action with this name already exists</string>
+    <!-- (xml) -->
     <string name="custom_action_editor_message">You can use the following variables:\n
         $IFACE, $AIRODUMP_DIR, $AIREPLAY_DIR, $MDK3_DIR, $REAVER_DIR\n
         AP: $MAC, $ESSID, $CH, $ENC, $CIPHER, $AUTH\n
@@ -65,21 +84,9 @@
     <string name="start_command">Start command</string>
     <string name="stop_command">Stop command</string>
     <string name="save">Save</string>
-    <string name="saved">Saved action</string>
-    <string name="requires_associated">Requires associated</string>
-    <string name="requires_clients">Requires clients</string>
-    <string name="title_empty">Title cannot be empty</string>
-    <string name="start_cmd_empty">Start command cannot be empty</string>
-    <string name="delete">Delete</string>
-    <string name="delete_title">Delete Action?</string>
-    <string name="delete_message">This action will be permanently deleted. Are you sure?</string>
-    <string name="manage_actions">Manage actions…</string>
-    <string name="edit">Edit…</string>
     <string name="access_point">Access Point</string>
     <string name="station">Station</string>
-    <string name="action_exists">An action with this name already exists</string>
     <string name="kill_process_on_stop">Has process to kill when implicitly stopping the action</string>
-    <string name="process_name_empty">Process name cannot be empty</string>
 
     <!-- CustomAPDialog -->
     <string name="custom_ap_title">Custom AP</string>

@@ -79,6 +79,14 @@ public class CustomActionEditorFragment extends Fragment{
                     Snackbar.make(v, getString(R.string.title_empty), Snackbar.LENGTH_SHORT).show();
                 }else if(start_cmd.equals("")){
                     Snackbar.make(v, getString(R.string.start_cmd_empty), Snackbar.LENGTH_SHORT).show();
+                }else if(title.contains("\n")){
+                    Snackbar.make(v, getString(R.string.title_newline), Snackbar.LENGTH_SHORT).show();
+                }else if(start_cmd.contains("\n")){
+                    Snackbar.make(v, getString(R.string.start_cmd_newline), Snackbar.LENGTH_SHORT).show();
+                }else if(stop_cmd.contains("\n")){
+                    Snackbar.make(v, getString(R.string.stop_cmd_newline), Snackbar.LENGTH_SHORT).show();
+                }else if(process_name.contains("\n")){
+                    Snackbar.make(v, getString(R.string.process_name_newline), Snackbar.LENGTH_SHORT).show();
                 }else if(process_name.equals("") && ((CheckBox)v.findViewById(R.id.has_process_name)).isChecked()){
                     Snackbar.make(v, getString(R.string.process_name_empty), Snackbar.LENGTH_SHORT).show();
                 }else if(action!=null){
@@ -133,7 +141,8 @@ public class CustomActionEditorFragment extends Fragment{
     @Override
     public void onResume(){
         super.onResume();
-        currentFragment = FRAGMENT_CUSTOM;if(action!=null){
+        currentFragment = FRAGMENT_CUSTOM;
+        if(action!=null){
             ((EditText)v.findViewById(R.id.title)).setText(action.getTitle());
             ((EditText)v.findViewById(R.id.start_cmd)).setText(action.getStart_cmd());
             ((EditText)v.findViewById(R.id.stop_cmd)).setText(action.getStop_cmd());
