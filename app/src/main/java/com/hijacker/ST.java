@@ -67,6 +67,12 @@ class ST {
             connected--;
             added_as_client = false;
             AP.getAPByMac(this.bssid).removeClient(this);
+            runInHandler(new Runnable(){
+                @Override
+                public void run(){
+                    Tile.onCountsChanged();
+                }
+            });
         }else if(!added_as_client && bssid!=null){
             AP temp = AP.getAPByMac(bssid);
             if (temp != null){
@@ -74,6 +80,12 @@ class ST {
                 temp.addClient(this);
                 added_as_client = true;
                 connected++;
+                runInHandler(new Runnable(){
+                    @Override
+                    public void run(){
+                        Tile.onCountsChanged();
+                    }
+                });
             }
         }
         if(frames!=this.frames || lost!=this.lost || this.lastseen==0){

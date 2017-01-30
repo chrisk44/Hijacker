@@ -71,10 +71,10 @@ public class Airodump{
                         synchronized(fifo){
                             completed = false;
                             fifo.pop().add();
+                            while(!completed){      //Wait for the update request to complete
+                                Thread.sleep(5);
+                            }
                             served++;
-                        }
-                        while(!completed){      //Wait for the update request to complete
-                            Thread.sleep(5);
                         }
                     }
                     if(served>0){
@@ -82,9 +82,6 @@ public class Airodump{
                             @Override
                             public void run(){
                                 adapter.notifyDataSetChanged();             //for when data is changed, no new data added
-                                ap_count.setText(Integer.toString(is_ap==null ? Tile.i : 1));
-                                st_count.setText(Integer.toString(Tile.tiles.size() - Tile.i));
-                                notification();
                                 if(toSort && !background) Tile.sort();
                             }
                         });

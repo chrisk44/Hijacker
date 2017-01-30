@@ -27,11 +27,11 @@ import android.view.View;
 import android.widget.TextView;
 
 import static com.hijacker.MainActivity.background;
-import static com.hijacker.MainActivity.runInHandler;
 
 public class StatsDialog extends DialogFragment {
+    static boolean isResumed = false;
     TextView wpa_count, wpa2_count, wep_count, opn_count, hidden_count, connected_count;
-    Runnable runnable;
+    static Runnable runnable;
     @Override
     public Dialog onCreateDialog(Bundle savedInstanceState) {
         AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
@@ -46,13 +46,6 @@ public class StatsDialog extends DialogFragment {
             connected_count = (TextView)view.findViewById(R.id.connected_count);
         }
 
-        wpa_count.setText(Integer.toString(AP.wpa));
-        wpa2_count.setText(Integer.toString(AP.wpa2));
-        wep_count.setText(Integer.toString(AP.wep));
-        opn_count.setText(Integer.toString(AP.opn));
-        hidden_count.setText(Integer.toString(AP.hidden));
-        connected_count.setText(Integer.toString(ST.connected) + '/' + Integer.toString(ST.STs.size()));
-
         runnable = new Runnable(){
             @Override
             public void run(){
@@ -64,18 +57,7 @@ public class StatsDialog extends DialogFragment {
                 connected_count.setText(Integer.toString(ST.connected) + '/' + Integer.toString(ST.STs.size()));
             }
         };
-        new Thread(new Runnable(){
-            @Override
-            public void run(){
-                try{
-                    Thread.sleep(1000);
-                    while(StatsDialog.this.isResumed()){
-                        runInHandler(runnable);
-                        Thread.sleep(1000);
-                    }
-                }catch(InterruptedException ignored){}
-            }
-        }).start();
+        runnable.run();
 
         builder.setView(view);
         builder.setTitle(R.string.ap_stats);
@@ -90,5 +72,15 @@ public class StatsDialog extends DialogFragment {
     @Override
     public void show(FragmentManager fragmentManager, String tag){
         if(!background) super.show(fragmentManager, tag);
+    }
+    @Override
+    public void onResume(){
+        super.onResume();
+        isResumed = true;
+    }
+    @Override
+    public void onPause(){
+        super.onPause();
+        isResumed = false;
     }
 }

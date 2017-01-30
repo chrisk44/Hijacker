@@ -46,7 +46,7 @@ public class FirstRunDialog extends DialogFragment {
                 }else{
                     mDrawerLayout.openDrawer(GravityCompat.START);
                     ErrorDialog errdialog = new ErrorDialog();
-                    errdialog.setMessage(getString(R.string.not_armv7l));
+                    errdialog.setMessage(getString(R.string.not_armv7l_firm));
                     errdialog.show(mFragmentManager, "ErrorDialog");
                 }
             }

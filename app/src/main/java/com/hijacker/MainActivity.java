@@ -163,7 +163,6 @@ public class MainActivity extends AppCompatActivity{
         setContentView(R.layout.activity_main);
         setSupportActionBar((Toolbar) findViewById(R.id.my_toolbar));
         setup();
-        installTools();
 
         if(debug) Log.d("HIJACKER/Main", "path is " + path);
 
@@ -773,6 +772,7 @@ public class MainActivity extends AppCompatActivity{
 
         //Load defaults
         iface = getString(R.string.iface);
+        prefix = getString(R.string.prefix);
         cap_dir = getString(R.string.cap_dir);
         enable_monMode = getString(R.string.enable_monMode);
         disable_monMode = getString(R.string.disable_monMode);
@@ -789,13 +789,6 @@ public class MainActivity extends AppCompatActivity{
         cont_on_fail = Boolean.parseBoolean(getString(R.string.cont_on_fail));
         watchdog = Boolean.parseBoolean(getString(R.string.watchdog));
         target_deauth = Boolean.parseBoolean(getString(R.string.target_deauth));
-
-        prefix = "LD_PRELOAD=" + path + "/lib/libfakeioctl.so";
-        airodump_dir = path + "/bin/airodump-ng";
-        aireplay_dir = path + "/bin/aireplay-ng";
-        aircrack_dir = path + "/bin/aircrack-ng";
-        mdk3_dir = path + "/bin/mdk3";
-        reaver_dir = path + "/bin/reaver";
 
         //Initialize notifications
             //Create intents
@@ -875,12 +868,37 @@ public class MainActivity extends AppCompatActivity{
             dialog.setMessage(getString(R.string.app_dir_notfound1) + path + getString(R.string.app_dir_notfound2));
             dialog.show(mFragmentManager, "ErrorDialog");
         }
+
+        if(arch.equals("armv7l") || arch.equals("aarch64")){
+            installTools();
+
+            prefix = "LD_PRELOAD=" + path + "/lib/libfakeioctl.so";
+            airodump_dir = path + "/bin/airodump-ng";
+            aireplay_dir = path + "/bin/aireplay-ng";
+            aircrack_dir = path + "/bin/aircrack-ng";
+            mdk3_dir = path + "/bin/mdk3";
+            reaver_dir = path + "/bin/reaver";
+        }else{
+            ErrorDialog dialog = new ErrorDialog();
+            dialog.setMessage(getString(R.string.not_armv7l));
+            dialog.show(getFragmentManager(), "ErrorDialog");
+
+            prefix = pref.getString("prefix", prefix);
+            airodump_dir = "airodump-ng";
+            aireplay_dir = "aireplay-ng";
+            aircrack_dir = "aircrack-ng";
+            mdk3_dir = "mdk3";
+            reaver_dir = "reaver";
+        }
     }
     static void load(){
         //Load Preferences
         if(debug) Log.d("HIJACKER/load", "Loading preferences...");
 
         iface = pref.getString("iface", iface);
+        if(!(arch.equals("armv7l") || arch.equals("aarch64"))){
+            prefix = pref.getString("prefix", prefix);
+        }
         deauthWait = Integer.parseInt(pref.getString("deauthWait", Integer.toString(deauthWait)));
         chroot_dir = pref.getString("chroot_dir", chroot_dir);
         monstart = pref.getBoolean("monstart", monstart);

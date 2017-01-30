@@ -48,12 +48,13 @@ public class SettingsFragment extends PreferenceFragment {
 
         if(!arch.equals("armv7l")){
             Preference temp;
-            String options[] = {"install_nexmon", "restore_firmware"};
-            for(int i=0;i<3;i++){
-                temp = findPreference(options[i]);
+            String toDisable[] = {"install_nexmon", "restore_firmware"};
+            for(String option : toDisable){
+                temp = findPreference(option);
                 temp.setSummary(R.string.incorrect_arch + ' ' + arch);
                 temp.setEnabled(false);
             }
+            if(!arch.equals("aarch64")) findPreference("prefix").setEnabled(true);
         }
 
         findPreference("test_tools").setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {

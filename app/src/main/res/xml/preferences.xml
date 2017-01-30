@@ -7,6 +7,16 @@
             android:title="@string/startup_title"
             android:key="airOnStartup" />
         <EditTextPreference
+            android:defaultValue="@string/prefix"
+            android:selectAllOnFocus="true"
+            android:singleLine="true"
+            android:title="@string/prefix_title"
+            android:key="prefix"
+            android:enabled="false"
+            android:summary="@string/prefix_sum"
+            android:dialogMessage="@string/prefix_desc"
+            android:dialogTitle="@string/prefix_title" />
+        <EditTextPreference
             android:defaultValue="@string/cap_dir"
             android:selectAllOnFocus="true"
             android:singleLine="true"

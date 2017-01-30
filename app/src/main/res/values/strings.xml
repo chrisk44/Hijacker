@@ -137,7 +137,7 @@
         You need to use a custom firmware (bcmon, Nexmon) so that your wireless adapter can be used in Monitor Mode. External adapters can also be used.
         You can configure your interface\'s name in Settings. This app requires root privileges to run the tools.
         If you don\'t grant them, it will hang. Don\'t ask me why…\nYou can install the Nexmon firmware now, or you can go to the Home Screen.</string>
-    <string name="not_armv7l">The nexmon firmware included in this app is not compatible with your device (not armv7l architecture).
+    <string name="not_armv7l_firm">The nexmon firmware included in this app is not compatible with your device (not armv7l architecture).
         You will have to download and install it manually to use this app.</string>
     <string name="install_firmware">Install Nexmon</string>
 
@@ -182,6 +182,8 @@
     <string name="busybox_notfound">There is no busybox installed on your device. This application requires busybox to function properly.</string>
     <string name="bin_not_created">Directory \'bin\' could not be created</string>
     <string name="lib_not_created">Directory \'lib\' could not be created</string>
+    <string name="not_armv7l">This device is not armv7l or aarch64 architecture. The included tools cannot be used.
+        You will have to install the tools manually: aircrack-ng suite, mdk3, reaver, wireless-tools and libfakeioctl.so (adjust the prefix for this)</string>
         <!-- Notification -->
         <string name="notification_title">Hijacker is running in the background</string>
         <string name="notification2_title">Hijacker watchdog detected a problem</string>
@@ -250,6 +252,7 @@
 
     <!-- Default Preferences -->
     <string name="iface" translatable="false">wlan0</string>
+    <string name="prefix" translatable="false">LD_PRELOAD=/vendor/lib/libfakeioctl.so</string>
     <string name="chroot_dir" translatable="false">/data/local/nhsystem/kali-armhf</string>
     <string name="monstart" translatable="false">true</string>
     <string name="cap_dir" translatable="false">/sdcard/cap</string>
@@ -271,6 +274,10 @@
     <!-- General -->
     <string name="general">General</string>
     <string name="startup_title">Run Airodump on startup</string>
+
+    <string name="prefix_title">Prefix</string>
+    <string name="prefix_sum">Prefix for every command</string>
+    <string name="prefix_desc">A prefix for every command that is run and needs monitor mode. (LD_PRELOAD)</string>
 
     <string name="cap_title">Cap files directory</string>
     <string name="cap_sum">Directory to save cap files (eg. /sdcard/cap)</string>
