@@ -34,7 +34,7 @@
         android:layout_height="wrap_content">
 
         <EditText
-            android:layout_width="match_parent"
+            android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:text="@string/firm_location_default"
             android:ems="10"
@@ -78,7 +78,7 @@
         android:layout_height="wrap_content">
 
         <EditText
-            android:layout_width="match_parent"
+            android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:text="@string/util_location_default"
             android:ems="10"

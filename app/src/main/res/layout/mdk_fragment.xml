@@ -102,7 +102,7 @@
                 android:layout_height="wrap_content"
                 android:id="@+id/ssid_file"
                 android:inputType="text"
-                android:layout_width="wrap_content"
+                android:layout_width="0dp"
                 android:layout_gravity="center_vertical"
                 android:hint="/sdcard/list.txt"
                 android:layout_weight="1"/>

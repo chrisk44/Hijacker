@@ -30,7 +30,6 @@ import android.widget.CompoundButton;
 import android.widget.EditText;
 import android.widget.PopupMenu;
 import android.widget.Switch;
-import android.widget.TextView;
 import android.widget.Toast;
 
 import java.io.File;
