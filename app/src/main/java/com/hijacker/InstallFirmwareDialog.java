@@ -57,6 +57,7 @@ import static com.hijacker.MainActivity.stop;
 public class InstallFirmwareDialog extends DialogFragment {
     View view;
     Shell shell;
+    EditText firm_edittext, util_edittext;
     @Override
     public Dialog onCreateDialog(Bundle savedInstanceState) {
         AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
@@ -68,6 +69,37 @@ public class InstallFirmwareDialog extends DialogFragment {
         }
         ((CheckBox) view.findViewById(R.id.backup)).setChecked(!(new File(firm_backup_file).exists()));
 
+        firm_edittext = (EditText) view.findViewById(R.id.firm_location);
+        util_edittext = (EditText) view.findViewById(R.id.util_location);
+
+        view.findViewById(R.id.firm_fe_btn).setOnClickListener(new View.OnClickListener(){
+            @Override
+            public void onClick(View v){
+                final FileExplorerDialog dialog = new FileExplorerDialog();
+                dialog.setToSelect(FileExplorerDialog.SELECT_DIR);
+                dialog.setOnSelect(new Runnable(){
+                    @Override
+                    public void run(){
+                        firm_edittext.setText(dialog.result.getAbsolutePath());
+                    }
+                });
+                dialog.show(getFragmentManager(), "FileExplorerDialog");
+            }
+        });
+        view.findViewById(R.id.util_fe_btn).setOnClickListener(new View.OnClickListener(){
+            @Override
+            public void onClick(View v){
+                final FileExplorerDialog dialog = new FileExplorerDialog();
+                dialog.setToSelect(FileExplorerDialog.SELECT_DIR);
+                dialog.setOnSelect(new Runnable(){
+                    @Override
+                    public void run(){
+                        util_edittext.setText(dialog.result.getAbsolutePath());
+                    }
+                });
+                dialog.show(getFragmentManager(), "FileExplorerDialog");
+            }
+        });
 
         shell = Shell.getFreeShell();
 
@@ -99,8 +131,8 @@ public class InstallFirmwareDialog extends DialogFragment {
                 @Override
                 public boolean onLongClick(View v){
                     v.performHapticFeedback(HapticFeedbackConstants.LONG_PRESS);
-                    String firm_location = ((EditText) view.findViewById(R.id.firm_location)).getText().toString();
-                    String util_location = ((EditText) view.findViewById(R.id.util_location)).getText().toString();
+                    String firm_location = firm_edittext.getText().toString();
+                    String util_location = util_edittext.getText().toString();
                     firm_location = getDirectory(firm_location);
                     util_location = getDirectory(util_location);
 
@@ -114,8 +146,8 @@ public class InstallFirmwareDialog extends DialogFragment {
             positiveButton.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    String firm_location = ((EditText)view.findViewById(R.id.firm_location)).getText().toString();
-                    String util_location = ((EditText)view.findViewById(R.id.util_location)).getText().toString();
+                    String firm_location = firm_edittext.getText().toString();
+                    String util_location = util_edittext.getText().toString();
                     firm_location = getDirectory(firm_location);
                     util_location = getDirectory(util_location);
 
@@ -147,7 +179,7 @@ public class InstallFirmwareDialog extends DialogFragment {
                         Snackbar.make(v, R.string.firm_notfound_bcm, Snackbar.LENGTH_LONG).show();
                     }else{
                         lastline = lastline.substring(0, lastline.length()-14);
-                        ((EditText)view.findViewById(R.id.firm_location)).setText(lastline);
+                        firm_edittext.setText(lastline);
                     }
 
                     progress.setIndeterminate(false);

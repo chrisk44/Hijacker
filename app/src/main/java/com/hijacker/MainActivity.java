@@ -455,8 +455,6 @@ public class MainActivity extends AppCompatActivity{
         //Delete old report, it's not needed if no exception is thrown up to this point
         File report = new File(Environment.getExternalStorageDirectory() + "/report.txt");
         if(report.exists()) report.delete();
-
-        new FileExplorerDialog().show(getFragmentManager(), "FileExplorerDialog");
     }
     void extract(String filename, String out_dir, boolean chmod){
         File f = new File(out_dir, filename);

@@ -55,6 +55,7 @@ public class CrackFragment extends Fragment{
     static final int WPA=2, WEP=1;
     View v;
     TextView console;
+    EditText cap_edittext, wordlist_edittext;
     Button button;
     static int mode;
     static Thread thread;
@@ -67,6 +68,9 @@ public class CrackFragment extends Fragment{
         console = (TextView)v.findViewById(R.id.console);
         console.setText("");
         console.setMovementMethod(new ScrollingMovementMethod());
+
+        cap_edittext = (EditText)v.findViewById(R.id.capfile);
+        wordlist_edittext = (EditText)v.findViewById(R.id.wordlist);
 
         final RadioGroup wep_rg = (RadioGroup)v.findViewById(R.id.wep_rg);
         for (int i = 0; i < wep_rg.getChildCount(); i++) {
@@ -128,8 +132,8 @@ public class CrackFragment extends Fragment{
         button.setOnClickListener(new View.OnClickListener(){
             @Override
             public void onClick(View view){
-                capfile = ((EditText)v.findViewById(R.id.capfile)).getText().toString();
-                wordlist = ((EditText)v.findViewById(R.id.wordlist)).getText().toString();
+                capfile = cap_edittext.getText().toString();
+                wordlist = wordlist_edittext.getText().toString();
                 File cap = new File(capfile);
                 File word = new File(wordlist);
                 if(thread.isAlive()){
@@ -165,6 +169,36 @@ public class CrackFragment extends Fragment{
                         thread.start();
                     }
                 }
+            }
+        });
+        v.findViewById(R.id.cap_fe_btn).setOnClickListener(new View.OnClickListener(){
+            @Override
+            public void onClick(View v){
+                final FileExplorerDialog dialog = new FileExplorerDialog();
+                dialog.setStartingDir(new RootFile(cap_dir));
+                dialog.setToSelect(FileExplorerDialog.SELECT_EXISTING_FILE);
+                dialog.setOnSelect(new Runnable(){
+                    @Override
+                    public void run(){
+                        cap_edittext.setText(dialog.result.getAbsolutePath() + "/" + dialog.result.getName());
+                    }
+                });
+                dialog.show(getFragmentManager(), "FileExplorerDialog");
+            }
+        });
+        v.findViewById(R.id.wordlist_fe_btn).setOnClickListener(new View.OnClickListener(){
+            @Override
+            public void onClick(View v){
+                final FileExplorerDialog dialog = new FileExplorerDialog();
+                dialog.setStartingDir(new RootFile(cap_dir));
+                dialog.setToSelect(FileExplorerDialog.SELECT_EXISTING_FILE);
+                dialog.setOnSelect(new Runnable(){
+                    @Override
+                    public void run(){
+                        wordlist_edittext.setText(dialog.result.getAbsolutePath() + "/" + dialog.result.getName());
+                    }
+                });
+                dialog.show(getFragmentManager(), "FileExplorerDialog");
             }
         });
 

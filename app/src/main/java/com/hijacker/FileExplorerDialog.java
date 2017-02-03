@@ -23,6 +23,8 @@ import android.app.DialogFragment;
 import android.app.FragmentManager;
 import android.content.DialogInterface;
 import android.os.Bundle;
+import android.util.Log;
+import android.view.KeyEvent;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ImageButton;
@@ -41,7 +43,7 @@ import static com.hijacker.MainActivity.file_explorer_adapter;
 public class FileExplorerDialog extends DialogFragment{
     static final int SELECT_EXISTING_FILE=1, SELECT_NEW_FILE=2, SELECT_DIR=3;
     static List<RootFile> list = new ArrayList<>();
-    static RootFile result = null;
+    RootFile result = null;
     ListView listView;
     ImageButton backButton, newFolderButton, saveButton;
     TextView currentDir;
@@ -50,6 +52,7 @@ public class FileExplorerDialog extends DialogFragment{
     int toSelect = 0;
     @Override
     public Dialog onCreateDialog(Bundle savedInstanceState){
+        setCancelable(false);
         AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
         View view = getActivity().getLayoutInflater().inflate(R.layout.file_explorer, null);
 
@@ -71,7 +74,8 @@ public class FileExplorerDialog extends DialogFragment{
                 dialog.setRunnable(new Runnable(){
                     @Override
                     public void run(){
-                        RootFile newFolder = new RootFile(currentDir + "/" + dialog.result);
+                        Log.d("TEST", current.getAbsolutePath() + "/" + dialog.result);
+                        RootFile newFolder = new RootFile(current.getAbsolutePath() + "/" + dialog.result);
                         if(newFolder.exists()){
                             Toast.makeText(getActivity(), getString(R.string.folder_exists), Toast.LENGTH_SHORT).show();
                         }else{
@@ -81,14 +85,6 @@ public class FileExplorerDialog extends DialogFragment{
                     }
                 });
                 dialog.show(getFragmentManager(), "EditTextDialog");
-            }
-        });
-        saveButton = (ImageButton)view.findViewById(R.id.saveButton);
-        saveButton.setVisibility(toSelect==SELECT_NEW_FILE ? View.VISIBLE : View.INVISIBLE);
-        saveButton.setOnClickListener(new View.OnClickListener(){
-            @Override
-            public void onClick(View v){
-
             }
         });
 
@@ -107,16 +103,29 @@ public class FileExplorerDialog extends DialogFragment{
         });
 
         builder.setView(view);
-        builder.setPositiveButton(R.string.select, new DialogInterface.OnClickListener() {
-            public void onClick(DialogInterface dialog, int id) {
-                onSelect(current);
-            }
-        });
+        if(toSelect==SELECT_DIR){
+            builder.setPositiveButton(R.string.select, new DialogInterface.OnClickListener(){
+                public void onClick(DialogInterface dialog, int id){
+                    onSelect(current);
+                }
+            });
+        }
         builder.setNegativeButton(R.string.cancel, new DialogInterface.OnClickListener() {
             public void onClick(DialogInterface dialog, int id) {
                 if(onCancel!=null){
                     onCancel.run();
                 }
+            }
+        });
+        builder.setOnKeyListener(new DialogInterface.OnKeyListener(){
+            @Override
+            public boolean onKey(DialogInterface dialog, int keyCode, KeyEvent event){
+                if (keyCode == KeyEvent.KEYCODE_BACK){
+                    if(!current.getParentPath().equals("")){
+                        goToDirectory(new RootFile(current.getParentPath()));
+                    }
+                }
+                return false;
             }
         });
 
@@ -130,11 +139,10 @@ public class FileExplorerDialog extends DialogFragment{
     void goToDirectory(RootFile file){
         current = file;
         list = file.listFiles();
-        if(toSelect==SELECT_DIR){
-            for(int i=0;i<list.size();i++){
-                if(!list.get(i).isDirectory()){
-                    list.remove(i);
-                }
+        for(int i=0;i<list.size();i++){
+            if((toSelect==SELECT_DIR && !list.get(i).isDirectory()) || list.get(i).isUnknownType()){
+                list.remove(i);
+                i--;
             }
         }
         Collections.sort(list, new Comparator<RootFile>(){
@@ -156,5 +164,17 @@ public class FileExplorerDialog extends DialogFragment{
             onSelect.run();
         }
         this.dismiss();
+    }
+    void setStartingDir(RootFile file){
+        start = file;
+    }
+    void setOnSelect(Runnable runnable){
+        onSelect = runnable;
+    }
+    void setOnCancel(Runnable runnable){
+        onCancel = runnable;
+    }
+    void setToSelect(int selection){
+        toSelect = selection;
     }
 }

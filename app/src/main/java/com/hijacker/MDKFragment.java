@@ -19,6 +19,7 @@ package com.hijacker;
 
 import android.app.Fragment;
 import android.os.Bundle;
+import android.os.Environment;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -29,6 +30,7 @@ import android.widget.CompoundButton;
 import android.widget.EditText;
 import android.widget.PopupMenu;
 import android.widget.Switch;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import java.io.File;
@@ -48,6 +50,7 @@ public class MDKFragment extends Fragment{
     View v;
     static AP ados_ap=null;
     static Switch bf_switch, ados_switch;
+    EditText ssid_edittext;
     Button select_button;
     static String custom_mac=null, ssid_file=null;
     static boolean managed=true, adhoc=true, opn=true, wep=true, tkip=true, aes=true;
@@ -58,13 +61,31 @@ public class MDKFragment extends Fragment{
         setRetainInstance(true);
         v = inflater.inflate(R.layout.mdk_fragment, container, false);
 
+        ssid_edittext = (EditText)v.findViewById(R.id.ssid_file);
+
+        v.findViewById(R.id.ssid_file_fe_btn).setOnClickListener(new View.OnClickListener(){
+            @Override
+            public void onClick(View v){
+                final FileExplorerDialog dialog = new FileExplorerDialog();
+                dialog.setToSelect(FileExplorerDialog.SELECT_EXISTING_FILE);
+                dialog.setStartingDir(new RootFile(Environment.getExternalStorageDirectory().toString()));
+                dialog.setOnSelect(new Runnable(){
+                    @Override
+                    public void run(){
+                        ssid_edittext.setText(dialog.result.getAbsolutePath() + "/" + dialog.result.getName());
+                    }
+                });
+                dialog.show(getFragmentManager(), "FileExplorerDialog");
+            }
+        });
+
         bf_switch = (Switch)v.findViewById(R.id.bf_switch);
         bf_switch.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener(){
             @Override
             public void onCheckedChanged(CompoundButton compoundButton, boolean b){
                 //Beacon Flooding
                 if(b){
-                    String ssid_file = ((EditText)v.findViewById(R.id.ssid_file)).getText().toString();
+                    String ssid_file = ssid_edittext.getText().toString();
                     managed = ((CheckBox)v.findViewById(R.id.managed)).isChecked();
                     adhoc = ((CheckBox)v.findViewById(R.id.adhoc)).isChecked();
                     opn = ((CheckBox)v.findViewById(R.id.opn)).isChecked();
@@ -188,7 +209,7 @@ public class MDKFragment extends Fragment{
             ados_ap = AP.marked.get(AP.marked.size()-1);
             select_button.setText(ados_ap.essid + " (" + ados_ap.mac + ')');
         }
-        if(ssid_file!=null) ((EditText)v.findViewById(R.id.ssid_file)).setText(ssid_file);
+        if(ssid_file!=null) ssid_edittext.setText(ssid_file);
         CompoundButton.OnCheckedChangeListener listener = new CompoundButton.OnCheckedChangeListener(){
             @Override
             public void onCheckedChanged(CompoundButton buttonView, boolean isChecked){
@@ -213,7 +234,7 @@ public class MDKFragment extends Fragment{
     public void onPause(){
         super.onPause();
         //Save options
-        ssid_file = ((EditText)v.findViewById(R.id.ssid_file)).getText().toString();
+        ssid_file = ssid_edittext.getText().toString();
         managed = ((CheckBox)v.findViewById(R.id.managed)).isChecked();
         adhoc = ((CheckBox)v.findViewById(R.id.adhoc)).isChecked();
         opn = ((CheckBox)v.findViewById(R.id.opn)).isChecked();

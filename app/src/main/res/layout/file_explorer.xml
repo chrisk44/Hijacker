@@ -24,14 +24,6 @@
         <ImageButton
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            app:srcCompat="@drawable/save"
-            android:id="@+id/saveButton"
-            style="@android:style/Widget.Material.Button.Borderless"
-            android:layout_toStartOf="@+id/newFolderButton"/>
-
-        <ImageButton
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
             app:srcCompat="@drawable/new_folder"
             android:id="@+id/newFolderButton"
             style="@android:style/Widget.Material.Button.Borderless"

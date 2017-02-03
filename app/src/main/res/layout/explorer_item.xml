@@ -11,7 +11,7 @@
         android:layout_height="wrap_content"
         app:srcCompat="@drawable/file"
         android:id="@+id/explorer_iv"
-        />
+        android:layout_gravity="center_vertical"/>
 
     <TextView
         android:text="TextView"

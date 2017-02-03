@@ -22,6 +22,7 @@ import android.app.DialogFragment;
 import android.app.FragmentManager;
 import android.content.DialogInterface;
 import android.os.Bundle;
+import android.os.Environment;
 import android.support.design.widget.Snackbar;
 import android.support.v7.app.AlertDialog;
 import android.util.Log;
@@ -41,10 +42,28 @@ import static com.hijacker.MainActivity.background;
 
 public class ExportDialog extends DialogFragment{
     View view;
+    EditText output_file;
     @Override
     public Dialog onCreateDialog(Bundle savedInstanceState) {
         AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
         view = getActivity().getLayoutInflater().inflate(R.layout.export, null);
+
+        output_file = (EditText)view.findViewById(R.id.output_file);
+        view.findViewById(R.id.export_fe_btn).setOnClickListener(new View.OnClickListener(){
+            @Override
+            public void onClick(View v){
+                final FileExplorerDialog dialog = new FileExplorerDialog();
+                dialog.setStartingDir(new RootFile(Environment.getExternalStorageDirectory().toString()));
+                dialog.setToSelect(FileExplorerDialog.SELECT_DIR);
+                dialog.setOnSelect(new Runnable(){
+                    @Override
+                    public void run(){
+                        output_file.setText(dialog.result.getAbsolutePath() + "/output.txt");
+                    }
+                });
+                dialog.show(getFragmentManager(), "FileExplorerDialog");
+            }
+        });
 
         builder.setView(view);
         builder.setTitle(R.string.export);
@@ -67,14 +86,14 @@ public class ExportDialog extends DialogFragment{
                 @Override
                 public boolean onLongClick(View v){
                     v.performHapticFeedback(HapticFeedbackConstants.LONG_PRESS);
-                    export(v, new File(((EditText)view.findViewById(R.id.output_file)).getText().toString()));
+                    export(v, new File(output_file.getText().toString()));
                     return false;
                 }
             });
             positiveButton.setOnClickListener(new View.OnClickListener(){
                 @Override
                 public void onClick(View v){
-                    File out_file = new File(((EditText) view.findViewById(R.id.output_file)).getText().toString());
+                    File out_file = new File(output_file.getText().toString());
 
                     if(out_file.exists()){
                         Snackbar.make(v, R.string.output_file_exists, Snackbar.LENGTH_LONG).show();

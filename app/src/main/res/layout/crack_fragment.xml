@@ -12,13 +12,29 @@
         android:textColor="?android:attr/textColorPrimary"
         android:textSize="18sp"/>
 
-    <EditText
+    <LinearLayout
+        android:orientation="horizontal"
         android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+        <EditText
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:inputType="text"
+            android:ems="10"
+            android:id="@+id/capfile"
+            android:layout_gravity="center_vertical"
+            android:hint="/sdcard/cap/handshake-01.cap"
+            android:layout_weight="1"/>
+
+        <Button
+        style="?android:attr/buttonBarButtonStyle"
+        android:text="..."
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:inputType="text"
-        android:ems="10"
-        android:id="@+id/capfile"
-        android:hint="/sdcard/cap/handshake-01.cap"/>
+        android:layout_gravity="center_vertical"
+        android:id="@+id/cap_fe_btn"/>
+    </LinearLayout>
 
     <TextView
         android:text="@string/path_to_wordlist"
@@ -28,14 +44,30 @@
         android:textColor="?android:attr/textColorPrimary"
         android:textSize="18sp"/>
 
-    <EditText
+    <LinearLayout
+        android:orientation="horizontal"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:inputType="text"
-        android:ems="10"
-        android:id="@+id/wordlist"
-        android:hint="/sdcard/wordlist.txt"
-        android:text="/sdcard/wordlist.txt"/>
+        android:layout_height="wrap_content">
+
+        <EditText
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:inputType="text"
+            android:ems="10"
+            android:id="@+id/wordlist"
+            android:layout_gravity="center_vertical"
+            android:hint="/sdcard/wordlist.txt"
+            android:text="/sdcard/wordlist.txt"
+            android:layout_weight="1"/>
+
+        <Button
+            style="?android:attr/buttonBarButtonStyle"
+            android:text="..."
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_vertical"
+            android:id="@+id/wordlist_fe_btn"/>
+    </LinearLayout>
 
     <RadioGroup
         android:layout_width="match_parent"

@@ -44,7 +44,6 @@ public class RootFile{
     private String absolutePath = null, name = null;
     private boolean exists = false, isFile = false, isDirectory = false, isUnknownType = false;
     RootFile(String path) throws IllegalArgumentException{
-        Log.d("TEST/RootFile", "Called new RootFile with path: " + path);
         if(path==null) throw new IllegalArgumentException("File path can't be null");
         if(path.length()==0) throw new IllegalArgumentException("File path has zero length");
         if(path.charAt(0)!='/') throw new IllegalArgumentException("File path must start with /");
@@ -59,15 +58,10 @@ public class RootFile{
             return;
         }
 
-        //Isolate absolute path and name
-        this.name = path.substring(path.lastIndexOf('/') + 1);
-        this.absolutePath = isFile() ? path.substring(0, path.lastIndexOf('/')) : path;
-        Log.d("TEST", "Absolute path: " + absolutePath);
-
         if(buffer.contains("No such")){
             this.absolutePath = path.substring(0, path.lastIndexOf('/'));
             this.name = path.substring(path.lastIndexOf('/') + 1);
-            Log.d("TEST", "Absolute path: " + absolutePath);
+            this.isUnknownType = true;
             return;
         }
 
@@ -94,6 +88,11 @@ public class RootFile{
         }
 
         this.length = Integer.parseInt(temp[4]);
+
+        //Isolate absolute path and name
+        this.name = path.substring(path.lastIndexOf('/') + 1);
+        this.absolutePath = isFile() ? path.substring(0, path.lastIndexOf('/')) : path;
+        Log.d("TEST", "Absolute path: " + absolutePath + ", name: " + name + ", " + (isFile() ? "file" : "not_file") + " " + (isDirectory() ? "directory" : "not directory"));
     }
     String getAbsolutePath(){ return absolutePath; }
     String getName(){ return name; }
@@ -115,6 +114,7 @@ public class RootFile{
             shell.run("busybox touch " + absolutePath + "/" + name);
             exists = true;
             isFile = true;
+            isUnknownType = false;
         }else throw new IllegalStateException("Already exists" + (isDirectory() ? " and it's a directory" : ""));
     }
     void delete(){
@@ -132,14 +132,18 @@ public class RootFile{
     void mkdir(){
         if(!exists){
             if(absolutePath==null || name==null) throw new IllegalStateException("path or name is null");
+            absolutePath = absolutePath + "/" + name;
             shell.run("busybox mkdir " + absolutePath);
             exists = true;
             isDirectory = true;
+            isUnknownType = false;
         }else throw new IllegalStateException("Already exists" + (isFile() ? " and it's a file" : ""));
     }
-    void rmdir(){
+    /*void rmdir(){
+        //THIS IS DANGEROUS but it works BUT IT'S DANGEROUS
         if(exists() && isDirectory()){
             if(absolutePath==null || name==null) throw new IllegalStateException("path or name is null");
+            Log.d("RMDIR TEST", "path: " + absolutePath + ", name: " + name);
             shell.run("rm -rf " + absolutePath);
             exists = false;
             isDirectory = false;
@@ -148,7 +152,7 @@ public class RootFile{
             if(!exists()) throw new IllegalStateException("Doesn't exist");
             else throw new IllegalStateException("Not a directory");
         }
-    }
+    }*/
     List<RootFile> listFiles(){
         List<RootFile> result = new ArrayList<>();
         if(this.isFile()){
