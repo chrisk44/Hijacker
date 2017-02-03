@@ -34,14 +34,14 @@ public class EditTextDialog extends DialogFragment {
     @Override
     public Dialog onCreateDialog(Bundle savedInstanceState) {
         AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
-        final View view = getActivity().getLayoutInflater().inflate(R.layout.custom_ap_dialog, null);
+        final View view = getActivity().getLayoutInflater().inflate(R.layout.edit_text_dialog, null);
 
-        if(title!=null) builder.setTitle(R.string.custom_ap_title);
+        if(title!=null) builder.setTitle(title);
         if(hint!=null) ((EditText)view.findViewById(R.id.edit_text)).setHint(hint);
         builder.setView(view);
         builder.setPositiveButton(R.string.ok, new DialogInterface.OnClickListener() {
             public void onClick(DialogInterface dialog, int id) {
-                result = ((EditText) view.findViewById(R.id.custom_mac)).getText().toString();
+                result = ((EditText) view.findViewById(R.id.edit_text)).getText().toString();
                 if(runnable!=null) runnable.run();
             }
         });
