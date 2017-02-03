@@ -890,6 +890,8 @@ public class MainActivity extends AppCompatActivity{
             mdk3_dir = "mdk3";
             reaver_dir = "reaver";
         }
+
+        RootFile.init();
     }
     static void load(){
         //Load Preferences
@@ -988,6 +990,7 @@ public class MainActivity extends AppCompatActivity{
         stop(PROCESS_AIRCRACK);
         stop(PROCESS_REAVER);
         runOne(disable_monMode);
+        RootFile.finish();
         Shell.exitAll();
         stopService(new Intent(this, PersistenceService.class));
         super.onDestroy();
