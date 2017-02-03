@@ -19,8 +19,15 @@
             app:srcCompat="@drawable/back"
             android:id="@+id/backButton"
             style="@android:style/Widget.Material.Button.Borderless"
-            android:layout_alignParentLeft="true"
-            />
+            android:layout_alignParentLeft="true"/>
+
+        <ImageButton
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            app:srcCompat="@drawable/save"
+            android:id="@+id/saveButton"
+            style="@android:style/Widget.Material.Button.Borderless"
+            android:layout_toLeftOf="@+id/newFolderButton"/>
 
         <ImageButton
             android:layout_width="wrap_content"
@@ -28,7 +35,7 @@
             app:srcCompat="@drawable/new_folder"
             android:id="@+id/newFolderButton"
             style="@android:style/Widget.Material.Button.Borderless"
-            android:layout_alignParentRight="true"/>
+            android:layout_alignParentEnd="true"/>
     </RelativeLayout>
 
     <ListView

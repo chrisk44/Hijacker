@@ -24,7 +24,6 @@ import android.app.FragmentManager;
 import android.content.DialogInterface;
 import android.os.Bundle;
 import android.view.View;
-import android.view.Window;
 import android.widget.AdapterView;
 import android.widget.ImageButton;
 import android.widget.ListView;
@@ -39,13 +38,14 @@ import static com.hijacker.MainActivity.background;
 import static com.hijacker.MainActivity.file_explorer_adapter;
 
 public class FileExplorerDialog extends DialogFragment{
+    static final int SELECT_EXISTING_FILE=1, SELECT_NEW_FILE=2, SELECT_DIR=3;
     static List<RootFile> list = new ArrayList<>();
     static RootFile result = null;
     ListView listView;
-    ImageButton backButton, newFolderButton;
+    ImageButton backButton, newFolderButton, saveButton;
     Runnable onSelect = null, onCancel = null;
     RootFile start = null, current = null;
-    boolean onlyDir = false;
+    int toSelect = 0;
     @Override
     public Dialog onCreateDialog(Bundle savedInstanceState){
         AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
@@ -59,7 +59,16 @@ public class FileExplorerDialog extends DialogFragment{
             }
         });
         newFolderButton = (ImageButton)view.findViewById(R.id.newFolderButton);
+        newFolderButton.setEnabled(toSelect==SELECT_DIR);
         newFolderButton.setOnClickListener(new View.OnClickListener(){
+            @Override
+            public void onClick(View v){
+
+            }
+        });
+        saveButton = (ImageButton)view.findViewById(R.id.saveButton);
+        saveButton.setEnabled(toSelect==SELECT_NEW_FILE);
+        saveButton.setOnClickListener(new View.OnClickListener(){
             @Override
             public void onClick(View v){
 
@@ -104,7 +113,7 @@ public class FileExplorerDialog extends DialogFragment{
     void goToDirectory(RootFile file){
         current = file;
         list = file.listFiles();
-        if(onlyDir){
+        if(toSelect==SELECT_DIR){
             for(int i=0;i<list.size();i++){
                 if(!list.get(i).isDirectory()){
                     list.remove(i);
