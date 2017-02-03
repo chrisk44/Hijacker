@@ -24,7 +24,6 @@ import android.app.FragmentManager;
 import android.content.DialogInterface;
 import android.os.Bundle;
 import android.util.Log;
-import android.view.KeyEvent;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ImageButton;
@@ -41,18 +40,17 @@ import static com.hijacker.MainActivity.background;
 import static com.hijacker.MainActivity.file_explorer_adapter;
 
 public class FileExplorerDialog extends DialogFragment{
-    static final int SELECT_EXISTING_FILE=1, SELECT_NEW_FILE=2, SELECT_DIR=3;
+    static final int SELECT_EXISTING_FILE=1, SELECT_DIR=2;
     static List<RootFile> list = new ArrayList<>();
     RootFile result = null;
     ListView listView;
-    ImageButton backButton, newFolderButton, saveButton;
+    ImageButton backButton, newFolderButton;
     TextView currentDir;
     Runnable onSelect = null, onCancel = null;
     RootFile start = null, current = null;
     int toSelect = 0;
     @Override
     public Dialog onCreateDialog(Bundle savedInstanceState){
-        setCancelable(false);
         AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
         View view = getActivity().getLayoutInflater().inflate(R.layout.file_explorer, null);
 
@@ -74,7 +72,6 @@ public class FileExplorerDialog extends DialogFragment{
                 dialog.setRunnable(new Runnable(){
                     @Override
                     public void run(){
-                        Log.d("TEST", current.getAbsolutePath() + "/" + dialog.result);
                         RootFile newFolder = new RootFile(current.getAbsolutePath() + "/" + dialog.result);
                         if(newFolder.exists()){
                             Toast.makeText(getActivity(), getString(R.string.folder_exists), Toast.LENGTH_SHORT).show();
@@ -117,17 +114,6 @@ public class FileExplorerDialog extends DialogFragment{
                 }
             }
         });
-        builder.setOnKeyListener(new DialogInterface.OnKeyListener(){
-            @Override
-            public boolean onKey(DialogInterface dialog, int keyCode, KeyEvent event){
-                if (keyCode == KeyEvent.KEYCODE_BACK){
-                    if(!current.getParentPath().equals("")){
-                        goToDirectory(new RootFile(current.getParentPath()));
-                    }
-                }
-                return false;
-            }
-        });
 
         goToDirectory(start==null ? new RootFile("/") : start);
         return builder.create();
@@ -137,6 +123,9 @@ public class FileExplorerDialog extends DialogFragment{
         if(!background) super.show(fragmentManager, tag);
     }
     void goToDirectory(RootFile file){
+        while(!file.exists()){
+            file = new RootFile(start.getParentPath());
+        }
         current = file;
         list = file.listFiles();
         for(int i=0;i<list.size();i++){
@@ -154,12 +143,11 @@ public class FileExplorerDialog extends DialogFragment{
             }
         });
         file_explorer_adapter.notifyDataSetChanged();
-        backButton.setEnabled(!current.getParentPath().equals(""));
+        backButton.setEnabled(!current.getAbsolutePath().equals("/"));
         currentDir.setText(current.getAbsolutePath());
     }
     void onSelect(RootFile file){
         result = file;
-        Toast.makeText(getActivity(), "Selected " + result.getAbsolutePath() + "/" + result.getName(), Toast.LENGTH_SHORT).show();
         if(onSelect!=null){
             onSelect.run();
         }

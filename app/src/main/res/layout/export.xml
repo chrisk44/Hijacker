@@ -23,7 +23,6 @@
         <EditText
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:text="@string/output_file_hint"
             android:ems="10"
             android:id="@+id/output_file"
             android:inputType="text"

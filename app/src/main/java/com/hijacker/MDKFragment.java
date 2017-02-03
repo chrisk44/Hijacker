@@ -71,7 +71,7 @@ public class MDKFragment extends Fragment{
                 dialog.setOnSelect(new Runnable(){
                     @Override
                     public void run(){
-                        ssid_edittext.setText(dialog.result.getAbsolutePath() + "/" + dialog.result.getName());
+                        ssid_edittext.setText(dialog.result.getAbsolutePath());
                     }
                 });
                 dialog.show(getFragmentManager(), "FileExplorerDialog");

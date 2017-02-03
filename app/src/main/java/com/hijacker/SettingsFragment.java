@@ -21,6 +21,7 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.Environment;
 import android.preference.Preference;
 import android.preference.PreferenceFragment;
 
@@ -30,6 +31,7 @@ import static com.hijacker.MainActivity.FRAGMENT_SETTINGS;
 import static com.hijacker.MainActivity.arch;
 import static com.hijacker.MainActivity.firm_backup_file;
 import static com.hijacker.MainActivity.mFragmentManager;
+import static com.hijacker.MainActivity.pref_edit;
 import static com.hijacker.MainActivity.refreshDrawer;
 import static com.hijacker.MainActivity.version;
 import static com.hijacker.MainActivity.watchdog;
@@ -114,6 +116,42 @@ public class SettingsFragment extends PreferenceFragment {
                 Intent intent = new Intent(Intent.ACTION_VIEW);
                 intent.setData(Uri.parse("https://github.com/chrisk44/Hijacker"));
                 startActivity(intent);
+                return false;
+            }
+        });
+        findPreference("cap_dir").setOnPreferenceClickListener(new Preference.OnPreferenceClickListener(){
+            @Override
+            public boolean onPreferenceClick(Preference preference){
+                final FileExplorerDialog dialog = new FileExplorerDialog();
+                dialog.setToSelect(FileExplorerDialog.SELECT_DIR);
+                dialog.setStartingDir(new RootFile(Environment.getExternalStorageDirectory().toString()));
+                dialog.setOnSelect(new Runnable(){
+                    @Override
+                    public void run(){
+                        pref_edit.putString("cap_dir", dialog.result.getAbsolutePath());
+                        pref_edit.commit();
+                        load();
+                    }
+                });
+                dialog.show(getFragmentManager(), "FileExplorerDialog");
+                return false;
+            }
+        });
+        findPreference("chroot_dir").setOnPreferenceClickListener(new Preference.OnPreferenceClickListener(){
+            @Override
+            public boolean onPreferenceClick(Preference preference){
+                final FileExplorerDialog dialog = new FileExplorerDialog();
+                dialog.setToSelect(FileExplorerDialog.SELECT_DIR);
+                dialog.setStartingDir(new RootFile("/data/local/"));
+                dialog.setOnSelect(new Runnable(){
+                    @Override
+                    public void run(){
+                        pref_edit.putString("chroot_dir", dialog.result.getAbsolutePath());
+                        pref_edit.commit();
+                        load();
+                    }
+                });
+                dialog.show(getFragmentManager(), "FileExplorerDialog");
                 return false;
             }
         });

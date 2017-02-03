@@ -24,7 +24,6 @@
             android:ems="10"
             android:id="@+id/capfile"
             android:layout_gravity="center_vertical"
-            android:hint="/sdcard/cap/handshake-01.cap"
             android:layout_weight="1"/>
 
         <Button
@@ -56,8 +55,6 @@
             android:ems="10"
             android:id="@+id/wordlist"
             android:layout_gravity="center_vertical"
-            android:hint="/sdcard/wordlist.txt"
-            android:text="/sdcard/wordlist.txt"
             android:layout_weight="1"/>
 
         <Button

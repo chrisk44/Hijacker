@@ -203,6 +203,7 @@
     <string name="select_type">Select at least one type of network</string>
     <string name="custom_ap_title">Custom AP</string>
     <string name="mac_address">MAC Address</string>
+    <string name="optional">(Optional)</string>
 
     <!-- ReaverFragment -->
     <string name="select_ap">Select Access Point</string>
@@ -283,8 +284,7 @@
     <string name="prefix_desc">A prefix for every command that is run and needs monitor mode. (LD_PRELOAD)</string>
 
     <string name="cap_title">Cap files directory</string>
-    <string name="cap_sum">Directory to save cap files (eg. /sdcard/cap)</string>
-    <string name="cap_desc">The directory to save the cap file when cracking WPA or WEP. This needs to be a directory that you have access to and won\'t be deleted (eg. not a tmp folder). It will be created and written to, and also a \"rm -rf …\" is ran in it as root so be careful what you enter here. Don\'t end it with /</string>
+    <string name="cap_sum">Directory to save .cap files</string>
 
     <string name="delete_extra_title">Delete extra cap files</string>
     <string name="delete_extra_sum">Delete .csv and .netxml files created by airodump when saving to .cap file</string>

@@ -23,6 +23,9 @@ package com.hijacker;
     EXTREME CARE is required as the methods createNewFile(), delete(), mkdir() and rmdir()
     act on files as root. If a wrong file is selected, or due to a bug (it's not perfect)
     the variables absolutePath and name have something wrong, the results could be catastrophic.
+
+    Results for /path/to/something: absolutePath = /path/to/something, parentPath = /path/to/, name = something
+    Results for /: absolutePath = /, parentPath = /, name = "";
  */
 
 import android.util.Log;
@@ -41,7 +44,7 @@ public class RootFile{
     static Shell shell;
     static BufferedReader out;
     private int length = -1;
-    private String absolutePath = null, name = null;
+    private String absolutePath = null, parentPath = null, name = null;
     private boolean exists = false, isFile = false, isDirectory = false, isUnknownType = false;
     RootFile(String path) throws IllegalArgumentException{
         if(path==null) throw new IllegalArgumentException("File path can't be null");
@@ -58,9 +61,12 @@ public class RootFile{
             return;
         }
 
+        //Isolate absolute path and name
+        this.name = path.substring(path.lastIndexOf('/') + 1);
+        this.absolutePath = path;
+        this.parentPath = absolutePath.substring(0, absolutePath.lastIndexOf('/') + 1);
+
         if(buffer.contains("No such")){
-            this.absolutePath = path.substring(0, path.lastIndexOf('/'));
-            this.name = path.substring(path.lastIndexOf('/') + 1);
             this.isUnknownType = true;
             return;
         }
@@ -89,17 +95,11 @@ public class RootFile{
 
         this.length = Integer.parseInt(temp[4]);
 
-        //Isolate absolute path and name
-        this.name = path.substring(path.lastIndexOf('/') + 1);
-        this.absolutePath = isFile() ? path.substring(0, path.lastIndexOf('/')) : path;
-        Log.d("TEST", "Absolute path: " + absolutePath + ", name: " + name + ", " + (isFile() ? "file" : "not_file") + " " + (isDirectory() ? "directory" : "not directory"));
+        if(debug) Log.d("TEST", "Absolute path: " + absolutePath + ", name: " + name + ", parent path: " + parentPath + ", " + (isFile() ? "file" : "not_file") + " | " + (isDirectory() ? "directory" : "not directory"));
     }
     String getAbsolutePath(){ return absolutePath; }
     String getName(){ return name; }
-    String getParentPath(){
-        if(absolutePath.equals("/")) return "";
-        else return absolutePath.substring(0, absolutePath.lastIndexOf('/') + 1);
-    }
+    String getParentPath(){ return parentPath; }
     boolean exists(){ return exists; }
     boolean isFile(){ return isFile; }
     boolean isDirectory(){ return isDirectory; }
@@ -111,7 +111,12 @@ public class RootFile{
     void createNewFile(){
         if(!exists()){
             if(absolutePath==null || name==null) throw new IllegalStateException("path or name is null");
-            shell.run("busybox touch " + absolutePath + "/" + name);
+            shell.run("busybox touch \"" + absolutePath + "\"");
+            try{
+                while(!new RootFile(absolutePath).exists()){
+                    Thread.sleep(10);
+                }
+            }catch(InterruptedException ignored){}
             exists = true;
             isFile = true;
             isUnknownType = false;
@@ -120,7 +125,7 @@ public class RootFile{
     void delete(){
         if(exists() && isFile()){
             if(absolutePath==null || name==null) throw new IllegalStateException("path or name is null");
-            shell.run("busybox rm " + absolutePath + "/" + name);
+            shell.run("busybox rm \"" + absolutePath + "\"");
             exists = false;
             isFile = false;
             length = -1;
@@ -132,8 +137,12 @@ public class RootFile{
     void mkdir(){
         if(!exists){
             if(absolutePath==null || name==null) throw new IllegalStateException("path or name is null");
-            absolutePath = absolutePath + "/" + name;
-            shell.run("busybox mkdir " + absolutePath);
+            shell.run("busybox mkdir \"" + absolutePath + "\"");
+            try{
+                while(!new RootFile(absolutePath).exists()){
+                    Thread.sleep(10);
+                }
+            }catch(InterruptedException ignored){}
             exists = true;
             isDirectory = true;
             isUnknownType = false;
@@ -144,7 +153,7 @@ public class RootFile{
         if(exists() && isDirectory()){
             if(absolutePath==null || name==null) throw new IllegalStateException("path or name is null");
             Log.d("RMDIR TEST", "path: " + absolutePath + ", name: " + name);
-            shell.run("rm -rf " + absolutePath);
+            shell.run("rm -rf \"" + absolutePath + "\"");
             exists = false;
             isDirectory = false;
             length = -1;

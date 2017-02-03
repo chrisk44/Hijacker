@@ -44,11 +44,29 @@ import static com.hijacker.MainActivity.getLastLine;
 public class RestoreFirmwareDialog extends DialogFragment {
     View view;
     Shell shell;
+    EditText firm_edittext;
     @Override
     public Dialog onCreateDialog(Bundle savedInstanceState) {
         shell = Shell.getFreeShell();
         AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
         view = getActivity().getLayoutInflater().inflate(R.layout.restore_firmware, null);
+
+        firm_edittext = (EditText)view.findViewById(R.id.firm_location);
+
+        view.findViewById(R.id.firm_fe_btn).setOnClickListener(new View.OnClickListener(){
+            @Override
+            public void onClick(View v){
+                final FileExplorerDialog dialog = new FileExplorerDialog();
+                dialog.setToSelect(FileExplorerDialog.SELECT_DIR);
+                dialog.setOnSelect(new Runnable(){
+                    @Override
+                    public void run(){
+                        firm_edittext.setText(dialog.result.getAbsolutePath());
+                    }
+                });
+                dialog.show(getFragmentManager(), "FileExplorerDialog");
+            }
+        });
 
         builder.setView(view);
         builder.setTitle(R.string.restore_firmware);
@@ -79,7 +97,7 @@ public class RestoreFirmwareDialog extends DialogFragment {
             positiveButton.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    String firm_location = ((EditText)view.findViewById(R.id.firm_location)).getText().toString();
+                    String firm_location = firm_edittext.getText().toString();
                     firm_location = getDirectory(firm_location);
 
                     File firm = new File(firm_location);

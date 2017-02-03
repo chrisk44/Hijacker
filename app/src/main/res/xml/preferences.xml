@@ -16,15 +16,12 @@
             android:summary="@string/prefix_sum"
             android:dialogMessage="@string/prefix_desc"
             android:dialogTitle="@string/prefix_title" />
-        <EditTextPreference
-            android:defaultValue="@string/cap_dir"
+        <Preference
             android:selectAllOnFocus="true"
             android:singleLine="true"
             android:title="@string/cap_title"
             android:key="cap_dir"
-            android:summary="@string/cap_sum"
-            android:dialogMessage="@string/cap_desc"
-            android:dialogTitle="@string/cap_title" />
+            android:summary="@string/cap_sum" />
         <SwitchPreference
             android:defaultValue="@string/delete_extra"
             android:title="@string/delete_extra_title"
@@ -118,13 +115,11 @@
     <PreferenceCategory
         android:title="@string/chroot">
 
-        <EditTextPreference
-            android:defaultValue="@string/chroot_dir"
+        <Preference
             android:selectAllOnFocus="true"
             android:singleLine="true"
-            android:dialogMessage="@string/chroot_desc"
-            android:dialogTitle="@string/chroot_title"
             android:title="@string/chroot_title"
+            android:summary="@string/chroot_desc"
             android:key="chroot_dir"/>
         <EditTextPreference
             android:defaultValue=""

@@ -104,7 +104,7 @@
                 android:inputType="text"
                 android:layout_width="0dp"
                 android:layout_gravity="center_vertical"
-                android:hint="/sdcard/list.txt"
+                android:hint="@string/optional"
                 android:layout_weight="1"/>
 
             <Button

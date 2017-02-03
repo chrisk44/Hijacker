@@ -19,6 +19,7 @@ package com.hijacker;
 
 import android.app.Fragment;
 import android.os.Bundle;
+import android.os.Environment;
 import android.os.Handler;
 import android.os.Message;
 import android.support.design.widget.Snackbar;
@@ -180,7 +181,7 @@ public class CrackFragment extends Fragment{
                 dialog.setOnSelect(new Runnable(){
                     @Override
                     public void run(){
-                        cap_edittext.setText(dialog.result.getAbsolutePath() + "/" + dialog.result.getName());
+                        cap_edittext.setText(dialog.result.getAbsolutePath());
                     }
                 });
                 dialog.show(getFragmentManager(), "FileExplorerDialog");
@@ -190,12 +191,12 @@ public class CrackFragment extends Fragment{
             @Override
             public void onClick(View v){
                 final FileExplorerDialog dialog = new FileExplorerDialog();
-                dialog.setStartingDir(new RootFile(cap_dir));
+                dialog.setStartingDir(new RootFile(Environment.getExternalStorageDirectory().toString()));
                 dialog.setToSelect(FileExplorerDialog.SELECT_EXISTING_FILE);
                 dialog.setOnSelect(new Runnable(){
                     @Override
                     public void run(){
-                        wordlist_edittext.setText(dialog.result.getAbsolutePath() + "/" + dialog.result.getName());
+                        wordlist_edittext.setText(dialog.result.getAbsolutePath());
                     }
                 });
                 dialog.show(getFragmentManager(), "FileExplorerDialog");
