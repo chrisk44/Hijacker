@@ -89,7 +89,9 @@ public class Airodump{
                 }
             }catch(InterruptedException e){
                 Log.e("HIJACKER/Exception", "Caught Exception in refresh_thread: " + e.toString());
-                fifo.clear();
+                synchronized(fifo){
+                    fifo.clear();
+                }
                 try{
                     while(!completed){      //Wait for running request to complete
                         Thread.sleep(10);
@@ -207,7 +209,9 @@ public class Airodump{
         start();
     }
     static void start(){
-        fifo.clear();
+        synchronized(fifo){
+            fifo.clear();
+        }
 
         String cmd = "su -c " + prefix + " " + airodump_dir + " --update 1 ";
 
@@ -298,10 +302,14 @@ public class Airodump{
         return running;
     }
     public static void addAP(String essid, String mac, String enc, String cipher, String auth, int pwr, int beacons, int data, int ivs, int ch){
-        fifo.add(new UpdateRequest(essid, mac, enc, cipher, auth, pwr, beacons, data, ivs, ch));
+        synchronized(fifo){
+            fifo.add(new UpdateRequest(essid, mac, enc, cipher, auth, pwr, beacons, data, ivs, ch));
+        }
     }
     public static void addST(String mac, String bssid, String probes, int pwr, int lost, int frames){
-        fifo.add(new UpdateRequest(mac, bssid, probes, pwr, lost, frames));
+        synchronized(fifo){
+            fifo.add(new UpdateRequest(mac, bssid, probes, pwr, lost, frames));
+        }
     }
 
     public static native int main(String str, int off);

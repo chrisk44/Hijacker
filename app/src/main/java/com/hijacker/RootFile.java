@@ -44,11 +44,12 @@ public class RootFile{
     private String absolutePath = null, name = null;
     private boolean exists = false, isFile = false, isDirectory = false, isUnknownType = false;
     RootFile(String path) throws IllegalArgumentException{
+        Log.d("TEST/RootFile", "Called new RootFile with path: " + path);
         if(path==null) throw new IllegalArgumentException("File path can't be null");
         if(path.length()==0) throw new IllegalArgumentException("File path has zero length");
         if(path.charAt(0)!='/') throw new IllegalArgumentException("File path must start with /");
 
-        if(path.charAt(path.length()-1)=='/') path = path.substring(0, path.length()-1);
+        if(path.charAt(path.length()-1)=='/' && path.length()>1) path = path.substring(0, path.length()-1);
 
         shell.run("busybox ls \"" + path + "\" -d -l; echo ENDOFLS");
         String buffer = getLastLine(out, "ENDOFLS");
@@ -61,10 +62,12 @@ public class RootFile{
         //Isolate absolute path and name
         this.name = path.substring(path.lastIndexOf('/') + 1);
         this.absolutePath = isFile() ? path.substring(0, path.lastIndexOf('/')) : path;
+        Log.d("TEST", "Absolute path: " + absolutePath);
 
         if(buffer.contains("No such")){
             this.absolutePath = path.substring(0, path.lastIndexOf('/'));
             this.name = path.substring(path.lastIndexOf('/') + 1);
+            Log.d("TEST", "Absolute path: " + absolutePath);
             return;
         }
 
@@ -94,6 +97,10 @@ public class RootFile{
     }
     String getAbsolutePath(){ return absolutePath; }
     String getName(){ return name; }
+    String getParentPath(){
+        if(absolutePath.equals("/")) return "";
+        else return absolutePath.substring(0, absolutePath.lastIndexOf('/') + 1);
+    }
     boolean exists(){ return exists; }
     boolean isFile(){ return isFile; }
     boolean isDirectory(){ return isDirectory; }
@@ -149,7 +156,7 @@ public class RootFile{
             return result;
         }
         Shell shell2 = getFreeShell();
-        shell2.run("busybox ls -l " + absolutePath + "; echo ENDOFLS");
+        shell2.run("busybox ls -l \"" + absolutePath + "\"; echo ENDOFLS");
         BufferedReader out2 = shell2.getShell_out();
         try{
             String buffer = null;
@@ -178,7 +185,7 @@ public class RootFile{
                 }
                 if(!full_name.contains("->")){
                     if(debug) Log.d("HIJACKER/RootFile", "Found " + full_name);
-                    result.add(new RootFile(this.absolutePath + "/" + full_name));
+                    result.add(new RootFile(absolutePath + (absolutePath.length()==1 ? "" : '/') + full_name));
                 }
 
                 buffer = out2.readLine();

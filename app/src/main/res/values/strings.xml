@@ -23,6 +23,7 @@
     <string name="filter">Filter</string>
     <string name="clear">Clear</string>
     <string name="settings">Settings</string>
+    <string name="select">Select</string>
 
     <!-- APDialog (xml) -->
     <string name="mac">MAC:</string>

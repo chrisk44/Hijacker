@@ -113,6 +113,7 @@ public class MainActivity extends AppCompatActivity{
     static Menu menu;
     static MyListAdapter adapter;
     static CustomActionAdapter custom_action_adapter;
+    static FileExplorerAdapter file_explorer_adapter;
     static SharedPreferences pref;
     static SharedPreferences.Editor pref_edit;
     static ClipboardManager clipboard;
@@ -160,6 +161,8 @@ public class MainActivity extends AppCompatActivity{
         adapter.setNotifyOnChange(true);
         custom_action_adapter = new CustomActionAdapter();
         custom_action_adapter.setNotifyOnChange(true);
+        file_explorer_adapter = new FileExplorerAdapter();
+        file_explorer_adapter.setNotifyOnChange(true);
         setContentView(R.layout.activity_main);
         setSupportActionBar((Toolbar) findViewById(R.id.my_toolbar));
         setup();
@@ -1173,6 +1176,41 @@ public class MainActivity extends AppCompatActivity{
         @Override
         public int getCount(){
             return CustomAction.cmds.size();
+        }
+    }
+    class FileExplorerAdapter extends ArrayAdapter<RootFile>{
+        FileExplorerAdapter(){
+            super(MainActivity.this, R.layout.explorer_item);
+        }
+
+        @Override
+        public View getView(int position, View convertView, ViewGroup parent){
+            // get a view to work with
+            View itemview = convertView;
+            if(itemview==null){
+                itemview = getLayoutInflater().inflate(R.layout.explorer_item, parent, false);
+            }
+
+            // find the item to work with
+            RootFile currentItem = FileExplorerDialog.list.get(position);
+
+            TextView firstText = (TextView) itemview.findViewById(R.id.explorer_item_tv);
+            firstText.setText(currentItem.getName());
+
+            //Image
+            ImageView iv = (ImageView) itemview.findViewById(R.id.explorer_iv);
+            if(currentItem.isFile()){
+                iv.setImageResource(R.drawable.file);
+            }else{
+                iv.setImageResource(R.drawable.folder);
+            }
+
+            return itemview;
+        }
+
+        @Override
+        public int getCount(){
+            return FileExplorerDialog.list.size();
         }
     }
     public void onAPStats(View v){ new StatsDialog().show(mFragmentManager, "StatsDialog"); }
