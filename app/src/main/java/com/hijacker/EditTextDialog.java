@@ -28,28 +28,21 @@ import android.widget.EditText;
 
 import static com.hijacker.MainActivity.background;
 
-public class CustomAPDialog extends DialogFragment {
-    static final int FOR_MDK=0, FOR_REAVER=1;
-    int mode;
+public class EditTextDialog extends DialogFragment {
+    String title = null, hint = null, result = null;
+    Runnable runnable = null;
     @Override
     public Dialog onCreateDialog(Bundle savedInstanceState) {
         AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
         final View view = getActivity().getLayoutInflater().inflate(R.layout.custom_ap_dialog, null);
 
+        if(title!=null) builder.setTitle(R.string.custom_ap_title);
+        if(hint!=null) ((EditText)view.findViewById(R.id.edit_text)).setHint(hint);
         builder.setView(view);
-        builder.setTitle(R.string.custom_ap_title);
         builder.setPositiveButton(R.string.ok, new DialogInterface.OnClickListener() {
             public void onClick(DialogInterface dialog, int id) {
-                String mac = ((EditText) view.findViewById(R.id.custom_mac)).getText().toString();
-                if(mode==FOR_REAVER){
-                    ReaverFragment.ap = null;
-                    ReaverFragment.custom_mac = mac;
-                    ReaverFragment.select_button.setText(mac);
-                }else if(mode==FOR_MDK){
-                    MDKFragment.ados_ap = null;
-                    MDKFragment.custom_mac = mac;
-                    MDKFragment.select_button.setText(mac);
-                }
+                result = ((EditText) view.findViewById(R.id.custom_mac)).getText().toString();
+                if(runnable!=null) runnable.run();
             }
         });
         builder.setNegativeButton(R.string.cancel, new DialogInterface.OnClickListener() {
@@ -63,5 +56,14 @@ public class CustomAPDialog extends DialogFragment {
     @Override
     public void show(FragmentManager fragmentManager, String tag){
         if(!background) super.show(fragmentManager, tag);
+    }
+    void setRunnable(Runnable runnable){
+        this.runnable = runnable;
+    }
+    void setTitle(String title){
+        this.title = title;
+    }
+    void setHint(String hint){
+        this.hint = hint;
     }
 }

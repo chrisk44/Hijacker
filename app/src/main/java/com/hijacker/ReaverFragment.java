@@ -42,7 +42,6 @@ import java.io.InputStreamReader;
 import java.io.PrintWriter;
 
 import static android.widget.Toast.LENGTH_SHORT;
-import static com.hijacker.CustomAPDialog.FOR_REAVER;
 import static com.hijacker.MainActivity.FRAGMENT_REAVER;
 import static com.hijacker.MainActivity.PROCESS_AIRODUMP;
 import static com.hijacker.MainActivity.PROCESS_REAVER;
@@ -123,9 +122,18 @@ public class ReaverFragment extends Fragment{
                             select_button.setText(ap.essid + " (" + ap.mac + ')');
                         }else{
                             //Clcked custom
-                            CustomAPDialog dialog = new CustomAPDialog();
-                            dialog.mode = FOR_REAVER;
-                            dialog.show(mFragmentManager, "CustomAPDialog");
+                            final EditTextDialog dialog = new EditTextDialog();
+                            dialog.setTitle(getString(R.string.custom_ap_title));
+                            dialog.setHint(getString(R.string.mac_address));
+                            dialog.setRunnable(new Runnable(){
+                                @Override
+                                public void run(){
+                                    ap = null;
+                                    custom_mac = dialog.result;
+                                    select_button.setText(dialog.result);
+                                }
+                            });
+                            dialog.show(mFragmentManager, "EditTextDialog");
                         }
                         return true;
                     }

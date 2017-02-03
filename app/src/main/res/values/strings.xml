@@ -89,11 +89,6 @@
     <string name="station">Station</string>
     <string name="kill_process_on_stop">Has process to kill when implicitly stopping the action</string>
 
-    <!-- CustomAPDialog -->
-    <string name="custom_ap_title">Custom AP</string>
-    <string name="mac_address">MAC Address</string>
-    <string name="custom_chroot_cmd_illegal">The custom command can\'t contain the character \'</string>
-
     <!-- DisclaimerDialog -->
     <string name="disclaimer_title">Disclaimer</string>
     <string name="disclaimer">It is extremely illegal to use this application against networks for which you don\'t have permission.
@@ -115,6 +110,10 @@
     <string name="output_file_exists">File already exists. Long click to overwrite.</string>
     <string name="output_file_cant_write">Can\'t write to that file</string>
     <string name="output_file_exported">Exported</string>
+
+    <!-- FileExplorerDialog -->
+    <string name="folder_name">Folder name</string>
+    <string name="folder_exists">A folder with this name already exists</string>
 
     <!-- FiltersDialog (xml) -->
     <string name="show_ap">Show Access Points</string>
@@ -202,6 +201,8 @@
     <string name="ad_hoc">Ad-hoc</string>
     <string name="select_enc">Select at least one encryption</string>
     <string name="select_type">Select at least one type of network</string>
+    <string name="custom_ap_title">Custom AP</string>
+    <string name="mac_address">MAC Address</string>
 
     <!-- ReaverFragment -->
     <string name="select_ap">Select Access Point</string>
@@ -216,6 +217,7 @@
         The command \"source monstart-nh\" will be executed in chroot. !!!!!!</string>
     <string name="pin_delay">PIN delay</string>
     <string name="locked_delay">Locked Delay</string>
+    <string name="custom_chroot_cmd_illegal">The custom command can\'t contain the character \'</string>
 
     <!-- RestoreFirmwareDialog -->
     <string name="restore">Restore</string>

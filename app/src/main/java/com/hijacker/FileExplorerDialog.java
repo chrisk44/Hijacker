@@ -27,6 +27,7 @@ import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ImageButton;
 import android.widget.ListView;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import java.util.ArrayList;
@@ -43,6 +44,7 @@ public class FileExplorerDialog extends DialogFragment{
     static RootFile result = null;
     ListView listView;
     ImageButton backButton, newFolderButton, saveButton;
+    TextView currentDir;
     Runnable onSelect = null, onCancel = null;
     RootFile start = null, current = null;
     int toSelect = 0;
@@ -51,6 +53,7 @@ public class FileExplorerDialog extends DialogFragment{
         AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
         View view = getActivity().getLayoutInflater().inflate(R.layout.file_explorer, null);
 
+        currentDir = (TextView)view.findViewById(R.id.currentDir);
         backButton = (ImageButton)view.findViewById(R.id.backButton);
         backButton.setOnClickListener(new View.OnClickListener(){
             @Override
@@ -59,15 +62,29 @@ public class FileExplorerDialog extends DialogFragment{
             }
         });
         newFolderButton = (ImageButton)view.findViewById(R.id.newFolderButton);
-        newFolderButton.setEnabled(toSelect==SELECT_DIR);
+        newFolderButton.setVisibility(toSelect==SELECT_DIR ? View.VISIBLE : View.INVISIBLE);
         newFolderButton.setOnClickListener(new View.OnClickListener(){
             @Override
             public void onClick(View v){
-
+                final EditTextDialog dialog = new EditTextDialog();
+                dialog.setTitle(getString(R.string.folder_name));
+                dialog.setRunnable(new Runnable(){
+                    @Override
+                    public void run(){
+                        RootFile newFolder = new RootFile(currentDir + "/" + dialog.result);
+                        if(newFolder.exists()){
+                            Toast.makeText(getActivity(), getString(R.string.folder_exists), Toast.LENGTH_SHORT).show();
+                        }else{
+                            newFolder.mkdir();
+                            goToDirectory(newFolder);
+                        }
+                    }
+                });
+                dialog.show(getFragmentManager(), "EditTextDialog");
             }
         });
         saveButton = (ImageButton)view.findViewById(R.id.saveButton);
-        saveButton.setEnabled(toSelect==SELECT_NEW_FILE);
+        saveButton.setVisibility(toSelect==SELECT_NEW_FILE ? View.VISIBLE : View.INVISIBLE);
         saveButton.setOnClickListener(new View.OnClickListener(){
             @Override
             public void onClick(View v){
@@ -130,6 +147,7 @@ public class FileExplorerDialog extends DialogFragment{
         });
         file_explorer_adapter.notifyDataSetChanged();
         backButton.setEnabled(!current.getParentPath().equals(""));
+        currentDir.setText(current.getAbsolutePath());
     }
     void onSelect(RootFile file){
         result = file;

@@ -33,7 +33,6 @@ import android.widget.Toast;
 
 import java.io.File;
 
-import static com.hijacker.CustomAPDialog.FOR_MDK;
 import static com.hijacker.MainActivity.FRAGMENT_MDK;
 import static com.hijacker.MainActivity.MDK_ADOS;
 import static com.hijacker.MainActivity.MDK_BF;
@@ -49,7 +48,7 @@ public class MDKFragment extends Fragment{
     View v;
     static AP ados_ap=null;
     static Switch bf_switch, ados_switch;
-    static Button select_button;
+    Button select_button;
     static String custom_mac=null, ssid_file=null;
     static boolean managed=true, adhoc=true, opn=true, wep=true, tkip=true, aes=true;
     static boolean bf=false, ados=false;
@@ -154,9 +153,18 @@ public class MDKFragment extends Fragment{
                             select_button.setText(ados_ap.essid + " (" + ados_ap.mac + ')');
                         }else{
                             //Clcked custom
-                            CustomAPDialog dialog = new CustomAPDialog();
-                            dialog.mode = FOR_MDK;
-                            dialog.show(mFragmentManager, "CustomAPDialog");
+                            final EditTextDialog dialog = new EditTextDialog();
+                            dialog.setTitle(getString(R.string.custom_ap_title));
+                            dialog.setHint(getString(R.string.mac_address));
+                            dialog.setRunnable(new Runnable(){
+                                @Override
+                                public void run(){
+                                    ados_ap = null;
+                                    custom_mac = dialog.result;
+                                    select_button.setText(dialog.result);
+                                }
+                            });
+                            dialog.show(mFragmentManager, "EditTextDialog");
                         }
                         return true;
                     }
