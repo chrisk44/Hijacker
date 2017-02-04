@@ -694,8 +694,13 @@ public class MainActivity extends AppCompatActivity{
                 break;
             case PROCESS_MDK:
                 if(currentFragment==FRAGMENT_MDK){
-                    MDKFragment.bf_switch.setChecked(false);
-                    MDKFragment.ados_switch.setChecked(false);
+                    runInHandler(new Runnable(){
+                        @Override
+                        public void run(){
+                            MDKFragment.bf_switch.setChecked(false);
+                            MDKFragment.ados_switch.setChecked(false);
+                        }
+                    });
                 }
                 ados = false;
                 bf = false;
