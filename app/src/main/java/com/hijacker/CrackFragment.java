@@ -43,6 +43,7 @@ import java.io.InputStreamReader;
 import static com.hijacker.MainActivity.FRAGMENT_CRACK;
 import static com.hijacker.MainActivity.PROCESS_AIRCRACK;
 import static com.hijacker.MainActivity.aircrack_dir;
+import static com.hijacker.MainActivity.busybox;
 import static com.hijacker.MainActivity.cap_dir;
 import static com.hijacker.MainActivity.currentFragment;
 import static com.hijacker.MainActivity.debug;
@@ -234,7 +235,7 @@ public class CrackFragment extends Fragment{
             ((EditText)v.findViewById(R.id.capfile)).setText(capfile_text);
         }else{
             Shell shell = Shell.getFreeShell();
-            shell.run("busybox ls -1 " + cap_dir + "/handshake-*.cap; echo ENDOFLS");
+            shell.run(busybox + " ls -1 " + cap_dir + "/handshake-*.cap; echo ENDOFLS");
             capfile = getLastLine(shell.getShell_out(), "ENDOFLS");
             if(!capfile.equals("ENDOFLS") && capfile.charAt(0)!='l'){
                 ((EditText)v.findViewById(R.id.capfile)).setText(capfile);

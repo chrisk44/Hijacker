@@ -41,7 +41,9 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 
+import static com.hijacker.MainActivity.BUFFER_SIZE;
 import static com.hijacker.MainActivity.PROCESS_AIRODUMP;
+import static com.hijacker.MainActivity.busybox;
 import static com.hijacker.MainActivity.debug;
 import static com.hijacker.MainActivity.firm_backup_file;
 import static com.hijacker.MainActivity.getDirectory;
@@ -152,7 +154,7 @@ public class InstallFirmwareDialog extends DialogFragment {
                     util_location = getDirectory(util_location);
 
                     if(check(firm_location, util_location, false, v)){
-                        shell.run("strings " + firm_location + "fw_bcmdhd.bin | busybox grep \"FWID:\"; echo ENDOFSTRINGS");
+                        shell.run("strings " + firm_location + "fw_bcmdhd.bin | " + busybox + " grep \"FWID:\"; echo ENDOFSTRINGS");
                         String result = getLastLine(shell.getShell_out(), "ENDOFSTRINGS");
                         result = result.substring(0, 4);
 
@@ -172,7 +174,7 @@ public class InstallFirmwareDialog extends DialogFragment {
                     positiveButton.setActivated(false);
                     ProgressBar progress = (ProgressBar)view.findViewById(R.id.install_firm_progress);
                     progress.setIndeterminate(true);
-                    shell.run("busybox find /system/ -type f -name \"fw_bcmdhd.bin\"; echo ENDOFFIND");
+                    shell.run(busybox + " find /system/ -type f -name \"fw_bcmdhd.bin\"; echo ENDOFFIND");
 
                     String lastline = getLastLine(shell.getShell_out(), "ENDOFFIND");
                     if(lastline.equals("ENDOFFIND")){
@@ -226,10 +228,10 @@ public class InstallFirmwareDialog extends DialogFragment {
             Log.d("HIJACKER/InstFirmware", "Installing firmware in " + firm_location);
             Log.d("HIJACKER/InstFirmware", "Installing utility in " + util_location);
         }
-        shell.run("busybox mount -o rw,remount,rw /system");
+        shell.run(busybox + " mount -o rw,remount,rw /system");
         extract("fw_bcmdhd.bin", firm_location);
         extract("nexutil", util_location);
-        shell.run("busybox mount -o ro,remount,ro /system");
+        shell.run(busybox + " mount -o ro,remount,ro /system");
 
         Toast.makeText(getActivity(), R.string.installed_firm_util, Toast.LENGTH_SHORT).show();
         wifiManager.setWifiEnabled(true);
@@ -261,7 +263,7 @@ public class InstallFirmwareDialog extends DialogFragment {
             try{
                 InputStream in = getResources().getAssets().open(filename);
                 FileOutputStream out = new FileOutputStream(f);
-                byte[] buf = new byte[1024];
+                byte[] buf = new byte[BUFFER_SIZE];
                 int len;
                 while((len = in.read(buf))>0){
                     out.write(buf, 0, len);

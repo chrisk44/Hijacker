@@ -27,6 +27,7 @@ import android.content.ClipboardManager;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
@@ -82,6 +83,7 @@ import static com.hijacker.Shell.getFreeShell;
 import static com.hijacker.Shell.runOne;
 
 public class MainActivity extends AppCompatActivity{
+    static final int BUFFER_SIZE = 1048576;
     static final int AIREPLAY_DEAUTH = 1, AIREPLAY_WEP = 2;
     static final int FRAGMENT_AIRODUMP = 0, FRAGMENT_MDK = 1, FRAGMENT_CRACK = 2,
             FRAGMENT_REAVER = 3, FRAGMENT_CUSTOM=4, FRAGMENT_SETTINGS = 5;                     //These need to correspond to the items in the drawer
@@ -120,7 +122,7 @@ public class MainActivity extends AppCompatActivity{
     static NotificationCompat.Builder notif, error_notif, handshake_notif;
     static NotificationManager mNotificationManager;
     static FragmentManager mFragmentManager;
-    static String path, firm_backup_file, version, arch;             //path: App files path (ends with .../files)
+    static String path, firm_backup_file, version, arch, busybox;             //path: App files path (ends with .../files)
     static boolean init=false;      //True on first run to swap the dialogs for initialization
     static ActionBar actionBar;
     private GoogleApiClient client;
@@ -384,25 +386,6 @@ public class MainActivity extends AppCompatActivity{
 
         //Extract and verify oui.txt for Manufacturer look-up
         extract("oui.txt", path, false);
-        File oui = new File(path + "/oui.txt");
-        if(!oui.exists()){
-            ErrorDialog dialog = new ErrorDialog();
-            dialog.setMessage(getString(R.string.oui_not_found));
-            dialog.show(mFragmentManager, "ErrorDialog");
-        }
-
-        //Install busybox
-        if(arch.equals("armv7l")){
-            if(new File("/su").exists()){
-                if(debug) Log.d("HIJACKER/onCreate", "Installing busybox in /su/xbin...");
-                extract("busybox", path, false);
-                Shell shell = getFreeShell();
-                shell.run("cp " + path + "/busybox /su/xbin/busybox");
-                shell.run("chmod 755 /su/xbin/busybox");
-                shell.done();
-                if(debug) Log.d("HIJACKER/onCreate", "Installed busybox in /su/xbin");
-            }else if(debug) Log.d("HIJACKER/onCreate", "No /su to install busybox");
-        }else if(debug) Log.d("HIJACKER/onCreate", "Cannot install busybox, arch is " + arch);
 
         //Thread to wait for the drawer to be initialized, so that the first option (airodump) can be highlighted
         new Thread(new Runnable(){      //Thread to wait until the drawer is initialized and then highlight airodump
@@ -430,16 +413,6 @@ public class MainActivity extends AppCompatActivity{
         //First start
         if(!pref.getBoolean("disclaimer", false)){
             new DisclaimerDialog().show(mFragmentManager, "Disclaimer");
-            //Check for busybox
-            Shell shell = getFreeShell();
-            shell.run("busybox; echo ENDOFBUSYBOX");
-            if(getLastLine(shell.getShell_out(), "ENDOFBUSYBOX").equals("ENDOFBUSYBOX")){
-                ErrorDialog dialog = new ErrorDialog();
-                dialog.setTitle(getString(R.string.busybox_notfound_title));
-                dialog.setMessage(getString(R.string.busybox_notfound));
-                dialog.show(mFragmentManager, "ErrorDialog");
-            }
-            shell.done();
             //Check for SuperSU
             if(!new File("/su").exists()){
                 ErrorDialog dialog = new ErrorDialog();
@@ -463,7 +436,7 @@ public class MainActivity extends AppCompatActivity{
             InputStream in = getResources().getAssets().open(filename);
             FileOutputStream out = new FileOutputStream(f);
 
-            byte[] buf = new byte[1024];
+            byte[] buf = new byte[BUFFER_SIZE];
             int len;
             while((len = in.read(buf))>0){
                 out.write(buf, 0, len);
@@ -508,6 +481,16 @@ public class MainActivity extends AppCompatActivity{
                 return;
             }
         }
+        PackageInfo info = null;
+        try{
+            info = getPackageManager().getPackageInfo(this.getPackageName(), 0);
+        }catch(PackageManager.NameNotFoundException ignored){}
+        if(bin.list().length==19 && lib.list().length==1 && info!=null){
+            if(info.versionCode<=pref.getInt("tools_version", 0)){
+                if(debug) Log.d("HIJACKER/installTools", "Tools already installed");
+                return;
+            }
+        }
         String tools_location = path + "/bin/";
         String lib_location = path + "/lib/";
         extract("airbase-ng", tools_location, true);
@@ -530,6 +513,17 @@ public class MainActivity extends AppCompatActivity{
         extract("wesside-ng", tools_location, true);
         extract("wpaclean", tools_location, true);
         extract("libfakeioctl.so", lib_location, true);
+
+        //Install busybox
+        if(arch.equals("armv7l")){
+            extract("busybox", path, true);
+        }else{
+            if(debug) Log.d("HIJACKER/installTools", "Cannot install busybox, arch is " + arch);
+            busybox = null;
+        }
+
+        pref_edit.putInt("tools_version", info.versionCode);
+        pref_edit.commit();
     }
 
     public static void _startAireplay(final String str){
@@ -626,7 +620,7 @@ public class MainActivity extends AppCompatActivity{
 
         Shell shell = getFreeShell();
         ArrayList<Integer> list = new ArrayList<>();
-        shell.run("busybox pidof " + process_name + "; echo ENDOFPIDOF");
+        shell.run(busybox + " pidof " + process_name + "; echo ENDOFPIDOF");
         BufferedReader out = shell.getShell_out();
         String buffer = null;
         try{
@@ -686,11 +680,11 @@ public class MainActivity extends AppCompatActivity{
                 });
                 Shell shell = getFreeShell();
                 if(delete_extra && aireplay_running==AIREPLAY_WEP){
-                    shell.run("busybox rm -rf " + cap_dir + "/wep_ivs-*.csv");
-                    shell.run("busybox rm -rf " + cap_dir + "/wep_ivs-*.netxml");
+                    shell.run(busybox + " rm -rf " + cap_dir + "/wep_ivs-*.csv");
+                    shell.run(busybox + " rm -rf " + cap_dir + "/wep_ivs-*.netxml");
                 }
                 progress_int = deauthWait;
-                shell.run("busybox kill $(busybox pidof aireplay-ng)");
+                shell.run(busybox + " kill $(" + busybox + " pidof aireplay-ng)");
                 shell.done();
                 if(is_ap==null && aireplay_running==AIREPLAY_DEAUTH){
                     //Aireplay was just deauthenticating so airodump has locked a channel, no more needed
@@ -705,18 +699,18 @@ public class MainActivity extends AppCompatActivity{
                 }
                 ados = false;
                 bf = false;
-                runOne("busybox kill $(busybox pidof mdk3)");
+                runOne(busybox + " kill $(" + busybox + " pidof mdk3)");
                 break;
             case PROCESS_AIRCRACK:
                 CrackFragment.cont = false;
-                runOne("busybox kill $(busybox pidof aircrack-ng)");
+                runOne(busybox + " kill $(" + busybox + " pidof aircrack-ng)");
                 break;
             case PROCESS_REAVER:
                 ReaverFragment.cont = false;
-                runOne("busybox kill $(busybox pidof reaver)");
+                runOne(busybox + " kill $(" + busybox + " pidof reaver)");
                 break;
             default:
-                runOne("busybox kill " + pr);
+                runOne(busybox + " kill " + pr);
                 break;
         }
         last_action = System.currentTimeMillis();
@@ -771,6 +765,7 @@ public class MainActivity extends AppCompatActivity{
         mFragmentManager = getFragmentManager();
         actionBar = getSupportActionBar();
         path = getFilesDir().getAbsolutePath();
+        busybox = path + "/busybox";
         firm_backup_file = Environment.getExternalStorageDirectory() + "/fw_bcmdhd.orig.bin";
 
         //Load defaults
@@ -1318,7 +1313,7 @@ public class MainActivity extends AppCompatActivity{
     static String getManuf(String mac){
         String temp = mac.subSequence(0, 2).toString() + mac.subSequence(3, 5).toString() + mac.subSequence(6, 8).toString();
         Shell shell = getFreeShell();
-        shell.run("busybox grep -m 1 -i " + temp + " " + path + "/oui.txt; echo ENDOFGREP");
+        shell.run(busybox + " grep -m 1 -i " + temp + " " + path + "/oui.txt; echo ENDOFGREP");
         String manuf = getLastLine(shell.getShell_out(), "ENDOFGREP");
         shell.done();
 

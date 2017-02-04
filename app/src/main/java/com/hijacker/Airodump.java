@@ -29,6 +29,7 @@ import static com.hijacker.MainActivity.adapter;
 import static com.hijacker.MainActivity.airodump_dir;
 import static com.hijacker.MainActivity.always_cap;
 import static com.hijacker.MainActivity.background;
+import static com.hijacker.MainActivity.busybox;
 import static com.hijacker.MainActivity.cap_dir;
 import static com.hijacker.MainActivity.completed;
 import static com.hijacker.MainActivity.debug;
@@ -269,7 +270,6 @@ public class Airodump{
             @Override
             public void run(){
                 if(menu!=null) menu.getItem(1).setIcon(R.drawable.run);
-                Tile.filter();
                 if(wpa_thread.isAlive()) progress.setIndeterminate(false);
             }
         });
@@ -279,10 +279,10 @@ public class Airodump{
             wpa_thread.interrupt();
         }
         if(delete_extra && always_cap){
-            runOne("busybox rm -rf " + cap_dir + "/cap-*.csv");
-            runOne("busybox rm -rf " + cap_dir + "/cap-*.netxml");
+            runOne(busybox + " rm -rf " + cap_dir + "/cap-*.csv");
+            runOne(busybox + " rm -rf " + cap_dir + "/cap-*.netxml");
         }
-        runOne("busybox kill $(busybox pidof airodump-ng)");
+        runOne(busybox + " kill $(" + busybox + " pidof airodump-ng)");
         last_action = System.currentTimeMillis();
         AP.saveData();
         ST.saveData();

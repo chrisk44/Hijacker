@@ -48,6 +48,7 @@ import java.util.ArrayList;
 import java.util.Date;
 
 public class SendLogActivity extends AppCompatActivity{
+    static String busybox;
     String filename, stackTrace;
     Process shell;
     PrintWriter shell_in;
@@ -58,6 +59,8 @@ public class SendLogActivity extends AppCompatActivity{
         requestWindowFeature(Window.FEATURE_NO_TITLE); // make a dialog without a titlebar
         setFinishOnTouchOutside(false); // prevent users from dismissing the dialog by tapping outside
         setContentView(R.layout.activity_send_log);
+
+        busybox = getFilesDir().getAbsolutePath() + "/busybox";
         stackTrace = getIntent().getStringExtra("exception");
         Log.e("HIJACKER/SendLog", stackTrace);
 
@@ -132,11 +135,11 @@ public class SendLogActivity extends AppCompatActivity{
             writer.write("\nStack trace:\n" + stackTrace + '\n');
 
             String cmd = "echo pref_file--------------------------------------; su -c cat /data/data/com.hijacker/shared_prefs/com.hijacker_preferences.xml;";
-            cmd += " echo app directory----------------------------------; busybox ls -lR " + getFilesDir().getAbsolutePath() + ';';
+            cmd += " echo app directory----------------------------------; " + busybox + " ls -lR " + getFilesDir().getAbsolutePath() + ';';
             cmd += " echo fw_bcmdhd--------------------------------------; su -c strings /vendor/firmware/fw_bcmdhd.bin | grep \"FWID:\";";
-            cmd += " echo ps---------------------------------------------; su -c ps | busybox grep -e air -e mdk -e reaver;";
-            cmd += " echo busybox----------------------------------------; busybox;";
-            cmd += " echo logcat-----------------------------------------; logcat -d -v time | busybox grep HIJACKER;";
+            cmd += " echo ps---------------------------------------------; su -c ps | " + busybox + " grep -e air -e mdk -e reaver;";
+            cmd += " echo busybox----------------------------------------; " + busybox + ";";
+            cmd += " echo logcat-----------------------------------------; logcat -d -v time | " + busybox + " grep HIJACKER;";
             cmd += " echo ENDOFLOG\n";
             Log.d("HIJACKER/SendLog", cmd);
             shell_in.print(cmd);                //Runtime.getRuntime().exec(cmd) just echos the cmd...
@@ -179,7 +182,7 @@ public class SendLogActivity extends AppCompatActivity{
                 "reaver",
                 "reaver-wash"
         };
-        String cmd = "busybox pidof";
+        String cmd = busybox + " pidof";
         for(String process_name : processes){
             cmd += ' ' + process_name;
         }

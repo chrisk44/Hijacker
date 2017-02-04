@@ -36,6 +36,7 @@ import java.util.ArrayList;
 import java.util.IllegalFormatFlagsException;
 import java.util.List;
 
+import static com.hijacker.MainActivity.busybox;
 import static com.hijacker.MainActivity.debug;
 import static com.hijacker.MainActivity.getLastLine;
 import static com.hijacker.Shell.getFreeShell;
@@ -53,7 +54,7 @@ public class RootFile{
 
         if(path.charAt(path.length()-1)=='/' && path.length()>1) path = path.substring(0, path.length()-1);
 
-        shell.run("busybox ls \"" + path + "\" -d -l; echo ENDOFLS");
+        shell.run(busybox + " ls \"" + path + "\" -d -l; echo ENDOFLS");
         String buffer = getLastLine(out, "ENDOFLS");
 
         if(buffer.equals("ENDOFLS")){
@@ -81,7 +82,7 @@ public class RootFile{
         }
 
         String temp[] = buffer.split(" ");
-        //0: type & permissions, 4: size, 5,6,7: some date, rest is name
+        //0: type & permissions, 4: size, 5,6,7: last edited date, rest is name
         if(temp[0].length()!=10){
             throw new IllegalFormatFlagsException(temp[0] + " is not how it should be");
         }
@@ -94,8 +95,6 @@ public class RootFile{
         }
 
         this.length = Integer.parseInt(temp[4]);
-
-        if(debug) Log.d("TEST", "Absolute path: " + absolutePath + ", name: " + name + ", parent path: " + parentPath + ", " + (isFile() ? "file" : "not_file") + " | " + (isDirectory() ? "directory" : "not directory"));
     }
     String getAbsolutePath(){ return absolutePath; }
     String getName(){ return name; }
@@ -111,7 +110,7 @@ public class RootFile{
     void createNewFile(){
         if(!exists()){
             if(absolutePath==null || name==null) throw new IllegalStateException("path or name is null");
-            shell.run("busybox touch \"" + absolutePath + "\"");
+            shell.run(busybox + " touch \"" + absolutePath + "\"");
             try{
                 while(!new RootFile(absolutePath).exists()){
                     Thread.sleep(10);
@@ -125,7 +124,7 @@ public class RootFile{
     void delete(){
         if(exists() && isFile()){
             if(absolutePath==null || name==null) throw new IllegalStateException("path or name is null");
-            shell.run("busybox rm \"" + absolutePath + "\"");
+            shell.run(busybox + " rm \"" + absolutePath + "\"");
             exists = false;
             isFile = false;
             length = -1;
@@ -137,7 +136,7 @@ public class RootFile{
     void mkdir(){
         if(!exists){
             if(absolutePath==null || name==null) throw new IllegalStateException("path or name is null");
-            shell.run("busybox mkdir \"" + absolutePath + "\"");
+            shell.run(busybox + " mkdir \"" + absolutePath + "\"");
             try{
                 while(!new RootFile(absolutePath).exists()){
                     Thread.sleep(10);
@@ -169,7 +168,7 @@ public class RootFile{
             return result;
         }
         Shell shell2 = getFreeShell();
-        shell2.run("busybox ls -l \"" + absolutePath + "\"; echo ENDOFLS");
+        shell2.run(busybox + " ls -l \"" + absolutePath + "\"; echo ENDOFLS");
         BufferedReader out2 = shell2.getShell_out();
         try{
             String buffer = null;
@@ -196,8 +195,7 @@ public class RootFile{
                 if(full_name.charAt(full_name.length()-1)==' '){
                     full_name = full_name.substring(0, full_name.length()-1);
                 }
-                if(!full_name.contains("->")){
-                    if(debug) Log.d("HIJACKER/RootFile", "Found " + full_name);
+                if(!full_name.contains(" -> ")){
                     result.add(new RootFile(absolutePath + (absolutePath.length()==1 ? "" : '/') + full_name));
                 }
 

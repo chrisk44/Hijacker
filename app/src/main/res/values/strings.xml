@@ -178,8 +178,6 @@
     <string name="su_notfound_title">SuperSU not found!</string>
     <string name="su_notfound">You might be rooted, but at the moment, this application requires SuperSU to function properly.
         You can continue if you believe that your root solution will work. Please don\'t report bugs.</string>
-    <string name="busybox_notfound_title">Busybox not found!</string>
-    <string name="busybox_notfound">There is no busybox installed on your device. This application requires busybox to function properly.</string>
     <string name="bin_not_created">Directory \'bin\' could not be created</string>
     <string name="lib_not_created">Directory \'lib\' could not be created</string>
     <string name="not_armv7l">This device is not armv7l or aarch64 architecture. The included tools cannot be used.

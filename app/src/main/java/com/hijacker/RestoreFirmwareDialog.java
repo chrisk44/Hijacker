@@ -35,6 +35,7 @@ import android.widget.Toast;
 
 import java.io.File;
 
+import static com.hijacker.MainActivity.busybox;
 import static com.hijacker.MainActivity.debug;
 import static com.hijacker.MainActivity.background;
 import static com.hijacker.MainActivity.firm_backup_file;
@@ -110,9 +111,9 @@ public class RestoreFirmwareDialog extends DialogFragment {
                         WifiManager wifiManager = (WifiManager) getActivity().getSystemService(Context.WIFI_SERVICE);
                         wifiManager.setWifiEnabled(false);
 
-                        shell.run("busybox mount -o rw,remount,rw /system");
+                        shell.run(busybox + " mount -o rw,remount,rw /system");
                         shell.run("cp " + firm_backup_file + " " + firm_location + "fw_bcmdhd.bin");
-                        shell.run("busybox mount -o ro,remount,ro /system");
+                        shell.run(busybox + " mount -o ro,remount,ro /system");
 
                         Toast.makeText(getActivity(), R.string.restored, Toast.LENGTH_SHORT).show();
                         wifiManager.setWifiEnabled(true);
