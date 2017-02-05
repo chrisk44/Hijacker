@@ -211,6 +211,13 @@ public class RootFile{
 
         return result;
     }
+    void write(String str){
+        //Appends string str to the file
+        if(!this.isFile()) throw new IllegalStateException("This is not a file");
+        if(!this.exists()) throw new IllegalStateException("File doesn't exist");
+
+        shell.run(busybox + " echo \"" + str + "\" >> " + this.absolutePath);
+    }
     static void init(){
         shell = getFreeShell();
         out = shell.getShell_out();

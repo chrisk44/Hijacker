@@ -26,6 +26,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ListView;
 import android.widget.PopupMenu;
+import android.widget.Toast;
 
 import static com.hijacker.AP.WEP;
 import static com.hijacker.AP.WPA;
@@ -43,6 +44,7 @@ import static com.hijacker.MainActivity.mFragmentManager;
 import static com.hijacker.MainActivity.prefix;
 import static com.hijacker.MainActivity.refreshDrawer;
 import static com.hijacker.MainActivity.startMdk;
+import static com.hijacker.MainActivity.target_deauth;
 
 public class MyListFragment extends ListFragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -114,7 +116,8 @@ public class MyListFragment extends ListFragment {
                                     switch(item.getItemId()){
                                         case 0:
                                             //Disconnect
-                                            clicked.ap.disconnectAll();
+                                            if(!target_deauth || clicked.ap.clients.size()>0) clicked.ap.disconnectAll();
+                                            else Toast.makeText(getActivity(), getString(R.string.target_deauth_no_clients), Toast.LENGTH_LONG).show();
                                             break;
                                         case 1:
                                             //Disconnect client

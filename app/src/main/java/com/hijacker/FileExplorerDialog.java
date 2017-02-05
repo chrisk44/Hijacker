@@ -124,7 +124,7 @@ public class FileExplorerDialog extends DialogFragment{
     }
     void goToDirectory(RootFile file){
         while(!file.exists()){
-            file = new RootFile(start.getParentPath());
+            file = new RootFile(file.getParentPath());
         }
         current = file;
         list = file.listFiles();

@@ -55,9 +55,9 @@ import static com.hijacker.MainActivity.stop;
 
 public class CrackFragment extends Fragment{
     static final int WPA=2, WEP=1;
-    View v;
+    View fragmentView;
     TextView console;
-    EditText cap_edittext, wordlist_edittext;
+    EditText cap_et, wordlist_et;
     Button button;
     static int mode;
     static Thread thread;
@@ -66,15 +66,15 @@ public class CrackFragment extends Fragment{
     static String capfile, wordlist, console_text, capfile_text=null, wordlist_text=null;
     @Override
     public View onCreateView(LayoutInflater inflater, final ViewGroup container, Bundle savedInstanceState){
-        v = inflater.inflate(R.layout.crack_fragment, container, false);
-        console = (TextView)v.findViewById(R.id.console);
+        fragmentView = inflater.inflate(R.layout.crack_fragment, container, false);
+        console = (TextView)fragmentView.findViewById(R.id.console);
         console.setText("");
         console.setMovementMethod(new ScrollingMovementMethod());
 
-        cap_edittext = (EditText)v.findViewById(R.id.capfile);
-        wordlist_edittext = (EditText)v.findViewById(R.id.wordlist);
+        cap_et = (EditText)fragmentView.findViewById(R.id.capfile);
+        wordlist_et = (EditText)fragmentView.findViewById(R.id.wordlist);
 
-        final RadioGroup wep_rg = (RadioGroup)v.findViewById(R.id.wep_rg);
+        final RadioGroup wep_rg = (RadioGroup)fragmentView.findViewById(R.id.wep_rg);
         for (int i = 0; i < wep_rg.getChildCount(); i++) {
             //Disable all the WEP options
             wep_rg.getChildAt(i).setEnabled(false);
@@ -121,7 +121,7 @@ public class CrackFragment extends Fragment{
         };
         thread = new Thread(runnable);
 
-        ((RadioButton)v.findViewById(R.id.wep_rb)).setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener(){
+        ((RadioButton)fragmentView.findViewById(R.id.wep_rb)).setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener(){
             @Override
             public void onCheckedChanged(CompoundButton compoundButton, boolean b){
                 for (int i = 0; i < wep_rg.getChildCount(); i++) {
@@ -130,31 +130,31 @@ public class CrackFragment extends Fragment{
                 }
             }
         });
-        button = (Button)v.findViewById(R.id.start);
+        button = (Button)fragmentView.findViewById(R.id.start);
         button.setOnClickListener(new View.OnClickListener(){
             @Override
             public void onClick(View view){
-                capfile = cap_edittext.getText().toString();
-                wordlist = wordlist_edittext.getText().toString();
+                capfile = cap_et.getText().toString();
+                wordlist = wordlist_et.getText().toString();
                 File cap = new File(capfile);
                 File word = new File(wordlist);
                 if(thread.isAlive()){
                     cont = false;
                 }else if(!cap.exists() || !cap.isFile()){
-                    Snackbar.make(v, getString(R.string.cap_notfound), Snackbar.LENGTH_LONG).show();
+                    Snackbar.make(fragmentView, getString(R.string.cap_notfound), Snackbar.LENGTH_LONG).show();
                 }else if(!word.exists() || !word.isFile()){
-                    Snackbar.make(v, getString(R.string.wordlist_notfound), Snackbar.LENGTH_LONG).show();
+                    Snackbar.make(fragmentView, getString(R.string.wordlist_notfound), Snackbar.LENGTH_LONG).show();
                 }else{
-                    RadioGroup temp = (RadioGroup)v.findViewById(R.id.radio_group);
+                    RadioGroup temp = (RadioGroup)fragmentView.findViewById(R.id.radio_group);
                     if(temp.getCheckedRadioButtonId()==-1){
                         //Mode not selected
-                        Snackbar.make(v, getString(R.string.select_wpa_wep), Snackbar.LENGTH_SHORT).show();
+                        Snackbar.make(fragmentView, getString(R.string.select_wpa_wep), Snackbar.LENGTH_SHORT).show();
                     }else if(temp.getCheckedRadioButtonId()==R.id.wep_rb &&
-                            ((RadioGroup)v.findViewById(R.id.wep_rg)).getCheckedRadioButtonId()==-1){
+                            ((RadioGroup)fragmentView.findViewById(R.id.wep_rg)).getCheckedRadioButtonId()==-1){
                         //If wep is selected, we need to have a wep bit length selection
-                        Snackbar.make(v, getString(R.string.select_wep_bits), Snackbar.LENGTH_SHORT).show();
+                        Snackbar.make(fragmentView, getString(R.string.select_wep_bits), Snackbar.LENGTH_SHORT).show();
                     }else{
-                        switch(((RadioGroup) v.findViewById(R.id.radio_group)).getCheckedRadioButtonId()){
+                        switch(temp.getCheckedRadioButtonId()){
                             case R.id.wpa_rb:
                                 //WPA
                                 mode = WPA;
@@ -173,7 +173,7 @@ public class CrackFragment extends Fragment{
                 }
             }
         });
-        v.findViewById(R.id.cap_fe_btn).setOnClickListener(new View.OnClickListener(){
+        fragmentView.findViewById(R.id.cap_fe_btn).setOnClickListener(new View.OnClickListener(){
             @Override
             public void onClick(View v){
                 final FileExplorerDialog dialog = new FileExplorerDialog();
@@ -182,13 +182,13 @@ public class CrackFragment extends Fragment{
                 dialog.setOnSelect(new Runnable(){
                     @Override
                     public void run(){
-                        cap_edittext.setText(dialog.result.getAbsolutePath());
+                        cap_et.setText(dialog.result.getAbsolutePath());
                     }
                 });
                 dialog.show(getFragmentManager(), "FileExplorerDialog");
             }
         });
-        v.findViewById(R.id.wordlist_fe_btn).setOnClickListener(new View.OnClickListener(){
+        fragmentView.findViewById(R.id.wordlist_fe_btn).setOnClickListener(new View.OnClickListener(){
             @Override
             public void onClick(View v){
                 final FileExplorerDialog dialog = new FileExplorerDialog();
@@ -197,14 +197,14 @@ public class CrackFragment extends Fragment{
                 dialog.setOnSelect(new Runnable(){
                     @Override
                     public void run(){
-                        wordlist_edittext.setText(dialog.result.getAbsolutePath());
+                        wordlist_et.setText(dialog.result.getAbsolutePath());
                     }
                 });
                 dialog.show(getFragmentManager(), "FileExplorerDialog");
             }
         });
 
-        return v;
+        return fragmentView;
     }
     public Handler stop = new Handler(){
         public void handleMessage(Message msg){
@@ -232,17 +232,17 @@ public class CrackFragment extends Fragment{
         super.onResume();
         currentFragment = FRAGMENT_CRACK;
         if(capfile_text!=null){
-            ((EditText)v.findViewById(R.id.capfile)).setText(capfile_text);
+            ((EditText)fragmentView.findViewById(R.id.capfile)).setText(capfile_text);
         }else{
             Shell shell = Shell.getFreeShell();
             shell.run(busybox + " ls -1 " + cap_dir + "/handshake-*.cap; echo ENDOFLS");
             capfile = getLastLine(shell.getShell_out(), "ENDOFLS");
             if(!capfile.equals("ENDOFLS") && capfile.charAt(0)!='l'){
-                ((EditText)v.findViewById(R.id.capfile)).setText(capfile);
+                ((EditText)fragmentView.findViewById(R.id.capfile)).setText(capfile);
             }
             shell.done();
         }
-        if(wordlist_text!=null) ((EditText)v.findViewById(R.id.wordlist)).setText(wordlist_text);
+        if(wordlist_text!=null) ((EditText)fragmentView.findViewById(R.id.wordlist)).setText(wordlist_text);
         console.setText(console_text);
         refreshDrawer();
     }
@@ -250,7 +250,7 @@ public class CrackFragment extends Fragment{
     public void onPause(){
         super.onPause();
         console_text = console.getText().toString();
-        capfile_text = ((EditText)v.findViewById(R.id.capfile)).getText().toString();
-        wordlist_text = ((EditText)v.findViewById(R.id.wordlist)).getText().toString();
+        capfile_text = cap_et.getText().toString();
+        wordlist_text = wordlist_et.getText().toString();
     }
 }

@@ -57,24 +57,26 @@ import static com.hijacker.MainActivity.path;
 import static com.hijacker.MainActivity.stop;
 
 public class InstallFirmwareDialog extends DialogFragment {
-    View view;
+    View dialogView;
     Shell shell;
     EditText firm_edittext, util_edittext;
+    CheckBox backup_cb;
     @Override
     public Dialog onCreateDialog(Bundle savedInstanceState) {
         AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
-        view = getActivity().getLayoutInflater().inflate(R.layout.install_firmware, null);
+        dialogView = getActivity().getLayoutInflater().inflate(R.layout.install_firmware, null);
+
+        firm_edittext = (EditText) dialogView.findViewById(R.id.firm_location);
+        util_edittext = (EditText) dialogView.findViewById(R.id.util_location);
+        backup_cb = (CheckBox) dialogView.findViewById(R.id.backup);
 
         //Adjust directories
         if(!(new File("/su").exists())){
-            ((EditText)view.findViewById(R.id.util_location)).setText("/system/xbin");
+            util_edittext.setText("/system/xbin");
         }
-        ((CheckBox) view.findViewById(R.id.backup)).setChecked(!(new File(firm_backup_file).exists()));
+        backup_cb.setChecked(!(new File(firm_backup_file).exists()));
 
-        firm_edittext = (EditText) view.findViewById(R.id.firm_location);
-        util_edittext = (EditText) view.findViewById(R.id.util_location);
-
-        view.findViewById(R.id.firm_fe_btn).setOnClickListener(new View.OnClickListener(){
+        dialogView.findViewById(R.id.firm_fe_btn).setOnClickListener(new View.OnClickListener(){
             @Override
             public void onClick(View v){
                 final FileExplorerDialog dialog = new FileExplorerDialog();
@@ -88,7 +90,7 @@ public class InstallFirmwareDialog extends DialogFragment {
                 dialog.show(getFragmentManager(), "FileExplorerDialog");
             }
         });
-        view.findViewById(R.id.util_fe_btn).setOnClickListener(new View.OnClickListener(){
+        dialogView.findViewById(R.id.util_fe_btn).setOnClickListener(new View.OnClickListener(){
             @Override
             public void onClick(View v){
                 final FileExplorerDialog dialog = new FileExplorerDialog();
@@ -105,7 +107,7 @@ public class InstallFirmwareDialog extends DialogFragment {
 
         shell = Shell.getFreeShell();
 
-        builder.setView(view);
+        builder.setView(dialogView);
         builder.setTitle(R.string.install_nexmon_title);
         builder.setNegativeButton(R.string.cancel, new DialogInterface.OnClickListener() {
             @Override
@@ -138,7 +140,7 @@ public class InstallFirmwareDialog extends DialogFragment {
                     firm_location = getDirectory(firm_location);
                     util_location = getDirectory(util_location);
 
-                    if(check(firm_location, util_location, true, v)){
+                    if(check(firm_location, util_location, true)){
                         install(firm_location, util_location);
                         dismissAllowingStateLoss();
                     }
@@ -153,7 +155,7 @@ public class InstallFirmwareDialog extends DialogFragment {
                     firm_location = getDirectory(firm_location);
                     util_location = getDirectory(util_location);
 
-                    if(check(firm_location, util_location, false, v)){
+                    if(check(firm_location, util_location, false)){
                         shell.run("strings " + firm_location + "fw_bcmdhd.bin | " + busybox + " grep \"FWID:\"; echo ENDOFSTRINGS");
                         String result = getLastLine(shell.getShell_out(), "ENDOFSTRINGS");
                         result = result.substring(0, 4);
@@ -172,7 +174,7 @@ public class InstallFirmwareDialog extends DialogFragment {
                 @Override
                 public void onClick(View v) {
                     positiveButton.setActivated(false);
-                    ProgressBar progress = (ProgressBar)view.findViewById(R.id.install_firm_progress);
+                    ProgressBar progress = (ProgressBar)dialogView.findViewById(R.id.install_firm_progress);
                     progress.setIndeterminate(true);
                     shell.run(busybox + " find /system/ -type f -name \"fw_bcmdhd.bin\"; echo ENDOFFIND");
 
@@ -213,7 +215,7 @@ public class InstallFirmwareDialog extends DialogFragment {
         WifiManager wifiManager = (WifiManager) getActivity().getSystemService(Context.WIFI_SERVICE);
         wifiManager.setWifiEnabled(false);
         if(debug) Log.d("HIJACKER/InstFirmware", "Backing up firmware from " + firm_location);
-        if(((CheckBox)view.findViewById(R.id.backup)).isChecked()){
+        if(backup_cb.isChecked()){
             if(new File(firm_backup_file).exists()){
                 Toast.makeText(getActivity(), R.string.backup_exists, Toast.LENGTH_SHORT).show();
             }else{
@@ -238,20 +240,28 @@ public class InstallFirmwareDialog extends DialogFragment {
 
         if(start_airodump) Airodump.startClean();
     }
-    boolean check(String firm_location, String util_location, boolean override, View v){
+    boolean check(String firm_location, String util_location, boolean override){
+        if(firm_location.equals("")){
+            Snackbar.make(dialogView, getString(R.string.firm_location_empty), Snackbar.LENGTH_SHORT).show();
+            return false;
+        }
+        if(util_location.equals("")){
+            Snackbar.make(dialogView, getString(R.string.util_location_empty), Snackbar.LENGTH_SHORT).show();
+            return false;
+        }
         File firm = new File(firm_location);
         File util = new File(util_location);
         if(!firm.exists()){
-            Snackbar.make(v, R.string.dir_notfound_firm, Snackbar.LENGTH_SHORT).show();
+            Snackbar.make(dialogView, R.string.dir_notfound_firm, Snackbar.LENGTH_SHORT).show();
             return false;
         }else if(!(new File(firm_location + "fw_bcmdhd.bin").exists())){
-            Snackbar.make(v, R.string.firm_notfound, Snackbar.LENGTH_SHORT).show();
+            Snackbar.make(dialogView, R.string.firm_notfound, Snackbar.LENGTH_SHORT).show();
             return false;
         }else if(!util.exists()){
-            Snackbar.make(v, R.string.dir_notfound_util, Snackbar.LENGTH_SHORT).show();
+            Snackbar.make(dialogView, R.string.dir_notfound_util, Snackbar.LENGTH_SHORT).show();
             return false;
         }else if(!override && (util_location.contains("system") || firm_location.contains("system"))){
-            Snackbar.make(v, R.string.path_contains_system, Snackbar.LENGTH_LONG).show();
+            Snackbar.make(dialogView, R.string.path_contains_system, Snackbar.LENGTH_LONG).show();
             return false;
         }
         return true;

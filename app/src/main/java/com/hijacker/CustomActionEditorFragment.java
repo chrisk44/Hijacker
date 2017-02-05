@@ -24,6 +24,7 @@ import android.support.design.widget.Snackbar;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.CompoundButton;
 import android.widget.EditText;
@@ -42,53 +43,64 @@ import static com.hijacker.MainActivity.mFragmentManager;
 import static com.hijacker.MainActivity.refreshDrawer;
 
 public class CustomActionEditorFragment extends Fragment{
-    View v;
+    View fragmentView;
+    EditText title_et, start_cmd_et, stop_cmd_et, process_name_et;
+    CheckBox requirement_cb, has_process_name_cb;
+    Button save_btn;
     CustomAction action;
     @Override
     public View onCreateView(LayoutInflater inflater, final ViewGroup container, Bundle savedInstanceState){
-        v = inflater.inflate(R.layout.custom_action_editor, container, false);
+        fragmentView = inflater.inflate(R.layout.custom_action_editor, container, false);
 
-        ((RadioGroup)v.findViewById(R.id.radio_group)).setOnCheckedChangeListener(new RadioGroup.OnCheckedChangeListener(){
+        title_et = (EditText)fragmentView.findViewById(R.id.title);
+        start_cmd_et = (EditText)fragmentView.findViewById(R.id.start_cmd);
+        stop_cmd_et = (EditText)fragmentView.findViewById(R.id.stop_cmd);
+        process_name_et = (EditText)fragmentView.findViewById(R.id.process_name);
+        requirement_cb = (CheckBox)fragmentView.findViewById(R.id.requirement);
+        has_process_name_cb = (CheckBox)fragmentView.findViewById(R.id.has_process_name);
+        save_btn = (Button)fragmentView.findViewById(R.id.save_button);
+
+        ((RadioGroup)fragmentView.findViewById(R.id.radio_group)).setOnCheckedChangeListener(new RadioGroup.OnCheckedChangeListener(){
             @Override
             public void onCheckedChanged(RadioGroup radioGroup, int i){
-                v.findViewById(R.id.title).setEnabled(true);
-                v.findViewById(R.id.start_cmd).setEnabled(true);
-                v.findViewById(R.id.stop_cmd).setEnabled(true);
-                v.findViewById(R.id.requirement).setEnabled(true);
-                v.findViewById(R.id.save_button).setEnabled(true);
-                v.findViewById(R.id.has_process_name).setEnabled(true);
-                ((CheckBox)v.findViewById(R.id.requirement)).setText(i==R.id.st_rb ? R.string.requires_associated : R.string.requires_clients);
+                title_et.setEnabled(true);
+                start_cmd_et.setEnabled(true);
+                stop_cmd_et.setEnabled(true);
+                requirement_cb.setEnabled(true);
+                has_process_name_cb.setEnabled(true);
+                save_btn.setEnabled(true);
+                requirement_cb.setText(i==R.id.st_rb ? R.string.requires_associated : R.string.requires_clients);
             }
         });
 
-        ((CheckBox)v.findViewById(R.id.has_process_name)).setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener(){
+        has_process_name_cb.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener(){
             @Override
             public void onCheckedChanged(CompoundButton buttonView, boolean isChecked){
-                v.findViewById(R.id.process_name).setEnabled(isChecked);
+                process_name_et.setEnabled(isChecked);
             }
         });
 
-        (v.findViewById(R.id.save_button)).setOnClickListener(new View.OnClickListener(){
+        save_btn.setOnClickListener(new View.OnClickListener(){
             @Override
             public void onClick(View view){
-                String title = ((EditText)v.findViewById(R.id.title)).getText().toString();
-                String start_cmd = ((EditText)v.findViewById(R.id.start_cmd)).getText().toString();
-                String stop_cmd = ((EditText)v.findViewById(R.id.stop_cmd)).getText().toString();
-                String process_name = ((EditText)v.findViewById(R.id.process_name)).getText().toString();
+                String title = title_et.getText().toString();
+                String start_cmd = start_cmd_et.getText().toString();
+                String stop_cmd = stop_cmd_et.getText().toString();
+                String process_name = process_name_et.getText().toString();
                 if(title.equals("")){
-                    Snackbar.make(v, getString(R.string.title_empty), Snackbar.LENGTH_SHORT).show();
+                    Snackbar.make(fragmentView, getString(R.string.title_empty), Snackbar.LENGTH_SHORT).show();
                 }else if(start_cmd.equals("")){
-                    Snackbar.make(v, getString(R.string.start_cmd_empty), Snackbar.LENGTH_SHORT).show();
+                    Snackbar.make(fragmentView, getString(R.string.start_cmd_empty), Snackbar.LENGTH_SHORT).show();
                 }else if(title.contains("\n")){
-                    Snackbar.make(v, getString(R.string.title_newline), Snackbar.LENGTH_SHORT).show();
+                    Snackbar.make(fragmentView, getString(R.string.title_newline), Snackbar.LENGTH_SHORT).show();
                 }else if(start_cmd.contains("\n")){
-                    Snackbar.make(v, getString(R.string.start_cmd_newline), Snackbar.LENGTH_SHORT).show();
+                    Snackbar.make(fragmentView, getString(R.string.start_cmd_newline), Snackbar.LENGTH_SHORT).show();
                 }else if(stop_cmd.contains("\n")){
-                    Snackbar.make(v, getString(R.string.stop_cmd_newline), Snackbar.LENGTH_SHORT).show();
+                    Snackbar.make(fragmentView, getString(R.string.stop_cmd_newline), Snackbar.LENGTH_SHORT).show();
                 }else if(process_name.contains("\n")){
-                    Snackbar.make(v, getString(R.string.process_name_newline), Snackbar.LENGTH_SHORT).show();
-                }else if(process_name.equals("") && ((CheckBox)v.findViewById(R.id.has_process_name)).isChecked()){
-                    Snackbar.make(v, getString(R.string.process_name_empty), Snackbar.LENGTH_SHORT).show();
+                    Snackbar.make(fragmentView, getString(R.string.process_name_newline), Snackbar.LENGTH_SHORT).show();
+                }else if(process_name.equals("") && ((CheckBox)fragmentView.findViewById(R.id.has_process_name)).isChecked()){
+                    Snackbar.make(fragmentView, getString(R.string.process_name_empty), Snackbar.LENGTH_SHORT).show();
                 }else if(action!=null){
                     //update existing action
                     if(!action.getTitle().equals(title)){
@@ -100,12 +112,12 @@ public class CustomActionEditorFragment extends Fragment{
                     action.setStart_cmd(start_cmd);
                     action.setStop_cmd(stop_cmd);
                     if(action.getType()==TYPE_AP){
-                        action.setRequires_clients(((CheckBox) v.findViewById(R.id.requirement)).isChecked());
+                        action.setRequires_clients(requirement_cb.isChecked());
                     }else{
-                        action.setRequires_connected(((CheckBox) v.findViewById(R.id.requirement)).isChecked());
+                        action.setRequires_connected(requirement_cb.isChecked());
                     }
                     save();
-                    Snackbar.make(v, getString(R.string.saved) + " " + action.getTitle(), Snackbar.LENGTH_SHORT).show();
+                    Snackbar.make(fragmentView, getString(R.string.saved) + " " + action.getTitle(), Snackbar.LENGTH_SHORT).show();
                     mFragmentManager.popBackStackImmediate();
                 }else{
                     boolean found = false;
@@ -116,57 +128,57 @@ public class CustomActionEditorFragment extends Fragment{
                         }
                     }
                     if(found){
-                        Snackbar.make(v, getString(R.string.action_exists), Snackbar.LENGTH_SHORT).show();
+                        Snackbar.make(fragmentView, getString(R.string.action_exists), Snackbar.LENGTH_SHORT).show();
                     }else{
                         //create new action
-                        if(((RadioGroup) v.findViewById(R.id.radio_group)).getCheckedRadioButtonId()==R.id.ap_rb){
+                        if(((RadioGroup) fragmentView.findViewById(R.id.radio_group)).getCheckedRadioButtonId()==R.id.ap_rb){
                             //this action is for ap
                             action = new CustomAction(title, start_cmd, stop_cmd, process_name, TYPE_AP);
-                            action.setRequires_clients(((CheckBox) v.findViewById(R.id.requirement)).isChecked());
+                            action.setRequires_clients(requirement_cb.isChecked());
                         }else{
                             //this action is for st
                             action = new CustomAction(title, start_cmd, stop_cmd, process_name, TYPE_ST);
-                            action.setRequires_connected(((CheckBox) v.findViewById(R.id.requirement)).isChecked());
+                            action.setRequires_connected(requirement_cb.isChecked());
                         }
                         save();
-                        Snackbar.make(v, getString(R.string.saved) + " " + action.getTitle(), Snackbar.LENGTH_SHORT).show();
+                        Snackbar.make(fragmentView, getString(R.string.saved) + " " + action.getTitle(), Snackbar.LENGTH_SHORT).show();
                         mFragmentManager.popBackStackImmediate();
                     }
                 }
             }
         });
 
-        return v;
+        return fragmentView;
     }
     @Override
     public void onResume(){
         super.onResume();
         currentFragment = FRAGMENT_CUSTOM;
         if(action!=null){
-            ((EditText)v.findViewById(R.id.title)).setText(action.getTitle());
-            ((EditText)v.findViewById(R.id.start_cmd)).setText(action.getStart_cmd());
-            ((EditText)v.findViewById(R.id.stop_cmd)).setText(action.getStop_cmd());
+            title_et.setText(action.getTitle());
+            start_cmd_et.setText(action.getStart_cmd());
+            stop_cmd_et.setText(action.getStop_cmd());
             if(action.getType()==TYPE_AP){
-                ((RadioButton)v.findViewById(R.id.ap_rb)).setChecked(true);
-                v.findViewById(R.id.st_rb).setEnabled(false);
-                ((CheckBox)v.findViewById(R.id.requirement)).setChecked(action.requires_clients());
+                ((RadioButton)fragmentView.findViewById(R.id.ap_rb)).setChecked(true);
+                fragmentView.findViewById(R.id.st_rb).setEnabled(false);
+                requirement_cb.setChecked(action.requires_clients());
             }else{
-                ((RadioButton) v.findViewById(R.id.st_rb)).setChecked(true);
-                v.findViewById(R.id.ap_rb).setEnabled(false);
-                ((CheckBox)v.findViewById(R.id.requirement)).setChecked(action.requires_connected());
-                ((CheckBox)v.findViewById(R.id.requirement)).setText(R.string.requires_associated);
+                ((RadioButton) fragmentView.findViewById(R.id.st_rb)).setChecked(true);
+                fragmentView.findViewById(R.id.ap_rb).setEnabled(false);
+                requirement_cb.setChecked(action.requires_connected());
+                requirement_cb.setText(R.string.requires_associated);
             }
             if(action.hasProcessName()){
-                ((CheckBox)v.findViewById(R.id.has_process_name)).setChecked(true);
-                ((EditText)v.findViewById(R.id.process_name)).setText(action.getProcess_name());
+                has_process_name_cb.setChecked(true);
+                process_name_et.setText(action.getProcess_name());
             }
-            v.findViewById(R.id.title).setEnabled(true);
-            v.findViewById(R.id.start_cmd).setEnabled(true);
-            v.findViewById(R.id.stop_cmd).setEnabled(true);
-            v.findViewById(R.id.requirement).setEnabled(true);
-            v.findViewById(R.id.save_button).setEnabled(true);
-            v.findViewById(R.id.has_process_name).setEnabled(true);
-            v.findViewById(R.id.process_name).setEnabled(action.hasProcessName());
+            title_et.setEnabled(true);
+            start_cmd_et.setEnabled(true);
+            stop_cmd_et.setEnabled(true);
+            requirement_cb.setEnabled(true);
+            has_process_name_cb.setEnabled(true);
+            process_name_et.setEnabled(action.hasProcessName());
+            save_btn.setEnabled(true);
         }
 
         refreshDrawer();

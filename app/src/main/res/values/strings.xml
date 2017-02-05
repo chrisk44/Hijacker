@@ -97,6 +97,9 @@
     <string name="agree">I agree</string>
     <string name="not_agree">I don\'t agree</string>
 
+    <!-- EditTextDialog -->
+    <string name="field_empty">Text field is empty</string>
+
     <!-- ExitDialog -->
     <string name="exit_dialog_title">Exit?</string>
     <string name="exit_dialog_message">Airodump, aireplay and mdk will stop. Are you sure?</string>
@@ -110,6 +113,8 @@
     <string name="output_file_exists">File already exists. Long click to overwrite.</string>
     <string name="output_file_cant_write">Can\'t write to that file</string>
     <string name="output_file_exported">Exported</string>
+    <string name="filename_empty">Filename is empty</string>
+    <string name="file_not_created">File could not be created</string>
 
     <!-- FileExplorerDialog -->
     <string name="folder_name">Folder name</string>
@@ -152,6 +157,8 @@
     <string name="create_backup">Create Backup</string>
     <string name="fw_not_compatible">Your device does not seem to be compatible with Nexmon (BCM4339). Long click to override.</string>
     <string name="path_contains_system">Modifying the system partition can brick some devices. Long click to override.</string>
+    <string name="firm_location_empty">Firmware location is empty</string>
+    <string name="util_location_empty">Utility location is emtpy</string>
 
     <!-- IsolatedFragment (xml) -->
     <string name="crack">Crack</string>
@@ -190,6 +197,9 @@
         <string name="stopped_to_capture">Stopped aireplay to capture handshake…</string>
         <string name="handshake_captured">WPA handshake captured.</string>
         <string name="saved_in_file">Saved in file </string>
+
+    <!-- MyListFragment -->
+    <string name="target_deauth_no_clients">Can\'t start targeted deauthentication without any clients.</string>
 
     <!-- MDKFragment -->
     <string name="bf_title">Beacon Flooding</string>

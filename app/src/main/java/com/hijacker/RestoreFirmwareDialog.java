@@ -43,18 +43,18 @@ import static com.hijacker.MainActivity.getDirectory;
 import static com.hijacker.MainActivity.getLastLine;
 
 public class RestoreFirmwareDialog extends DialogFragment {
-    View view;
+    View dialogView;
     Shell shell;
-    EditText firm_edittext;
+    EditText firm_et;
     @Override
     public Dialog onCreateDialog(Bundle savedInstanceState) {
         shell = Shell.getFreeShell();
         AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
-        view = getActivity().getLayoutInflater().inflate(R.layout.restore_firmware, null);
+        dialogView = getActivity().getLayoutInflater().inflate(R.layout.restore_firmware, null);
 
-        firm_edittext = (EditText)view.findViewById(R.id.firm_location);
+        firm_et = (EditText)dialogView.findViewById(R.id.firm_location);
 
-        view.findViewById(R.id.firm_fe_btn).setOnClickListener(new View.OnClickListener(){
+        dialogView.findViewById(R.id.firm_fe_btn).setOnClickListener(new View.OnClickListener(){
             @Override
             public void onClick(View v){
                 final FileExplorerDialog dialog = new FileExplorerDialog();
@@ -62,14 +62,14 @@ public class RestoreFirmwareDialog extends DialogFragment {
                 dialog.setOnSelect(new Runnable(){
                     @Override
                     public void run(){
-                        firm_edittext.setText(dialog.result.getAbsolutePath());
+                        firm_et.setText(dialog.result.getAbsolutePath());
                     }
                 });
                 dialog.show(getFragmentManager(), "FileExplorerDialog");
             }
         });
 
-        builder.setView(view);
+        builder.setView(dialogView);
         builder.setTitle(R.string.restore_firmware);
         builder.setNegativeButton(R.string.cancel, new DialogInterface.OnClickListener() {
             @Override
@@ -98,14 +98,14 @@ public class RestoreFirmwareDialog extends DialogFragment {
             positiveButton.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    String firm_location = firm_edittext.getText().toString();
+                    String firm_location = firm_et.getText().toString();
                     firm_location = getDirectory(firm_location);
 
                     File firm = new File(firm_location);
                     if(!firm.exists()){
-                        Snackbar.make(v, R.string.dir_notfound_firm, Snackbar.LENGTH_SHORT).show();
+                        Snackbar.make(dialogView, R.string.dir_notfound_firm, Snackbar.LENGTH_SHORT).show();
                     }else if(!(new File(firm_location + "fw_bcmdhd.bin").exists())){
-                        Snackbar.make(v, R.string.firm_notfound, Snackbar.LENGTH_SHORT).show();
+                        Snackbar.make(dialogView, R.string.firm_notfound, Snackbar.LENGTH_SHORT).show();
                     }else{
                         if(debug) Log.d("HIJACKER/RestoreFirm", "Restoring firmware in " + firm_location);
                         WifiManager wifiManager = (WifiManager) getActivity().getSystemService(Context.WIFI_SERVICE);
@@ -125,15 +125,15 @@ public class RestoreFirmwareDialog extends DialogFragment {
                 @Override
                 public void onClick(View v) {
                     positiveButton.setActivated(false);
-                    ProgressBar progress = (ProgressBar)view.findViewById(R.id.install_firm_progress);
+                    ProgressBar progress = (ProgressBar)dialogView.findViewById(R.id.install_firm_progress);
                     progress.setIndeterminate(true);
                     shell.run("find /system/ -type f -name \"fw_bcmdhd.bin\"; echo ENDOFFIND");
                     String lastline = getLastLine(shell.getShell_out(), "ENDOFFIND");
                     if(lastline.equals("ENDOFFIND")){
-                        Snackbar.make(v, R.string.firm_notfound_bcm, Snackbar.LENGTH_LONG).show();
+                        Snackbar.make(dialogView, R.string.firm_notfound_bcm, Snackbar.LENGTH_LONG).show();
                     }else{
                         lastline = lastline.substring(0, lastline.length()-14);
-                        ((EditText)view.findViewById(R.id.firm_location)).setText(lastline);
+                        firm_et.setText(lastline);
                     }
                     progress.setIndeterminate(false);
 
