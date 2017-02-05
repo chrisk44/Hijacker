@@ -51,6 +51,7 @@ public class RootFile{
         if(path==null) throw new IllegalArgumentException("File path can't be null");
         if(path.length()==0) throw new IllegalArgumentException("File path has zero length");
         if(path.charAt(0)!='/') throw new IllegalArgumentException("File path must start with /");
+        if(path.contains("*")) throw new IllegalArgumentException("File path contains * character");
 
         if(path.charAt(path.length()-1)=='/' && path.length()>1) path = path.substring(0, path.length()-1);
 

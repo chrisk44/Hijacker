@@ -39,6 +39,7 @@ import android.os.Message;
 import android.preference.PreferenceManager;
 import android.support.design.widget.Snackbar;
 import android.support.v4.app.ActivityCompat;
+import android.support.v4.content.ContextCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
@@ -658,7 +659,7 @@ public class MainActivity extends AppCompatActivity{
                 return getPIDs("reaver");
             default:
                 Log.e("HIJACKER/getPIDs", "Method called with invalid pr code");
-                return null;
+                throw new UnsupportedOperationException("getPIDs() called with invalid pr code");
             }
     }
     public static void stop(int pr){
@@ -678,14 +679,8 @@ public class MainActivity extends AppCompatActivity{
                         }
                     }
                 });
-                Shell shell = getFreeShell();
-                if(delete_extra && aireplay_running==AIREPLAY_WEP){
-                    shell.run(busybox + " rm -rf " + cap_dir + "/wep_ivs-*.csv");
-                    shell.run(busybox + " rm -rf " + cap_dir + "/wep_ivs-*.netxml");
-                }
                 progress_int = deauthWait;
-                shell.run(busybox + " kill $(" + busybox + " pidof aireplay-ng)");
-                shell.done();
+                runOne(busybox + " kill $(" + busybox + " pidof aireplay-ng)");
                 if(is_ap==null && aireplay_running==AIREPLAY_DEAUTH){
                     //Aireplay was just deauthenticating so airodump has locked a channel, no more needed
                     Airodump.startClean();
@@ -1119,11 +1114,11 @@ public class MainActivity extends AppCompatActivity{
             ImageView iv = (ImageView) itemview.findViewById(R.id.iv);
             if(!current.type){
                 iv.setImageResource(R.drawable.st2);
-                firstText.setTextColor(getColor(current.st.isMarked ? R.color.colorAccent : android.R.color.white));
+                firstText.setTextColor(ContextCompat.getColor(getContext(), current.st.isMarked ? R.color.colorAccent : android.R.color.white));
             }else{
                 if(current.ap.isHidden) iv.setImageResource(R.drawable.ap_hidden);
                 else iv.setImageResource(R.drawable.ap2);
-                firstText.setTextColor(getColor(current.ap.isMarked ? R.color.colorAccent : android.R.color.white));
+                firstText.setTextColor(ContextCompat.getColor(getContext(), current.ap.isMarked ? R.color.colorAccent : android.R.color.white));
             }
 
             return itemview;

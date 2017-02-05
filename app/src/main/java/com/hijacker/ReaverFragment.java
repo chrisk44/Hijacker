@@ -36,7 +36,6 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import java.io.BufferedReader;
-import java.io.File;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
@@ -60,7 +59,6 @@ import static com.hijacker.MainActivity.reaver_dir;
 import static com.hijacker.MainActivity.refreshDrawer;
 import static com.hijacker.MainActivity.runInHandler;
 import static com.hijacker.MainActivity.stop;
-import static com.hijacker.Shell.runOne;
 
 public class ReaverFragment extends Fragment{
     View fragmentView;

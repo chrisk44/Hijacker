@@ -29,10 +29,7 @@ import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 
-import java.io.BufferedReader;
-import java.io.File;
 import java.io.IOException;
-import java.io.InputStreamReader;
 
 import static com.hijacker.MainActivity.PROCESS_AIREPLAY;
 import static com.hijacker.MainActivity.PROCESS_AIRODUMP;
@@ -121,7 +118,7 @@ public class TestDialog extends DialogFragment {
                 runInHandler(new Runnable(){        //test aireplay
                     @Override
                     public void run(){
-                        String cmd = "su -c " + prefix + " " + aireplay_dir + " --deauth 0 -a 11:22:33:44:55:66 " + iface;
+                        String cmd = "su -c " + prefix + " " + aireplay_dir + " -D --deauth 0 -a 11:22:33:44:55:66 " + iface;
                         Log.d("HIJACKER/test_thread", cmd);
                         try{
                             Runtime.getRuntime().exec(cmd);
@@ -232,7 +229,7 @@ public class TestDialog extends DialogFragment {
                 }
             }
         }
-    };;
+    };
     public Dialog onCreateDialog(Bundle savedInstanceState) {
         setCancelable(false);
         load();

@@ -253,7 +253,7 @@ public class Airodump{
             }
             cap_thread = new Thread(cap_runnable);
             cap_thread.start();
-        }
+        }else capFile = null;
         runInHandler(new Runnable(){
             @Override
             public void run(){
@@ -278,9 +278,13 @@ public class Airodump{
             wpacheckcont = false;
             wpa_thread.interrupt();
         }
-        if(delete_extra && always_cap){
-            runOne(busybox + " rm -rf " + cap_dir + "/cap-*.csv");
-            runOne(busybox + " rm -rf " + cap_dir + "/cap-*.netxml");
+        if(delete_extra && (forWPA || forWEP || always_cap)){
+            String file_prefix = getCapFile();
+            if(file_prefix!=null){
+                file_prefix = file_prefix.substring(0, file_prefix.lastIndexOf("."));
+                runOne(busybox + " rm -rf " + file_prefix + "*.csv");
+                runOne(busybox + " rm -rf " + file_prefix + "*.netxml");
+            }
         }
         runOne(busybox + " kill $(" + busybox + " pidof airodump-ng)");
         last_action = System.currentTimeMillis();
