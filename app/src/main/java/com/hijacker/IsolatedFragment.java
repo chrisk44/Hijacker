@@ -36,7 +36,6 @@ import static com.hijacker.AP.WPA;
 import static com.hijacker.AP.WPA2;
 import static com.hijacker.MainActivity.FRAGMENT_AIRODUMP;
 import static com.hijacker.MainActivity.PROCESS_AIREPLAY;
-import static com.hijacker.MainActivity.PROCESS_AIRODUMP;
 import static com.hijacker.MainActivity.aireplay_dir;
 import static com.hijacker.MainActivity.copy;
 import static com.hijacker.MainActivity.currentFragment;
@@ -44,25 +43,25 @@ import static com.hijacker.MainActivity.deauthWait;
 import static com.hijacker.MainActivity.debug;
 import static com.hijacker.MainActivity.iface;
 import static com.hijacker.MainActivity.isolate;
+import static com.hijacker.MainActivity.mFragmentManager;
 import static com.hijacker.MainActivity.menu;
 import static com.hijacker.MainActivity.prefix;
 import static com.hijacker.MainActivity.progress;
 import static com.hijacker.MainActivity.refreshDrawer;
-import static com.hijacker.MainActivity.startAirodump;
 import static com.hijacker.MainActivity.stop;
 import static com.hijacker.MainActivity.wpa_thread;
 
 public class IsolatedFragment extends Fragment{
-    View view;
     static AP is_ap;
-    TextView essid, manuf, mac, sec1, numbers, sec2;
     static Thread thread;
     static Runnable runnable;
     static boolean cont = false;
     static int exit_on;
+    View fragmentView;
+    TextView essid, manuf, mac, sec1, numbers, sec2;
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState){
-        view = inflater.inflate(R.layout.isolated_fragment, container, false);
+        fragmentView = inflater.inflate(R.layout.isolated_fragment, container, false);
 
         runnable = new Runnable(){
             @Override
@@ -78,14 +77,14 @@ public class IsolatedFragment extends Fragment{
         };
         thread = new Thread(runnable);
 
-        essid = (TextView)view.findViewById(R.id.essid);
-        manuf = (TextView)view.findViewById(R.id.manuf);
-        mac = (TextView)view.findViewById(R.id.mac);
-        sec1 = (TextView)view.findViewById(R.id.sec1);
-        numbers = (TextView)view.findViewById(R.id.numbers);
-        sec2 = (TextView)view.findViewById(R.id.sec2);
+        essid = (TextView)fragmentView.findViewById(R.id.essid);
+        manuf = (TextView)fragmentView.findViewById(R.id.manuf);
+        mac = (TextView)fragmentView.findViewById(R.id.mac);
+        sec1 = (TextView)fragmentView.findViewById(R.id.sec1);
+        numbers = (TextView)fragmentView.findViewById(R.id.numbers);
+        sec2 = (TextView)fragmentView.findViewById(R.id.sec2);
 
-        ListView listview = (ListView)view.findViewById(R.id.listview);
+        ListView listview = (ListView)fragmentView.findViewById(R.id.listview);
         listview.setAdapter(MainActivity.adapter);
         listview.setOnItemClickListener(new AdapterView.OnItemClickListener(){
             @Override
@@ -109,7 +108,7 @@ public class IsolatedFragment extends Fragment{
                         switch(item.getItemId()) {
                             case 0:
                                 //Info
-                                clicked.st.showInfo(getFragmentManager());
+                                clicked.st.showInfo(mFragmentManager);
                                 break;
                             case 1:
                                 //copy to clipboard
@@ -132,7 +131,7 @@ public class IsolatedFragment extends Fragment{
             }
         });
 
-        return view;
+        return fragmentView;
     }
     public Handler refresh = new Handler(){
         public void handleMessage(Message msg){
@@ -153,9 +152,9 @@ public class IsolatedFragment extends Fragment{
         refreshDrawer();
         thread = new Thread(runnable);
         thread.start();
-        ((Button)view.findViewById(R.id.crack)).setText(wpa_thread.isAlive() ? R.string.stop : R.string.crack);
-        view.findViewById(R.id.crack).setEnabled(is_ap.sec==WPA || is_ap.sec==WPA2 || is_ap.sec==WEP);
-        ((Button)view.findViewById(R.id.dos)).setText(MDKFragment.ados ? R.string.stop : R.string.dos);
+        ((Button)fragmentView.findViewById(R.id.crack)).setText(wpa_thread.isAlive() ? R.string.stop : R.string.crack);
+        fragmentView.findViewById(R.id.crack).setEnabled(is_ap.sec==WPA || is_ap.sec==WPA2 || is_ap.sec==WEP);
+        ((Button)fragmentView.findViewById(R.id.dos)).setText(MDKFragment.ados ? R.string.stop : R.string.dos);
         refresh.obtainMessage().sendToTarget();
         menu.findItem(R.id.reset).setVisible(false);
     }
@@ -170,12 +169,11 @@ public class IsolatedFragment extends Fragment{
     public void onDestroy(){
         super.onDestroy();
         cont = false;
-        if(getFragmentManager().getBackStackEntryCount()==exit_on){
+        if(mFragmentManager.getBackStackEntryCount()==exit_on){
             isolate(null);
             Tile.filter();
-            stop(PROCESS_AIRODUMP);
             stop(PROCESS_AIREPLAY);
-            startAirodump(null);
+            Airodump.startClean();
             progress.setIndeterminate(false);
             progress.setProgress(deauthWait);
         }

@@ -28,15 +28,31 @@
         android:paddingEnd="8dp"
         android:paddingStart="8dp"/>
 
-    <EditText
+    <LinearLayout
+        android:orientation="horizontal"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="@string/firm_location_default"
-        android:ems="10"
-        android:id="@+id/firm_location"
-        android:inputType="text"
-        android:paddingEnd="8dp"
-        android:paddingStart="8dp"/>
+        android:layout_height="wrap_content">
+
+        <EditText
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:text="@string/firm_location_default"
+            android:ems="10"
+            android:id="@+id/firm_location"
+            android:inputType="text"
+            android:paddingEnd="8dp"
+            android:layout_gravity="center_vertical"
+            android:paddingStart="8dp"
+            android:layout_weight="1"/>
+
+        <Button
+            style="?android:attr/buttonBarButtonStyle"
+            android:text="..."
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:id="@+id/firm_fe_btn"
+            android:layout_gravity="center_vertical"/>
+    </LinearLayout>
 
     <CheckBox
         android:text="@string/create_backup"
@@ -56,13 +72,30 @@
         android:paddingEnd="8dp"
         android:paddingStart="8dp"/>
 
-    <EditText
+    <LinearLayout
+        android:orientation="horizontal"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="@string/util_location_default"
-        android:ems="10"
-        android:id="@+id/util_location"
-        android:inputType="text"
-        android:paddingEnd="8dp"
-        android:paddingStart="8dp"/>
+        android:layout_height="wrap_content">
+
+        <EditText
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:text="@string/util_location_default"
+            android:ems="10"
+            android:id="@+id/util_location"
+            android:inputType="text"
+            android:paddingEnd="8dp"
+            android:paddingStart="8dp"
+            android:layout_gravity="center_vertical"
+            android:layout_weight="1"/>
+
+        <Button
+            style="?android:attr/buttonBarButtonStyle"
+            android:text="..."
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:id="@+id/util_fe_btn"
+            android:layout_gravity="center_vertical"/>
+    </LinearLayout>
+
 </LinearLayout>

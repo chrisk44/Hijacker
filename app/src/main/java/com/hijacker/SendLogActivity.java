@@ -47,9 +47,8 @@ import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.Date;
 
-import static com.hijacker.MainActivity.ps;
-
 public class SendLogActivity extends AppCompatActivity{
+    static String busybox;
     String filename, stackTrace;
     Process shell;
     PrintWriter shell_in;
@@ -60,6 +59,8 @@ public class SendLogActivity extends AppCompatActivity{
         requestWindowFeature(Window.FEATURE_NO_TITLE); // make a dialog without a titlebar
         setFinishOnTouchOutside(false); // prevent users from dismissing the dialog by tapping outside
         setContentView(R.layout.activity_send_log);
+
+        busybox = getFilesDir().getAbsolutePath() + "/busybox";
         stackTrace = getIntent().getStringExtra("exception");
         Log.e("HIJACKER/SendLog", stackTrace);
 
@@ -72,11 +73,8 @@ public class SendLogActivity extends AppCompatActivity{
         }
         shell_in = new PrintWriter(shell.getOutputStream());
         shell_out = new BufferedReader(new InputStreamReader(shell.getInputStream()));
-        if(shell_in==null || shell_out==null){
-            Log.e("HIJACKER/onCreate", "Error opening shell_in/shell_out");
-            Toast.makeText(this, "Couldn't start su shell to stop any remaining processes", Toast.LENGTH_LONG).show();
-            return;
-        }
+
+        stopAll();
 
         if(ContextCompat.checkSelfPermission(this, Manifest.permission.WRITE_EXTERNAL_STORAGE)==PackageManager.PERMISSION_DENIED){
             ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE}, 0);
@@ -100,8 +98,6 @@ public class SendLogActivity extends AppCompatActivity{
                 }catch(IOException ignored){}
             }
         }else Log.e("HIJACKER/SendLog", "WRITE_EXTERNAL_STORAGE permission denied");
-
-        stopAll();
     }
     private void sendLogFile(String fullName){
         Intent intent = new Intent (Intent.ACTION_SEND);
@@ -130,26 +126,22 @@ public class SendLogActivity extends AppCompatActivity{
         FileWriter writer = null;
         try{
             writer = new FileWriter(file, true);
-            writer.write("\n\n--------------------------------------------------------------------------------\n");
+            writer.write("\n--------------------------------------------------------------------------------\n");
             writer.write("Hijacker bug report - " + new Date().toString() + "\n\n");
-            writer.write("Android version: " +  Build.VERSION.SDK_INT + "\n");
-            writer.write("Device: " + model + "\n");
-            writer.write("App version: " + (info == null ? "(null)" : info.versionName) + "\n");
+            writer.write("Android version: " +  Build.VERSION.SDK_INT + '\n');
+            writer.write("Device: " + model + '\n');
+            writer.write("App version: " + (info == null ? "(null)" : info.versionName) + '\n');
+            writer.write("App data path: " + getFilesDir().getAbsolutePath() + '\n');
             writer.write("\nStack trace:\n" + stackTrace + '\n');
 
-            String cmd = "echo pref_file--------------------------------------; su -c cat /data/user/0/com.hijacker/shared_prefs/com.hijacker_preferences.xml;";
-            cmd += " echo ls_system-xbin---------------------------------; su -c ls /system/xbin | busybox grep -e air -e mdk -e reaver -e nexutil -e iw -e libfakeioctl.so -e busybox -e toolbox;";
-            cmd += " echo ls_su-xbin-------------------------------------; su -c ls /su/xbin | busybox grep -e air -e mdk -e reaver -e nexutil -e iw -e libfakeioctl.so -e busybox -e toolbox;";
-            cmd += " echo ls_vendor-lib----------------------------------; su -c ls /vendor/lib | busybox grep -e air -e mdk -e reaver -e nexutil -e iw -e libfakeioctl.so -e busybox -e toolbox;";
-            cmd += " echo ls_su-lib--------------------------------------; su -c ls /su/lib | busybox grep -e air -e mdk -e reaver -e nexutil -e iw -e libfakeioctl.so -e busybox -e toolbox;";
-            cmd += " echo ls_system-lib----------------------------------; su -c ls /system/lib | busybox grep -e air -e mdk -e reaver -e nexutil -e iw -e libfakeioctl.so -e busybox -e toolbox;";
+            String cmd = "echo pref_file--------------------------------------; su -c cat /data/data/com.hijacker/shared_prefs/com.hijacker_preferences.xml;";
+            cmd += " echo app directory----------------------------------; " + busybox + " ls -lR " + getFilesDir().getAbsolutePath() + ';';
             cmd += " echo fw_bcmdhd--------------------------------------; su -c strings /vendor/firmware/fw_bcmdhd.bin | grep \"FWID:\";";
-            cmd += " echo ps---------------------------------------------; su -c ps | busybox grep -e air -e mdk -e reaver;";
-            cmd += " echo busybox----------------------------------------; busybox;";
-            cmd += " echo toolbox----------------------------------------; toolbox;";
-            cmd += " echo logcat-----------------------------------------; logcat -d -v time | busybox grep HIJACKER;";
+            cmd += " echo ps---------------------------------------------; su -c ps | " + busybox + " grep -e air -e mdk -e reaver;";
+            cmd += " echo busybox----------------------------------------; " + busybox + ";";
+            cmd += " echo logcat-----------------------------------------; logcat -d -v time | " + busybox + " grep HIJACKER;";
             cmd += " echo ENDOFLOG\n";
-            Log.d("HIJACKER/cmd", cmd);
+            Log.d("HIJACKER/SendLog", cmd);
             shell_in.print(cmd);                //Runtime.getRuntime().exec(cmd) just echos the cmd...
             shell_in.flush();
             String buffer = shell_out.readLine();
@@ -182,20 +174,38 @@ public class SendLogActivity extends AppCompatActivity{
     }
     public void stopAll(){
         ArrayList<Integer> pids = new ArrayList<>();
+        String processes[] = {
+                "airodump-ng",
+                "aireplay-ng",
+                "aircrack-ng",
+                "mdk3",
+                "reaver",
+                "reaver-wash"
+        };
+        String cmd = busybox + " pidof";
+        for(String process_name : processes){
+            cmd += ' ' + process_name;
+        }
+        cmd += "; echo ENDOFPIDOF\n";
+        shell_in.print(cmd);
+        shell_in.flush();
+        String buffer = null;
         try{
-            int pid;
-            String s = null;
-            shell_in.print("toolbox ps | busybox grep -e air -e mdk -e reaver; echo ENDOFPS\n");
-            shell_in.flush();
-            while(s==null){ s = shell_out.readLine(); } //for some reason sometimes s remains null
-            while(!s.equals("ENDOFPS")){
-                pid = ps(s);
-                if(pid!=0){
-                    pids.add(pid);
+            while(buffer==null) buffer = shell_out.readLine();
+            while(!buffer.equals("ENDOFPIDOF")){
+                String[] temp = buffer.split(" ");
+                try{
+                    for(String tmp : temp){
+                        pids.add(Integer.parseInt(tmp));
+                    }
+                }catch(NumberFormatException e){
+                    Log.e("HIJACKER/SendLog", "Exception: " + e.toString());
                 }
-                s = shell_out.readLine();
+                buffer = shell_out.readLine();
             }
-        }catch(IOException e){ Log.e("HIJACKER/Exception", "Caught Exception in stopAll(): " + e.toString()); }
+        }catch(IOException e){
+            Log.e("HIJACKER/SendLog", "Exception: " + e.toString());
+        }
         if(pids.isEmpty()) Log.d("HIJACKER/stopAll", "Nothing found");
         else{
             for(int i = 0; i<pids.size(); i++){

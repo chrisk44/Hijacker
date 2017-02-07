@@ -23,7 +23,6 @@ import android.app.FragmentManager;
 import android.content.DialogInterface;
 import android.os.Bundle;
 import android.support.v7.app.AlertDialog;
-import android.util.Log;
 
 import static com.hijacker.MainActivity.mNotificationManager;
 import static com.hijacker.MainActivity.error_notif;
@@ -32,6 +31,7 @@ import static com.hijacker.MainActivity.watchdog_runnable;
 import static com.hijacker.MainActivity.watchdog_thread;
 
 public class ErrorDialog extends DialogFragment {
+    static String notification2_title;
     String message;
     String title=null;
     boolean watchdog=false;
@@ -41,7 +41,7 @@ public class ErrorDialog extends DialogFragment {
         AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
         builder.setPositiveButton(R.string.ok, new DialogInterface.OnClickListener() {
             public void onClick(DialogInterface dialog, int id) {
-                if(!watchdog_thread.isAlive() && watchdog){
+                if(watchdog){
                     watchdog_thread = new Thread(watchdog_runnable);
                     watchdog_thread.start();   //If the error was from there restart the thread
                 }
@@ -70,8 +70,10 @@ public class ErrorDialog extends DialogFragment {
         if(!background) super.show(fragmentManager, tag);
         else{
             if(this.watchdog){
-                error_notif.setContentTitle(getString(R.string.notification2_title));
+                error_notif.setContentTitle(notification2_title);
                 error_notif.setContentText(title);
+                watchdog_thread = new Thread(watchdog_runnable);
+                watchdog_thread.start();   //If the error was from there restart the thread
             }else{
                 error_notif.setContentTitle(title);
                 error_notif.setContentText(message);

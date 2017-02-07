@@ -31,6 +31,7 @@ import android.widget.PopupMenu;
 import static com.hijacker.MainActivity.FRAGMENT_CUSTOM;
 import static com.hijacker.MainActivity.currentFragment;
 import static com.hijacker.MainActivity.custom_action_adapter;
+import static com.hijacker.MainActivity.mFragmentManager;
 import static com.hijacker.MainActivity.refreshDrawer;
 
 public class CustomActionManagerFragment extends Fragment{
@@ -58,7 +59,7 @@ public class CustomActionManagerFragment extends Fragment{
                                 CustomActionEditorFragment fragment = new CustomActionEditorFragment();
                                 fragment.action = CustomAction.cmds.get(index);
 
-                                FragmentTransaction ft = getFragmentManager().beginTransaction();
+                                FragmentTransaction ft = mFragmentManager.beginTransaction();
                                 ft.replace(R.id.fragment1, fragment);
                                 ft.setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN);
                                 ft.addToBackStack(null);
@@ -68,7 +69,7 @@ public class CustomActionManagerFragment extends Fragment{
                                 //delete
                                 ActionDeleteDialog dialog = new ActionDeleteDialog();
                                 dialog.index = index;
-                                dialog.show(getFragmentManager(), "ActionDeleteDialog");
+                                dialog.show(mFragmentManager, "ActionDeleteDialog");
                                 break;
                         }
                         return true;
@@ -83,7 +84,7 @@ public class CustomActionManagerFragment extends Fragment{
             @Override
             public void onClick(View view){
                 //Open editor for new
-                FragmentTransaction ft = getFragmentManager().beginTransaction();
+                FragmentTransaction ft = mFragmentManager.beginTransaction();
                 ft.replace(R.id.fragment1, new CustomActionEditorFragment());
                 ft.setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN);
                 ft.addToBackStack(null);

@@ -39,6 +39,7 @@ import static com.hijacker.MainActivity.adapter;
 import static com.hijacker.MainActivity.ap_count;
 import static com.hijacker.MainActivity.clearing;
 import static com.hijacker.MainActivity.debug;
+import static com.hijacker.MainActivity.notification;
 import static com.hijacker.MainActivity.opn;
 import static com.hijacker.MainActivity.pwr_filter;
 import static com.hijacker.MainActivity.show_ap;
@@ -85,6 +86,7 @@ class Tile {
                 tiles.add(this);
                 adapter.add(this);
             }
+            onCountsChanged();
         }
     }
     void update(String s1, String s2, String s3, String s4){
@@ -103,6 +105,7 @@ class Tile {
                     tiles.add(this);
                     adapter.add(this);
                 }
+                onCountsChanged();
             }
         }else{
             this.check();
@@ -155,8 +158,7 @@ class Tile {
             }
         }
         sort();
-        ap_count.setText(Integer.toString(is_ap==null ? Tile.i : 1));
-        st_count.setText(Integer.toString(Tile.tiles.size() - Tile.i));
+        onCountsChanged();
     }
     static void sort(){
         //sort allTiles 0/i for APs and i/allTiles.size() for STs
@@ -242,5 +244,13 @@ class Tile {
         }
         toSort = false;
         adapter.notifyDataSetChanged();
+    }
+    static void onCountsChanged(){
+        ap_count.setText(Integer.toString(is_ap==null ? Tile.i : 1));
+        st_count.setText(Integer.toString(Tile.tiles.size() - Tile.i));
+        if(StatsDialog.isResumed){
+            StatsDialog.runnable.run();
+        }
+        notification();
     }
 }

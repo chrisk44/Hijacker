@@ -36,22 +36,22 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import java.io.BufferedReader;
-import java.io.File;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
 
 import static android.widget.Toast.LENGTH_SHORT;
-import static com.hijacker.CustomAPDialog.FOR_REAVER;
 import static com.hijacker.MainActivity.FRAGMENT_REAVER;
 import static com.hijacker.MainActivity.PROCESS_AIRODUMP;
 import static com.hijacker.MainActivity.PROCESS_REAVER;
+import static com.hijacker.MainActivity.background;
 import static com.hijacker.MainActivity.cont_on_fail;
 import static com.hijacker.MainActivity.currentFragment;
 import static com.hijacker.MainActivity.custom_chroot_cmd;
 import static com.hijacker.MainActivity.debug;
 import static com.hijacker.MainActivity.iface;
 import static com.hijacker.MainActivity.last_action;
+import static com.hijacker.MainActivity.mFragmentManager;
 import static com.hijacker.MainActivity.monstart;
 import static com.hijacker.MainActivity.prefix;
 import static com.hijacker.MainActivity.progress;
@@ -59,44 +59,48 @@ import static com.hijacker.MainActivity.reaver_dir;
 import static com.hijacker.MainActivity.refreshDrawer;
 import static com.hijacker.MainActivity.runInHandler;
 import static com.hijacker.MainActivity.stop;
-import static com.hijacker.Shell.runOne;
 
 public class ReaverFragment extends Fragment{
-    View v;
+    View fragmentView;
     static Button start_button, select_button;
     TextView console;
+    EditText pin_delay_et, locked_delay_et;
+    CheckBox pixie_dust_et, ignored_locked_cb, eap_fail_cb, small_dh_cb;
     static Thread thread;
     static Runnable runnable;
     static boolean cont=false;
     static String console_text = null, pin_delay="1", locked_delay="60", custom_mac=null;       //delays are always used as strings
-    static boolean ignore_locked, eap_fail, small_dh;
+    static boolean pixie_dust, ignore_locked, eap_fail, small_dh;
     static AP ap=null;
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState){
-        v = inflater.inflate(R.layout.reaver_fragment, container, false);
+        fragmentView = inflater.inflate(R.layout.reaver_fragment, container, false);
         setRetainInstance(true);
-        console = (TextView)v.findViewById(R.id.console);
+
+        console = (TextView)fragmentView.findViewById(R.id.console);
+        pin_delay_et = (EditText)fragmentView.findViewById(R.id.pin_delay);
+        locked_delay_et = (EditText)fragmentView.findViewById(R.id.locked_delay);
+        pixie_dust_et = (CheckBox)fragmentView.findViewById(R.id.pixie_dust);
+        ignored_locked_cb = (CheckBox)fragmentView.findViewById(R.id.ignore_locked);
+        eap_fail_cb = (CheckBox)fragmentView.findViewById(R.id.eap_fail);
+        small_dh_cb = (CheckBox)fragmentView.findViewById(R.id.small_dh);
+        select_button = (Button)fragmentView.findViewById(R.id.select_ap);
+        start_button = (Button)fragmentView.findViewById(R.id.start_button);
+
         console.setMovementMethod(new ScrollingMovementMethod());
 
-        runOne("chmod a+r " + MainActivity.chroot_dir);
-        File chroot_dir = new File(MainActivity.chroot_dir);
-        boolean kali_init = false;
-        try{
-            Process dc = Runtime.getRuntime().exec("ls /system/bin -1 | grep bootkali_init");
-            BufferedReader out = new BufferedReader(new InputStreamReader(dc.getInputStream()));
-            kali_init = out.readLine()!=null;
-        }catch(IOException ignored){}
+        RootFile chroot_dir = new RootFile(MainActivity.chroot_dir);
+        boolean kali_init = new RootFile("/system/bin/bootkali_init").exists();
         if(debug){
             Log.d("HIJACKER/ReaverFragment", "chroot_dir is " + Boolean.toString(chroot_dir.exists()));
             Log.d("HIJACKER/ReaverFragment", "kali_init is " + Boolean.toString(kali_init));
         }
         if(!chroot_dir.exists() || !kali_init){
-            v.findViewById(R.id.pixie_dust).setEnabled(false);
+            pixie_dust_et.setEnabled(false);
             if(!chroot_dir.exists()) Toast.makeText(getActivity(), getString(R.string.chroot_notfound), LENGTH_SHORT).show();
             if(!kali_init) Toast.makeText(getActivity(), getString(R.string.kali_notfound), LENGTH_SHORT).show();
         }
 
-        select_button = (Button)v.findViewById(R.id.select_ap);
         select_button.setOnClickListener(new View.OnClickListener(){
             @Override
             public void onClick(View view){
@@ -121,9 +125,18 @@ public class ReaverFragment extends Fragment{
                             select_button.setText(ap.essid + " (" + ap.mac + ')');
                         }else{
                             //Clcked custom
-                            CustomAPDialog dialog = new CustomAPDialog();
-                            dialog.mode = FOR_REAVER;
-                            dialog.show(getFragmentManager(), "CustomAPDialog");
+                            final EditTextDialog dialog = new EditTextDialog();
+                            dialog.setTitle(getString(R.string.custom_ap_title));
+                            dialog.setHint(getString(R.string.mac_address));
+                            dialog.setRunnable(new Runnable(){
+                                @Override
+                                public void run(){
+                                    ap = null;
+                                    custom_mac = dialog.result;
+                                    select_button.setText(dialog.result);
+                                }
+                            });
+                            dialog.show(mFragmentManager, "EditTextDialog");
                         }
                         return true;
                     }
@@ -138,25 +151,20 @@ public class ReaverFragment extends Fragment{
                 if(debug) Log.d("HIJACKER/ReaverFragment", "in thread");
                 try{
                     BufferedReader out;
-                    Message msg;
                     String args = "-i " + iface + " -vv";
                     args += ap==null ? " -b " + custom_mac : " -b " + ap.mac + " --channel " + ap.ch;
-                    args += " -d " + ((EditText)v.findViewById(R.id.pin_delay)).getText();
-                    args += " -l " + ((EditText)v.findViewById(R.id.locked_delay)).getText();
-                    if(((CheckBox)v.findViewById(R.id.ignore_locked)).isChecked()) args += " -L";
-                    if(((CheckBox)v.findViewById(R.id.eap_fail)).isChecked()) args += " -E";
-                    if(((CheckBox)v.findViewById(R.id.small_dh)).isChecked()) args += " -S";
+                    args += " -d " + pin_delay_et.getText();
+                    args += " -l " + locked_delay_et.getText();
+                    if(ignored_locked_cb.isChecked()) args += " -L";
+                    if(eap_fail_cb.isChecked()) args += " -E";
+                    if(small_dh_cb.isChecked()) args += " -S";
                     String cmd;
-                    if(((CheckBox)v.findViewById(R.id.pixie_dust)).isChecked()){
-                        msg = new Message();
-                        msg.obj = getString(R.string.chroot_warning);
-                        refresh.sendMessage(msg);
+                    if(pixie_dust_et.isChecked()){
+                        writeToConsole(getString(R.string.chroot_warning));
                         Runtime.getRuntime().exec("su -c bootkali_init");       //Make sure kali has booted
                         args += " -K 1";
                         cmd = "chroot " + MainActivity.chroot_dir + " /bin/bash -c \'" + get_chroot_env(getActivity()) + "reaver " + args + "\'";
-                        msg = new Message();
-                        msg.obj = "\nRunning: " + cmd + '\n';
-                        refresh.sendMessage(msg);
+                        writeToConsole("\nRunning: " + cmd + '\n');
                         ProcessBuilder pb = new ProcessBuilder("su");
                         pb.redirectErrorStream(true);
                         Process dc = pb.start();
@@ -166,9 +174,7 @@ public class ReaverFragment extends Fragment{
                         in.flush();
                     }else{
                         cmd = "su -c " + prefix + " " + reaver_dir + " " + args;
-                        msg = new Message();
-                        msg.obj = "Running: " + cmd;
-                        refresh.sendMessage(msg);
+                        writeToConsole("Running: " + cmd);
                         Process dc = Runtime.getRuntime().exec(cmd);
                         out = new BufferedReader(new InputStreamReader(dc.getInputStream()));
                     }
@@ -177,13 +183,9 @@ public class ReaverFragment extends Fragment{
                     cont = true;
                     String buffer;
                     while(cont && (buffer = out.readLine())!=null){
-                        msg = new Message();
-                        msg.obj = buffer;
-                        refresh.sendMessage(msg);
+                        writeToConsole(buffer);
                     }
-                    msg = new Message();
-                    msg.obj = "\nDone\n";
-                    refresh.sendMessage(msg);
+                    writeToConsole("\nDone\n");
                 }catch(IOException e){
                     Log.e("HIJACKER/Exception", "Caught Exception in ReaverFragment: " + e.toString());
                 }
@@ -193,13 +195,12 @@ public class ReaverFragment extends Fragment{
         };
         if(thread==null) thread = new Thread(runnable);
 
-        start_button = (Button)v.findViewById(R.id.start_button);
         start_button.setOnClickListener(new View.OnClickListener(){
             @Override
             public void onClick(View view){
                 if(!thread.isAlive()){
                     if(ap==null && custom_mac==null){
-                        Snackbar.make(v, select_button.getText(), Snackbar.LENGTH_LONG).show();
+                        Snackbar.make(fragmentView, select_button.getText(), Snackbar.LENGTH_LONG).show();
                     }else{
                         start_button.setText(R.string.stop);
                         cont = true;
@@ -213,7 +214,7 @@ public class ReaverFragment extends Fragment{
                 }
             }
         });
-        return v;
+        return fragmentView;
     }
     public Handler stop = new Handler(){
         public void handleMessage(Message msg){
@@ -225,20 +226,30 @@ public class ReaverFragment extends Fragment{
     };
     public Handler refresh = new Handler(){
         public void handleMessage(Message msg){
-            console.append((String)msg.obj + '\n');
+            if(currentFragment==FRAGMENT_REAVER && !background){
+                console.append((String)msg.obj + '\n');
+            }else{
+                console_text += (String)msg.obj + '\n';
+            }
         }
     };
+    void writeToConsole(String str){
+        Message msg = new Message();
+        msg.obj = str;
+        refresh.sendMessage(msg);
+    }
     @Override
     public void onResume() {
         super.onResume();
         currentFragment = FRAGMENT_REAVER;
         refreshDrawer();
         console.setText(console_text);
-        ((EditText)v.findViewById(R.id.pin_delay)).setText(pin_delay);
-        ((EditText)v.findViewById(R.id.locked_delay)).setText(locked_delay);
-        ((CheckBox)v.findViewById(R.id.ignore_locked)).setChecked(ignore_locked);
-        ((CheckBox)v.findViewById(R.id.eap_fail)).setChecked(eap_fail);
-        ((CheckBox)v.findViewById(R.id.small_dh)).setChecked(small_dh);
+        pin_delay_et.setText(pin_delay);
+        locked_delay_et.setText(locked_delay);
+        pixie_dust_et.setChecked(pixie_dust);
+        ignored_locked_cb.setChecked(ignore_locked);
+        eap_fail_cb.setChecked(eap_fail);
+        small_dh_cb.setChecked(small_dh);
         if(custom_mac!=null) select_button.setText(custom_mac);
         else if(ap!=null) select_button.setText(ap.essid + " (" + ap.mac + ')');
         else if(!AP.marked.isEmpty()){
@@ -251,11 +262,12 @@ public class ReaverFragment extends Fragment{
     public void onPause(){
         super.onPause();
         console_text = console.getText().toString();
-        pin_delay = ((EditText)v.findViewById(R.id.pin_delay)).getText().toString();
-        locked_delay = ((EditText)v.findViewById(R.id.locked_delay)).getText().toString();
-        ignore_locked = ((CheckBox)v.findViewById(R.id.ignore_locked)).isChecked();
-        eap_fail = ((CheckBox)v.findViewById(R.id.eap_fail)).isChecked();
-        small_dh = ((CheckBox)v.findViewById(R.id.small_dh)).isChecked();
+        pin_delay = pin_delay_et.getText().toString();
+        locked_delay = locked_delay_et.getText().toString();
+        pixie_dust = pixie_dust_et.isChecked();
+        ignore_locked = ignored_locked_cb.isChecked();
+        eap_fail = eap_fail_cb.isChecked();
+        small_dh = small_dh_cb.isChecked();
     }
     static String get_chroot_env(final Activity activity){
         // add strings here , they will be in the kali env

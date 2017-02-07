@@ -25,6 +25,7 @@ import android.os.Bundle;
 import android.support.v7.app.AlertDialog;
 
 import static com.hijacker.MainActivity.background;
+import static com.hijacker.MainActivity.mFragmentManager;
 import static com.hijacker.MainActivity.pref_edit;
 
 public class DisclaimerDialog extends DialogFragment {
@@ -38,7 +39,7 @@ public class DisclaimerDialog extends DialogFragment {
             public void onClick(DialogInterface dialog, int id) {
                 pref_edit.putBoolean("disclaimer", true);
                 pref_edit.commit();
-                new FirstRunDialog().show(getFragmentManager(), "FirstRunDialog");
+                new FirstRunDialog().show(mFragmentManager, "FirstRunDialog");
                 dismissAllowingStateLoss();
             }
         });

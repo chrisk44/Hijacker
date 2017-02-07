@@ -30,6 +30,7 @@ import java.util.List;
 
 import static com.hijacker.MainActivity.aireplay_dir;
 import static com.hijacker.MainActivity.airodump_dir;
+import static com.hijacker.MainActivity.busybox;
 import static com.hijacker.MainActivity.debug;
 import static com.hijacker.MainActivity.mFragmentManager;
 import static com.hijacker.MainActivity.getPIDs;
@@ -97,7 +98,7 @@ class CustomAction{
         if(has_process_name){
             ArrayList<Integer> list = getPIDs(process_name);
             for(int i=0;i<list.size();i++){
-                shell.run("busybox kill " + list.get(i));
+                shell.run(busybox + " kill " + list.get(i));
             }
             try{
                 Thread.sleep(100);  //Make sure that the processes have been killed

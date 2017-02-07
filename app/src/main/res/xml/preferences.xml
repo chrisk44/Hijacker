@@ -12,18 +12,16 @@
             android:singleLine="true"
             android:title="@string/prefix_title"
             android:key="prefix"
+            android:enabled="false"
             android:summary="@string/prefix_sum"
             android:dialogMessage="@string/prefix_desc"
             android:dialogTitle="@string/prefix_title" />
-        <EditTextPreference
-            android:defaultValue="@string/cap_dir"
+        <Preference
             android:selectAllOnFocus="true"
             android:singleLine="true"
             android:title="@string/cap_title"
             android:key="cap_dir"
-            android:summary="@string/cap_sum"
-            android:dialogMessage="@string/cap_desc"
-            android:dialogTitle="@string/cap_title" />
+            android:summary="@string/cap_sum" />
         <SwitchPreference
             android:defaultValue="@string/delete_extra"
             android:title="@string/delete_extra_title"
@@ -65,6 +63,11 @@
             android:title="@string/watchdog_title"
             android:summary="@string/watchdog_sum"
             android:key="watchdog"/>
+        <SwitchPreference
+            android:defaultValue="@string/target_deauth"
+            android:title="@string/target_deauth_title"
+            android:summary="@string/target_deauth_sum"
+            android:key="target_deauth"/>
     </PreferenceCategory>
     <PreferenceCategory android:title="Interface">
 
@@ -98,78 +101,25 @@
     </PreferenceCategory>
     <PreferenceCategory android:title="@string/tools">
         <Preference
-            android:title="@string/install_tools_title"
-            android:summary="@string/install_tools_sum"
-            android:key="install_tools" />
-
-        <Preference
             android:title="@string/install_nexmon_title"
             android:summary="@string/install_nexmon_sum"
             android:key="install_nexmon" />
-
-        <EditTextPreference
-            android:defaultValue="@string/aircrack_dir"
-            android:selectAllOnFocus="true"
-            android:singleLine="true"
-            android:title="@string/airc_title"
-            android:key="aircrack_dir"
-            android:summary="@string/airc_sum"
-            android:dialogMessage="@string/airc_desc"
-            android:dialogTitle="@string/airc_title" />
-        <EditTextPreference
-            android:defaultValue="@string/airodump_dir"
-            android:selectAllOnFocus="true"
-            android:singleLine="true"
-            android:title="@string/aird_title"
-            android:key="airodump_dir"
-            android:summary="@string/aird_sum"
-            android:dialogMessage="@string/aird_desc"
-            android:dialogTitle="@string/aird_title" />
-        <EditTextPreference
-            android:defaultValue="@string/aireplay_dir"
-            android:selectAllOnFocus="true"
-            android:singleLine="true"
-            android:title="@string/aire_title"
-            android:key="aireplay_dir"
-            android:summary="@string/aire_sum"
-            android:dialogMessage="@string/aire_desc"
-            android:dialogTitle="@string/aire_title" />
-        <EditTextPreference
-            android:defaultValue="@string/mdk3_dir"
-            android:selectAllOnFocus="true"
-            android:singleLine="true"
-            android:title="@string/mdk_title"
-            android:key="mdk3_dir"
-            android:summary="@string/mdk_sum"
-            android:dialogMessage="@string/mdk_desc"
-            android:dialogTitle="@string/mdk_title" />
-        <EditTextPreference
-            android:defaultValue="@string/reaver_dir"
-            android:selectAllOnFocus="true"
-            android:singleLine="true"
-            android:title="@string/reaver_title"
-            android:summary="@string/reaver_sum"
-            android:dialogMessage="@string/reaver_desc"
-            android:dialogTitle="@string/reaver_title"
-            android:key="reaver_dir"/>
-        <Preference
-            android:title="@string/copy_sample_title"
-            android:key="copy_sample_button" />
         <Preference
             android:title="@string/test_title"
             android:summary="@string/test_sum"
             android:key="test_tools" />
+        <Preference
+            android:title="@string/copy_sample_title"
+            android:key="copy_sample_button" />
     </PreferenceCategory>
     <PreferenceCategory
         android:title="@string/chroot">
 
-        <EditTextPreference
-            android:defaultValue="@string/chroot_dir"
+        <Preference
             android:selectAllOnFocus="true"
             android:singleLine="true"
-            android:dialogMessage="@string/chroot_desc"
-            android:dialogTitle="@string/chroot_title"
             android:title="@string/chroot_title"
+            android:summary="@string/chroot_desc"
             android:key="chroot_dir"/>
         <EditTextPreference
             android:defaultValue=""

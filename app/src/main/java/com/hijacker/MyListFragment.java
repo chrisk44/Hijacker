@@ -39,9 +39,9 @@ import static com.hijacker.MainActivity.copy;
 import static com.hijacker.MainActivity.currentFragment;
 import static com.hijacker.MainActivity.debug;
 import static com.hijacker.MainActivity.iface;
+import static com.hijacker.MainActivity.mFragmentManager;
 import static com.hijacker.MainActivity.prefix;
 import static com.hijacker.MainActivity.refreshDrawer;
-import static com.hijacker.MainActivity.startAirodumpForAP;
 import static com.hijacker.MainActivity.startMdk;
 
 public class MyListFragment extends ListFragment {
@@ -72,7 +72,7 @@ public class MyListFragment extends ListFragment {
                     switch(item.getItemId()) {
                         case 0:
                             //Info
-                            clicked.ap.showInfo(getFragmentManager());
+                            clicked.ap.showInfo(mFragmentManager);
                             break;
                         case 1:
                             //mark or unmark
@@ -89,7 +89,7 @@ public class MyListFragment extends ListFragment {
                         case 3:
                             //Watch
                             MainActivity.isolate(clicked.ap.mac);
-                            startAirodumpForAP(clicked.ap, null);
+                            Airodump.startClean(clicked.ap);
                             break;
                         case 4:
                             //attack
@@ -156,7 +156,7 @@ public class MyListFragment extends ListFragment {
                                             break;
                                         case 6:
                                             //crack with reaver
-                                            clicked.ap.crackReaver(getFragmentManager());
+                                            clicked.ap.crackReaver(mFragmentManager);
                                             break;
                                     }
                                     return false;
@@ -187,7 +187,7 @@ public class MyListFragment extends ListFragment {
                     switch(item.getItemId()) {
                         case 0:
                             //Info
-                            clicked.st.showInfo(getFragmentManager());
+                            clicked.st.showInfo(mFragmentManager);
                             break;
                         case 1:
                             //copy to clipboard

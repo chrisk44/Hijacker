@@ -9,6 +9,5 @@
         android:layout_height="wrap_content"
         android:inputType="textPersonName"
         android:ems="10"
-        android:id="@+id/custom_mac"
-        android:hint="@string/mac_address"/>
+        android:id="@+id/edit_text"/>
 </LinearLayout>

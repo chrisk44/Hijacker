@@ -36,30 +36,8 @@ extern "C" jint Java_com_hijacker_MainActivity_checkwpa(JNIEnv* env, jobject obj
         else return 1;
     }else return -1;
 }
-extern "C" jboolean Java_com_hijacker_MainActivity_aireplay(JNIEnv* env, jobject obj, jstring str) {
-    char *buffer = (char *) malloc(512);
-    const char *nativeString = env->GetStringUTFChars(str, 0);
-    strcpy(buffer, nativeString);
-    env->ReleaseStringUTFChars(str, nativeString);
-    char temp[8];
-    strncpy(temp, buffer+10, 7);
-    temp[7]='\0';
-    return (jboolean)!strcmp(temp, "Sending");
-}
 
-extern "C" jint Java_com_hijacker_MainActivity_ps(JNIEnv* env, jobject obj, jstring str) {
-    char *buffer = (char *) malloc(512);
-    const char *nativeString = env->GetStringUTFChars(str, 0);
-    strcpy(buffer, nativeString);
-    env->ReleaseStringUTFChars(str, nativeString);
-    char pid[7];          //pid text
-
-    strncpy(pid, buffer+10, 6);
-    pid[6] = '\0';
-    return atoi(pid);
-}
-
-extern "C" jint Java_com_hijacker_MainActivity_main(JNIEnv* env, jobject obj, jstring str, jint off){
+extern "C" jint Java_com_hijacker_Airodump_main(JNIEnv* env, jobject obj, jstring str, jint off){
     int i, j;
     char *buffer = (char*)malloc(512);
     const char *nativeString = env->GetStringUTFChars(str, 0);
@@ -73,7 +51,7 @@ extern "C" jint Java_com_hijacker_MainActivity_main(JNIEnv* env, jobject obj, js
 
     env->ReleaseStringUTFChars(str, nativeString);
 
-    jclass jclass1 = env->FindClass("com/hijacker/MainActivity");
+    jclass jclass1 = env->FindClass("com/hijacker/Airodump");
     jmethodID method_ap = env->GetStaticMethodID(jclass1, "addAP", "(Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;IIIII)V");
     jmethodID method_st = env->GetStaticMethodID(jclass1, "addST", "(Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;III)V");
 

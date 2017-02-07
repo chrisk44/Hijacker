@@ -25,6 +25,7 @@ import android.content.DialogInterface;
 import android.net.wifi.WifiManager;
 import android.os.Bundle;
 import android.support.design.widget.Snackbar;
+import android.support.v4.view.GravityCompat;
 import android.support.v7.app.AlertDialog;
 import android.util.Log;
 import android.view.HapticFeedbackConstants;
@@ -40,36 +41,74 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 
+import static com.hijacker.MainActivity.BUFFER_SIZE;
 import static com.hijacker.MainActivity.PROCESS_AIRODUMP;
+import static com.hijacker.MainActivity.busybox;
 import static com.hijacker.MainActivity.debug;
 import static com.hijacker.MainActivity.firm_backup_file;
+import static com.hijacker.MainActivity.getDirectory;
 import static com.hijacker.MainActivity.getLastLine;
 import static com.hijacker.MainActivity.background;
 import static com.hijacker.MainActivity.getPIDs;
+import static com.hijacker.MainActivity.init;
+import static com.hijacker.MainActivity.mDrawerLayout;
+import static com.hijacker.MainActivity.main;
 import static com.hijacker.MainActivity.path;
-import static com.hijacker.MainActivity.startAirodump;
 import static com.hijacker.MainActivity.stop;
 
 public class InstallFirmwareDialog extends DialogFragment {
-    View view;
+    View dialogView;
     Shell shell;
+    EditText firm_edittext, util_edittext;
+    CheckBox backup_cb;
     @Override
     public Dialog onCreateDialog(Bundle savedInstanceState) {
         AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
-        view = getActivity().getLayoutInflater().inflate(R.layout.install_firmware, null);
+        dialogView = getActivity().getLayoutInflater().inflate(R.layout.install_firmware, null);
+
+        firm_edittext = (EditText) dialogView.findViewById(R.id.firm_location);
+        util_edittext = (EditText) dialogView.findViewById(R.id.util_location);
+        backup_cb = (CheckBox) dialogView.findViewById(R.id.backup);
 
         //Adjust directories
         if(!(new File("/su").exists())){
-            ((EditText)view.findViewById(R.id.util_location)).setText("/system/xbin");
+            util_edittext.setText("/system/xbin");
         }
-        ((CheckBox) view.findViewById(R.id.backup)).setChecked(!(new File(firm_backup_file).exists()));
+        backup_cb.setChecked(!(new File(firm_backup_file).exists()));
 
+        dialogView.findViewById(R.id.firm_fe_btn).setOnClickListener(new View.OnClickListener(){
+            @Override
+            public void onClick(View v){
+                final FileExplorerDialog dialog = new FileExplorerDialog();
+                dialog.setToSelect(FileExplorerDialog.SELECT_DIR);
+                dialog.setOnSelect(new Runnable(){
+                    @Override
+                    public void run(){
+                        firm_edittext.setText(dialog.result.getAbsolutePath());
+                    }
+                });
+                dialog.show(getFragmentManager(), "FileExplorerDialog");
+            }
+        });
+        dialogView.findViewById(R.id.util_fe_btn).setOnClickListener(new View.OnClickListener(){
+            @Override
+            public void onClick(View v){
+                final FileExplorerDialog dialog = new FileExplorerDialog();
+                dialog.setToSelect(FileExplorerDialog.SELECT_DIR);
+                dialog.setOnSelect(new Runnable(){
+                    @Override
+                    public void run(){
+                        util_edittext.setText(dialog.result.getAbsolutePath());
+                    }
+                });
+                dialog.show(getFragmentManager(), "FileExplorerDialog");
+            }
+        });
 
         shell = Shell.getFreeShell();
 
-        builder.setView(view);
+        builder.setView(dialogView);
         builder.setTitle(R.string.install_nexmon_title);
-        builder.setMessage(R.string.install_message);
         builder.setNegativeButton(R.string.cancel, new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int which) {}
@@ -96,10 +135,12 @@ public class InstallFirmwareDialog extends DialogFragment {
                 @Override
                 public boolean onLongClick(View v){
                     v.performHapticFeedback(HapticFeedbackConstants.LONG_PRESS);
-                    String firm_location = ((EditText) view.findViewById(R.id.firm_location)).getText().toString();
-                    String util_location = ((EditText) view.findViewById(R.id.util_location)).getText().toString();
+                    String firm_location = firm_edittext.getText().toString();
+                    String util_location = util_edittext.getText().toString();
+                    firm_location = getDirectory(firm_location);
+                    util_location = getDirectory(util_location);
 
-                    if(check(firm_location, util_location, true, v)){
+                    if(check(firm_location, util_location, true)){
                         install(firm_location, util_location);
                         dismissAllowingStateLoss();
                     }
@@ -109,11 +150,13 @@ public class InstallFirmwareDialog extends DialogFragment {
             positiveButton.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    String firm_location = ((EditText)view.findViewById(R.id.firm_location)).getText().toString();
-                    String util_location = ((EditText)view.findViewById(R.id.util_location)).getText().toString();
+                    String firm_location = firm_edittext.getText().toString();
+                    String util_location = util_edittext.getText().toString();
+                    firm_location = getDirectory(firm_location);
+                    util_location = getDirectory(util_location);
 
-                    if(check(firm_location, util_location, false, v)){
-                        shell.run("strings " + firm_location + "/fw_bcmdhd.bin | busybox grep \"FWID:\"; echo ENDOFSTRINGS");
+                    if(check(firm_location, util_location, false)){
+                        shell.run("strings " + firm_location + "fw_bcmdhd.bin | " + busybox + " grep \"FWID:\"; echo ENDOFSTRINGS");
                         String result = getLastLine(shell.getShell_out(), "ENDOFSTRINGS");
                         result = result.substring(0, 4);
 
@@ -131,16 +174,16 @@ public class InstallFirmwareDialog extends DialogFragment {
                 @Override
                 public void onClick(View v) {
                     positiveButton.setActivated(false);
-                    ProgressBar progress = (ProgressBar)view.findViewById(R.id.install_firm_progress);
+                    ProgressBar progress = (ProgressBar)dialogView.findViewById(R.id.install_firm_progress);
                     progress.setIndeterminate(true);
-                    shell.run("busybox find /system/ -type f -name \"fw_bcmdhd.bin\"; echo ENDOFFIND");
+                    shell.run(busybox + " find /system/ -type f -name \"fw_bcmdhd.bin\"; echo ENDOFFIND");
 
                     String lastline = getLastLine(shell.getShell_out(), "ENDOFFIND");
                     if(lastline.equals("ENDOFFIND")){
                         Snackbar.make(v, R.string.firm_notfound_bcm, Snackbar.LENGTH_LONG).show();
                     }else{
                         lastline = lastline.substring(0, lastline.length()-14);
-                        ((EditText)view.findViewById(R.id.firm_location)).setText(lastline);
+                        firm_edittext.setText(lastline);
                     }
 
                     progress.setIndeterminate(false);
@@ -153,7 +196,11 @@ public class InstallFirmwareDialog extends DialogFragment {
     public void onDismiss(final DialogInterface dialog) {
         super.onDismiss(dialog);
         shell.done();
-        if(MainActivity.init) new InstallToolsDialog().show(getFragmentManager(), "InstallToolsDialog");
+        if(init){
+            init = false;
+            mDrawerLayout.openDrawer(GravityCompat.START);
+            main();
+        }
     }
     @Override
     public void show(FragmentManager fragmentManager, String tag){
@@ -163,16 +210,16 @@ public class InstallFirmwareDialog extends DialogFragment {
         boolean start_airodump = false;
         if(getPIDs(PROCESS_AIRODUMP).size()>0){
             start_airodump = true;
-            stop(0);
+            stop(PROCESS_AIRODUMP);
         }
         WifiManager wifiManager = (WifiManager) getActivity().getSystemService(Context.WIFI_SERVICE);
         wifiManager.setWifiEnabled(false);
         if(debug) Log.d("HIJACKER/InstFirmware", "Backing up firmware from " + firm_location);
-        if(((CheckBox)view.findViewById(R.id.backup)).isChecked()){
+        if(backup_cb.isChecked()){
             if(new File(firm_backup_file).exists()){
                 Toast.makeText(getActivity(), R.string.backup_exists, Toast.LENGTH_SHORT).show();
             }else{
-                shell.run("cp -n " + firm_location + "/fw_bcmdhd.bin " + firm_backup_file);
+                shell.run("cp -n " + firm_location + "fw_bcmdhd.bin " + firm_backup_file);
                 Toast.makeText(getActivity(), R.string.backup_created, Toast.LENGTH_SHORT).show();
             }
         }
@@ -183,41 +230,50 @@ public class InstallFirmwareDialog extends DialogFragment {
             Log.d("HIJACKER/InstFirmware", "Installing firmware in " + firm_location);
             Log.d("HIJACKER/InstFirmware", "Installing utility in " + util_location);
         }
-        shell.run("busybox mount -o rw,remount,rw /system");
+        shell.run(busybox + " mount -o rw,remount,rw /system");
         extract("fw_bcmdhd.bin", firm_location);
         extract("nexutil", util_location);
-        shell.run("busybox mount -o ro,remount,ro /system");
+        shell.run(busybox + " mount -o ro,remount,ro /system");
+
         Toast.makeText(getActivity(), R.string.installed_firm_util, Toast.LENGTH_SHORT).show();
         wifiManager.setWifiEnabled(true);
 
-        if(start_airodump) startAirodump(null);
+        if(start_airodump) Airodump.startClean();
     }
-    boolean check(String firm_location, String util_location, boolean override, View v){
+    boolean check(String firm_location, String util_location, boolean override){
+        if(firm_location.equals("")){
+            Snackbar.make(dialogView, getString(R.string.firm_location_empty), Snackbar.LENGTH_SHORT).show();
+            return false;
+        }
+        if(util_location.equals("")){
+            Snackbar.make(dialogView, getString(R.string.util_location_empty), Snackbar.LENGTH_SHORT).show();
+            return false;
+        }
         File firm = new File(firm_location);
         File util = new File(util_location);
         if(!firm.exists()){
-            Snackbar.make(v, R.string.dir_notfound_firm, Snackbar.LENGTH_SHORT).show();
+            Snackbar.make(dialogView, R.string.dir_notfound_firm, Snackbar.LENGTH_SHORT).show();
             return false;
-        }else if(!(new File(firm_location + "/fw_bcmdhd.bin").exists())){
-            Snackbar.make(v, R.string.firm_notfound, Snackbar.LENGTH_SHORT).show();
+        }else if(!(new File(firm_location + "fw_bcmdhd.bin").exists())){
+            Snackbar.make(dialogView, R.string.firm_notfound, Snackbar.LENGTH_SHORT).show();
             return false;
         }else if(!util.exists()){
-            Snackbar.make(v, R.string.dir_notfound_util, Snackbar.LENGTH_SHORT).show();
+            Snackbar.make(dialogView, R.string.dir_notfound_util, Snackbar.LENGTH_SHORT).show();
             return false;
         }else if(!override && (util_location.contains("system") || firm_location.contains("system"))){
-            Snackbar.make(v, R.string.path_contains_system, Snackbar.LENGTH_LONG).show();
+            Snackbar.make(dialogView, R.string.path_contains_system, Snackbar.LENGTH_LONG).show();
             return false;
         }
         return true;
     }
     void extract(String filename, String dest){
         File f = new File(path, filename);      //no permissions to write at dest so extract at local directory and then move to target
-        dest = dest + '/' + filename;
+        dest = dest + filename;
         if(!f.exists()){
             try{
                 InputStream in = getResources().getAssets().open(filename);
                 FileOutputStream out = new FileOutputStream(f);
-                byte[] buf = new byte[1024];
+                byte[] buf = new byte[BUFFER_SIZE];
                 int len;
                 while((len = in.read(buf))>0){
                     out.write(buf, 0, len);

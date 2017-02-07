@@ -33,25 +33,43 @@ import android.widget.EditText;
 import android.widget.ProgressBar;
 import android.widget.Toast;
 
-import java.io.BufferedReader;
 import java.io.File;
-import java.io.IOException;
 
+import static com.hijacker.MainActivity.busybox;
 import static com.hijacker.MainActivity.debug;
 import static com.hijacker.MainActivity.background;
 import static com.hijacker.MainActivity.firm_backup_file;
-import static com.hijacker.MainActivity.path;
+import static com.hijacker.MainActivity.getDirectory;
+import static com.hijacker.MainActivity.getLastLine;
 
 public class RestoreFirmwareDialog extends DialogFragment {
-    View view;
+    View dialogView;
     Shell shell;
+    EditText firm_et;
     @Override
     public Dialog onCreateDialog(Bundle savedInstanceState) {
         shell = Shell.getFreeShell();
         AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
-        view = getActivity().getLayoutInflater().inflate(R.layout.restore_firmware, null);
+        dialogView = getActivity().getLayoutInflater().inflate(R.layout.restore_firmware, null);
 
-        builder.setView(view);
+        firm_et = (EditText)dialogView.findViewById(R.id.firm_location);
+
+        dialogView.findViewById(R.id.firm_fe_btn).setOnClickListener(new View.OnClickListener(){
+            @Override
+            public void onClick(View v){
+                final FileExplorerDialog dialog = new FileExplorerDialog();
+                dialog.setToSelect(FileExplorerDialog.SELECT_DIR);
+                dialog.setOnSelect(new Runnable(){
+                    @Override
+                    public void run(){
+                        firm_et.setText(dialog.result.getAbsolutePath());
+                    }
+                });
+                dialog.show(getFragmentManager(), "FileExplorerDialog");
+            }
+        });
+
+        builder.setView(dialogView);
         builder.setTitle(R.string.restore_firmware);
         builder.setNegativeButton(R.string.cancel, new DialogInterface.OnClickListener() {
             @Override
@@ -80,21 +98,22 @@ public class RestoreFirmwareDialog extends DialogFragment {
             positiveButton.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    String firm_location = ((EditText)view.findViewById(R.id.firm_location)).getText().toString();
+                    String firm_location = firm_et.getText().toString();
+                    firm_location = getDirectory(firm_location);
 
                     File firm = new File(firm_location);
                     if(!firm.exists()){
-                        Snackbar.make(v, R.string.dir_notfound_firm, Snackbar.LENGTH_SHORT).show();
-                    }else if(!(new File(firm_location + "/fw_bcmdhd.bin").exists())){
-                        Snackbar.make(v, R.string.firm_notfound, Snackbar.LENGTH_SHORT).show();
+                        Snackbar.make(dialogView, R.string.dir_notfound_firm, Snackbar.LENGTH_SHORT).show();
+                    }else if(!(new File(firm_location + "fw_bcmdhd.bin").exists())){
+                        Snackbar.make(dialogView, R.string.firm_notfound, Snackbar.LENGTH_SHORT).show();
                     }else{
                         if(debug) Log.d("HIJACKER/RestoreFirm", "Restoring firmware in " + firm_location);
                         WifiManager wifiManager = (WifiManager) getActivity().getSystemService(Context.WIFI_SERVICE);
                         wifiManager.setWifiEnabled(false);
 
-                        shell.run("busybox mount -o rw,remount,rw /system");
-                        shell.run("cp " + firm_backup_file + " " + firm_location + "/fw_bcmdhd.bin");
-                        shell.run("busybox mount -o ro,remount,ro /system");
+                        shell.run(busybox + " mount -o rw,remount,rw /system");
+                        shell.run("cp " + firm_backup_file + " " + firm_location + "fw_bcmdhd.bin");
+                        shell.run(busybox + " mount -o ro,remount,ro /system");
 
                         Toast.makeText(getActivity(), R.string.restored, Toast.LENGTH_SHORT).show();
                         wifiManager.setWifiEnabled(true);
@@ -106,27 +125,16 @@ public class RestoreFirmwareDialog extends DialogFragment {
                 @Override
                 public void onClick(View v) {
                     positiveButton.setActivated(false);
-                    ProgressBar progress = (ProgressBar)view.findViewById(R.id.install_firm_progress);
+                    ProgressBar progress = (ProgressBar)dialogView.findViewById(R.id.install_firm_progress);
                     progress.setIndeterminate(true);
                     shell.run("find /system/ -type f -name \"fw_bcmdhd.bin\"; echo ENDOFFIND");
-                    BufferedReader out = shell.getShell_out();
-                    try{
-                        String buffer = null, lastline;
-                        while(buffer==null){
-                            buffer = out.readLine();
-                        }
-                        lastline = buffer;
-                        while(!buffer.equals("ENDOFFIND")){
-                            lastline = buffer;
-                            buffer = out.readLine();
-                        }
-                        if(lastline.equals("ENDOFFIND")){
-                            Snackbar.make(v, R.string.firm_notfound_bcm, Snackbar.LENGTH_LONG).show();
-                        }else{
-                            lastline = lastline.substring(0, lastline.length()-14);
-                            ((EditText)view.findViewById(R.id.firm_location)).setText(lastline);
-                        }
-                    }catch(IOException ignored){}
+                    String lastline = getLastLine(shell.getShell_out(), "ENDOFFIND");
+                    if(lastline.equals("ENDOFFIND")){
+                        Snackbar.make(dialogView, R.string.firm_notfound_bcm, Snackbar.LENGTH_LONG).show();
+                    }else{
+                        lastline = lastline.substring(0, lastline.length()-14);
+                        firm_et.setText(lastline);
+                    }
                     progress.setIndeterminate(false);
 
                     positiveButton.setActivated(true);
