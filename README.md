@@ -2,49 +2,68 @@
 
 Hijacker is a Graphical User Interface for the aircrack-ng suite, mdk3 and reaver. It offers a simple and easy UI to use these tools without typing commands in a console and copy&pasting MAC addresses.
 
-This application requires an android device with a wireless adapter that supports **Monitor Mode**. A few android devices do, but none of them natively. This means that you will need a custom firmware. Nexus 5 and any other device that uses the BCM4339 (MSM8974, such as Xperia Z2, LG G2 etc.) chipset will work with [Nexmon](https://github.com/seemoo-lab/nexmon) (it also supports some other chipsets). Also, devices that use BCM4330 can use [bcmon](http://bcmon.blogspot.gr/).
+This application requires an ARM android device with a wireless adapter that supports **Monitor Mode**. A few android devices do, but none of them natively. This means that you will need a custom firmware. Nexus 5 and any other device that uses the BCM4339 chipset (MSM8974, such as Xperia Z2, LG G2 etc) will work with [Nexmon](https://github.com/seemoo-lab/nexmon) (it also supports some other chipsets). Devices that use BCM4330 can use [bcmon](http://bcmon.blogspot.gr/).
 An alternative would be to use an external adapter that supports monitor mode in Android with an OTG cable.
 
-The required tools are included in the app (only for armv7l devices). You will be asked to install them on first run or you can do it in settings at any time. You can also have them at any directory you want and set the directories in Settings, though this might cause the wireless tools not being found by the aircrack-ng suite, mdk and reaver. The Nexmon driver and management utility is also included.
+The required tools are included for armv7l and aarch64 devices as of version 1.1. The Nexmon driver and management utility for BCM4339 are also included.
 
 Root is also necessary, as these tools need root to work.
 
-##Features:
+##Features
+###Information Gathering
 * View a list of access points and stations (clients) around you (even hidden ones)
 * View the activity of a network (by measuring beacons and data packets) and its clients
-* Deauthenticate all the clients of a network
-* Deauthenticate a specific client from the network it's connected
-* MDK3 Beacon Flooding with custom SSID list
-* MDK3 Authentication DoS for a specific network or to everyone
-* Try to get a WPA handshake or gather IVs to crack a WEP network
-* Statistics about access points (only encryption for now)
-* See the manufacturer of a device (AP or station) from a OUI database (pulled from IEEE)
+* Statistics about access points and stations
+* See the manufacturer of a device (AP or station) from the OUI database
 * See the signal power of devices and filter the ones that are closer to you
-* Leave the app running in the background, optionally with a notification
-* Copy commands or MAC addresses to clipboard, so you can run them in a terminal if something goes wrong
-* Include the tools
-* Reaver WPS cracking (pixie-dust attack using NetHunter chroot and external adapter)
-* .cap files cracking with custom wordlist
 * Save captured packets in .cap file
-* Create custom commands to be ran on an access point or a client with one click
 
-##Installation:
+###Attacks
+* Deauthenticate all the clients of a network (either targeting each one (effective) or without specific target)
+* Deauthenticate a specific client from the network it's connected
+* MDK3 Beacon Flooding with custom options and SSID list
+* MDK3 Authentication DoS for a specific network or to everyone
+* Capture a WPA handshake or gather IVs to crack a WEP network
+* Reaver WPS cracking (pixie-dust attack using NetHunter chroot and external adapter)
+
+###Other
+* Leave the app running in the background, optionally with a notification
+* Copy commands or MAC addresses to clipboard
+* Includes the required tools, no need for manual installation
+* Includes the nexmon driver and management utility for BCM4339 devices
+* Set commands to enable and disable monitor mode automatically
+* Crack .cap files with custom wordlist
+* Create custom actions to be ran on an access point or a client easily
+* Sort and filter Access Points with many parameters
+* Export all the gathered information to a file
+
+##Installation
 Make sure:
 * you are on Android 5+
 * you are rooted. SuperSU is required. If you are on CM, install SuperSU
-* have installed busybox (opened and installed the tools) (it is now included and will be automatically installed on startup)
 * have a firmware to support Monitor Mode on your wireless interface
 
 ####Download the latest version [here](https://github.com/chrisk44/Hijacker/releases).
 
-When you run Hijacker for the first time, you will be asked whether you want to set up the tools or go to home screen. If you have installed your firmware and all the tools, you can just go to the home screen. Otherwise, click set up to install the tools. You can change the directories in which they will be installed, but I recommend that you leave them unchanged. The app will check what directories are available and select the best for you. Keep in mind that on some devices, installing files in /system might trigger an Android security feature and your system partition will be restored when you reboot.
-After installing the tools and the firmware (only Nexmon) you will land on the home screen and airodump will start. If you don't see any networks, make sure you have enabled your WiFi and it's in monitor mode. If you have a problem, go to settings and click "Test Tools". If they all pass, you probably don't have monitor mode enabled. If something fails, click "Copy test command" and select the tool that fails. A sample command will be copied to your clipboard so you can open a terminal, run it, and see what's wrong. 
+When you run Hijacker for the first time, you will be asked whether you want to install the nexmon firmware or go to home screen. If you have installed your firmware, you can just go to the home screen. Otherwise, click'Install Nexmon' and follow the directions. Keep in mind that on some devices, installing files in /system might trigger an Android security feature and your system partition will be restored when you reboot.
+After installing the firmware you will land on the home screen and airodump will start. If you don't see any networks, make sure you have enabled your WiFi and it's in monitor mode. If you have a problem, go to settings and click "Test Tools". If they all pass, you probably don't have monitor mode enabled. If something fails, click "Copy test command" and select the tool that fails. A sample command will be copied to your clipboard so you can open a terminal, run it, and see what's wrong. 
 
-##Troubleshooting:
-Most of the problems arise from the binaries not being installed (correctly or at all). If that's the case, go to settings, click "install tools", choose directories for binaries and the lib (libfakeioctl.so) and click install. If the directory for your binaries is included in PATH, then you don't have to do anything else. If it's not, the you need to adjust the absolute paths of the binaries, right below the "install tools" option. This might also cause problems (especially with mdk) since these programs require the wireless tools to be installed, and they won't find them if you install them anywhere other than the paths included in your PATH variable. If you don't know what the PATH variable is, then you shouldn't be using any of these programs.
+##Troubleshooting
+First of all, this app is designed and tested for ARM devices. All the binaries included are compiled for that architecture and will not work on anything else. You can check by going to settings: if you have the option to install nexmon, then you are on the correct architecture, otherwise you will have to install all the tools manually (busybox, aircrack-ng suite, mdk3, reaver, wireless tools, libfakeioctl.so library) and set the 'Prefix' option for the tools to preload the library they need.
 
-Installing the tools via the NexMon app doesn't work anymore, so if there is a problem, just reinstall them through the app in the same directory you already have them.
+In settings, there is an option to test the tools. If something fails, then you can click 'Copy test command' and select the tool that fails. This will copy a test command to your clipboard, which you can run in a terminal and see what's wrong. If all the tests pass and you still have a problem, feel free to open an issue here to fix it, or use the 'Send feedback' feature of the app in settings.
 
-If you are certain that there is problem with the app itself and not the tools installation, open an issue here so I can fix it. Make sure to include precise steps to reproduce the problem and a logcat (having the logcat messages options enabled in settings). If the app happens to crash, a new activity should start which will generate a report in /sdcard and give you the option to email it to me directly. I suggest you do that, and if you are worried about what will be sent you can check it out yourself, it's just a txt file and it will be sent as an email attachment to me.
+If the app happens to crash, a new activity will start which will generate a report in your external storage and give you the option to email it to me directly. I suggest you do that, and if you are worried about what will be sent you can check it out yourself, it's just a txt file and it will be sent as an email attachment to me.
 
-Keep in mind that Hijacker is just a GUI for these tools. The way it runs the tools is fairly simple, and if all the tests pass and you are in monitor mode, then you should be getting the results you want. But also keep in mind that these are AUDITING tools. This means that they are used to TEST the integrity of your network, so there is a chance (and you should hope for it) that the attacks don't work on a network. It's not the app's fault, it's actually something to be happy about (given that this means that your network is safe). However, if an attack works when you type a command in a terminal, but not with the app, feel free to post here to resolve the issue. This app is still under development so bugs are to be expected.
+Please do not report bugs for devices that are not supported or when you are using an outdated version.
+
+Keep in mind that Hijacker is just a GUI for these tools. The way it runs the tools is fairly simple, and if all the tests pass and you are in monitor mode, you should be getting the results you want. Also keep in mind that these are AUDITING tools. This means that they are used to TEST the integrity of your network, so there is a chance (and you should hope for it) that the attacks don't work on your network. It's not the app's fault, it's actually something to be happy about (given that this means that your network is safe). However, if an attack works when you type a command in a terminal, but not with the app, feel free to post here to resolve the issue. This app is still under development so bugs are to be expected.
+
+##Warning
+###Legal
+It is extremely illegal to use this application against networks for which you don't have permission. You can use it only on YOUR network or a network that you are authorized to. Using a software that uses a network adapter in promiscuous mode may be considered illegal even without actively using it against someone, and don't think for a second it's untracable. I am not responsible for how you use this application and any damages you may cause.
+
+###Device
+The app gives you the option to install the nexmon firmware on your device. Even though the app performs a chipset check, you have the option to override it, if you believe that your device has the BCM4339 wireless adapter. However, installing a custom firmware intended for BCM4339 on a different chipset can possibly damage your device (and I mean hardware, not something that is fixable with factory reset). I am not responsible for any damage caused to your device by this software.
+
+####Consider yourself warned.
