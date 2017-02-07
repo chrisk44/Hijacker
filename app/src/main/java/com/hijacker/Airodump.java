@@ -51,7 +51,7 @@ import static com.hijacker.MainActivity.wpacheckcont;
 import static com.hijacker.Shell.getFreeShell;
 import static com.hijacker.Shell.runOne;
 
-public class Airodump{
+class Airodump{
     final static LinkedList<UpdateRequest> fifo = new LinkedList<>();                    //List used as FIFO for handling calls to addAP/addST in an order
     private static int channel = 0;
     private static boolean forWPA = false, forWEP = false, running = false;
@@ -90,11 +90,6 @@ public class Airodump{
                 synchronized(fifo){
                     fifo.clear();
                 }
-                try{
-                    while(!completed){      //Wait for running request to complete
-                        Thread.sleep(10);
-                    }
-                }catch(InterruptedException ignored){}
             }
             if(debug) Log.d("HIJACKER/refresh_thread", "refresh_thread done");
         }
@@ -266,6 +261,7 @@ public class Airodump{
     static void stop(){
         running = false;
         refresh_thread.interrupt();
+        while(refresh_thread.isAlive());
         runInHandler(new Runnable(){
             @Override
             public void run(){
@@ -278,15 +274,17 @@ public class Airodump{
             wpacheckcont = false;
             wpa_thread.interrupt();
         }
+        Shell shell = getFreeShell();
         if(delete_extra && (forWPA || forWEP || always_cap)){
             String file_prefix = getCapFile();
             if(file_prefix!=null){
                 file_prefix = file_prefix.substring(0, file_prefix.lastIndexOf("."));
-                runOne(busybox + " rm -rf " + file_prefix + "*.csv");
-                runOne(busybox + " rm -rf " + file_prefix + "*.netxml");
+                shell.run(busybox + " rm -rf " + file_prefix + "*.csv");
+                shell.run(busybox + " rm -rf " + file_prefix + "*.netxml");
             }
         }
-        runOne(busybox + " kill $(" + busybox + " pidof airodump-ng)");
+        shell.run(busybox + " kill $(" + busybox + " pidof airodump-ng)");
+        shell.done();
         last_action = System.currentTimeMillis();
         AP.saveData();
         ST.saveData();

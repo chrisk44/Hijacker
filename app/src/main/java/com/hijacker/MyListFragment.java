@@ -26,7 +26,6 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ListView;
 import android.widget.PopupMenu;
-import android.widget.Toast;
 
 import static com.hijacker.AP.WEP;
 import static com.hijacker.AP.WPA;
@@ -44,7 +43,6 @@ import static com.hijacker.MainActivity.mFragmentManager;
 import static com.hijacker.MainActivity.prefix;
 import static com.hijacker.MainActivity.refreshDrawer;
 import static com.hijacker.MainActivity.startMdk;
-import static com.hijacker.MainActivity.target_deauth;
 
 public class MyListFragment extends ListFragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {

@@ -122,7 +122,7 @@ class ST {
         this.pwr = pwr;
         this.lost = lost;
         this.frames = frames;
-        this.probes = probes.equals("") ? "No probes" : probes;
+        this.probes = probes.equals("") ? "No probes" : probes.replace(",", ", ");
 
         final String b, c;
         if(connectedTo!=null){

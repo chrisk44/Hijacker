@@ -41,7 +41,7 @@ import static com.hijacker.MainActivity.debug;
 import static com.hijacker.MainActivity.getLastLine;
 import static com.hijacker.Shell.getFreeShell;
 
-public class RootFile{
+class RootFile{
     static Shell shell;
     static BufferedReader out;
     private int length = -1;

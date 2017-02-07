@@ -73,7 +73,6 @@ import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
 
-import static com.hijacker.Airodump.fifo;
 import static com.hijacker.CustomAction.TYPE_ST;
 import static com.hijacker.IsolatedFragment.is_ap;
 import static com.hijacker.MDKFragment.ados;
@@ -931,11 +930,6 @@ public class MainActivity extends AppCompatActivity{
             case R.id.reset:
                 clearing = true;
                 stop(PROCESS_AIRODUMP);
-                try{
-                    while(!completed || !fifo.isEmpty()){
-                        Thread.sleep(10);       //Wait for requests to complete before clearing the view
-                    }
-                }catch(InterruptedException ignored){}
                 Tile.clear();
                 ap_count.setText("0");
                 st_count.setText("0");
