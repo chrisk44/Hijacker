@@ -685,6 +685,7 @@ public class MainActivity extends AppCompatActivity{
                     //Aireplay was just deauthenticating so airodump has locked a channel, no more needed
                     Airodump.startClean();
                 }
+                AP.currentTargetDeauth.clear();
                 aireplay_running = 0;
                 break;
             case PROCESS_MDK:

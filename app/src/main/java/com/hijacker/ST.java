@@ -18,6 +18,7 @@ package com.hijacker;
  */
 
 import android.app.FragmentManager;
+import android.util.Log;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -43,8 +44,9 @@ class ST {
     int pwr, id;
     private int frames, lost, total_frames=0, total_lost=0;
     long lastseen = 0;
-    boolean added_as_client = false, isMarked = false;
+    boolean isMarked = false;
     Tile tile;
+    AP connectedTo = null;
     String mac, bssid, manuf, probes;
     ST(String mac, String bssid, int pwr, int lost, int frames, String probes){
         this.mac = mac;
@@ -55,31 +57,42 @@ class ST {
         if(sort!=SORT_NOSORT) toSort = true;
     }
     void disconnect(){
-        if(Airodump.getChannel() != AP.getAPByMac(this.bssid).ch){
+        if(Airodump.getChannel() != connectedTo.ch){
             //switch channel only if airodump is running elsewhere
             stop(PROCESS_AIREPLAY);
-            Airodump.startClean(AP.getAPByMac(this.bssid).ch);
+            Airodump.startClean(connectedTo.ch);
         }
         startAireplay(this.bssid, this.mac);
     }
     void update(String bssid, int pwr, int lost, int frames, String probes){
-        if(added_as_client && bssid==null){
-            connected--;
-            added_as_client = false;
-            AP.getAPByMac(this.bssid).removeClient(this);
-            runInHandler(new Runnable(){
-                @Override
-                public void run(){
-                    Tile.onCountsChanged();
+        if(connectedTo!=null){
+            if(!connectedTo.mac.equals(bssid)){
+                //Connected to a different network
+                connectedTo.removeClient(this);
+                connectedTo = AP.getAPByMac(bssid);
+                if(connectedTo==null){
+                    //Now not connected
+                    Log.d("TEST", this.mac + " is now disconnected");
+                    connected--;
+                    runInHandler(new Runnable(){
+                        @Override
+                        public void run(){
+                            Tile.onCountsChanged();
+                        }
+                    });
+                }else{
+                    Log.d("TEST", this.mac + " is now connected to " + connectedTo.mac + ", " + connectedTo.mac);
+                    connectedTo.addClient(this);
                 }
-            });
-        }else if(!added_as_client && bssid!=null){
-            AP temp = AP.getAPByMac(bssid);
-            if (temp != null){
-                this.bssid = bssid;
-                temp.addClient(this);
-                added_as_client = true;
+            }
+        }else if(bssid!=null){
+            //Now connected somewhere
+            connectedTo = AP.getAPByMac(bssid);
+            if(connectedTo!=null){
+                //Now connected to known AP
+                Log.d("TEST", this.mac + " is now connected to " + connectedTo.mac + ", " + connectedTo.mac);
                 connected++;
+                connectedTo.addClient(this);
                 runInHandler(new Runnable(){
                     @Override
                     public void run(){
@@ -112,10 +125,9 @@ class ST {
         this.probes = probes.equals("") ? "No probes" : probes;
 
         final String b, c;
-        if (bssid != null){
-            if(AP.getAPByMac(bssid) != null) b = paired + bssid + " (" + AP.getAPByMac(bssid).essid + ")";
-            else b = paired + bssid;
-        } else b = not_connected;
+        if(connectedTo!=null){
+            b = paired + connectedTo.mac + " (" + connectedTo.essid + ")";
+        }else b = not_connected;
         c = "PWR: " + this.pwr + " | Frames: " + this.getFrames();
         runInHandler(new Runnable(){
             @Override

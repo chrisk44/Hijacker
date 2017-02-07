@@ -50,27 +50,13 @@ public class STDialog extends DialogFragment {
             st[7] = (TextView)view.findViewById(R.id.probes_st);
         }
 
-        st[0].setText(info_st.mac);
-
-        if(info_st.bssid==null) st[1].setText(R.string.not_connected);
-        else if(AP.getAPByMac(info_st.bssid)!=null) st[1].setText(info_st.bssid + " (" + AP.getAPByMac(info_st.bssid).essid + ")");
-        else st[1].setText(info_st.bssid);
-
-        st[2].setText(Integer.toString(info_st.pwr));
-        st[3].setText(Integer.toString(info_st.getFrames()));
-        st[4].setText(Integer.toString(info_st.getLost()));
-        st[5].setText(info_st.manuf);
-        st[6].setText(getLastSeen(info_st.lastseen));
-        st[7].setText(info_st.probes);
-
         runnable = new Runnable(){
             @Override
             public void run(){
                 st[0].setText(info_st.mac);
 
-                if(info_st.bssid==null) st[1].setText(R.string.not_connected);
-                else if(AP.getAPByMac(info_st.bssid)!=null) st[1].setText(info_st.bssid + " (" + AP.getAPByMac(info_st.bssid).essid + ")");
-                else st[1].setText(info_st.bssid);
+                if(info_st.connectedTo==null) st[1].setText(R.string.not_connected);
+                else st[1].setText(info_st.connectedTo.mac + " (" + info_st.connectedTo.essid + ")");
 
                 st[2].setText(Integer.toString(info_st.pwr));
                 st[3].setText(Integer.toString(info_st.getFrames()));
@@ -80,15 +66,15 @@ public class STDialog extends DialogFragment {
                 st[7].setText(info_st.probes);
             }
         };
+        runnable.run();
         new Thread(new Runnable(){
             @Override
             public void run(){
                 try{
-                    Thread.sleep(1000);
-                    while(STDialog.this.isResumed()){
-                        runInHandler(runnable);
+                    do{
                         Thread.sleep(1000);
-                    }
+                        runInHandler(runnable);
+                    }while(STDialog.this.isResumed());
                 }catch(InterruptedException ignored){}
             }
         }).start();

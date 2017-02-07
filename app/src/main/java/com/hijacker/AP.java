@@ -53,12 +53,13 @@ class AP {
     static int wpa=0, wpa2=0, wep=0, opn=0, hidden=0;
     static List<AP> APs = new ArrayList<>();
     static List<AP> marked = new ArrayList<>();
+    static List<AP> currentTargetDeauth = new ArrayList<>();
     boolean isHidden = false, isMarked = false;
     int pwr, ch, id, sec=UNKNOWN;
     private int beacons, data, ivs, total_beacons=0, total_data=0, total_ivs=0;
     long lastseen = 0;
     String essid, mac, enc, cipher, auth, manuf;
-    List <ST>clients = new ArrayList<>();
+    List<ST> clients = new ArrayList<>();
     Tile tile;
     AP(String essid, String mac, String enc, String cipher, String auth,
        int pwr, int beacons, int data, int ivs, int ch) {
@@ -71,7 +72,12 @@ class AP {
         if(sort!=SORT_NOSORT) toSort = true;
     }
 
-    void addClient(ST client){ this.clients.add(client); }
+    void addClient(ST client){
+        this.clients.add(client);
+        if(currentTargetDeauth.contains(this)){
+            client.disconnect();
+        }
+    }
     void update(String essid, String enc, String cipher, String auth,
                               int pwr, int beacons, int data, int ivs, int ch){
 
@@ -147,7 +153,7 @@ class AP {
     }
     static AP getAPByMac(String mac){
         if(mac==null) return null;
-        for(int i=APs.size()-1;i>=0;i--){
+        for(int i=0;i<AP.APs.size();i++){
             if(mac.equals(APs.get(i).mac)) return APs.get(i);
         }
         return null;
@@ -205,18 +211,17 @@ class AP {
         if(Airodump.getChannel() != this.ch){
             if(debug) Log.d("HIJACKER/AP", "Starting airodump for channel " + this.ch);
             Airodump.startClean(this.ch);
+            stop(PROCESS_AIREPLAY);         //Aireplay is useless since we are changing channel
         }
         if(target_deauth){
-            if(debug) Log.d("HIJACKER/AP", "Starting targeted deauthentication...");
+            if(debug) Log.d("HIJACKER/AP", "Starting targeted deauthentication for " + this.mac + "...");
             int i;
             for(i=0;i<this.clients.size();i++){
-                startAireplay(this.mac, this.clients.get(i).mac);
+                this.clients.get(i).disconnect();
             }
+            currentTargetDeauth.add(this);
         }else{
-            if(debug) {
-                Log.d("HIJACKER/AP", "Starting aireplay without targets...");
-                Log.d("HIJACKER/AP", this.mac);
-            }
+            if(debug) Log.d("HIJACKER/AP", "Starting aireplay without targets for " + this.mac + "...");
             startAireplay(this.mac);
         }
     }

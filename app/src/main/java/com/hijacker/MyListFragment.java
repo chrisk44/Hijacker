@@ -116,8 +116,7 @@ public class MyListFragment extends ListFragment {
                                     switch(item.getItemId()){
                                         case 0:
                                             //Disconnect
-                                            if(!target_deauth || clicked.ap.clients.size()>0) clicked.ap.disconnectAll();
-                                            else Toast.makeText(getActivity(), getString(R.string.target_deauth_no_clients), Toast.LENGTH_LONG).show();
+                                            clicked.ap.disconnectAll();
                                             break;
                                         case 1:
                                             //Disconnect client
