@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout
+<RelativeLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     android:id="@+id/ll_st_info"
     android:orientation="horizontal"
@@ -8,152 +8,189 @@
     android:padding="10dp"
     android:baselineAligned="false">
 
-    <LinearLayout
-        android:orientation="vertical"
+    <TextView
+        android:id="@+id/mac_tv"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:gravity="end">
+        android:text="@string/mac"
+        android:padding="5dp"
+        android:textColor="?android:attr/textColorPrimary"
+        android:textSize="16sp"
+        android:layout_alignEnd="@+id/connected_to_tv"
+        android:layout_alignBottom="@+id/mac_st"
+        android:layout_alignTop="@+id/mac_st"/>
 
-        <TextView
-            android:text="@string/mac"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:padding="5dp"
-            android:textColor="?android:attr/textColorPrimary"
-            android:textSize="16sp" />
-
-        <TextView
-            android:text="@string/power"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:padding="5dp"
-            android:textColor="?android:attr/textColorPrimary"
-            android:textSize="16sp" />
-
-        <TextView
-            android:text="@string/frames"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:padding="5dp"
-            android:textColor="?android:attr/textColorPrimary"
-            android:textSize="16sp" />
-
-        <TextView
-            android:text="@string/lost"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:padding="5dp"
-            android:textColor="?android:attr/textColorPrimary"
-            android:textSize="16sp" />
-
-        <TextView
-            android:text="@string/lastseen"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:padding="5dp"
-            android:textColor="?android:attr/textColorPrimary"
-            android:textSize="16sp" />
-
-        <TextView
-            android:text="@string/connected_to"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:padding="5dp"
-            android:textColor="?android:attr/textColorPrimary"
-            android:textSize="16sp" />
-
-        <TextView
-            android:text="@string/manuf"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:padding="5dp"
-            android:textColor="?android:attr/textColorPrimary"
-            android:textSize="16sp"
-            android:lines="1"/>
-
-        <TextView
-            android:text="@string/probes"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:padding="5dp"
-            android:textColor="?android:attr/textColorPrimary"
-            android:textSize="16sp"/>
-
-    </LinearLayout>
-
-    <LinearLayout
-        android:orientation="vertical"
-        android:layout_width="0dp"
+    <TextView
+        android:id="@+id/mac_st"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:padding="0dp"
-        android:layout_weight="1"
-        android:layout_gravity="start">
+        android:padding="5dp"
+        android:onClick="onCopy"
+        android:textColor="?android:attr/textColorPrimary"
+        android:textSize="16sp"
+        android:layout_toEndOf="@+id/mac_tv"/>
 
-        <TextView
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:id="@+id/mac_st"
-            android:padding="5dp"
-            android:onClick="onCopy"
-            android:textColor="?android:attr/textColorPrimary"
-            android:textSize="16sp" />
+    <TextView
+        android:id="@+id/pwr_tv"
+        android:text="@string/power"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:padding="5dp"
+        android:textColor="?android:attr/textColorPrimary"
+        android:textSize="16sp"
+        android:layout_alignEnd="@+id/connected_to_tv"
+        android:layout_below="@+id/mac_tv"
+        android:layout_alignTop="@+id/pwr_st"
+        android:layout_alignBottom="@+id/pwr_st"/>
 
-        <TextView
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:id="@+id/pwr_st"
-            android:padding="5dp"
-            android:textColor="?android:attr/textColorPrimary"
-            android:textSize="16sp" />
-        <TextView
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:id="@+id/frames_st"
-            android:padding="5dp"
-            android:textColor="?android:attr/textColorPrimary"
-            android:textSize="16sp" />
-        <TextView
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:id="@+id/lost_st"
-            android:padding="5dp"
-            android:textColor="?android:attr/textColorPrimary"
-            android:textSize="16sp" />
+    <TextView
+        android:id="@+id/pwr_st"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:padding="5dp"
+        android:textColor="?android:attr/textColorPrimary"
+        android:textSize="16sp"
+        android:layout_below="@+id/mac_st"
+        android:layout_toEndOf="@+id/pwr_tv"/>
 
-        <TextView
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:id="@+id/lastseen_st"
-            android:padding="5dp"
-            android:textColor="?android:attr/textColorPrimary"
-            android:textSize="16sp" />
+    <TextView
+        android:id="@+id/frames_tv"
+        android:text="@string/frames"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:padding="5dp"
+        android:textColor="?android:attr/textColorPrimary"
+        android:textSize="16sp"
+        android:layout_alignEnd="@+id/connected_to_tv"
+        android:layout_below="@+id/pwr_tv"
+        android:layout_alignTop="@+id/frames_st"
+        android:layout_alignBottom="@+id/frames_st"/>
 
-        <TextView
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:id="@+id/bssid_st"
-            android:padding="5dp"
-            android:onClick="onCopy"
-            android:textColor="?android:attr/textColorPrimary"
-            android:textSize="16sp"
-            android:lines="1" />
+    <TextView
+        android:id="@+id/frames_st"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:padding="5dp"
+        android:textColor="?android:attr/textColorPrimary"
+        android:textSize="16sp"
+        android:layout_below="@+id/pwr_st"
+        android:layout_toEndOf="@+id/frames_tv"/>
 
-        <TextView
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:id="@+id/manuf_st"
-            android:padding="5dp"
-            android:onClick="onCopy"
-            android:textColor="?android:attr/textColorPrimary"
-            android:textSize="16sp"
-            android:lines="1"/>
+    <TextView
+        android:id="@+id/lost_tv"
+        android:text="@string/lost"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:padding="5dp"
+        android:textColor="?android:attr/textColorPrimary"
+        android:textSize="16sp"
+        android:layout_alignEnd="@+id/connected_to_tv"
+        android:layout_below="@+id/frames_tv"
+        android:layout_alignBottom="@+id/lost_st"
+        android:layout_alignTop="@+id/lost_st"/>
 
-        <TextView
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:id="@+id/probes_st"
-            android:padding="5dp"
-            android:textColor="?android:attr/textColorPrimary"
-            android:textSize="16sp"/>
-    </LinearLayout>
-</LinearLayout>
+    <TextView
+        android:id="@+id/lost_st"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:padding="5dp"
+        android:textColor="?android:attr/textColorPrimary"
+        android:textSize="16sp"
+        android:layout_below="@+id/frames_st"
+        android:layout_toEndOf="@+id/lost_tv"/>
+
+    <TextView
+        android:id="@+id/lastseen_tv"
+        android:text="@string/lastseen"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:padding="5dp"
+        android:textColor="?android:attr/textColorPrimary"
+        android:textSize="16sp"
+        android:layout_alignEnd="@+id/connected_to_tv"
+        android:layout_below="@+id/lost_tv"
+        android:layout_alignBottom="@+id/lastseen_st"
+        android:layout_alignTop="@+id/lastseen_st"/>
+
+    <TextView
+        android:id="@+id/lastseen_st"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:padding="5dp"
+        android:textColor="?android:attr/textColorPrimary"
+        android:textSize="16sp"
+        android:layout_toEndOf="@+id/lastseen_tv"
+        android:layout_below="@+id/lost_st"/>
+
+    <TextView
+        android:id="@+id/connected_to_tv"
+        android:text="@string/connected_to"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:padding="5dp"
+        android:textColor="?android:attr/textColorPrimary"
+        android:textSize="16sp"
+        android:layout_below="@+id/lastseen_tv"
+        android:layout_alignBottom="@+id/bssid_st"
+        android:layout_alignTop="@+id/bssid_st"/>
+
+    <TextView
+        android:id="@+id/bssid_st"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:padding="5dp"
+        android:onClick="onCopy"
+        android:textColor="?android:attr/textColorPrimary"
+        android:textSize="16sp"
+        android:layout_below="@+id/lastseen_st"
+        android:layout_toEndOf="@+id/connected_to_tv"/>
+
+    <TextView
+        android:id="@+id/manuf_tv"
+        android:text="@string/manuf"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:padding="5dp"
+        android:textColor="?android:attr/textColorPrimary"
+        android:textSize="16sp"
+        android:lines="1"
+        android:layout_alignEnd="@+id/connected_to_tv"
+        android:layout_below="@+id/connected_to_tv"
+        android:layout_alignBottom="@+id/manuf_st"
+        android:layout_alignTop="@+id/manuf_st"/>
+
+    <TextView
+        android:id="@+id/manuf_st"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:padding="5dp"
+        android:onClick="onCopy"
+        android:textColor="?android:attr/textColorPrimary"
+        android:textSize="16sp"
+        android:layout_below="@+id/bssid_st"
+        android:layout_toEndOf="@+id/manuf_tv"/>
+
+    <TextView
+        android:id="@+id/probes_tv"
+        android:text="@string/probes"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:padding="5dp"
+        android:textColor="?android:attr/textColorPrimary"
+        android:textSize="16sp"
+        android:layout_alignEnd="@+id/connected_to_tv"
+        android:layout_below="@+id/manuf_tv"
+        android:layout_alignBottom="@+id/probes_st"
+        android:layout_alignTop="@+id/probes_st"/>
+
+    <TextView
+        android:id="@+id/probes_st"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:padding="5dp"
+        android:textColor="?android:attr/textColorPrimary"
+        android:textSize="16sp"
+        android:layout_below="@+id/manuf_st"
+        android:layout_toEndOf="@+id/probes_tv"/>
+
+</RelativeLayout>

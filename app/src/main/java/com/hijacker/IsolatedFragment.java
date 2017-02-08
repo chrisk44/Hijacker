@@ -35,27 +35,23 @@ import static com.hijacker.AP.WEP;
 import static com.hijacker.AP.WPA;
 import static com.hijacker.AP.WPA2;
 import static com.hijacker.MainActivity.FRAGMENT_AIRODUMP;
-import static com.hijacker.MainActivity.PROCESS_AIREPLAY;
 import static com.hijacker.MainActivity.aireplay_dir;
 import static com.hijacker.MainActivity.copy;
 import static com.hijacker.MainActivity.currentFragment;
-import static com.hijacker.MainActivity.deauthWait;
 import static com.hijacker.MainActivity.debug;
 import static com.hijacker.MainActivity.iface;
 import static com.hijacker.MainActivity.isolate;
 import static com.hijacker.MainActivity.mFragmentManager;
 import static com.hijacker.MainActivity.menu;
 import static com.hijacker.MainActivity.prefix;
-import static com.hijacker.MainActivity.progress;
 import static com.hijacker.MainActivity.refreshDrawer;
-import static com.hijacker.MainActivity.stop;
 import static com.hijacker.MainActivity.wpa_thread;
 
 public class IsolatedFragment extends Fragment{
     static AP is_ap;
-    static Thread thread;
-    static Runnable runnable;
-    static boolean cont = false;
+    private Thread thread;
+    private Runnable runnable;
+    private boolean cont = false;
     static int exit_on;
     View fragmentView;
     TextView essid, manuf, mac, sec1, numbers, sec2;
@@ -67,12 +63,12 @@ public class IsolatedFragment extends Fragment{
             @Override
             public void run(){
                 cont = true;
-                while(cont){
-                    try{
+                try{
+                    while(cont){
                         Thread.sleep(1000);
                         refresh.obtainMessage().sendToTarget();
-                    }catch(InterruptedException ignored){}
-                }
+                    }
+                }catch(InterruptedException ignored){}
             }
         };
         thread = new Thread(runnable);
@@ -168,14 +164,9 @@ public class IsolatedFragment extends Fragment{
     @Override
     public void onDestroy(){
         super.onDestroy();
-        cont = false;
         if(mFragmentManager.getBackStackEntryCount()==exit_on){
             isolate(null);
-            Tile.filter();
-            stop(PROCESS_AIREPLAY);
             Airodump.startClean();
-            progress.setIndeterminate(false);
-            progress.setProgress(deauthWait);
         }
     }
 }

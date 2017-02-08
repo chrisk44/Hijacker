@@ -42,11 +42,11 @@ import static com.hijacker.MainActivity.sort;
 import static com.hijacker.MainActivity.startAireplay;
 import static com.hijacker.MainActivity.startAireplayWEP;
 import static com.hijacker.MainActivity.stop;
+import static com.hijacker.MainActivity.stopWPA;
 import static com.hijacker.MainActivity.target_deauth;
 import static com.hijacker.MainActivity.toSort;
 import static com.hijacker.MainActivity.wpa_runnable;
 import static com.hijacker.MainActivity.wpa_thread;
-import static com.hijacker.MainActivity.wpacheckcont;
 
 class AP {
     static final int WPA=0, WPA2=1, WEP=2, OPN=3, UNKNOWN=4;
@@ -178,9 +178,7 @@ class AP {
             progress.setIndeterminate(true);
         }else if(this.sec == WPA || this.sec == WPA2){
             //wpa/wpa2
-            wpacheckcont = false;           //Make sure wpa threads are not running from previous cracking
-            wpa_thread.interrupt();
-            while(wpa_thread.isAlive())      //Wait for everything to shutdown
+            stopWPA();
             if(debug) Log.d("HIJACKER/AP", "Cracking WPA/WPA2");
             Airodump.reset();
             Airodump.setAP(this);

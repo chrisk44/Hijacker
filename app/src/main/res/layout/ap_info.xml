@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout
+<RelativeLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     android:orientation="horizontal"
     android:layout_width="match_parent"
@@ -8,225 +8,304 @@
     android:id="@+id/ll_ap_info"
     android:baselineAligned="false">
 
-    <LinearLayout
-        android:orientation="vertical"
+    <TextView
+        android:id="@+id/mac_tv"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:visibility="visible"
-        android:gravity="end">
+        android:text="@string/mac"
+        android:padding="5dp"
+        android:textColor="?android:attr/textColorPrimary"
+        android:textSize="16sp"
+        android:layout_alignEnd="@+id/auth_tv"
+        android:layout_alignBottom="@+id/mac"
+        android:layout_alignTop="@+id/mac"/>
 
-        <TextView
-            android:text="@string/mac"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:padding="5dp"
-            android:textColor="?android:attr/textColorPrimary"
-            android:textSize="16sp" />
-
-        <TextView
-            android:text="@string/channel"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:padding="5dp"
-            android:textColor="?android:attr/textColorPrimary"
-            android:textSize="16sp" />
-
-        <TextView
-            android:text="@string/power"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:padding="5dp"
-            android:textColor="?android:attr/textColorPrimary"
-            android:textSize="16sp" />
-
-        <TextView
-            android:text="@string/enc"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:padding="5dp"
-            android:textColor="?android:attr/textColorPrimary"
-            android:textSize="16sp" />
-
-        <TextView
-            android:text="@string/auth"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:padding="5dp"
-            android:textColor="?android:attr/textColorPrimary"
-            android:textSize="16sp" />
-
-        <TextView
-            android:text="@string/cipher"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:padding="5dp"
-            android:textColor="?android:attr/textColorPrimary"
-            android:textSize="16sp" />
-
-        <TextView
-            android:text="@string/beacons"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:padding="5dp"
-            android:textColor="?android:attr/textColorPrimary"
-            android:textSize="16sp" />
-
-        <TextView
-            android:text="@string/data"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:padding="5dp"
-            android:textColor="?android:attr/textColorPrimary"
-            android:textSize="16sp" />
-
-        <TextView
-            android:text="@string/ivs"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:padding="5dp"
-            android:textColor="?android:attr/textColorPrimary"
-            android:textSize="16sp" />
-
-        <TextView
-            android:text="@string/clients"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:padding="5dp"
-            android:textColor="?android:attr/textColorPrimary"
-            android:textSize="16sp" />
-
-        <TextView
-            android:text="@string/lastseen"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:padding="5dp"
-            android:textColor="?android:attr/textColorPrimary"
-            android:textSize="16sp" />
-
-        <TextView
-            android:text="@string/essid"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:padding="5dp"
-            android:textColor="?android:attr/textColorPrimary"
-            android:textSize="16sp" />
-
-        <TextView
-            android:text="@string/manuf"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:padding="5dp"
-            android:textColor="?android:attr/textColorPrimary"
-            android:textSize="16sp" />
-
-    </LinearLayout>
-
-    <LinearLayout
-        android:orientation="vertical"
-        android:layout_width="0dp"
+    <TextView
+        android:id="@+id/mac"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:padding="0dp"
-        android:visibility="visible"
-        android:layout_weight="1"
-        android:gravity="start">
+        android:padding="5dp"
+        android:onClick="onCopy"
+        android:textColor="?android:attr/textColorPrimary"
+        android:textSize="16sp"
+        android:layout_toEndOf="@+id/mac_tv"/>
 
-        <TextView
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:id="@+id/mac"
-            android:padding="5dp"
-            android:onClick="onCopy"
-            android:textColor="?android:attr/textColorPrimary"
-            android:textSize="16sp" />
-        <TextView
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:id="@+id/channel"
-            android:padding="5dp"
-            android:textColor="?android:attr/textColorPrimary"
-            android:textSize="16sp" />
-        <TextView
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:id="@+id/pwr"
-            android:padding="5dp"
-            android:textColor="?android:attr/textColorPrimary"
-            android:textSize="16sp" />
-        <TextView
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:id="@+id/enc"
-            android:padding="5dp"
-            android:textColor="?android:attr/textColorPrimary"
-            android:textSize="16sp" />
-        <TextView
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:id="@+id/auth"
-            android:padding="5dp"
-            android:textColor="?android:attr/textColorPrimary"
-            android:textSize="16sp" />
-        <TextView
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:id="@+id/cipher"
-            android:padding="5dp"
-            android:textColor="?android:attr/textColorPrimary"
-            android:textSize="16sp" />
-        <TextView
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:id="@+id/beacons"
-            android:padding="5dp"
-            android:textColor="?android:attr/textColorPrimary"
-            android:textSize="16sp" />
-        <TextView
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:id="@+id/data"
-            android:padding="5dp"
-            android:textColor="?android:attr/textColorPrimary"
-            android:textSize="16sp" />
-        <TextView
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:id="@+id/ivs"
-            android:padding="5dp"
-            android:textColor="?android:attr/textColorPrimary"
-            android:textSize="16sp" />
-        <TextView
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:id="@+id/clients"
-            android:padding="5dp"
-            android:textColor="?android:attr/textColorPrimary"
-            android:textSize="16sp" />
+    <TextView
+        android:id="@+id/channel_tv"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/channel"
+        android:padding="5dp"
+        android:textColor="?android:attr/textColorPrimary"
+        android:textSize="16sp"
+        android:layout_below="@+id/mac_tv"
+        android:layout_alignTop="@+id/channel"
+        android:layout_alignBottom="@+id/channel"
+        android:layout_alignEnd="@+id/auth_tv"/>
 
-        <TextView
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:id="@+id/lastseen"
-            android:padding="5dp"
-            android:textColor="?android:attr/textColorPrimary"
-            android:textSize="16sp" />
+    <TextView
+        android:id="@+id/channel"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:padding="5dp"
+        android:textColor="?android:attr/textColorPrimary"
+        android:textSize="16sp"
+        android:layout_toEndOf="@+id/channel_tv"
+        android:layout_below="@+id/mac"/>
 
-        <TextView
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:id="@+id/essid"
-            android:padding="5dp"
-            android:onClick="onCopy"
-            android:textColor="?android:attr/textColorPrimary"
-            android:textSize="16sp"
-            android:lines="1" />
+    <TextView
+        android:id="@+id/pwr_tv"
+        android:text="@string/power"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:padding="5dp"
+        android:textColor="?android:attr/textColorPrimary"
+        android:textSize="16sp"
+        android:layout_below="@+id/channel_tv"
+        android:layout_alignTop="@+id/pwr"
+        android:layout_alignBottom="@+id/pwr"
+        android:layout_alignEnd="@+id/auth_tv"/>
 
-        <TextView
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:id="@+id/manuf"
-            android:padding="5dp"
-            android:onClick="onCopy"
-            android:textColor="?android:attr/textColorPrimary"
-            android:textSize="16sp" />
-    </LinearLayout>
-</LinearLayout>
+    <TextView
+        android:id="@+id/pwr"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:padding="5dp"
+        android:textColor="?android:attr/textColorPrimary"
+        android:textSize="16sp"
+        android:layout_below="@+id/channel"
+        android:layout_toEndOf="@+id/pwr_tv"/>
+
+    <TextView
+        android:id="@+id/enc_tv"
+        android:text="@string/enc"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:padding="5dp"
+        android:textColor="?android:attr/textColorPrimary"
+        android:textSize="16sp"
+        android:layout_below="@+id/pwr_tv"
+        android:layout_alignTop="@+id/enc"
+        android:layout_alignBottom="@+id/enc"
+        android:layout_alignEnd="@+id/auth_tv"/>
+
+    <TextView
+        android:id="@+id/enc"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:padding="5dp"
+        android:textColor="?android:attr/textColorPrimary"
+        android:textSize="16sp"
+        android:layout_below="@+id/pwr"
+        android:layout_toEndOf="@+id/enc_tv"/>
+
+    <TextView
+        android:id="@+id/auth_tv"
+        android:text="@string/auth"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:padding="5dp"
+        android:textColor="?android:attr/textColorPrimary"
+        android:textSize="16sp"
+        android:layout_below="@+id/enc_tv"
+        android:layout_alignBottom="@+id/auth"
+        android:layout_alignTop="@+id/auth"/>
+
+    <TextView
+        android:id="@+id/auth"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:padding="5dp"
+        android:textColor="?android:attr/textColorPrimary"
+        android:textSize="16sp"
+        android:layout_toEndOf="@+id/auth_tv"
+        android:layout_below="@+id/enc"/>
+
+    <TextView
+        android:id="@+id/cipher_tv"
+        android:text="@string/cipher"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:padding="5dp"
+        android:textColor="?android:attr/textColorPrimary"
+        android:textSize="16sp"
+        android:layout_below="@+id/auth_tv"
+        android:layout_alignBottom="@+id/cipher"
+        android:layout_alignTop="@+id/cipher"
+        android:layout_alignEnd="@+id/auth_tv"/>
+
+    <TextView
+        android:id="@+id/cipher"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:padding="5dp"
+        android:textColor="?android:attr/textColorPrimary"
+        android:textSize="16sp"
+        android:layout_toEndOf="@+id/cipher_tv"
+        android:layout_below="@+id/auth"/>
+
+    <TextView
+        android:id="@+id/beacons_tv"
+        android:text="@string/beacons"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:padding="5dp"
+        android:textColor="?android:attr/textColorPrimary"
+        android:textSize="16sp"
+        android:layout_below="@+id/cipher_tv"
+        android:layout_alignBottom="@+id/beacons"
+        android:layout_alignTop="@+id/beacons"
+        android:layout_alignEnd="@+id/auth_tv"/>
+
+    <TextView
+        android:id="@+id/beacons"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:padding="5dp"
+        android:textColor="?android:attr/textColorPrimary"
+        android:textSize="16sp"
+        android:layout_toEndOf="@+id/beacons_tv"
+        android:layout_below="@+id/cipher"/>
+
+    <TextView
+        android:id="@+id/data_tv"
+        android:text="@string/data"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:padding="5dp"
+        android:textColor="?android:attr/textColorPrimary"
+        android:textSize="16sp"
+        android:layout_below="@+id/beacons_tv"
+        android:layout_alignTop="@+id/data"
+        android:layout_alignBottom="@+id/data"
+        android:layout_alignEnd="@+id/auth_tv"/>
+
+    <TextView
+        android:id="@+id/data"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:padding="5dp"
+        android:textColor="?android:attr/textColorPrimary"
+        android:textSize="16sp"
+        android:layout_toEndOf="@+id/data_tv"
+        android:layout_below="@+id/beacons"/>
+
+    <TextView
+        android:id="@+id/ivs_tv"
+        android:text="@string/ivs"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:padding="5dp"
+        android:textColor="?android:attr/textColorPrimary"
+        android:textSize="16sp"
+        android:layout_below="@+id/data_tv"
+        android:layout_alignBottom="@+id/ivs"
+        android:layout_alignTop="@+id/ivs"
+        android:layout_alignEnd="@+id/auth_tv"/>
+
+    <TextView
+        android:id="@+id/ivs"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:padding="5dp"
+        android:textColor="?android:attr/textColorPrimary"
+        android:textSize="16sp"
+        android:layout_below="@+id/data"
+        android:layout_toEndOf="@+id/ivs_tv"/>
+
+    <TextView
+        android:id="@+id/clients_tv"
+        android:text="@string/clients"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:padding="5dp"
+        android:textColor="?android:attr/textColorPrimary"
+        android:textSize="16sp"
+        android:layout_below="@+id/ivs_tv"
+        android:layout_alignBottom="@+id/clients"
+        android:layout_alignTop="@+id/clients"
+        android:layout_alignEnd="@+id/auth_tv"/>
+
+    <TextView
+        android:id="@+id/clients"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:padding="5dp"
+        android:textColor="?android:attr/textColorPrimary"
+        android:textSize="16sp"
+        android:layout_below="@+id/ivs"
+        android:layout_toEndOf="@+id/clients_tv"/>
+
+    <TextView
+        android:id="@+id/lastseen_tv"
+        android:text="@string/lastseen"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:padding="5dp"
+        android:textColor="?android:attr/textColorPrimary"
+        android:textSize="16sp"
+        android:layout_below="@+id/clients_tv"
+        android:layout_alignBottom="@+id/lastseen"
+        android:layout_alignTop="@+id/lastseen"
+        android:layout_alignEnd="@+id/auth_tv"/>
+
+    <TextView
+        android:id="@+id/lastseen"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:padding="5dp"
+        android:textColor="?android:attr/textColorPrimary"
+        android:textSize="16sp"
+        android:layout_below="@+id/clients"
+        android:layout_toEndOf="@+id/lastseen_tv"/>
+
+    <TextView
+        android:id="@+id/essid_tv"
+        android:text="@string/essid"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:padding="5dp"
+        android:textColor="?android:attr/textColorPrimary"
+        android:textSize="16sp"
+        android:layout_below="@+id/lastseen_tv"
+        android:layout_alignBottom="@+id/essid"
+        android:layout_alignTop="@+id/essid"
+        android:layout_alignEnd="@+id/auth_tv"/>
+
+    <TextView
+        android:id="@+id/essid"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:padding="5dp"
+        android:onClick="onCopy"
+        android:textColor="?android:attr/textColorPrimary"
+        android:textSize="16sp"
+        android:layout_below="@+id/lastseen"
+        android:layout_toEndOf="@+id/essid_tv"/>
+
+    <TextView
+        android:id="@+id/manuf_tv"
+        android:text="@string/manuf"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:padding="5dp"
+        android:textColor="?android:attr/textColorPrimary"
+        android:textSize="16sp"
+        android:layout_below="@+id/essid_tv"
+        android:layout_centerHorizontal="false"
+        android:layout_alignTop="@+id/manuf"
+        android:layout_alignBottom="@+id/manuf"
+        android:layout_alignEnd="@+id/auth_tv"/>
+
+    <TextView
+        android:id="@+id/manuf"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:padding="5dp"
+        android:onClick="onCopy"
+        android:textColor="?android:attr/textColorPrimary"
+        android:textSize="16sp"
+        android:layout_below="@+id/essid"
+        android:layout_toEndOf="@+id/manuf_tv"/>
+
+</RelativeLayout>

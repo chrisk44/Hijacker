@@ -18,7 +18,6 @@ package com.hijacker;
  */
 
 import android.app.FragmentManager;
-import android.util.Log;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -72,7 +71,6 @@ class ST {
                 connectedTo = AP.getAPByMac(bssid);
                 if(connectedTo==null){
                     //Now not connected
-                    Log.d("TEST", this.mac + " is now disconnected");
                     connected--;
                     runInHandler(new Runnable(){
                         @Override
@@ -81,7 +79,6 @@ class ST {
                         }
                     });
                 }else{
-                    Log.d("TEST", this.mac + " is now connected to " + connectedTo.mac + ", " + connectedTo.mac);
                     connectedTo.addClient(this);
                 }
             }
@@ -90,7 +87,6 @@ class ST {
             connectedTo = AP.getAPByMac(bssid);
             if(connectedTo!=null){
                 //Now connected to known AP
-                Log.d("TEST", this.mac + " is now connected to " + connectedTo.mac + ", " + connectedTo.mac);
                 connected++;
                 connectedTo.addClient(this);
                 runInHandler(new Runnable(){

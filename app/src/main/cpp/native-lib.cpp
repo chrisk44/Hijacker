@@ -24,19 +24,6 @@ void logd(char* str){
     __android_log_write(ANDROID_LOG_INFO, "CPP", str);
 }
 
-extern "C" jint Java_com_hijacker_MainActivity_checkwpa(JNIEnv* env, jobject obj, jstring str) {
-    char *buffer = (char *) malloc(512);
-    const char *nativeString = env->GetStringUTFChars(str, 0);
-    strcpy(buffer, nativeString);
-    env->ReleaseStringUTFChars(str, nativeString);
-    char temp[2];
-    if(strlen(buffer)>55) {
-        strncpy(temp, buffer + 56, 1);
-        if(!(temp[0]=='1' || temp[0]=='2' || temp[0]=='3')) return 0;
-        else return 1;
-    }else return -1;
-}
-
 extern "C" jint Java_com_hijacker_Airodump_main(JNIEnv* env, jobject obj, jstring str, jint off){
     int i, j;
     char *buffer = (char*)malloc(512);

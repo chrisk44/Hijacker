@@ -176,11 +176,12 @@ public class MainActivity extends AppCompatActivity{
             public void run(){
                 if(debug) Log.d("HIJACKER/wpa_thread", "Started wpa_thread");
 
-                Thread wpa_subthread = new Thread(new Runnable(){
+                Thread counter_thread = new Thread(new Runnable(){
                     @Override
                     public void run(){
                         if(debug) Log.d("HIJACKER/wpa_subthread", "wpa_subthread started");
                         try{
+                            progress_int = 0;
                             while(progress_int<=deauthWait && wpacheckcont){
                                 Thread.sleep(1000);
                                 progress_int++;
@@ -191,98 +192,92 @@ public class MainActivity extends AppCompatActivity{
                                     }
                                 });
                             }
+                            if(wpacheckcont){
+                                runInHandler(new Runnable(){
+                                    @Override
+                                    public void run(){
+                                        if(!background) Snackbar.make(findViewById(R.id.fragment1), getString(R.string.stopped_to_capture), Snackbar.LENGTH_SHORT).show();
+                                        else Toast.makeText(MainActivity.this, getString(R.string.stopped_to_capture), Toast.LENGTH_SHORT).show();
+                                        progress.setProgress(deauthWait);
+                                        progress.setIndeterminate(true);
+                                    }
+                                });
+                            }
+                        }catch(InterruptedException e){
+                            Log.e("HIJACKER/Exception", "Caught Exception in wpa_subthread: " + e.toString());
                             runInHandler(new Runnable(){
                                 @Override
                                 public void run(){
-                                    if(wpacheckcont){
-                                        stop(PROCESS_AIREPLAY);
-                                        if(!background) Snackbar.make(findViewById(R.id.fragment1), getString(R.string.stopped_to_capture), Snackbar.LENGTH_SHORT).show();
-                                        else Toast.makeText(MainActivity.this, getString(R.string.stopped_to_capture), Toast.LENGTH_SHORT).show();
-                                        progress.setIndeterminate(true);
-                                    }else{
-                                        progress.setIndeterminate(false);
-                                        progress.setProgress(deauthWait);
-                                    }
+                                    progress.setIndeterminate(false);
+                                    progress.setProgress(deauthWait);
                                 }
                             });
-                        }catch(InterruptedException e){ Log.e("HIJACKER/Exception", "Caught Exception in wpa_subthread: " + e.toString()); }
+                        }finally{
+                            stop(PROCESS_AIREPLAY);
+                        }
                         if(debug) Log.d("HIJACKER/wpa_subthread", "wpa_subthread finished");
                     }
                 });
 
-                final String capfile;
-                String buffer;
-                int result = 0;
+                boolean handshake_captured = false;
+                final String capfile = Airodump.getCapFile();
                 Shell shell = getFreeShell();
                 try{
-                    capfile = Airodump.getCapFile();
-
                     if(capfile==null){
-                        if(debug){
-                            Log.d("HIJACKER/wpa_thread", "cap file not found, airodump is probably not running...");
-                            Log.d("HIJACKER/wpa_thread", "Returning...");
-                        }
+                        if(debug) Log.d("HIJACKER/wpa_thread", "cap file not found, airodump is probably not running...");
                     }else{
                         if(debug) Log.d("HIJACKER/wpa_thread", capfile);
-                        progress_int = 0;
                         wpacheckcont = true;
-                        wpa_subthread.start();
-                        while(result!=1 && wpacheckcont){
+                        counter_thread.start();
+
+                        BufferedReader out = shell.getShell_out();
+                        String buffer;
+                        while(!handshake_captured && wpacheckcont){
+                            //Check loop
                             if(debug) Log.d("HIJACKER/wpa_thread", "Checking cap file...");
                             shell.run(aircrack_dir + " " + capfile + "; echo ENDOFAIR");
-                            BufferedReader out = shell.getShell_out();
                             buffer = out.readLine();
-                            if(buffer==null) wpacheckcont = false;
+                            if(buffer==null) break;
                             else{
                                 while(!buffer.equals("ENDOFAIR")){
-                                    if(result!=1) result = checkwpa(buffer);
+                                    if(buffer.length()>=56){
+                                        if(buffer.charAt(56)=='1' || buffer.charAt(56)=='2' || buffer.charAt(56)=='3'){
+                                            handshake_captured = true;
+                                            break;
+                                        }
+                                    }
                                     buffer = out.readLine();
                                 }
                                 Thread.sleep(700);
                             }
                         }
-                        wpacheckcont = false;
                     }
-                    final int temp = result;
-                    runInHandler(new Runnable(){
-                        @Override
-                        public void run(){
-                            if(temp==1){
-                                stop(PROCESS_AIRODUMP);
-                                stop(PROCESS_AIREPLAY);
-                                if(!background) Snackbar.make(findViewById(R.id.fragment1), getString(R.string.handshake_captured) + ' ' + capfile, Snackbar.LENGTH_LONG).show();
-                                else{
-                                    handshake_notif.setContentText(getString(R.string.saved_in_file) + ' ' + capfile);
-                                    mNotificationManager.notify(2, handshake_notif.build());
-                                }
-                            }
-                            progress.setIndeterminate(false);
-                            progress.setProgress(deauthWait);
-                            if(is_ap!=null && currentFragment==FRAGMENT_AIRODUMP){
-                                ((Button) findViewById(R.id.crack)).setText(getString(R.string.crack));
-                            }
-                        }
-                    });
                 }catch(IOException | InterruptedException e){
                     Log.e("HIJACKER/Exception", "Caught Exception in wpa_thread: " + e.toString());
-                    stop(PROCESS_AIREPLAY);
                 }finally{
-                    wpa_subthread.interrupt();
-                    if(delete_extra){
-                        shell.run("rm -rf " + cap_dir + "/handshake-*.csv");
-                        shell.run("rm -rf " + cap_dir + "/handshake-*.netxml");
-                    }
-                    if(debug) Log.d("HIJACKER/wpa_thread", "wpa_thread finished");
+                    wpacheckcont = false;
+                    counter_thread.interrupt();
                     shell.done();
+                    final boolean found = handshake_captured;
+                    if(found) Airodump.startClean(is_ap);
                     runInHandler(new Runnable(){
                         @Override
                         public void run(){
-                            progress.setProgress(deauthWait);
                             Button crack_btn = (Button) findViewById(R.id.crack);
                             if(crack_btn!=null){
                                 //We are in IsolatedFragment
                                 crack_btn.setText(getString(R.string.crack));
                             }
+
+                            if(found){
+                                if(!background) Snackbar.make(findViewById(R.id.fragment1), getString(R.string.handshake_captured) + ' ' + capfile, Snackbar.LENGTH_LONG).show();
+                                else{
+                                    handshake_notif.setContentText(getString(R.string.saved_in_file) + ' ' + capfile);
+                                    mNotificationManager.notify(2, handshake_notif.build());
+                                }
+                                progress.setIndeterminate(false);
+                            }
+                            if(debug) Log.d("HIJACKER/wpa_thread", "wpa_thread finished");
                         }
                     });
                 }
@@ -664,6 +659,7 @@ public class MainActivity extends AppCompatActivity{
     public static void stop(int pr){
         //0 for airodump-ng, 1 for aireplay-ng, 2 for mdk, 3 for aircrack, 4 for reaver, everything else is considered pid and we kill it
         if(debug) Log.d("HIJACKER/stop", "stop(" + pr + ") called");
+        last_action = System.currentTimeMillis();
         switch(pr){
             case PROCESS_AIRODUMP:
                 Airodump.stop();
@@ -673,9 +669,6 @@ public class MainActivity extends AppCompatActivity{
                     @Override
                     public void run(){
                         if(menu!=null) menu.getItem(3).setEnabled(false);
-                        if(aireplay_running==AIREPLAY_WEP){
-                            progress.setIndeterminate(false);
-                        }
                     }
                 });
                 progress_int = deauthWait;
@@ -713,7 +706,6 @@ public class MainActivity extends AppCompatActivity{
                 runOne(busybox + " kill " + pr);
                 break;
         }
-        last_action = System.currentTimeMillis();
         runInHandler(new Runnable(){
             @Override
             public void run(){
@@ -721,6 +713,10 @@ public class MainActivity extends AppCompatActivity{
                 notification();
             }
         });
+    }
+    public static void stopWPA(){
+        wpacheckcont = false;
+        wpa_thread.interrupt();
     }
 
     //Handlers used for tasks that require the Main thread to update the view, but need to be run by other threads
@@ -1207,13 +1203,11 @@ public class MainActivity extends AppCompatActivity{
     public void onCrack(View v){
         //Clicked crack with isolated ap
         if(wpa_thread.isAlive()){
-            wpa_thread.interrupt();
-            stop(PROCESS_AIREPLAY);
-            ((TextView)v).setText(R.string.crack);
-            progress.setIndeterminate(false);
-            progress.setProgress(deauthWait);
+            //Clicked stop
+            stopWPA();
             Airodump.startClean(is_ap);
         }else{
+            //Clicked crack
             is_ap.crack();
             ((TextView)v).setText(R.string.stop);
         }
@@ -1359,5 +1353,4 @@ public class MainActivity extends AppCompatActivity{
     static{
         System.loadLibrary("native-lib");
     }
-    public static native int checkwpa(String str);
 }

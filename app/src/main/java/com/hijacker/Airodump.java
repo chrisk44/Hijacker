@@ -44,10 +44,10 @@ import static com.hijacker.MainActivity.progress;
 import static com.hijacker.MainActivity.refreshState;
 import static com.hijacker.MainActivity.rootView;
 import static com.hijacker.MainActivity.runInHandler;
+import static com.hijacker.MainActivity.stopWPA;
 import static com.hijacker.MainActivity.toSort;
 import static com.hijacker.MainActivity.menu;
 import static com.hijacker.MainActivity.wpa_thread;
-import static com.hijacker.MainActivity.wpacheckcont;
 import static com.hijacker.Shell.getFreeShell;
 import static com.hijacker.Shell.runOne;
 
@@ -259,6 +259,7 @@ class Airodump{
         });
     }
     static void stop(){
+        last_action = System.currentTimeMillis();
         running = false;
         refresh_thread.interrupt();
         while(refresh_thread.isAlive());
@@ -266,14 +267,9 @@ class Airodump{
             @Override
             public void run(){
                 if(menu!=null) menu.getItem(1).setIcon(R.drawable.run);
-                if(wpa_thread.isAlive()) progress.setIndeterminate(false);
             }
         });
-        if(wpa_thread.isAlive()){
-            IsolatedFragment.cont = false;
-            wpacheckcont = false;
-            wpa_thread.interrupt();
-        }
+        stopWPA();
         Shell shell = getFreeShell();
         if(delete_extra && (forWPA || forWEP || always_cap)){
             String file_prefix = getCapFile();
@@ -285,7 +281,6 @@ class Airodump{
         }
         shell.run(busybox + " kill $(" + busybox + " pidof airodump-ng)");
         shell.done();
-        last_action = System.currentTimeMillis();
         AP.saveData();
         ST.saveData();
 
