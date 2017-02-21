@@ -53,7 +53,7 @@ public class SettingsFragment extends PreferenceFragment {
             String toDisable[] = {"install_nexmon", "restore_firmware"};
             for(String option : toDisable){
                 temp = findPreference(option);
-                temp.setSummary(R.string.incorrect_arch + ' ' + arch);
+                temp.setSummary(getString(R.string.incorrect_arch) + ' ' + arch);
                 temp.setEnabled(false);
             }
             if(!arch.equals("aarch64")) findPreference("prefix").setEnabled(true);

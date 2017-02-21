@@ -480,7 +480,7 @@ public class MainActivity extends AppCompatActivity{
         try{
             info = getPackageManager().getPackageInfo(this.getPackageName(), 0);
         }catch(PackageManager.NameNotFoundException ignored){}
-        if(bin.list().length==19 && lib.list().length==1 && info!=null){
+        if(bin.list().length==20 && lib.list().length==1 && info!=null){
             if(info.versionCode<=pref.getInt("tools_version", 0)){
                 if(debug) Log.d("HIJACKER/installTools", "Tools already installed");
                 return;
@@ -493,6 +493,7 @@ public class MainActivity extends AppCompatActivity{
         extract("aireplay-ng", tools_location, true);
         extract("airodump-ng", tools_location, true);
         extract("besside-ng", tools_location, true);
+        extract("busybox", tools_location, true);
         extract("ivstools", tools_location, true);
         extract("iw", tools_location, true);
         extract("iwconfig", tools_location, true);
@@ -508,14 +509,6 @@ public class MainActivity extends AppCompatActivity{
         extract("wesside-ng", tools_location, true);
         extract("wpaclean", tools_location, true);
         extract("libfakeioctl.so", lib_location, true);
-
-        //Install busybox
-        if(arch.equals("armv7l")){
-            extract("busybox", path, true);
-        }else{
-            if(debug) Log.d("HIJACKER/installTools", "Cannot install busybox, arch is " + arch);
-            busybox = null;
-        }
 
         pref_edit.putInt("tools_version", info.versionCode);
         pref_edit.commit();
@@ -761,7 +754,6 @@ public class MainActivity extends AppCompatActivity{
         mFragmentManager = getFragmentManager();
         actionBar = getSupportActionBar();
         path = getFilesDir().getAbsolutePath();
-        busybox = path + "/busybox";
         firm_backup_file = Environment.getExternalStorageDirectory() + "/fw_bcmdhd.orig.bin";
 
         //Load defaults
@@ -865,6 +857,7 @@ public class MainActivity extends AppCompatActivity{
 
         if(arch.equals("armv7l") || arch.equals("aarch64")){
             installTools();
+            busybox = path + "/bin/busybox";
 
             prefix = "LD_PRELOAD=" + path + "/lib/libfakeioctl.so";
             airodump_dir = path + "/bin/airodump-ng";
@@ -873,6 +866,8 @@ public class MainActivity extends AppCompatActivity{
             mdk3_dir = path + "/bin/mdk3";
             reaver_dir = path + "/bin/reaver";
         }else{
+            Log.e("HIJACKER/onCreate", "Device not armv7l or aarch64, can't install tools");
+            busybox = "busybox";
             ErrorDialog dialog = new ErrorDialog();
             dialog.setMessage(getString(R.string.not_armv7l));
             dialog.show(getFragmentManager(), "ErrorDialog");
@@ -1316,7 +1311,7 @@ public class MainActivity extends AppCompatActivity{
         try{
             while(buffer==null) buffer = out.readLine();
             lastline = buffer;
-            while(!end.equals(buffer)){
+            while(!end.equals(buffer) && buffer!=null){
                 lastline = buffer;
                 buffer = out.readLine();
             }

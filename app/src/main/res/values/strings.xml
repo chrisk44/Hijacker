@@ -188,7 +188,7 @@
     <string name="bin_not_created">Directory \'bin\' could not be created</string>
     <string name="lib_not_created">Directory \'lib\' could not be created</string>
     <string name="not_armv7l">This device is not armv7l or aarch64 architecture. The included tools cannot be used.
-        You will have to install the tools manually: aircrack-ng suite, mdk3, reaver, wireless-tools and libfakeioctl.so (adjust the prefix for this)</string>
+        You will have to install the tools manually: aircrack-ng suite, busybox, mdk3, reaver, wireless-tools and libfakeioctl.so (adjust the prefix for this)</string>
         <!-- Notification -->
         <string name="notification_title">Hijacker is running in the background</string>
         <string name="notification2_title">Hijacker watchdog detected a problem</string>

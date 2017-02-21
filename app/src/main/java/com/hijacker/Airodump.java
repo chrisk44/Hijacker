@@ -40,14 +40,12 @@ import static com.hijacker.MainActivity.iface;
 import static com.hijacker.MainActivity.last_action;
 import static com.hijacker.MainActivity.notification;
 import static com.hijacker.MainActivity.prefix;
-import static com.hijacker.MainActivity.progress;
 import static com.hijacker.MainActivity.refreshState;
 import static com.hijacker.MainActivity.rootView;
 import static com.hijacker.MainActivity.runInHandler;
 import static com.hijacker.MainActivity.stopWPA;
 import static com.hijacker.MainActivity.toSort;
 import static com.hijacker.MainActivity.menu;
-import static com.hijacker.MainActivity.wpa_thread;
 import static com.hijacker.Shell.getFreeShell;
 import static com.hijacker.Shell.runOne;
 
