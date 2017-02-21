@@ -114,10 +114,15 @@ class ST {
             }
         }
 
+        if(frames<this.frames || lost<this.lost){
+            saveData();
+        }else{
+            this.lost = lost;
+            this.frames = frames;
+        }
+
         this.bssid = bssid;
         this.pwr = pwr;
-        this.lost = lost;
-        this.frames = frames;
         this.probes = probes.equals("") ? "No probes" : probes.replace(",", ", ");
 
         final String b, c;
@@ -159,14 +164,15 @@ class ST {
     }
     public int getFrames(){ return total_frames + frames; }
     public int getLost(){ return total_lost + lost; }
-    public static void saveData(){
-        ST temp;
+    public void saveData(){
+        total_frames += frames;
+        total_lost += lost;
+        frames = 0;
+        lost = 0;
+    }
+    public static void saveAll(){
         for(int i=0;i<ST.STs.size();i++){
-            temp = ST.STs.get(i);
-            temp.total_frames += temp.frames;
-            temp.total_lost += temp.lost;
-            temp.frames = 0;
-            temp.lost = 0;
+            ST.STs.get(i).saveData();
         }
     }
     static ST getSTByMac(String mac){

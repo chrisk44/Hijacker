@@ -510,8 +510,10 @@ public class MainActivity extends AppCompatActivity{
         extract("wpaclean", tools_location, true);
         extract("libfakeioctl.so", lib_location, true);
 
-        pref_edit.putInt("tools_version", info.versionCode);
-        pref_edit.commit();
+        if(info!=null){
+            pref_edit.putInt("tools_version", info.versionCode);
+            pref_edit.commit();
+        }
     }
 
     public static void _startAireplay(final String str){

@@ -204,7 +204,7 @@ class Airodump{
             fifo.clear();
         }
 
-        String cmd = "su -c " + prefix + " " + airodump_dir + " --update 1 ";
+        String cmd = "su -c " + prefix + " " + airodump_dir + " --update 1 --berlin 1 ";
 
         if(forWPA) cmd += "-w " + cap_dir + "/handshake ";
         else if(forWEP) cmd += "--ivs -w " + cap_dir + "/wep_ivs ";
@@ -279,8 +279,8 @@ class Airodump{
         }
         shell.run(busybox + " kill $(" + busybox + " pidof airodump-ng)");
         shell.done();
-        AP.saveData();
-        ST.saveData();
+        AP.saveAll();
+        ST.saveAll();
 
         runInHandler(new Runnable(){
             @Override

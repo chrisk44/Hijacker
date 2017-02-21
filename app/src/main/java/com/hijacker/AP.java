@@ -106,8 +106,16 @@ class AP {
             hidden++;
         }
 
-        if(beacons!=this.beacons || data!=this.data || this.lastseen==0){
+        if(beacons!=this.beacons || data!=this.data || ivs!=this.ivs || this.lastseen==0){
             this.lastseen = System.currentTimeMillis();
+        }
+
+        if(beacons<this.beacons || data<this.data || ivs<this.ivs){
+            saveData();
+        }else{
+            this.beacons = beacons;
+            this.data = data;
+            this.ivs = ivs;
         }
 
         this.enc = enc;
@@ -115,9 +123,6 @@ class AP {
         this.auth = auth;
         this.pwr = pwr;
         this.ch = ch==-1 ? 0 : ch;      //for hidden networks
-        this.beacons = beacons;
-        this.data = data;
-        this.ivs = ivs;
 
         if(sec==UNKNOWN){
             switch(this.enc){
@@ -244,16 +249,17 @@ class AP {
     public int getBeacons(){ return total_beacons + beacons; }
     public int getData(){ return total_data + data; }
     public int getIvs(){ return total_ivs + ivs; }
-    public static void saveData(){
-        AP temp;
+    public void saveData(){
+        total_beacons += beacons;
+        total_data += data;
+        total_ivs += ivs;
+        beacons = 0;
+        data = 0;
+        ivs = 0;
+    }
+    public static void saveAll(){
         for(int i=0;i<AP.APs.size();i++){
-            temp = AP.APs.get(i);
-            temp.total_beacons += temp.beacons;
-            temp.total_data += temp.data;
-            temp.total_ivs += temp.ivs;
-            temp.beacons = 0;
-            temp.data = 0;
-            temp.ivs = 0;
+            AP.APs.get(i).saveData();
         }
     }
 
