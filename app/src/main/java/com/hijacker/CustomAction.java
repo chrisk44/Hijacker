@@ -56,18 +56,19 @@ class CustomAction{
     }
 
     String getTitle(){ return title; }
-    String getStart_cmd(){ return start_cmd; }
-    String getStop_cmd(){ return stop_cmd; }
-    String getProcess_name(){ return process_name; }
-    boolean requires_clients(){ return requires_clients; }
-    boolean requires_connected(){ return requires_connected; }
+    String getStartCmd(){ return start_cmd; }
+    String getStopCmd(){ return stop_cmd; }
+    String getProcessName(){ return process_name; }
+    boolean requiresClients(){ return requires_clients; }
+    boolean requiresConnected(){ return requires_connected; }
     boolean hasProcessName(){ return has_process_name; }
+    boolean hasStopCmd(){ return !stop_cmd.equals(""); }
     int getType(){ return type; }
     void setTitle(String title){ this.title = title; }
-    void setStart_cmd(String start_cmd){ this.start_cmd = start_cmd; }
-    void setStop_cmd(String stop_cmd){ this.stop_cmd = stop_cmd; }
-    void setRequires_clients(boolean requires_clients){ this.requires_clients = requires_clients; }
-    void setRequires_connected(boolean requires_connected){ this.requires_connected = requires_connected; }
+    void setStartCmd(String start_cmd){ this.start_cmd = start_cmd; }
+    void setStopCmd(String stop_cmd){ this.stop_cmd = stop_cmd; }
+    void setRequiresClients(boolean requires_clients){ this.requires_clients = requires_clients; }
+    void setRequiresConnected(boolean requires_connected){ this.requires_connected = requires_connected; }
     void run(){
         Shell shell = CustomActionFragment.shell;
         shell.run("export IFACE=\"" + iface + '\"');
@@ -162,9 +163,9 @@ class CustomAction{
                             start_cmd + ", " + stop_cmd + ", " + Integer.toString(type) + ", " + Boolean.toString(requirement) + ", " + process_name);
                     CustomAction action = new CustomAction(title, start_cmd, stop_cmd, process_name, type);
                     if(type==TYPE_AP){
-                        action.setRequires_clients(requirement);
+                        action.setRequiresClients(requirement);
                     }else{
-                        action.setRequires_connected(requirement);
+                        action.setRequiresConnected(requirement);
                     }
                     reader.close();
                     reader0.close();

@@ -156,7 +156,7 @@ public class CustomActionFragment extends Fragment{
                     for(i = 0; i<AP.APs.size(); i++){
                         temp = AP.APs.get(i);
                         popup.getMenu().add(TYPE_AP, i, i, temp.essid + " (" + temp.mac + ")");
-                        if(selected_action.requires_clients() && temp.clients.size()==0){
+                        if(selected_action.requiresClients() && temp.clients.size()==0){
                             popup.getMenu().findItem(i).setEnabled(false);
                         }
                     }
@@ -165,7 +165,7 @@ public class CustomActionFragment extends Fragment{
                     for(i = 0; i<ST.STs.size(); i++){
                         temp = ST.STs.get(i);
                         popup.getMenu().add(TYPE_ST, i, i, temp.mac + ((temp.bssid==null) ? "" : " (" + AP.getAPByMac(temp.bssid).essid + ")"));
-                        if(selected_action.requires_connected() && temp.bssid==null){
+                        if(selected_action.requiresConnected() && temp.bssid==null){
                             popup.getMenu().findItem(i).setEnabled(false);
                         }
                     }
@@ -202,20 +202,22 @@ public class CustomActionFragment extends Fragment{
                 if(!thread.isAlive()){
                     //not started
                     shell = Shell.getFreeShell();
-                    console.append("Running: " + selected_action.getStart_cmd() + '\n');
-                    if(debug) Log.d("HIJACKER/CustomCMDFrag", "Running: " + selected_action.getStart_cmd());
+                    console.append("Running: " + selected_action.getStartCmd() + '\n');
+                    if(debug) Log.d("HIJACKER/CustomCMDFrag", "Running: " + selected_action.getStartCmd());
                     selected_action.run();
                     start_button.setText(R.string.stop);
                     progress.setIndeterminate(true);
                 }else{
                     //started
-                    console.append("Running: " + selected_action.getStop_cmd() + '\n');
                     if(selected_action.hasProcessName()){
-                        console.append("Killing process named " + selected_action.getProcess_name() + '\n');
-                        if(debug) Log.d("HIJACKER/CustomCMDFrag", "Killing process named " + selected_action.getProcess_name());
+                        console.append("Killing process named " + selected_action.getProcessName() + '\n');
+                        if(debug) Log.d("HIJACKER/CustomCMDFrag", "Killing process named " + selected_action.getProcessName());
                     }
-                    if(debug) Log.d("HIJACKER/CustomCMDFrag", "Running: " + selected_action.getStop_cmd());
+                    if(debug) Log.d("HIJACKER/CustomCMDFrag", "Running: " + selected_action.getStopCmd());
                     cont = false;
+                    if(selected_action.hasStopCmd()){
+                        console.append("Running: " + selected_action.getStopCmd() + '\n');
+                    }
                     selected_action.stop();
                     stop.obtainMessage().sendToTarget();
                 }

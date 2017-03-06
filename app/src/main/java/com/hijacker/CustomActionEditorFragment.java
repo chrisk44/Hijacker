@@ -109,12 +109,12 @@ public class CustomActionEditorFragment extends Fragment{
                         new File(filename_before).renameTo(new File(filename_after));
                     }
                     action.setTitle(title);
-                    action.setStart_cmd(start_cmd);
-                    action.setStop_cmd(stop_cmd);
+                    action.setStartCmd(start_cmd);
+                    action.setStopCmd(stop_cmd);
                     if(action.getType()==TYPE_AP){
-                        action.setRequires_clients(requirement_cb.isChecked());
+                        action.setRequiresClients(requirement_cb.isChecked());
                     }else{
-                        action.setRequires_connected(requirement_cb.isChecked());
+                        action.setRequiresConnected(requirement_cb.isChecked());
                     }
                     save();
                     Snackbar.make(fragmentView, getString(R.string.saved) + " " + action.getTitle(), Snackbar.LENGTH_SHORT).show();
@@ -134,11 +134,11 @@ public class CustomActionEditorFragment extends Fragment{
                         if(((RadioGroup) fragmentView.findViewById(R.id.radio_group)).getCheckedRadioButtonId()==R.id.ap_rb){
                             //this action is for ap
                             action = new CustomAction(title, start_cmd, stop_cmd, process_name, TYPE_AP);
-                            action.setRequires_clients(requirement_cb.isChecked());
+                            action.setRequiresClients(requirement_cb.isChecked());
                         }else{
                             //this action is for st
                             action = new CustomAction(title, start_cmd, stop_cmd, process_name, TYPE_ST);
-                            action.setRequires_connected(requirement_cb.isChecked());
+                            action.setRequiresConnected(requirement_cb.isChecked());
                         }
                         save();
                         Snackbar.make(fragmentView, getString(R.string.saved) + " " + action.getTitle(), Snackbar.LENGTH_SHORT).show();
@@ -156,21 +156,21 @@ public class CustomActionEditorFragment extends Fragment{
         currentFragment = FRAGMENT_CUSTOM;
         if(action!=null){
             title_et.setText(action.getTitle());
-            start_cmd_et.setText(action.getStart_cmd());
-            stop_cmd_et.setText(action.getStop_cmd());
+            start_cmd_et.setText(action.getStartCmd());
+            stop_cmd_et.setText(action.getStopCmd());
             if(action.getType()==TYPE_AP){
                 ((RadioButton)fragmentView.findViewById(R.id.ap_rb)).setChecked(true);
                 fragmentView.findViewById(R.id.st_rb).setEnabled(false);
-                requirement_cb.setChecked(action.requires_clients());
+                requirement_cb.setChecked(action.requiresClients());
             }else{
                 ((RadioButton) fragmentView.findViewById(R.id.st_rb)).setChecked(true);
                 fragmentView.findViewById(R.id.ap_rb).setEnabled(false);
-                requirement_cb.setChecked(action.requires_connected());
+                requirement_cb.setChecked(action.requiresConnected());
                 requirement_cb.setText(R.string.requires_associated);
             }
             if(action.hasProcessName()){
                 has_process_name_cb.setChecked(true);
-                process_name_et.setText(action.getProcess_name());
+                process_name_et.setText(action.getProcessName());
             }
             title_et.setEnabled(true);
             start_cmd_et.setEnabled(true);

@@ -1137,7 +1137,7 @@ public class MainActivity extends AppCompatActivity{
             firstText.setText(currentItem.getTitle());
 
             TextView secondText = (TextView) itemview.findViewById(R.id.bottom_left);
-            secondText.setText(currentItem.getStart_cmd());
+            secondText.setText(currentItem.getStartCmd());
 
             TextView thirdText = (TextView) itemview.findViewById(R.id.bottom_right);
             thirdText.setText("");
