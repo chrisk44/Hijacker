@@ -37,6 +37,8 @@ Root is also necessary, as these tools need root to work.
 * Sort and filter Access Points with many parameters
 * Export all the gathered information to a file
 
+[Screenshots](https://github.com/chrisk44/Hijacker/tree/master/screenshots)
+
 ##Installation
 Make sure:
 * you are on Android 5+
@@ -45,8 +47,8 @@ Make sure:
 
 ####Download the latest version [here](https://github.com/chrisk44/Hijacker/releases).
 
-When you run Hijacker for the first time, you will be asked whether you want to install the nexmon firmware or go to home screen. If you have installed your firmware, you can just go to the home screen. Otherwise, click'Install Nexmon' and follow the directions. Keep in mind that on some devices, installing files in /system might trigger an Android security feature and your system partition will be restored when you reboot.
-After installing the firmware you will land on the home screen and airodump will start. If you don't see any networks, make sure you have enabled your WiFi and it's in monitor mode. If you have a problem, go to settings and click "Test Tools". If they all pass, you probably don't have monitor mode enabled. If something fails, click "Copy test command" and select the tool that fails. A sample command will be copied to your clipboard so you can open a terminal, run it, and see what's wrong. 
+When you run Hijacker for the first time, you will be asked whether you want to install the nexmon firmware or go to home screen. If you have installed your firmware, you can just go to the home screen. Otherwise, click 'Install Nexmon' and follow the instructions. Keep in mind that on some devices, installing files in /system might trigger an Android security feature and your system partition will be restored when you reboot.
+After installing the firmware you will land on the home screen and airodump will start. If you don't see any networks, make sure you have enabled your WiFi and it's in monitor mode.
 
 ##Troubleshooting
 First of all, this app is designed and tested for ARM devices. All the binaries included are compiled for that architecture and will not work on anything else. You can check by going to settings: if you have the option to install nexmon, then you are on the correct architecture, otherwise you will have to install all the tools manually (busybox, aircrack-ng suite, mdk3, reaver, wireless tools, libfakeioctl.so library) and set the 'Prefix' option for the tools to preload the library they need.
