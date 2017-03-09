@@ -18,7 +18,6 @@
     <string name="exit">Exit</string>
     <string name="filters">Filters</string>
     <string name="apply">Apply</string>
-    <string name="setup">Set up</string>
     <string name="home">Home</string>
     <string name="filter">Filter</string>
     <string name="clear">Clear</string>
@@ -108,7 +107,6 @@
     <string name="export">Export</string>
     <string name="export_title">Export…</string>
     <string name="output_file_title">Output file</string>
-    <string name="output_file_hint">/sdcard/output.txt</string>
     <string name="visible">Visible</string>
     <string name="output_file_exists">File already exists. Long click to overwrite.</string>
     <string name="output_file_cant_write">Can\'t write to that file</string>
@@ -168,7 +166,6 @@
 
     <!-- Main -->
     <string name="cap_notfound">cap file not found</string>
-    <string name="cap_is">Cap file is</string>
     <string name="app_dir_notfound1">App file directory doesn\'t exist: </string>
     <string name="app_dir_notfound2">. Reinstall the app.</string>
     <string name="disconnect_started">Disconnect All started</string>
@@ -181,7 +178,6 @@
     <string name="mdk_not_running">MDK3 is not running!</string>
     <string name="reaver_still_running">Reaver is still running!</string>
     <string name="reaver_not_running">Reaver is not running</string>
-    <string name="oui_not_found">oui.txt file was not extracted. Manufacturer detection will not work. Restart the app to try again.</string>
     <string name="su_notfound_title">SuperSU not found!</string>
     <string name="su_notfound">You might be rooted, but at the moment, this application requires SuperSU to function properly.
         You can continue if you believe that your root solution will work. Please don\'t report bugs.</string>
@@ -197,9 +193,6 @@
         <string name="stopped_to_capture">Stopped aireplay to capture handshake…</string>
         <string name="handshake_captured">WPA handshake captured.</string>
         <string name="saved_in_file">Saved in file </string>
-
-    <!-- MyListFragment -->
-    <string name="target_deauth_no_clients">Can\'t start targeted deauthentication without any clients.</string>
 
     <!-- MDKFragment -->
     <string name="bf_title">Beacon Flooding</string>
@@ -270,6 +263,7 @@
     <string name="cap_dir" translatable="false">/sdcard/cap</string>
     <string name="enable_monMode" translatable="false">nexutil -m true</string>
     <string name="disable_monMode" translatable="false">nexutil -m false</string>
+    <string name="enable_on_airodump" translatable="false">true</string>
     <string name="deauthWait" translatable="false">20</string>
     <string name="show_notif" translatable="false">true</string>
     <string name="show_details" translatable="false">true</string>
@@ -332,6 +326,9 @@
     <string name="mm2_title">Disable Monitor Mode</string>
     <string name="mm2_sum">Command to disable monitor mode (leave blank if none)</string>
     <string name="mm2_desc">Command to disable monitor mode specific to your interface. Will be run AS ROOT when the app is being killed.</string>
+
+    <string name="enable_on_airodump_title">Enable on Airodump</string>
+    <string name="enable_on_airodump_sum">Run the "Enable Monitor Mode" command when starting airodump</string>
 
     <!-- Tools -->
     <string name="tools">Tools</string>

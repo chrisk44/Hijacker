@@ -23,11 +23,11 @@ import android.app.DialogFragment;
 import android.app.FragmentManager;
 import android.content.DialogInterface;
 import android.os.Bundle;
-import android.os.Environment;
 
 import java.io.File;
 
 import static com.hijacker.CustomAction.cmds;
+import static com.hijacker.MainActivity.actions_path;
 import static com.hijacker.MainActivity.custom_action_adapter;
 import static com.hijacker.MainActivity.background;
 
@@ -40,7 +40,7 @@ public class ActionDeleteDialog extends DialogFragment{
         builder.setTitle(R.string.delete_title);
         builder.setPositiveButton(R.string.delete, new DialogInterface.OnClickListener() {
             public void onClick(DialogInterface dialog, int id) {
-                new File(Environment.getExternalStorageDirectory() + "/Hijacker-actions/" + cmds.get(index).getTitle() + ".action").delete();
+                new File(actions_path + "/" + cmds.get(index).getTitle() + ".action").delete();
                 cmds.remove(index);
                 custom_action_adapter.notifyDataSetChanged();
             }

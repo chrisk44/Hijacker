@@ -40,6 +40,7 @@ public class ConfirmResetDialog extends DialogFragment {
                 pref_edit.putString("cap_dir", getString(R.string.cap_dir));
                 pref_edit.putString("enable_monMode", getString(R.string.enable_monMode));
                 pref_edit.putString("disable_monMode", getString(R.string.disable_monMode));
+                pref_edit.putBoolean("enable_on_airodump", Boolean.parseBoolean(getString(R.string.enable_on_airodump)));
                 pref_edit.putString("deauthWait", getString(R.string.deauthWait));
                 pref_edit.putBoolean("show_notif", Boolean.parseBoolean(getString(R.string.show_notif)));
                 pref_edit.putBoolean("show_details", Boolean.parseBoolean(getString(R.string.show_details)));

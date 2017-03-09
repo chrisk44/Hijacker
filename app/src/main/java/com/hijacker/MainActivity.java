@@ -122,7 +122,7 @@ public class MainActivity extends AppCompatActivity{
     static NotificationCompat.Builder notif, error_notif, handshake_notif;
     static NotificationManager mNotificationManager;
     static FragmentManager mFragmentManager;
-    static String path, firm_backup_file, version, arch, busybox;             //path: App files path (ends with .../files)
+    static String path, data_path, actions_path, firm_backup_file, version, arch, busybox;             //path: App files path (ends with .../files)
     static boolean init=false;      //True on first run to swap the dialogs for initialization
     static ActionBar actionBar;
     private GoogleApiClient client;
@@ -134,7 +134,7 @@ public class MainActivity extends AppCompatActivity{
             enable_monMode, disable_monMode, custom_chroot_cmd;
     static int deauthWait;
     static boolean show_notif, show_details, airOnStartup, debug, delete_extra,
-            monstart, always_cap, cont_on_fail, watchdog, target_deauth;
+            monstart, always_cap, cont_on_fail, watchdog, target_deauth, enable_on_airodump;
 
     @Override
     protected void onCreate(Bundle savedInstanceState){
@@ -756,7 +756,27 @@ public class MainActivity extends AppCompatActivity{
         mFragmentManager = getFragmentManager();
         actionBar = getSupportActionBar();
         path = getFilesDir().getAbsolutePath();
-        firm_backup_file = Environment.getExternalStorageDirectory() + "/fw_bcmdhd.orig.bin";
+        data_path = Environment.getExternalStorageDirectory() + "/Hijacker";
+        actions_path = data_path + "/actions";
+        firm_backup_file = data_path + "/fw_bcmdhd.orig.bin";
+        File data_dir = new File(data_path);
+        if(!data_dir.exists()){
+            //Create directory, subdirectories and files
+            data_dir.mkdir();
+
+            //Move app files from other directories in /Hijacker
+            File firm_backup_old = new File(Environment.getExternalStorageDirectory() + "/fw_bcmdhd.orig.bin");
+            if(firm_backup_old.exists()){
+                firm_backup_old.renameTo(new File(data_path + "/fw_bcmdhd.orig.bin"));
+            }
+
+            File actions_dir_old = new File(Environment.getExternalStorageDirectory() + "/Hijacker-actions");
+            if(actions_dir_old.exists()){
+                actions_dir_old.renameTo(new File(actions_path));
+            }else{
+                new File(data_dir + "/actions").mkdir();
+            }
+        }
 
         //Load defaults
         iface = getString(R.string.iface);
@@ -764,6 +784,7 @@ public class MainActivity extends AppCompatActivity{
         cap_dir = getString(R.string.cap_dir);
         enable_monMode = getString(R.string.enable_monMode);
         disable_monMode = getString(R.string.disable_monMode);
+        enable_on_airodump = Boolean.parseBoolean(getString(R.string.enable_on_airodump));
         deauthWait = Integer.parseInt(getString(R.string.deauthWait));
         show_notif = Boolean.parseBoolean(getString(R.string.show_notif));
         show_details = Boolean.parseBoolean(getString(R.string.show_details));
@@ -898,6 +919,7 @@ public class MainActivity extends AppCompatActivity{
         cap_dir = pref.getString("cap_dir", cap_dir);
         enable_monMode = pref.getString("enable_monMode", enable_monMode);
         disable_monMode = pref.getString("disable_monMode", disable_monMode);
+        enable_on_airodump = pref.getBoolean("enable_on_airodump", enable_on_airodump);
         show_notif = pref.getBoolean("show_notif", show_notif);
         show_details = pref.getBoolean("show_details", show_details);
         airOnStartup = pref.getBoolean("airOnStartup", airOnStartup);

@@ -98,6 +98,11 @@
             android:title="@string/mm2_title"
             android:key="disable_monMode"
             android:defaultValue="@string/disable_monMode" />
+        <SwitchPreference
+            android:defaultValue="true"
+            android:title="@string/enable_on_airodump_title"
+            android:key="enable_on_airodump"
+            android:summary="@string/enable_on_airodump_sum"/>
     </PreferenceCategory>
     <PreferenceCategory android:title="@string/tools">
         <Preference

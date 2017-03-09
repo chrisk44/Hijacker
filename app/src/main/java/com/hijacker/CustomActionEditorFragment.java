@@ -19,7 +19,6 @@ package com.hijacker;
 
 import android.app.Fragment;
 import android.os.Bundle;
-import android.os.Environment;
 import android.support.design.widget.Snackbar;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -38,6 +37,7 @@ import static com.hijacker.CustomAction.TYPE_ST;
 import static com.hijacker.CustomAction.cmds;
 import static com.hijacker.CustomAction.save;
 import static com.hijacker.MainActivity.FRAGMENT_CUSTOM;
+import static com.hijacker.MainActivity.actions_path;
 import static com.hijacker.MainActivity.currentFragment;
 import static com.hijacker.MainActivity.mFragmentManager;
 import static com.hijacker.MainActivity.refreshDrawer;
@@ -104,8 +104,8 @@ public class CustomActionEditorFragment extends Fragment{
                 }else if(action!=null){
                     //update existing action
                     if(!action.getTitle().equals(title)){
-                        String filename_before = Environment.getExternalStorageDirectory() + "/Hijacker-actions/" + action.getTitle() + ".action";
-                        String filename_after = Environment.getExternalStorageDirectory() + "/Hijacker-actions/" + title + ".action";
+                        String filename_before = actions_path + "/" + action.getTitle() + ".action";
+                        String filename_after = actions_path + "/" + title + ".action";
                         new File(filename_before).renameTo(new File(filename_after));
                     }
                     action.setTitle(title);

@@ -17,7 +17,6 @@ package com.hijacker;
     along with this program.  If not, see <http://www.gnu.org/licenses/>
  */
 
-import android.os.Environment;
 import android.util.Log;
 
 import java.io.BufferedReader;
@@ -28,6 +27,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
+import static com.hijacker.MainActivity.actions_path;
 import static com.hijacker.MainActivity.aireplay_dir;
 import static com.hijacker.MainActivity.airodump_dir;
 import static com.hijacker.MainActivity.busybox;
@@ -114,11 +114,10 @@ class CustomAction{
         //Save current cmds list to permanent storage
         File file;
         FileWriter writer;
-        String folder = Environment.getExternalStorageDirectory() + "/Hijacker-actions/";
         CustomAction action;
         for(int i=0;i<cmds.size();i++){
             action = cmds.get(i);
-            file = new File(folder + action.getTitle() + ".action");
+            file = new File(actions_path + "/" + action.getTitle() + ".action");
             try{
                 writer = new FileWriter(file);
                 writer.write(action.title + '\n');
@@ -139,7 +138,7 @@ class CustomAction{
     static void load(){
         //load custom actions from storage to cmds
         cmds.clear();
-        File folder = new File(Environment.getExternalStorageDirectory() + "/Hijacker-actions");
+        File folder = new File(actions_path);
         if(!folder.exists()){
             folder.mkdir();
         }

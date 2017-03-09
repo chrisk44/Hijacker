@@ -35,6 +35,7 @@ import static com.hijacker.MainActivity.completed;
 import static com.hijacker.MainActivity.debug;
 import static com.hijacker.MainActivity.delete_extra;
 import static com.hijacker.MainActivity.enable_monMode;
+import static com.hijacker.MainActivity.enable_on_airodump;
 import static com.hijacker.MainActivity.getLastLine;
 import static com.hijacker.MainActivity.iface;
 import static com.hijacker.MainActivity.last_action;
@@ -216,7 +217,7 @@ class Airodump{
 
         cmd += iface;
 
-        runOne(enable_monMode);
+        if(enable_on_airodump) runOne(enable_monMode);
         stop();
 
         final String final_cmd = cmd;
