@@ -90,6 +90,7 @@ public class MainActivity extends AppCompatActivity{
     static final int PROCESS_AIRODUMP=0, PROCESS_AIREPLAY=1, PROCESS_MDK=2, PROCESS_AIRCRACK=3, PROCESS_REAVER=4;
     static final int MDK_BF=0, MDK_ADOS=1;
     static final int SORT_NOSORT = 0, SORT_ESSID = 1, SORT_BEACONS_FRAMES = 2, SORT_DATA_FRAMES = 3, SORT_PWR = 4;
+    static final int CHROOT_FOUND = 0, CHROOT_BIN_MISSING = 1, CHROOT_DIR_MISSING = 2, CHROOT_BOTH_MISSING = 3;
     //State variables
     static boolean wpacheckcont = false, completed = true, clearing = false;
     static boolean notif_on = false, background = false;    //notif_on: notification should be shown, background: the app is running in the background
@@ -1367,6 +1368,28 @@ public class MainActivity extends AppCompatActivity{
         if(str.charAt(str.length()-1)=='/'){
             return str;
         }else return str + '/';
+    }
+    static int checkChroot(){
+        boolean bin = false, dir;
+
+        Shell shell = getFreeShell();
+        shell.run("echo $PATH; echo ENDOFPATH");
+        String path = getLastLine(shell.getShell_out(), "ENDOFPATH");
+        shell.done();
+        String paths[] = path.split(":");
+        for(String temp : paths){
+            if(new RootFile(temp + "/bootkali_init").exists()){
+                bin = true;
+                break;
+            }
+        }
+
+        dir = new RootFile(chroot_dir).exists() && new RootFile(chroot_dir + "/bin/bash").exists();
+
+        if(bin && dir) return CHROOT_FOUND;
+        else if(!bin && !dir) return CHROOT_BOTH_MISSING;
+        else if(dir) return CHROOT_BIN_MISSING;
+        else return CHROOT_DIR_MISSING;
     }
 
     static{

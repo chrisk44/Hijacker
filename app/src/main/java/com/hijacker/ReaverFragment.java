@@ -41,10 +41,14 @@ import java.io.InputStreamReader;
 import java.io.PrintWriter;
 
 import static android.widget.Toast.LENGTH_SHORT;
+import static com.hijacker.MainActivity.CHROOT_BIN_MISSING;
+import static com.hijacker.MainActivity.CHROOT_DIR_MISSING;
+import static com.hijacker.MainActivity.CHROOT_FOUND;
 import static com.hijacker.MainActivity.FRAGMENT_REAVER;
 import static com.hijacker.MainActivity.PROCESS_AIRODUMP;
 import static com.hijacker.MainActivity.PROCESS_REAVER;
 import static com.hijacker.MainActivity.background;
+import static com.hijacker.MainActivity.checkChroot;
 import static com.hijacker.MainActivity.cont_on_fail;
 import static com.hijacker.MainActivity.currentFragment;
 import static com.hijacker.MainActivity.custom_chroot_cmd;
@@ -89,16 +93,12 @@ public class ReaverFragment extends Fragment{
 
         console.setMovementMethod(new ScrollingMovementMethod());
 
-        RootFile chroot_dir = new RootFile(MainActivity.chroot_dir);
-        boolean kali_init = new RootFile("/system/bin/bootkali_init").exists();
-        if(debug){
-            Log.d("HIJACKER/ReaverFragment", "chroot_dir is " + Boolean.toString(chroot_dir.exists()));
-            Log.d("HIJACKER/ReaverFragment", "kali_init is " + Boolean.toString(kali_init));
-        }
-        if(!chroot_dir.exists() || !kali_init){
+        int chroot_check = checkChroot();
+        if(chroot_check!=CHROOT_FOUND){
             pixie_dust_et.setEnabled(false);
-            if(!chroot_dir.exists()) Toast.makeText(getActivity(), getString(R.string.chroot_notfound), LENGTH_SHORT).show();
-            if(!kali_init) Toast.makeText(getActivity(), getString(R.string.kali_notfound), LENGTH_SHORT).show();
+            if(chroot_check==CHROOT_DIR_MISSING) Toast.makeText(getActivity(), getString(R.string.chroot_notfound), LENGTH_SHORT).show();
+            else if(chroot_check==CHROOT_BIN_MISSING) Toast.makeText(getActivity(), getString(R.string.kali_notfound), LENGTH_SHORT).show();
+            else Toast.makeText(getActivity(), getString(R.string.chroot_both_notfound), LENGTH_SHORT).show();
         }
 
         select_button.setOnClickListener(new View.OnClickListener(){

@@ -214,6 +214,7 @@
     <string name="small_dh">Use small DH keys to improve crack speed</string>
     <string name="chroot_notfound">Chroot directory not found</string>
     <string name="kali_notfound">bootkali_init not found</string>
+    <string name="chroot_both_notfound">Chroot directory and bootkali_init not found</string>
     <string name="chroot_warning">!!!!!!  Kali chroot doesn\'t currently support monitor mode through the internal wireless interface.
         If you are on NetHunterOS it may work, otherwise you have to use an external adapter.
         The command \"source monstart-nh\" will be executed in chroot. !!!!!!</string>

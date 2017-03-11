@@ -28,13 +28,19 @@ import android.view.View;
 import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import java.io.IOException;
 
+import static android.widget.Toast.LENGTH_SHORT;
+import static com.hijacker.MainActivity.CHROOT_BIN_MISSING;
+import static com.hijacker.MainActivity.CHROOT_DIR_MISSING;
+import static com.hijacker.MainActivity.CHROOT_FOUND;
 import static com.hijacker.MainActivity.PROCESS_AIREPLAY;
 import static com.hijacker.MainActivity.PROCESS_AIRODUMP;
 import static com.hijacker.MainActivity.PROCESS_MDK;
 import static com.hijacker.MainActivity.PROCESS_REAVER;
+import static com.hijacker.MainActivity.checkChroot;
 import static com.hijacker.MainActivity.debug;
 import static com.hijacker.MainActivity.iface;
 import static com.hijacker.MainActivity.notif_on;
@@ -193,16 +199,12 @@ public class TestDialog extends DialogFragment {
                 runInHandler(new Runnable(){        //check chroot
                     @Override
                     public void run(){
-                        RootFile chroot_dir = new RootFile(MainActivity.chroot_dir);
-                        boolean kali_init = new RootFile("/system/bin/bootkali_init").exists();
-                        if(debug){
-                            Log.d("HIJACKER/test_thread", "chroot_dir is " + Boolean.toString(chroot_dir.exists()));
-                            Log.d("HIJACKER/test_thread", "kali_init is " + Boolean.toString(kali_init));
-                        }
-                        if(!chroot_dir.exists() || !kali_init){
+                        int chroot_check = checkChroot();
+                        if(chroot_check!=CHROOT_FOUND){
                             status[4].setImageResource(R.drawable.failed);
-                            if(!chroot_dir.exists()) test_cur_cmd.setText(R.string.chroot_notfound);
-                            else if(!kali_init) test_cur_cmd.setText(R.string.kali_notfound);
+                            if(chroot_check==CHROOT_DIR_MISSING) test_cur_cmd.setText(R.string.chroot_notfound);
+                            else if(chroot_check==CHROOT_BIN_MISSING) test_cur_cmd.setText(R.string.kali_notfound);
+                            else test_cur_cmd.setText(R.string.chroot_both_notfound);
                         }else{
                             test_cur_cmd.setText(R.string.done);
                             status[4].setImageResource(R.drawable.passed);
