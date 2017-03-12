@@ -24,16 +24,16 @@ import android.os.Bundle;
 import android.os.Environment;
 import android.preference.Preference;
 import android.preference.PreferenceFragment;
-
 import java.io.File;
 
 import static com.hijacker.MainActivity.FRAGMENT_SETTINGS;
 import static com.hijacker.MainActivity.arch;
+import static com.hijacker.MainActivity.checkForUpdate;
 import static com.hijacker.MainActivity.firm_backup_file;
 import static com.hijacker.MainActivity.mFragmentManager;
 import static com.hijacker.MainActivity.pref_edit;
 import static com.hijacker.MainActivity.refreshDrawer;
-import static com.hijacker.MainActivity.version;
+import static com.hijacker.MainActivity.versionName;
 import static com.hijacker.MainActivity.watchdog;
 import static com.hijacker.MainActivity.watchdog_runnable;
 import static com.hijacker.MainActivity.watchdog_thread;
@@ -102,11 +102,7 @@ public class SettingsFragment extends PreferenceFragment {
         findPreference("send_feedback").setOnPreferenceClickListener(new Preference.OnPreferenceClickListener(){
             @Override
             public boolean onPreferenceClick(Preference preference){
-                Intent intent = new Intent (Intent.ACTION_SEND);
-                intent.setType("plain/text");
-                intent.putExtra(Intent.EXTRA_EMAIL, new String[] {"kiriakopoulos44@gmail.com"});
-                intent.putExtra(Intent.EXTRA_SUBJECT, "Hijacker feedback");
-                startActivity(intent);
+                new FeedbackDialog().show(getFragmentManager(), "FeedbackDialog");
                 return false;
             }
         });
@@ -155,7 +151,16 @@ public class SettingsFragment extends PreferenceFragment {
                 return false;
             }
         });
-        findPreference("version").setSummary(version);
+        findPreference("update_on_startup").setOnPreferenceChangeListener(new Preference.OnPreferenceChangeListener(){
+            @Override
+            public boolean onPreferenceChange(Preference preference, Object newValue){
+                if((boolean)newValue){
+                    checkForUpdate(SettingsFragment.this.getActivity(), true);
+                }
+                return true;
+            }
+        });
+        findPreference("version").setSummary(versionName);
     }
     @Override
     public void onResume() {

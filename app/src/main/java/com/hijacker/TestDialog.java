@@ -28,11 +28,9 @@ import android.view.View;
 import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import java.io.IOException;
 
-import static android.widget.Toast.LENGTH_SHORT;
 import static com.hijacker.MainActivity.CHROOT_BIN_MISSING;
 import static com.hijacker.MainActivity.CHROOT_DIR_MISSING;
 import static com.hijacker.MainActivity.CHROOT_FOUND;
@@ -41,7 +39,6 @@ import static com.hijacker.MainActivity.PROCESS_AIRODUMP;
 import static com.hijacker.MainActivity.PROCESS_MDK;
 import static com.hijacker.MainActivity.PROCESS_REAVER;
 import static com.hijacker.MainActivity.checkChroot;
-import static com.hijacker.MainActivity.debug;
 import static com.hijacker.MainActivity.iface;
 import static com.hijacker.MainActivity.notif_on;
 import static com.hijacker.MainActivity.prefix;

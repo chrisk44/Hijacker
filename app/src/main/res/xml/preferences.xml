@@ -160,9 +160,12 @@
             android:title="@string/github_title"
             android:key="github" />
         <Preference
-            android:title="@string/send_feedback_title"
-            android:summary="@string/send_feedback_sum"
-            android:key="send_feedback" />
+            android:key="send_feedback"
+            android:title="@string/send_feedback_title"/>
+        <SwitchPreference
+            android:defaultValue="@string/auto_update"
+            android:title="@string/update_on_startup"
+            android:key="update_on_startup"/>
         <Preference
             android:key="version"
             android:title="@string/version_title" />

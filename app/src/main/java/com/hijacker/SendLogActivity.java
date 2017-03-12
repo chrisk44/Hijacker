@@ -19,14 +19,20 @@ package com.hijacker;
 //Code from here (modified): http://stackoverflow.com/questions/601503/how-do-i-obtain-crash-data-from-my-android-application
 
 import android.Manifest;
+import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Environment;
+import android.os.Handler;
+import android.os.Looper;
+import android.preference.PreferenceManager;
 import android.support.v4.app.ActivityCompat;
-import android.support.v4.content.ContextCompat;
 import android.support.v4.content.FileProvider;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -34,6 +40,9 @@ import android.text.method.ScrollingMovementMethod;
 import android.util.Log;
 import android.view.View;
 import android.view.Window;
+import android.widget.EditText;
+import android.widget.ImageView;
+import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -44,21 +53,29 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
+import java.net.Socket;
 import java.util.ArrayList;
 import java.util.Date;
 
+import static com.hijacker.MainActivity.connect;
+
 public class SendLogActivity extends AppCompatActivity{
     static String busybox;
-    String filename, stackTrace;
+    String stackTrace, user_email = null;
+    EditText user_email_et;
+    File report;
     Process shell;
     PrintWriter shell_in;
     BufferedReader shell_out;
+    SharedPreferences pref;
+    SharedPreferences.Editor pref_edit;
     @Override
     protected void onCreate(Bundle savedInstanceState){
         super.onCreate(savedInstanceState);
         requestWindowFeature(Window.FEATURE_NO_TITLE); // make a dialog without a titlebar
         setFinishOnTouchOutside(false); // prevent users from dismissing the dialog by tapping outside
         setContentView(R.layout.activity_send_log);
+        user_email_et = (EditText)findViewById(R.id.email_et);
 
         busybox = getFilesDir().getAbsolutePath() + "/busybox";
         stackTrace = getIntent().getStringExtra("exception");
@@ -76,40 +93,50 @@ public class SendLogActivity extends AppCompatActivity{
 
         stopAll();
 
-        if(ContextCompat.checkSelfPermission(this, Manifest.permission.WRITE_EXTERNAL_STORAGE)==PackageManager.PERMISSION_DENIED){
-            ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE}, 0);
-        }
-        if(ContextCompat.checkSelfPermission(this, Manifest.permission.WRITE_EXTERNAL_STORAGE)!=PackageManager.PERMISSION_DENIED){
-            filename = extractLogToFile();
-            if(filename==null) Log.d("HIJACKER/SendLog", "filename is null");
-            else{
-                File log = new File(filename);
-                try{
-                    BufferedReader br = new BufferedReader(new FileReader(log));
-                    String buffer;
-                    TextView console = (TextView)findViewById(R.id.console);
-                    console.setMovementMethod(ScrollingMovementMethod.getInstance());
-                    int i=0;
-                    while((buffer = br.readLine())!=null && i<400){
-                        console.append(buffer + '\n');
-                        i++;
-                    }
-                    if(i==400) console.append("...more logcat not displayed here");
-                }catch(IOException ignored){}
+        ActivityCompat.requestPermissions(this, new String[]{
+                Manifest.permission.CHANGE_WIFI_STATE,
+                Manifest.permission.ACCESS_WIFI_STATE,
+                Manifest.permission.WRITE_EXTERNAL_STORAGE,
+                Manifest.permission.ACCESS_NETWORK_STATE,
+                Manifest.permission.INTERNET
+        }, 0);
+
+        pref = PreferenceManager.getDefaultSharedPreferences(this);
+        pref_edit = pref.edit();
+
+        user_email_et.setText(pref.getString("user_email", ""));
+
+        report = new File(Environment.getExternalStorageDirectory() + "/report.txt");
+        if(report.exists()) report.delete();
+        try{
+            report.createNewFile();
+        }catch(IOException ignored){}
+        createReport();
+
+        try{
+            BufferedReader br = new BufferedReader(new FileReader(report));
+            TextView console = (TextView)findViewById(R.id.console);
+            console.setMovementMethod(ScrollingMovementMethod.getInstance());
+            int i=0, limit=100;
+            String buffer;
+            while((buffer = br.readLine())!=null && i<limit){
+                console.append(buffer + '\n');
+                i++;
             }
-        }else Log.e("HIJACKER/SendLog", "WRITE_EXTERNAL_STORAGE permission denied");
+            if(i==limit) console.append("...");
+        }catch(IOException ignored){}
     }
-    private void sendLogFile(String fullName){
+    public void onUseEmail(View v){
         Intent intent = new Intent (Intent.ACTION_SEND);
         intent.setType("plain/text");
         intent.putExtra(Intent.EXTRA_EMAIL, new String[] {"kiriakopoulos44@gmail.com"});
         intent.putExtra(Intent.EXTRA_SUBJECT, "Hijacker bug report");
-        Uri attachment = FileProvider.getUriForFile(this, BuildConfig.APPLICATION_ID + ".provider", new File(fullName));
+        Uri attachment = FileProvider.getUriForFile(this, BuildConfig.APPLICATION_ID + ".provider", report);
         intent.putExtra(Intent.EXTRA_STREAM, attachment);
         intent.putExtra(Intent.EXTRA_TEXT, "Log file attached.\n\nAdd additional details here, like what exactly you were doing when the crash occurred."); // do this so some email clients don't complain about empty body.
         startActivity(intent);
     }
-    private String extractLogToFile(){
+    void createReport(){
         PackageManager manager = this.getPackageManager();
         PackageInfo info = null;
         try{
@@ -118,14 +145,10 @@ public class SendLogActivity extends AppCompatActivity{
         String model = Build.MODEL;
         if (!model.startsWith(Build.MANUFACTURER)) model = Build.MANUFACTURER + " " + model;
 
-        // Make file name - file must be saved to external storage or it wont be readable by the email app.
-        String fullName = Environment.getExternalStorageDirectory() + "/report.txt";
-
         // Extract to file.
-        File file = new File (fullName);
         FileWriter writer = null;
         try{
-            writer = new FileWriter(file, true);
+            writer = new FileWriter(report, true);
             writer.write("\n--------------------------------------------------------------------------------\n");
             writer.write("Hijacker bug report - " + new Date().toString() + "\n\n");
             writer.write("Android version: " +  Build.VERSION.SDK_INT + '\n');
@@ -144,6 +167,7 @@ public class SendLogActivity extends AppCompatActivity{
             Log.d("HIJACKER/SendLog", cmd);
             shell_in.print(cmd);                //Runtime.getRuntime().exec(cmd) just echos the cmd...
             shell_in.flush();
+
             String buffer = shell_out.readLine();
             while(!buffer.equals("ENDOFLOG")){
                 writer.write(buffer + '\n');
@@ -152,20 +176,103 @@ public class SendLogActivity extends AppCompatActivity{
 
             writer.close();
         }catch(IOException e){
-            if (writer != null)
-                try {
+            if(writer != null){
+                try{
                     writer.close();
-                }catch(IOException ignored) {}
-            return null;
+                }catch(IOException ignored){}
+            }
         }
-
-        return fullName;
     }
-    public void onSend(View v){
-        if(filename==null){
+    public void onSend(final View v){
+        if(!report.exists()){
             Log.d("HIJACKER/SendLog", "filename is null");
             Toast.makeText(this, "Report was not created", Toast.LENGTH_LONG).show();
-        }else sendLogFile(filename);
+            return;
+        }
+        user_email = user_email_et.getText().toString();
+        pref_edit.putString("user_email", user_email);
+        pref_edit.commit();
+
+        ConnectivityManager connectivityManager = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
+        if(connectivityManager.getNetworkInfo(1).getState()!=NetworkInfo.State.CONNECTED &&
+                connectivityManager.getNetworkInfo(0).getState()!=NetworkInfo.State.CONNECTED){
+            Log.d("HIJACKER/SendLog", "No internet connection");
+            Toast.makeText(this, getString(R.string.no_internet), Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        final ProgressBar progress = (ProgressBar)findViewById(R.id.progress);
+        final ImageView completed = (ImageView)findViewById(R.id.completed);
+        v.setVisibility(View.GONE);
+        progress.setVisibility(View.VISIBLE);
+
+        new Thread(new Runnable(){
+            @Override
+            public void run(){
+                Looper.prepare();
+                Runnable runnable = new Runnable(){
+                    @Override
+                    public void run(){
+                        progress.setVisibility(View.GONE);
+                        v.setVisibility(View.VISIBLE);
+                    }
+                };
+                Socket socket = connect();
+                if(socket==null){
+                    handler.post(runnable);
+                    Toast.makeText(SendLogActivity.this, getString(R.string.server_error) , Toast.LENGTH_SHORT).show();
+                    return;
+                }
+                try{
+                    BufferedReader socketOut = new BufferedReader(new InputStreamReader(socket.getInputStream()));
+                    PrintWriter socketIn = new PrintWriter(socket.getOutputStream());
+                    socketIn.print("report\n");
+                    socketIn.flush();
+
+                    String temp = socketOut.readLine();
+                    if(temp!=null){
+                        if(!temp.equals("OK")){
+                            Toast.makeText(SendLogActivity.this, getString(R.string.server_denied), Toast.LENGTH_SHORT).show();
+                            handler.post(runnable);
+                            return;
+                        }
+                    }else{
+                        Toast.makeText(SendLogActivity.this, getString(R.string.connection_closed), Toast.LENGTH_SHORT).show();
+                        handler.post(runnable);
+                        return;
+                    }
+
+                    BufferedReader fileReader = new BufferedReader(new FileReader(report));
+
+                    socketIn.print("User email: " + user_email + '\n');
+                    socketIn.flush();
+                    String buffer = fileReader.readLine();
+                    while(buffer!=null){
+                        socketIn.print(buffer + '\n');
+                        socketIn.flush();
+                        buffer = fileReader.readLine();
+                    }
+                    socketIn.print("EOF\n");
+                    socketIn.print("exit\n");
+                    socketIn.flush();
+
+                    socketIn.close();
+                    socketOut.close();
+                    socket.close();
+                    handler.post(new Runnable(){
+                        @Override
+                        public void run(){
+                            progress.setVisibility(View.GONE);
+                            completed.setVisibility(View.VISIBLE);
+                        }
+                    });
+                }catch(IOException e){
+                    Log.e("HIJACKER/onSend", e.toString());
+                    Toast.makeText(SendLogActivity.this, getString(R.string.unknown_error), Toast.LENGTH_SHORT).show();
+                    handler.post(runnable);
+                }
+            }
+        }).start();
     }
     public void onRestart(View v){
         Intent intent = new Intent(this, MainActivity.class);
@@ -215,4 +322,5 @@ public class SendLogActivity extends AppCompatActivity{
             }
         }
     }
+    static Handler handler = new Handler();
 }

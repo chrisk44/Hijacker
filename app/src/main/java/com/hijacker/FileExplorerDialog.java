@@ -150,7 +150,7 @@ public class FileExplorerDialog extends DialogFragment{
         if(onSelect!=null){
             onSelect.run();
         }
-        this.dismiss();
+        this.dismissAllowingStateLoss();
     }
     void setStartingDir(RootFile file){
         start = file;
