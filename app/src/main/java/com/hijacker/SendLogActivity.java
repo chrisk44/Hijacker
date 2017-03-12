@@ -57,6 +57,9 @@ import java.net.Socket;
 import java.util.ArrayList;
 import java.util.Date;
 
+import static com.hijacker.MainActivity.ANS_POSITIVE;
+import static com.hijacker.MainActivity.REQ_EXIT;
+import static com.hijacker.MainActivity.REQ_REPORT;
 import static com.hijacker.MainActivity.connect;
 
 public class SendLogActivity extends AppCompatActivity{
@@ -133,7 +136,7 @@ public class SendLogActivity extends AppCompatActivity{
         intent.putExtra(Intent.EXTRA_SUBJECT, "Hijacker bug report");
         Uri attachment = FileProvider.getUriForFile(this, BuildConfig.APPLICATION_ID + ".provider", report);
         intent.putExtra(Intent.EXTRA_STREAM, attachment);
-        intent.putExtra(Intent.EXTRA_TEXT, "Log file attached.\n\nAdd additional details here, like what exactly you were doing when the crash occurred."); // do this so some email clients don't complain about empty body.
+        intent.putExtra(Intent.EXTRA_TEXT, "Log file attached.\n\nAdd additional details here, like what exactly you were doing when the crash occurred.");
         startActivity(intent);
     }
     void createReport(){
@@ -226,12 +229,12 @@ public class SendLogActivity extends AppCompatActivity{
                 try{
                     BufferedReader socketOut = new BufferedReader(new InputStreamReader(socket.getInputStream()));
                     PrintWriter socketIn = new PrintWriter(socket.getOutputStream());
-                    socketIn.print("report\n");
+                    socketIn.print(REQ_REPORT + '\n');
                     socketIn.flush();
 
                     String temp = socketOut.readLine();
                     if(temp!=null){
-                        if(!temp.equals("OK")){
+                        if(!temp.equals(ANS_POSITIVE)){
                             Toast.makeText(SendLogActivity.this, getString(R.string.server_denied), Toast.LENGTH_SHORT).show();
                             handler.post(runnable);
                             return;
@@ -253,7 +256,7 @@ public class SendLogActivity extends AppCompatActivity{
                         buffer = fileReader.readLine();
                     }
                     socketIn.print("EOF\n");
-                    socketIn.print("exit\n");
+                    socketIn.print(REQ_EXIT + '\n');
                     socketIn.flush();
 
                     socketIn.close();

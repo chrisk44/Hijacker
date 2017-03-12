@@ -45,10 +45,16 @@ import java.io.PrintWriter;
 import java.net.Socket;
 import java.util.Date;
 
+import static com.hijacker.MainActivity.ANS_POSITIVE;
+import static com.hijacker.MainActivity.REQ_EXIT;
+import static com.hijacker.MainActivity.REQ_FEEDBACK;
 import static com.hijacker.MainActivity.background;
 import static com.hijacker.MainActivity.connect;
+import static com.hijacker.MainActivity.deviceModel;
 import static com.hijacker.MainActivity.pref;
 import static com.hijacker.MainActivity.pref_edit;
+import static com.hijacker.MainActivity.versionCode;
+import static com.hijacker.MainActivity.versionName;
 
 public class FeedbackDialog extends DialogFragment{
     EditText email_et, feedback_et;
@@ -80,6 +86,7 @@ public class FeedbackDialog extends DialogFragment{
                 intent.setType("plain/text");
                 intent.putExtra(Intent.EXTRA_EMAIL, new String[] {"kiriakopoulos44@gmail.com"});
                 intent.putExtra(Intent.EXTRA_SUBJECT, "Hijacker feedback");
+                intent.putExtra(Intent.EXTRA_TEXT, feedback_et.getText().toString());
                 startActivity(intent);
             }
         });
@@ -141,12 +148,12 @@ public class FeedbackDialog extends DialogFragment{
                                 PrintWriter in = new PrintWriter(socket.getOutputStream());
                                 BufferedReader out = new BufferedReader(new InputStreamReader(socket.getInputStream()));
 
-                                in.print("feedback\n");
+                                in.print(REQ_FEEDBACK + '\n');
                                 in.flush();
 
                                 String buffer = out.readLine();
                                 if(buffer!=null){
-                                    if(!buffer.equals("OK")){
+                                    if(!buffer.equals(ANS_POSITIVE)){
                                         handler.post(runnable);
                                         Snackbar.make(v, getString(R.string.server_denied), Snackbar.LENGTH_SHORT).show();
                                         return;
@@ -159,11 +166,13 @@ public class FeedbackDialog extends DialogFragment{
 
                                 in.print("Hijacker feedback - " + new Date().toString() + "\n");
                                 in.print("User email: " + email + '\n');
+                                in.print("App version: " + versionName + " (" + versionCode + ")\n");
                                 in.print("Android version: " +  Build.VERSION.SDK_INT + '\n');
-                                in.print("Feedback:\n");
+                                in.print("Device model: " + deviceModel + '\n');
+                                in.print("\nFeedback:\n");
                                 in.print(feedback + '\n');
                                 in.print("EOF\n");
-                                in.print("exit\n");
+                                in.print(REQ_EXIT + '\n');
                                 in.flush();
 
                                 in.close();

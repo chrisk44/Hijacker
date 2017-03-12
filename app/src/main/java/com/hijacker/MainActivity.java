@@ -69,7 +69,9 @@ import com.google.android.gms.common.api.GoogleApiClient;
 
 import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
+import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -92,6 +94,8 @@ import static com.hijacker.Shell.runOne;
 public class MainActivity extends AppCompatActivity{
     static final String SERVER = "192.168.1.4";         //This will be a DNS resolvable name
     static final int PORT = 1025;
+    static final String REQ_VERSION = "version", REQ_INFO = "info", REQ_EXIT = "exit", REQ_REPORT = "report", REQ_FEEDBACK = "feedback", REQ_NEW_ID = "newid";
+    static final String ANS_POSITIVE = "OK", ANS_NEGATIVE = "NO";
     static final int BUFFER_SIZE = 1048576;
     static final int AIREPLAY_DEAUTH = 1, AIREPLAY_WEP = 2;
     static final int FRAGMENT_AIRODUMP = 0, FRAGMENT_MDK = 1, FRAGMENT_CRACK = 2,
@@ -133,8 +137,10 @@ public class MainActivity extends AppCompatActivity{
     static NotificationManager mNotificationManager;
     static FragmentManager mFragmentManager;
     static String path, data_path, actions_path, firm_backup_file, arch, busybox;             //path: App files path (ends with .../files)
-    static String versionName;
+    //App and device info
+    static String versionName, deviceModel;
     static int versionCode;
+    static long deviceID;
     static boolean init=false;      //True on first run to swap the dialogs for initialization
     static ActionBar actionBar;
     private GoogleApiClient client;
@@ -758,6 +764,9 @@ public class MainActivity extends AppCompatActivity{
         }catch(PackageManager.NameNotFoundException e){
             Log.e("HIJACKER/setup", e.toString());
         }
+        deviceModel = Build.MODEL;
+        if(!deviceModel.startsWith(Build.MANUFACTURER)) deviceModel = Build.MANUFACTURER + " " + deviceModel;
+
         arch = System.getProperty("os.arch");
         ap_count = (TextView) findViewById(R.id.ap_count);
         st_count = (TextView) findViewById(R.id.st_count);
@@ -801,6 +810,8 @@ public class MainActivity extends AppCompatActivity{
                 new File(data_dir + "/actions").mkdir();
             }
         }
+
+        deviceID = pref.getLong("deviceID", -1);
 
         //Load defaults
         iface = getString(R.string.iface);
@@ -1418,15 +1429,24 @@ public class MainActivity extends AppCompatActivity{
     }
     static Socket connect(){
         Socket socket;
-        InetAddress ip;
         try{
-            ip = Inet4Address.getByName(MainActivity.SERVER);
-        }catch(IOException e){
-            Log.e("HIJACKER/connect", e.toString());
-            return null;
-        }
-        try{
-            socket = new Socket(ip, MainActivity.PORT);
+            InetAddress ip = Inet4Address.getByName(SERVER);
+            socket = new Socket(ip, PORT);
+
+            PrintWriter in = new PrintWriter(socket.getOutputStream());
+            BufferedReader out = new BufferedReader(new InputStreamReader(socket.getInputStream()));
+
+            if(deviceID==-1){
+                in.print(REQ_NEW_ID + '\n');
+                in.flush();
+
+                deviceID = Long.parseLong(out.readLine());
+                pref_edit.putLong("deviceID", deviceID);
+                pref_edit.commit();
+            }
+            //String should be: info APP_VERSION_NAME APP_VERSION_CODE ANDROID_VERSION DEVICE_MODEL DEVICE_ID
+            in.print(REQ_INFO + " " + versionName.replace(" ", "_") + " " + versionCode + " " + Build.VERSION.SDK_INT + " " + deviceModel.replace(" ", "_") + " " + deviceID + '\n');
+            in.flush();
         }catch(IOException e){
             Log.e("HIJACKER/connect", e.toString());
             return null;
@@ -1458,14 +1478,14 @@ public class MainActivity extends AppCompatActivity{
                     PrintWriter in = new PrintWriter(socket.getOutputStream());
                     BufferedReader out = new BufferedReader(new InputStreamReader(socket.getInputStream()));
 
-                    in.print("version\n");
+                    in.print(REQ_VERSION + '\n');
                     in.flush();
 
                     int latestCode = Integer.parseInt(out.readLine());
                     String latestName = out.readLine();
                     String latestLink = out.readLine();
 
-                    in.print("exit\n");
+                    in.print(REQ_EXIT + '\n');
                     in.flush();
                     in.close();
                     out.close();
