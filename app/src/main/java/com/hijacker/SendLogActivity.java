@@ -19,13 +19,10 @@ package com.hijacker;
 //Code from here (modified): http://stackoverflow.com/questions/601503/how-do-i-obtain-crash-data-from-my-android-application
 
 import android.Manifest;
-import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
-import android.net.ConnectivityManager;
-import android.net.NetworkInfo;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Environment;
@@ -61,6 +58,7 @@ import static com.hijacker.MainActivity.ANS_POSITIVE;
 import static com.hijacker.MainActivity.REQ_EXIT;
 import static com.hijacker.MainActivity.REQ_REPORT;
 import static com.hijacker.MainActivity.connect;
+import static com.hijacker.MainActivity.internetAvailable;
 
 public class SendLogActivity extends AppCompatActivity{
     static String busybox;
@@ -196,9 +194,7 @@ public class SendLogActivity extends AppCompatActivity{
         pref_edit.putString("user_email", user_email);
         pref_edit.commit();
 
-        ConnectivityManager connectivityManager = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
-        if(connectivityManager.getNetworkInfo(1).getState()!=NetworkInfo.State.CONNECTED &&
-                connectivityManager.getNetworkInfo(0).getState()!=NetworkInfo.State.CONNECTED){
+        if(!internetAvailable(this)){
             Log.d("HIJACKER/SendLog", "No internet connection");
             Toast.makeText(this, getString(R.string.no_internet), Toast.LENGTH_SHORT).show();
             return;

@@ -21,11 +21,8 @@ import android.app.AlertDialog;
 import android.app.Dialog;
 import android.app.DialogFragment;
 import android.app.FragmentManager;
-import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
-import android.net.ConnectivityManager;
-import android.net.NetworkInfo;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
@@ -51,6 +48,7 @@ import static com.hijacker.MainActivity.REQ_FEEDBACK;
 import static com.hijacker.MainActivity.background;
 import static com.hijacker.MainActivity.connect;
 import static com.hijacker.MainActivity.deviceModel;
+import static com.hijacker.MainActivity.internetAvailable;
 import static com.hijacker.MainActivity.pref;
 import static com.hijacker.MainActivity.pref_edit;
 import static com.hijacker.MainActivity.versionCode;
@@ -105,10 +103,7 @@ public class FeedbackDialog extends DialogFragment{
             positiveButton.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(final View v) {
-                    ConnectivityManager connectivityManager = (ConnectivityManager) FeedbackDialog.this.getActivity().getSystemService(Context.CONNECTIVITY_SERVICE);
-                    FeedbackDialog.this.getActivity().getSystemService(Context.CONNECTIVITY_SERVICE);
-                    if(connectivityManager.getNetworkInfo(1).getState()!=NetworkInfo.State.CONNECTED &&
-                            connectivityManager.getNetworkInfo(0).getState()!=NetworkInfo.State.CONNECTED){
+                    if(!internetAvailable(FeedbackDialog.this.getActivity())){
                         Log.d("HIJACKER/SendLog", "No internet connection");
                         Toast.makeText(FeedbackDialog.this.getActivity(), getString(R.string.no_internet), Toast.LENGTH_SHORT).show();
                         return;
