@@ -36,14 +36,16 @@ import static com.hijacker.MainActivity.FRAGMENT_SETTINGS;
 import static com.hijacker.MainActivity.PORT;
 import static com.hijacker.MainActivity.REQ_EXIT;
 import static com.hijacker.MainActivity.connect;
+import static com.hijacker.MainActivity.deviceID;
+import static com.hijacker.MainActivity.pref_edit;
 import static com.hijacker.MainActivity.refreshDrawer;
 import static com.hijacker.MainActivity.currentFragment;
 import static com.hijacker.MainActivity.runInHandler;
 
-public class devOptionsFragment extends PreferenceFragment{
+public class DevOptionsFragment extends PreferenceFragment{
     static final String AUTH_KEY_TEST = "key-that-will-be-changed-in-the-release-build_this-is-for-testing";
     static final String backupKey = AUTH_KEY;
-    Preference causeNPE, connect, disconnect;
+    Preference causeNPE, connect, disconnect, resetID;
     SwitchPreference useTestKey;
     EditTextPreference port;
     Socket testSocket = null;
@@ -51,7 +53,6 @@ public class devOptionsFragment extends PreferenceFragment{
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        // Load the preferences from an XML resource
         addPreferencesFromResource(R.xml.dev_options);
 
         causeNPE = findPreference("causeNPE");
@@ -59,6 +60,7 @@ public class devOptionsFragment extends PreferenceFragment{
         disconnect = findPreference("disconnect");
         useTestKey = (SwitchPreference)findPreference("useTestKey");
         port = (EditTextPreference)findPreference("port");
+        resetID = findPreference("resetID");
 
         connect.setEnabled(testSocket==null);
         disconnect.setEnabled(testSocket!=null);
@@ -74,59 +76,61 @@ public class devOptionsFragment extends PreferenceFragment{
         connect.setOnPreferenceClickListener(new Preference.OnPreferenceClickListener(){
             @Override
             public boolean onPreferenceClick(Preference preference){
-                new Thread(new Runnable(){
-                    @Override
-                    public void run(){
-                        Looper.prepare();
-                        if(testSocket!=null) return;
-                        testSocket = connect();
-                        if(testSocket!=null){
-                            runInHandler(new Runnable(){
-                                @Override
-                                public void run(){
-                                    disconnect.setEnabled(true);
-                                    connect.setEnabled(false);
-                                }
-                            });
-                            Snackbar.make(fragmentView, "Socket opened", Snackbar.LENGTH_SHORT).show();
-                        }else{
-                            Snackbar.make(fragmentView, "Socket is null", Snackbar.LENGTH_SHORT).show();
+                if(testSocket==null){
+                    new Thread(new Runnable(){
+                        @Override
+                        public void run(){
+                            Looper.prepare();
+                            testSocket = connect();
+                            if(testSocket!=null){
+                                runInHandler(new Runnable(){
+                                    @Override
+                                    public void run(){
+                                        disconnect.setEnabled(true);
+                                        connect.setEnabled(false);
+                                    }
+                                });
+                                Snackbar.make(fragmentView, "Socket opened", Snackbar.LENGTH_SHORT).show();
+                            }else{
+                                Snackbar.make(fragmentView, "Socket is null", Snackbar.LENGTH_SHORT).show();
+                            }
                         }
-                    }
-                }).start();
+                    }).start();
+                }
                 return false;
             }
         });
         disconnect.setOnPreferenceClickListener(new Preference.OnPreferenceClickListener(){
             @Override
             public boolean onPreferenceClick(Preference preference){
-                new Thread(new Runnable(){
-                    @Override
-                    public void run(){
-                        Looper.prepare();
-                        if(testSocket==null) return;
-                        try{
-                            PrintWriter in = new PrintWriter(testSocket.getOutputStream());
-                            in.print(REQ_EXIT + '\n');
-                            in.flush();
+                if(testSocket!=null){
+                    new Thread(new Runnable(){
+                        @Override
+                        public void run(){
+                            Looper.prepare();
+                            try{
+                                PrintWriter in = new PrintWriter(testSocket.getOutputStream());
+                                in.print(REQ_EXIT + '\n');
+                                in.flush();
 
-                            in.close();
-                            testSocket.close();
-                            runInHandler(new Runnable(){
-                                @Override
-                                public void run(){
-                                    connect.setEnabled(true);
-                                    disconnect.setEnabled(false);
-                                }
-                            });
-                            testSocket = null;
-                            Snackbar.make(fragmentView, "Socket closed", Snackbar.LENGTH_SHORT).show();
-                        }catch(IOException e){
-                            Log.e("HIJACKER/devOptions", e.toString());
-                            Snackbar.make(fragmentView, "IOException", Snackbar.LENGTH_SHORT).show();
+                                in.close();
+                                testSocket.close();
+                                runInHandler(new Runnable(){
+                                    @Override
+                                    public void run(){
+                                        connect.setEnabled(true);
+                                        disconnect.setEnabled(false);
+                                    }
+                                });
+                                testSocket = null;
+                                Snackbar.make(fragmentView, "Socket closed", Snackbar.LENGTH_SHORT).show();
+                            }catch(IOException e){
+                                Log.e("HIJACKER/devOptions", e.toString());
+                                Snackbar.make(fragmentView, "IOException", Snackbar.LENGTH_SHORT).show();
+                            }
                         }
-                    }
-                }).start();
+                    }).start();
+                }
 
                 return false;
             }
@@ -152,6 +156,18 @@ public class devOptionsFragment extends PreferenceFragment{
             public boolean onPreferenceChange(Preference preference, Object newValue){
                 PORT = Integer.parseInt((String)newValue);
                 Snackbar.make(fragmentView, "Port is now " + PORT, Snackbar.LENGTH_SHORT).show();
+                return false;
+            }
+        });
+        resetID.setOnPreferenceClickListener(new Preference.OnPreferenceClickListener(){
+            @Override
+            public boolean onPreferenceClick(Preference preference){
+                pref_edit.putLong("deviceID", -1);
+                pref_edit.commit();
+
+                deviceID = -1;
+
+                Snackbar.make(fragmentView, "deviceID is now -1", Snackbar.LENGTH_SHORT).show();
                 return false;
             }
         });

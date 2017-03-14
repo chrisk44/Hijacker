@@ -2,7 +2,7 @@
 <PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
     <Preference
         android:key="causeNPE"
-        android:title="Cause NPE" />
+        android:title="Generate NPE" />
     <Preference
         android:key="connect"
         android:title="Connect to server" />
@@ -18,5 +18,8 @@
         android:inputType="number"
         android:key="port"
         android:title="Change server port"/>
+    <Preference
+        android:key="resetID"
+        android:title="Reset deviceID" />
 
 </PreferenceScreen>

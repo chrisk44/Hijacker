@@ -34,6 +34,7 @@ import static com.hijacker.MainActivity.SORT_PWR;
 import static com.hijacker.MainActivity.adapter;
 import static com.hijacker.MainActivity.completed;
 import static com.hijacker.MainActivity.debug;
+import static com.hijacker.MainActivity.getFixed;
 import static com.hijacker.MainActivity.getManuf;
 import static com.hijacker.MainActivity.isolate;
 import static com.hijacker.MainActivity.progress;
@@ -243,8 +244,21 @@ class AP {
         Tile.filter();
     }
     public String toString(){
-        return mac + '\t' + pwr + '\t' + ch + '\t' + getBeacons() + '\t' + getData() + '\t' + getIvs() + '\t' +
-                enc + '\t' + auth + '\t' + cipher + '\t' + (isHidden ? "Yes" : "No") + '\t' + essid + '\t' + manuf + '\n';
+        //MAC                 PWR  CH  Beacons    Data      #s   ENC  AUTH  CIPHER  Hidden  ESSID - Manufacturer
+        //00:11:22:33:44:55  -100  13   123456  123456  123456  WPA2  TKIP    CCMP     Yes  ExampleESSID - ExampleManufacturer
+        String str = mac;
+        str += getFixed(Integer.toString(pwr), 6);
+        str += getFixed(Integer.toString(ch), 4);
+        str += getFixed(Integer.toString(getBeacons()), 9);
+        str += getFixed(Integer.toString(getData()), 8);
+        str += getFixed(Integer.toString(getIvs()), 8);
+        str += getFixed(enc, 6);
+        str += getFixed(auth, 6);
+        str += getFixed(cipher, 8);
+        str += getFixed(isHidden ? "Yes" : "No", 8);
+        str += "  " + essid + " - " + manuf;
+
+        return str;
     }
     public int getBeacons(){ return total_beacons + beacons; }
     public int getData(){ return total_data + data; }

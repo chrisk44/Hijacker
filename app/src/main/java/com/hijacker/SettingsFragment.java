@@ -174,7 +174,7 @@ public class SettingsFragment extends PreferenceFragment {
                     }else{
                         versionClicks = 0;
                         FragmentTransaction ft = mFragmentManager.beginTransaction();
-                        ft.replace(R.id.fragment1, new devOptionsFragment());
+                        ft.replace(R.id.fragment1, new DevOptionsFragment());
                         ft.setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN);
                         ft.addToBackStack(null);
                         ft.commitAllowingStateLoss();

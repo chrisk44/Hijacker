@@ -69,7 +69,7 @@ extern "C" jint Java_com_hijacker_Airodump_main(JNIEnv* env, jobject obj, jstrin
             bssid[17]='\0';
 
             strncpy(pwr_c, buffer+37, 5);
-            pwr_c[5]='\0';
+            pwr_c[4]='\0';
             pwr = atoi(pwr_c);
 
             strncpy(lost_c, buffer+52, 6);
@@ -81,7 +81,7 @@ extern "C" jint Java_com_hijacker_Airodump_main(JNIEnv* env, jobject obj, jstrin
             frames = atoi(frames_c);
 
             strncpy(probes, buffer+69, 100);
-            probes[100] = '\0';
+            probes[99] = '\0';
 
             jstring s1 = env->NewStringUTF(st_mac);
             jstring s2 = env->NewStringUTF(bssid);

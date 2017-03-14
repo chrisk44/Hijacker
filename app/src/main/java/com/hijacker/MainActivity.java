@@ -1419,6 +1419,21 @@ public class MainActivity extends AppCompatActivity{
             return str;
         }else return str + '/';
     }
+    static String getFixed(String text, int size){
+        /*Returns a string of fixed length (size) that contains spaces followed by a text
+           <--  size  -->
+          |     ...  text|
+        */
+        if(text==null) return null;
+        if(text.length() > size){
+            text = text.substring(0, size);
+        }
+        String str = "";
+        for(int i=0;i < size-text.length();i++){
+            str += " ";
+        }
+        return str + text;
+    }
     static int checkChroot(){
         boolean bin = false, dir;
 

@@ -58,7 +58,11 @@ import static com.hijacker.MainActivity.ANS_POSITIVE;
 import static com.hijacker.MainActivity.REQ_EXIT;
 import static com.hijacker.MainActivity.REQ_REPORT;
 import static com.hijacker.MainActivity.connect;
+import static com.hijacker.MainActivity.deviceID;
+import static com.hijacker.MainActivity.deviceModel;
 import static com.hijacker.MainActivity.internetAvailable;
+import static com.hijacker.MainActivity.versionCode;
+import static com.hijacker.MainActivity.versionName;
 
 public class SendLogActivity extends AppCompatActivity{
     static String busybox;
@@ -105,6 +109,21 @@ public class SendLogActivity extends AppCompatActivity{
         pref = PreferenceManager.getDefaultSharedPreferences(this);
         pref_edit = pref.edit();
 
+        PackageManager manager = this.getPackageManager();
+        PackageInfo info;
+        try{
+            info = manager.getPackageInfo(this.getPackageName(), 0);
+            versionName = info.versionName.replace(" ", "_");
+            versionCode = info.versionCode;
+        }catch(PackageManager.NameNotFoundException e){
+            Log.e("HIJACKER/SendLog", e.toString());
+        }
+        deviceModel = Build.MODEL;
+        if(!deviceModel.startsWith(Build.MANUFACTURER)) deviceModel = Build.MANUFACTURER + " " + deviceModel;
+        deviceModel = deviceModel.replace(" ", "_");
+
+        deviceID = pref.getLong("deviceID", -1);
+
         user_email_et.setText(pref.getString("user_email", ""));
 
         report = new File(Environment.getExternalStorageDirectory() + "/report.txt");
@@ -138,23 +157,14 @@ public class SendLogActivity extends AppCompatActivity{
         startActivity(intent);
     }
     void createReport(){
-        PackageManager manager = this.getPackageManager();
-        PackageInfo info = null;
-        try{
-            info = manager.getPackageInfo (this.getPackageName(), 0);
-        }catch(PackageManager.NameNotFoundException ignored){}
-        String model = Build.MODEL;
-        if (!model.startsWith(Build.MANUFACTURER)) model = Build.MANUFACTURER + " " + model;
-
-        // Extract to file.
         FileWriter writer = null;
         try{
             writer = new FileWriter(report, true);
             writer.write("\n--------------------------------------------------------------------------------\n");
             writer.write("Hijacker bug report - " + new Date().toString() + "\n\n");
             writer.write("Android version: " +  Build.VERSION.SDK_INT + '\n');
-            writer.write("Device: " + model + '\n');
-            writer.write("App version: " + (info == null ? "(null)" : info.versionName) + '\n');
+            writer.write("Device: " + deviceModel + '\n');
+            writer.write("App version: " + versionName + " (" + versionCode + ")\n");
             writer.write("App data path: " + getFilesDir().getAbsolutePath() + '\n');
             writer.write("\nStack trace:\n" + stackTrace + '\n');
 
