@@ -24,7 +24,6 @@
     <string name="settings">Settings</string>
     <string name="select">Select</string>
     <string name="send">Send</string>
-    <string name="thankyou">Thank you</string>
     <string name="download">Download</string>
     <!-- Server Connection -->
     <string name="no_internet">No internet connection</string>
@@ -266,7 +265,6 @@
 
     <!-- TestDialog -->
     <string name="testing">Testing tools…</string>
-    <string name="make_sure_wifi">Make sure that WiFi is enabled</string>
     <string name="checking_chroot">Checking chroot…</string>
     <string name="done">Done</string>
 
@@ -389,7 +387,6 @@
     <string name="restore_firmware">Restore firmware</string>
     <string name="reset_title">Reset Preferences</string>
     <string name="send_feedback_title">Send feedback</string>
-    <string name="send_feedback_sum">Via email</string>
     <string name="update_on_startup">Check for updates on startup</string>
     <string name="already_on_latest">You are running the latest version</string>
     <string name="github_title">Go to GitHub</string>

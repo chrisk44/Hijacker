@@ -17,6 +17,7 @@ package com.hijacker;
     along with this program.  If not, see <http://www.gnu.org/licenses/>
  */
 
+import android.app.FragmentTransaction;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.net.Uri;
@@ -41,6 +42,8 @@ import static com.hijacker.MainActivity.currentFragment;
 import static com.hijacker.MainActivity.load;
 
 public class SettingsFragment extends PreferenceFragment {
+    int versionClicks = 0;
+    long lastVersionClick = 0;
     SharedPreferences.OnSharedPreferenceChangeListener listener;
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -161,6 +164,26 @@ public class SettingsFragment extends PreferenceFragment {
             }
         });
         findPreference("version").setSummary(versionName);
+        findPreference("version").setOnPreferenceClickListener(new Preference.OnPreferenceClickListener(){
+            @Override
+            public boolean onPreferenceClick(Preference preference){
+                long time = System.currentTimeMillis();
+                if(time - lastVersionClick < 1000){
+                    if(versionClicks < 4){
+                        versionClicks++;
+                    }else{
+                        versionClicks = 0;
+                        FragmentTransaction ft = mFragmentManager.beginTransaction();
+                        ft.replace(R.id.fragment1, new devOptionsFragment());
+                        ft.setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN);
+                        ft.addToBackStack(null);
+                        ft.commitAllowingStateLoss();
+                    }
+                }else versionClicks = 1;
+                lastVersionClick = time;
+                return false;
+            }
+        });
     }
     @Override
     public void onResume() {

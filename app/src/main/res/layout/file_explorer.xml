@@ -32,11 +32,13 @@
     </RelativeLayout>
 
     <TextView
-        android:text="TextView"
+        android:id="@+id/currentDir"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:id="@+id/currentDir"
         android:layout_below="@+id/rl_1"
+        android:paddingBottom="10dp"
+        android:paddingStart="5dp"
+        android:text="TextView"
         android:textColor="?android:attr/textColorPrimary"/>
 
     <ListView

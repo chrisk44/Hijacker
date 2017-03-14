@@ -32,8 +32,6 @@ import android.widget.PopupMenu;
 import android.widget.Switch;
 import android.widget.Toast;
 
-import java.io.File;
-
 import static com.hijacker.MainActivity.FRAGMENT_MDK;
 import static com.hijacker.MainActivity.MDK_ADOS;
 import static com.hijacker.MainActivity.MDK_BF;
@@ -121,7 +119,7 @@ public class MDKFragment extends Fragment{
                     if(tkip) args += 't';
                     if(aes) args += 'a';
                     if(!ssid_file.equals("")){
-                        if(!(new File(ssid_file).exists())){
+                        if(!(new RootFile(ssid_file).exists())){
                             Toast.makeText(getActivity(), ssid_file + " doesn't exist", Toast.LENGTH_SHORT).show();
                             bf_switch.setChecked(false);
                             return;

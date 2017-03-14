@@ -4,8 +4,8 @@
 
         <SwitchPreference
             android:defaultValue="@string/airOnStartup"
-            android:title="@string/startup_title"
-            android:key="airOnStartup" />
+            android:key="airOnStartup"
+            android:title="@string/startup_title"/>
         <EditTextPreference
             android:defaultValue="@string/prefix"
             android:selectAllOnFocus="true"
@@ -127,7 +127,6 @@
             android:summary="@string/chroot_desc"
             android:key="chroot_dir"/>
         <EditTextPreference
-            android:defaultValue=""
             android:hint="sh /root/myscript.sh"
             android:selectAllOnFocus="true"
             android:singleLine="true"
