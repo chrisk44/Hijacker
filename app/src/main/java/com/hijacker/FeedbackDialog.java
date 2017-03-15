@@ -23,19 +23,26 @@ import android.app.DialogFragment;
 import android.app.FragmentManager;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.Environment;
 import android.os.Handler;
 import android.os.Looper;
 import android.support.design.widget.Snackbar;
+import android.support.v4.content.FileProvider;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
+import android.widget.CheckBox;
+import android.widget.CompoundButton;
 import android.widget.EditText;
 import android.widget.ProgressBar;
 import android.widget.Toast;
 
 import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
@@ -45,27 +52,61 @@ import java.util.Date;
 import static com.hijacker.MainActivity.ANS_POSITIVE;
 import static com.hijacker.MainActivity.REQ_EXIT;
 import static com.hijacker.MainActivity.REQ_FEEDBACK;
+import static com.hijacker.MainActivity.REQ_REPORT;
 import static com.hijacker.MainActivity.background;
 import static com.hijacker.MainActivity.connect;
+import static com.hijacker.MainActivity.createReport;
+import static com.hijacker.MainActivity.debug;
 import static com.hijacker.MainActivity.deviceModel;
 import static com.hijacker.MainActivity.internetAvailable;
+import static com.hijacker.MainActivity.path;
 import static com.hijacker.MainActivity.pref;
 import static com.hijacker.MainActivity.pref_edit;
+import static com.hijacker.MainActivity.runInHandler;
 import static com.hijacker.MainActivity.versionCode;
 import static com.hijacker.MainActivity.versionName;
 
 public class FeedbackDialog extends DialogFragment{
     EditText email_et, feedback_et;
     ProgressBar progress;
+    CheckBox include_report;
+    File report;
     @Override
     public Dialog onCreateDialog(Bundle savedInstanceState) {
         AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
         View view = getActivity().getLayoutInflater().inflate(R.layout.feedback_dialog, null);
         email_et = (EditText)view.findViewById(R.id.email_et);
+        include_report = (CheckBox)view.findViewById(R.id.include_report);
         feedback_et = (EditText)view.findViewById(R.id.feedback_et);
         progress = (ProgressBar)view.findViewById(R.id.progress);
 
         email_et.setText(pref.getString("user_email", ""));
+
+        report = null;
+        include_report.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener(){
+            @Override
+            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked){
+                if(isChecked && report==null){
+                    progress.setIndeterminate(true);
+                    new Thread(new Runnable(){
+                        @Override
+                        public void run(){
+                            report = new File(Environment.getExternalStorageDirectory() + "/report.txt");
+                            if(!createReport(report, path, null, Shell.getFreeShell().getShell())){
+                                if(debug) Log.e("HIJACKER/feedbackDialog", "Report not generated");
+                                report = null;
+                            }
+                            runInHandler(new Runnable(){
+                                @Override
+                                public void run(){
+                                    progress.setIndeterminate(false);
+                                }
+                            });
+                        }
+                    }).start();
+                }
+            }
+        });
 
         builder.setView(view);
         builder.setTitle(getString(R.string.feedback));
@@ -84,6 +125,10 @@ public class FeedbackDialog extends DialogFragment{
                 intent.setType("plain/text");
                 intent.putExtra(Intent.EXTRA_EMAIL, new String[] {"kiriakopoulos44@gmail.com"});
                 intent.putExtra(Intent.EXTRA_SUBJECT, "Hijacker feedback");
+                if(report!=null){
+                    Uri attachment = FileProvider.getUriForFile(FeedbackDialog.this.getActivity().getApplicationContext(), BuildConfig.APPLICATION_ID + ".provider", report);
+                    intent.putExtra(Intent.EXTRA_STREAM, attachment);
+                }
                 intent.putExtra(Intent.EXTRA_TEXT, feedback_et.getText().toString());
                 startActivity(intent);
             }
@@ -105,7 +150,7 @@ public class FeedbackDialog extends DialogFragment{
                 public void onClick(final View v) {
                     if(!internetAvailable(FeedbackDialog.this.getActivity())){
                         Log.d("HIJACKER/SendLog", "No internet connection");
-                        Toast.makeText(FeedbackDialog.this.getActivity(), getString(R.string.no_internet), Toast.LENGTH_SHORT).show();
+                        Snackbar.make(v, getString(R.string.no_internet), Snackbar.LENGTH_SHORT).show();
                         return;
                     }
 
@@ -146,7 +191,8 @@ public class FeedbackDialog extends DialogFragment{
                                 in.print(REQ_FEEDBACK + '\n');
                                 in.flush();
 
-                                String buffer = out.readLine();
+                                String buffer;
+                                buffer = out.readLine();
                                 if(buffer!=null){
                                     if(!buffer.equals(ANS_POSITIVE)){
                                         handler.post(runnable);
@@ -167,6 +213,38 @@ public class FeedbackDialog extends DialogFragment{
                                 in.print("\nFeedback:\n");
                                 in.print(feedback + '\n');
                                 in.print("EOF\n");
+                                in.flush();
+
+                                if(report!=null && include_report.isChecked()){
+                                    in.print(REQ_REPORT + '\n');
+                                    in.flush();
+
+                                    buffer = out.readLine();
+                                    if(buffer!=null){
+                                        if(!buffer.equals(ANS_POSITIVE)){
+                                            Snackbar.make(v, getString(R.string.server_denied), Toast.LENGTH_SHORT).show();
+                                            handler.post(runnable);
+                                            return;
+                                        }
+                                    }else{
+                                        Snackbar.make(v, getString(R.string.connection_closed), Toast.LENGTH_SHORT).show();
+                                        handler.post(runnable);
+                                        return;
+                                    }
+
+                                    BufferedReader fileReader = new BufferedReader(new FileReader(report));
+
+                                    in.print("User email: " + email + '\n');
+                                    in.flush();
+                                    buffer = fileReader.readLine();
+                                    while(buffer!=null){
+                                        in.print(buffer + '\n');
+                                        in.flush();
+                                        buffer = fileReader.readLine();
+                                    }
+                                    in.print("EOF\n");
+                                    in.flush();
+                                }
                                 in.print(REQ_EXIT + '\n');
                                 in.flush();
 

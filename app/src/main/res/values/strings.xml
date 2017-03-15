@@ -124,6 +124,7 @@
 
     <!-- FeedbackDialog -->
     <string name="feedback">Feedback</string>
+    <string name="include_report">Include a report</string>
     <string name="feedback_empty">Feedback field cannot be empty</string>
     <string name="send_email">Send email</string>
 
@@ -241,11 +242,11 @@
 
     <!-- SendLogActivity -->
     <string name="unexpected_error_title">Unexpected Error</string>
-    <string name="unexpected_error_message">An unexpected error has occurred. A bug report has been generated in your external storage directory.
-        It contains useful information for troubleshooting.</string>
+    <string name="unexpected_error_message">An unexpected error has occurred. A bug report has been generated in your external storage directory.</string>
     <string name="send_report">Send report</string>
     <string name="restart_hijacker">Restart</string>
     <string name="use_email">Use email</string>
+    <string name="extra">Extra</string>
 
     <!-- ST -->
     <string name="paired">Paired:</string>

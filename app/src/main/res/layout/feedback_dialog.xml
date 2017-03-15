@@ -48,6 +48,12 @@
                 android:paddingStart="10dp"/>
         </LinearLayout>
 
+        <CheckBox
+            android:id="@+id/include_report"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/include_report"/>
+
         <TextView
             android:id="@+id/textView4"
             android:layout_width="wrap_content"

@@ -72,6 +72,7 @@ import com.google.android.gms.common.api.GoogleApiClient;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileOutputStream;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -80,6 +81,7 @@ import java.net.Inet4Address;
 import java.net.InetAddress;
 import java.net.Socket;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 import static com.hijacker.CustomAction.TYPE_ST;
@@ -1560,6 +1562,61 @@ public class MainActivity extends AppCompatActivity{
     static boolean internetAvailable(Context context){
         ConnectivityManager connectivityManager = (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
         return connectivityManager.getNetworkInfo(1).getState()==NetworkInfo.State.CONNECTED || connectivityManager.getNetworkInfo(0).getState()==NetworkInfo.State.CONNECTED;
+    }
+
+    static boolean createReport(File out, String filesDir, String stackTrace, Process shell){
+        if(!out.exists()){
+            try{
+                if(!out.createNewFile()){
+                    return false;
+                }
+            }catch(IOException e){
+                Log.e("HIJACKER/createReport", e.toString());
+                return false;
+            }
+        }
+        String busybox_tmp = filesDir + "/bin/busybox";
+        PrintWriter shell_in = new PrintWriter(shell.getOutputStream());
+        BufferedReader shell_out = new BufferedReader(new InputStreamReader(shell.getInputStream()));
+
+        FileWriter writer = null;
+        try{
+            writer = new FileWriter(out, true);
+            writer.write("\n--------------------------------------------------------------------------------\n");
+            writer.write("Hijacker bug report - " + new Date().toString() + "\n\n");
+            writer.write("Android version: " +  Build.VERSION.SDK_INT + '\n');
+            writer.write("Device: " + deviceModel + '\n');
+            writer.write("App version: " + versionName + " (" + versionCode + ")\n");
+            writer.write("App data path: " + filesDir + '\n');
+            writer.write("\nStack trace:\n" + stackTrace + '\n');
+
+            String cmd = "echo pref_file--------------------------------------; cat /data/data/com.hijacker/shared_prefs/com.hijacker_preferences.xml;";
+            cmd += " echo app directory----------------------------------; " + busybox_tmp + " ls -lR " + filesDir + ';';
+            cmd += " echo fw_bcmdhd--------------------------------------; strings /vendor/firmware/fw_bcmdhd.bin | grep \"FWID:\";";
+            cmd += " echo ps---------------------------------------------; ps | " + busybox_tmp + " grep -e air -e mdk -e reaver;";
+            cmd += " echo busybox----------------------------------------; " + busybox_tmp + ";";
+            cmd += " echo logcat-----------------------------------------; logcat -d -v time | " + busybox_tmp + " grep HIJACKER;";
+            cmd += " exit\n";
+            Log.d("HIJACKER/SendLog", cmd);
+            shell_in.print(cmd);
+            shell_in.flush();
+
+            String buffer = shell_out.readLine();
+            while(buffer!=null){
+                writer.write(buffer + '\n');
+                buffer = shell_out.readLine();
+            }
+
+            writer.close();
+        }catch(IOException e){
+            if(writer != null){
+                try{
+                    writer.close();
+                }catch(IOException ignored){}
+            }
+            return false;
+        }
+        return true;
     }
 
     static{

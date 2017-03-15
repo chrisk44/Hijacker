@@ -52,6 +52,24 @@
     </LinearLayout>
 
     <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:gravity="center_vertical"
+        android:text="@string/extra"
+        android:hint="@string/optional"
+        android:textColor="?android:attr/textColorPrimary"
+        android:textSize="18sp"/>
+
+    <EditText
+        android:id="@+id/extra_et"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:ems="10"
+        android:inputType="textMultiLine"
+        android:lines="2"
+        android:maxLines="2"/>
+
+    <TextView
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:id="@+id/console"
