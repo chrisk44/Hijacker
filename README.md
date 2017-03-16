@@ -55,7 +55,7 @@ First of all, this app is designed and tested for ARM devices. All the binaries 
 
 In settings, there is an option to test the tools. If something fails, then you can click 'Copy test command' and select the tool that fails. This will copy a test command to your clipboard, which you can run in a terminal and see what's wrong. If all the tests pass and you still have a problem, feel free to open an issue here to fix it, or use the 'Send feedback' feature of the app in settings.
 
-If the app happens to crash, a new activity will start which will generate a report in your external storage and give you the option to email it to me directly. I suggest you do that, and if you are worried about what will be sent you can check it out yourself, it's just a txt file and it will be sent as an email attachment to me.
+If the app happens to crash, a new activity will start which will generate a report in your external storage and give you the option to send it directly or by email. I suggest you do that, and if you are worried about what will be sent you can check it out yourself, it's just a txt file in your external storage directory. The part with the most important information is shown in the activity.
 
 Please do not report bugs for devices that are not supported or when you are using an outdated version.
 
