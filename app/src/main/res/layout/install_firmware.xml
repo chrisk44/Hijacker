@@ -1,101 +1,102 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
-    android:orientation="vertical"
     android:layout_width="match_parent"
-    android:layout_height="match_parent" >
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:paddingTop="10dp">
 
     <ProgressBar
-        style="?android:attr/progressBarStyleHorizontal"
         android:id="@+id/install_firm_progress"
+        style="?android:attr/progressBarStyleHorizontal"
         android:layout_width="match_parent"
-        android:progressDrawable="@drawable/progress_horizontal_holo_blue_dark"
         android:layout_height="wrap_content"
+        android:max="1"
+        android:maxHeight="5dp"
         android:minHeight="5dp"
         android:minWidth="0dp"
-        android:maxHeight="5dp"
-        android:max="1"
         android:paddingBottom="10dp"
-        android:progress="1"/>
+        android:progress="1"
+        android:progressDrawable="@drawable/progress_horizontal_holo_blue_dark"/>
 
     <TextView
-        android:text="@string/firm_location_text"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:textColor="@android:color/white"
-        android:textSize="18sp"
         android:labelFor="@+id/firm_location"
         android:paddingEnd="8dp"
-        android:paddingStart="8dp"/>
+        android:paddingStart="8dp"
+        android:text="@string/firm_location_text"
+        android:textColor="@android:color/white"
+        android:textSize="18sp"/>
 
     <LinearLayout
-        android:orientation="horizontal"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content">
+        android:layout_height="wrap_content"
+        android:orientation="horizontal">
 
         <EditText
+            android:id="@+id/firm_location"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:text="@string/firm_location_default"
+            android:layout_gravity="center_vertical"
+            android:layout_weight="1"
             android:ems="10"
-            android:id="@+id/firm_location"
             android:inputType="text"
             android:paddingEnd="8dp"
-            android:layout_gravity="center_vertical"
             android:paddingStart="8dp"
-            android:layout_weight="1"/>
+            android:text="@string/firm_location_default"/>
 
         <Button
+            android:id="@+id/firm_fe_btn"
             style="?android:attr/buttonBarButtonStyle"
-            android:text="..."
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:id="@+id/firm_fe_btn"
-            android:layout_gravity="center_vertical"/>
+            android:layout_gravity="center_vertical"
+            android:text="..."/>
     </LinearLayout>
 
     <CheckBox
-        android:text="@string/create_backup"
+        android:id="@+id/backup"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:id="@+id/backup"
         android:layout_marginBottom="10dp"
-        android:checked="true"/>
+        android:checked="true"
+        android:text="@string/create_backup"/>
 
     <TextView
-        android:text="@string/util_location_text"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:textColor="@android:color/white"
-        android:textSize="18sp"
         android:labelFor="@+id/util_location"
         android:paddingEnd="8dp"
-        android:paddingStart="8dp"/>
+        android:paddingStart="8dp"
+        android:text="@string/util_location_text"
+        android:textColor="@android:color/white"
+        android:textSize="18sp"/>
 
     <LinearLayout
-        android:orientation="horizontal"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content">
+        android:layout_height="wrap_content"
+        android:orientation="horizontal">
 
         <EditText
+            android:id="@+id/util_location"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:text="@string/util_location_default"
+            android:layout_gravity="center_vertical"
+            android:layout_weight="1"
             android:ems="10"
-            android:id="@+id/util_location"
             android:inputType="text"
             android:paddingEnd="8dp"
             android:paddingStart="8dp"
-            android:layout_gravity="center_vertical"
-            android:layout_weight="1"/>
+            android:text="@string/util_location_default"/>
 
         <Button
+            android:id="@+id/util_fe_btn"
             style="?android:attr/buttonBarButtonStyle"
-            android:text="..."
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:id="@+id/util_fe_btn"
-            android:layout_gravity="center_vertical"/>
+            android:layout_gravity="center_vertical"
+            android:text="..."/>
     </LinearLayout>
 
 </LinearLayout>

@@ -32,7 +32,7 @@ public class ConfirmResetDialog extends DialogFragment {
     @Override
     public Dialog onCreateDialog(Bundle savedInstanceState) {
         AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
-        builder.setTitle(R.string.reset_dialog_title);
+        builder.setMessage(R.string.reset_dialog_title);
         builder.setPositiveButton(R.string.yes, new DialogInterface.OnClickListener() {
             public void onClick(DialogInterface dialog, int id) {
                 pref_edit.putString("iface", getString(R.string.iface));
@@ -54,6 +54,7 @@ public class ConfirmResetDialog extends DialogFragment {
                 pref_edit.putBoolean("cont_on_fail", Boolean.parseBoolean(getString(R.string.cont_on_fail)));
                 pref_edit.putBoolean("watchdog", Boolean.parseBoolean(getString(R.string.watchdog)));
                 pref_edit.putBoolean("target_deauth", Boolean.parseBoolean(getString(R.string.target_deauth)));
+                pref_edit.putBoolean("update_on_startup", Boolean.parseBoolean(getString(R.string.auto_update)));
                 pref_edit.commit();
                 load();
                 dismissAllowingStateLoss();

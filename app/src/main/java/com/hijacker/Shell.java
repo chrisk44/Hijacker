@@ -62,6 +62,7 @@ class Shell{
         if(free.size()>5) exitAll();
     }
     BufferedReader getShell_out(){ return this.shell_out; }
+    Process getShell(){ return this.shell; }
     void run(String cmd){
         this.shell_in.print(cmd + '\n');
         this.shell_in.flush();

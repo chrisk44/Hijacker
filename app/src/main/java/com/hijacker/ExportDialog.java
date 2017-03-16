@@ -120,29 +120,29 @@ public class ExportDialog extends DialogFragment{
                 return;
             }
             FileWriter out = new FileWriter(out_file);
-            String ap_str = "Access Points:\nMAC\t\t\tPWR\tChannel\tBeacons\tData\t#s\tEnc\tAuth\tCipher\tHidden\tESSID\tManufacturer\n";
-            String st_str = "\nStations:\nMAC\t\t\tConnected To\t\tPWR\tFrames\tLost\tManufacturer\n";
+            String ap_str = "Access Points:\nMAC                 PWR  CH  Beacons    Data      #s   ENC  AUTH  CIPHER  Hidden  ESSID - Manufacturer";
+            String st_str = "Stations:\nMAC                BSSID               PWR  Frames    Lost  Manufacturer - Probes";
             out.write("Hijacker - " + new Date().toString() + "\n\n");
             if(((RadioGroup) dialogView.findViewById(R.id.radio_group)).getCheckedRadioButtonId()==R.id.all_rb){
                 //export all
-                out.write(ap_str);
+                out.write(ap_str + '\n');
                 for(int i=0;i<AP.APs.size();i++){
-                    out.write(AP.APs.get(i).toString());
+                    out.write(AP.APs.get(i).toString() + '\n');
                 }
-                out.write(st_str);
+                out.write('\n' + st_str + '\n');
                 for(int i=0;i<ST.STs.size();i++){
-                    out.write(ST.STs.get(i).toString());
+                    out.write(ST.STs.get(i).toString() + '\n');
                 }
             }else{
                 //export visible
-                out.write(ap_str);
+                out.write(ap_str + '\n');
                 int i;
                 for(i=0;i<Tile.i;i++){
-                    out.write(Tile.tiles.get(i).ap.toString());
+                    out.write(Tile.tiles.get(i).ap.toString() + '\n');
                 }
-                out.write(st_str);
+                out.write('\n' + st_str + '\n');
                 for(;i<Tile.tiles.size();i++){
-                    out.write(Tile.tiles.get(i).st.toString());
+                    out.write(Tile.tiles.get(i).st.toString() + '\n');
                 }
             }
             out.close();

@@ -72,7 +72,7 @@ public class EditTextDialog extends DialogFragment {
                         return;
                     }
                     if(runnable!=null) runnable.run();
-                    dismiss();
+                    dismissAllowingStateLoss();
                 }
             });
         }

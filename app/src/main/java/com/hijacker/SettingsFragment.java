@@ -17,6 +17,7 @@ package com.hijacker;
     along with this program.  If not, see <http://www.gnu.org/licenses/>
  */
 
+import android.app.FragmentTransaction;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.net.Uri;
@@ -24,16 +25,16 @@ import android.os.Bundle;
 import android.os.Environment;
 import android.preference.Preference;
 import android.preference.PreferenceFragment;
-
 import java.io.File;
 
 import static com.hijacker.MainActivity.FRAGMENT_SETTINGS;
 import static com.hijacker.MainActivity.arch;
+import static com.hijacker.MainActivity.checkForUpdate;
 import static com.hijacker.MainActivity.firm_backup_file;
 import static com.hijacker.MainActivity.mFragmentManager;
 import static com.hijacker.MainActivity.pref_edit;
 import static com.hijacker.MainActivity.refreshDrawer;
-import static com.hijacker.MainActivity.version;
+import static com.hijacker.MainActivity.versionName;
 import static com.hijacker.MainActivity.watchdog;
 import static com.hijacker.MainActivity.watchdog_runnable;
 import static com.hijacker.MainActivity.watchdog_thread;
@@ -41,6 +42,8 @@ import static com.hijacker.MainActivity.currentFragment;
 import static com.hijacker.MainActivity.load;
 
 public class SettingsFragment extends PreferenceFragment {
+    int versionClicks = 0;
+    long lastVersionClick = 0;
     SharedPreferences.OnSharedPreferenceChangeListener listener;
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -102,11 +105,7 @@ public class SettingsFragment extends PreferenceFragment {
         findPreference("send_feedback").setOnPreferenceClickListener(new Preference.OnPreferenceClickListener(){
             @Override
             public boolean onPreferenceClick(Preference preference){
-                Intent intent = new Intent (Intent.ACTION_SEND);
-                intent.setType("plain/text");
-                intent.putExtra(Intent.EXTRA_EMAIL, new String[] {"kiriakopoulos44@gmail.com"});
-                intent.putExtra(Intent.EXTRA_SUBJECT, "Hijacker feedback");
-                startActivity(intent);
+                new FeedbackDialog().show(getFragmentManager(), "FeedbackDialog");
                 return false;
             }
         });
@@ -155,7 +154,36 @@ public class SettingsFragment extends PreferenceFragment {
                 return false;
             }
         });
-        findPreference("version").setSummary(version);
+        findPreference("update_on_startup").setOnPreferenceChangeListener(new Preference.OnPreferenceChangeListener(){
+            @Override
+            public boolean onPreferenceChange(Preference preference, Object newValue){
+                if((boolean)newValue){
+                    checkForUpdate(SettingsFragment.this.getActivity(), true);
+                }
+                return true;
+            }
+        });
+        findPreference("version").setSummary(versionName);
+        findPreference("version").setOnPreferenceClickListener(new Preference.OnPreferenceClickListener(){
+            @Override
+            public boolean onPreferenceClick(Preference preference){
+                long time = System.currentTimeMillis();
+                if(time - lastVersionClick < 1000){
+                    if(versionClicks < 4){
+                        versionClicks++;
+                    }else{
+                        versionClicks = 0;
+                        FragmentTransaction ft = mFragmentManager.beginTransaction();
+                        ft.replace(R.id.fragment1, new DevOptionsFragment());
+                        ft.setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN);
+                        ft.addToBackStack(null);
+                        ft.commitAllowingStateLoss();
+                    }
+                }else versionClicks = 1;
+                lastVersionClick = time;
+                return false;
+            }
+        });
     }
     @Override
     public void onResume() {

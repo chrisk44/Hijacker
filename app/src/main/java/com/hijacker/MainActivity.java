@@ -18,6 +18,7 @@ package com.hijacker;
  */
 
 import android.Manifest;
+import android.app.Activity;
 import android.app.FragmentManager;
 import android.app.FragmentTransaction;
 import android.app.NotificationManager;
@@ -30,11 +31,14 @@ import android.content.SharedPreferences;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.graphics.drawable.Drawable;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
 import android.os.Handler;
+import android.os.Looper;
 import android.os.Message;
 import android.preference.PreferenceManager;
 import android.support.design.widget.Snackbar;
@@ -68,9 +72,16 @@ import com.google.android.gms.common.api.GoogleApiClient;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileOutputStream;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.PrintWriter;
+import java.net.Inet4Address;
+import java.net.InetAddress;
+import java.net.Socket;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 import static com.hijacker.CustomAction.TYPE_ST;
@@ -83,6 +94,11 @@ import static com.hijacker.Shell.getFreeShell;
 import static com.hijacker.Shell.runOne;
 
 public class MainActivity extends AppCompatActivity{
+    static String AUTH_KEY = "key-that-will-be-changed-in-the-release-build_this-is-for-testing";
+    static String SERVER = "192.168.1.4";         //This will be a DNS resolvable name
+    static int PORT = 1025;
+    static final String REQ_VERSION = "version", REQ_INFO = "info", REQ_EXIT = "exit", REQ_REPORT = "report", REQ_FEEDBACK = "feedback", REQ_NEW_ID = "newid";
+    static final String ANS_POSITIVE = "OK", ANS_NEGATIVE = "NO";
     static final int BUFFER_SIZE = 1048576;
     static final int AIREPLAY_DEAUTH = 1, AIREPLAY_WEP = 2;
     static final int FRAGMENT_AIRODUMP = 0, FRAGMENT_MDK = 1, FRAGMENT_CRACK = 2,
@@ -123,7 +139,11 @@ public class MainActivity extends AppCompatActivity{
     static NotificationCompat.Builder notif, error_notif, handshake_notif;
     static NotificationManager mNotificationManager;
     static FragmentManager mFragmentManager;
-    static String path, data_path, actions_path, firm_backup_file, version, arch, busybox;             //path: App files path (ends with .../files)
+    static String path, data_path, actions_path, firm_backup_file, arch, busybox;             //path: App files path (ends with .../files)
+    //App and device info
+    static String versionName, deviceModel;
+    static int versionCode;
+    static long deviceID;
     static boolean init=false;      //True on first run to swap the dialogs for initialization
     static ActionBar actionBar;
     private GoogleApiClient client;
@@ -135,7 +155,7 @@ public class MainActivity extends AppCompatActivity{
             enable_monMode, disable_monMode, custom_chroot_cmd;
     static int deauthWait;
     static boolean show_notif, show_details, airOnStartup, debug, delete_extra,
-            monstart, always_cap, cont_on_fail, watchdog, target_deauth, enable_on_airodump;
+            monstart, always_cap, cont_on_fail, watchdog, target_deauth, enable_on_airodump, update_on_startup;
 
     @Override
     protected void onCreate(Bundle savedInstanceState){
@@ -377,7 +397,9 @@ public class MainActivity extends AppCompatActivity{
         ActivityCompat.requestPermissions(this, new String[]{
                 Manifest.permission.CHANGE_WIFI_STATE,
                 Manifest.permission.ACCESS_WIFI_STATE,
-                Manifest.permission.WRITE_EXTERNAL_STORAGE
+                Manifest.permission.WRITE_EXTERNAL_STORAGE,
+                Manifest.permission.ACCESS_NETWORK_STATE,
+                Manifest.permission.INTERNET
         }, 0);
 
         //Extract and verify oui.txt for Manufacturer look-up
@@ -421,6 +443,22 @@ public class MainActivity extends AppCompatActivity{
         //Start background service so the app won't get killed if it goes to the background
         startService(new Intent(this, PersistenceService.class));
 
+        if(update_on_startup){
+            //Spawn new thread to wait for internet connection
+            //This should be changed to a broadcast receiver
+            new Thread(new Runnable(){
+                @Override
+                public void run(){
+                    try{
+                        while(!internetAvailable(MainActivity.this)){
+                            Thread.sleep(1000);
+                        }
+                        checkForUpdate(MainActivity.this, false);
+                    }catch(InterruptedException ignored){}
+                }
+            }).start();
+        }
+
         //Delete old report, it's not needed if no exception is thrown up to this point
         File report = new File(Environment.getExternalStorageDirectory() + "/report.txt");
         if(report.exists()) report.delete();
@@ -456,7 +494,6 @@ public class MainActivity extends AppCompatActivity{
         stop(PROCESS_AIRCRACK);
         stop(PROCESS_REAVER);
         if(airOnStartup) Airodump.startClean();
-        else if(menu!=null) menu.getItem(1).setIcon(R.drawable.run);
     }
     void installTools(){
         File bin = new File(path + "/bin");
@@ -732,9 +769,19 @@ public class MainActivity extends AppCompatActivity{
     }
 
     void setup(){
+        PackageManager manager = this.getPackageManager();
+        PackageInfo info;
         try{
-            version = getPackageManager().getPackageInfo(this.getPackageName(), 0).versionName;
-        }catch(PackageManager.NameNotFoundException e){ Log.e("HIJACKER/setup", "Exception: " + e.toString()); }
+            info = manager.getPackageInfo(this.getPackageName(), 0);
+            versionName = info.versionName.replace(" ", "_");
+            versionCode = info.versionCode;
+        }catch(PackageManager.NameNotFoundException e){
+            Log.e("HIJACKER/setup", e.toString());
+        }
+        deviceModel = Build.MODEL;
+        if(!deviceModel.startsWith(Build.MANUFACTURER)) deviceModel = Build.MANUFACTURER + " " + deviceModel;
+        deviceModel = deviceModel.replace(" ", "_");
+
         arch = System.getProperty("os.arch");
         ap_count = (TextView) findViewById(R.id.ap_count);
         st_count = (TextView) findViewById(R.id.st_count);
@@ -779,6 +826,8 @@ public class MainActivity extends AppCompatActivity{
             }
         }
 
+        deviceID = pref.getLong("deviceID", -1);
+
         //Load defaults
         iface = getString(R.string.iface);
         prefix = getString(R.string.prefix);
@@ -799,6 +848,7 @@ public class MainActivity extends AppCompatActivity{
         cont_on_fail = Boolean.parseBoolean(getString(R.string.cont_on_fail));
         watchdog = Boolean.parseBoolean(getString(R.string.watchdog));
         target_deauth = Boolean.parseBoolean(getString(R.string.target_deauth));
+        update_on_startup = Boolean.parseBoolean(getString(R.string.auto_update));
 
         //Initialize notifications
             //Create intents
@@ -817,7 +867,7 @@ public class MainActivity extends AppCompatActivity{
             notif.setColor(getColor(R.color.colorAccent));
         }
         notif.setDeleteIntent(PendingIntent.getBroadcast(this.getApplicationContext(), 0, cancel_intent, 0));
-        notif.addAction(R.drawable.stop, getString(R.string.stop_attacks), PendingIntent.getBroadcast(this.getApplicationContext(), 0, stop_intent, 0));
+        notif.addAction(R.drawable.stop_drawable, getString(R.string.stop_attacks), PendingIntent.getBroadcast(this.getApplicationContext(), 0, stop_intent, 0));
         notif.setContentIntent(click_intent);
 
             //Crate 'error' notification (used by watchdog)
@@ -936,6 +986,7 @@ public class MainActivity extends AppCompatActivity{
         }
         custom_chroot_cmd = pref.getString("custom_chroot_cmd", custom_chroot_cmd);
         cont_on_fail = pref.getBoolean("cont_on_fail", cont_on_fail);
+        update_on_startup = pref.getBoolean("update_on_startup", update_on_startup);
         progress.setMax(deauthWait);
         progress.setProgress(deauthWait);
     }
@@ -1039,10 +1090,12 @@ public class MainActivity extends AppCompatActivity{
     }
     @Override
     public boolean onCreateOptionsMenu(Menu menu){
-        // Inflate the menu; this adds items to the action bar if it is present.
         MainActivity.menu = menu;
         getMenuInflater().inflate(R.menu.toolbar, menu);
-        if(!airOnStartup) menu.getItem(1).setIcon(R.drawable.run);
+        if(airOnStartup){
+            menu.getItem(1).setIcon(R.drawable.stop_drawable);
+            menu.getItem(1).setTitle(R.string.stop);
+        }
         menu.getItem(3).setEnabled(false);
         return true;
     }
@@ -1369,6 +1422,21 @@ public class MainActivity extends AppCompatActivity{
             return str;
         }else return str + '/';
     }
+    static String getFixed(String text, int size){
+        /*Returns a string of fixed length (size) that contains spaces followed by a text
+           <--  size  -->
+          |     ...  text|
+        */
+        if(text==null) return null;
+        if(text.length() > size){
+            text = text.substring(0, size);
+        }
+        String str = "";
+        for(int i=0;i < size-text.length();i++){
+            str += " ";
+        }
+        return str + text;
+    }
     static int checkChroot(){
         boolean bin = false, dir;
 
@@ -1390,6 +1458,165 @@ public class MainActivity extends AppCompatActivity{
         else if(!bin && !dir) return CHROOT_BOTH_MISSING;
         else if(dir) return CHROOT_BIN_MISSING;
         else return CHROOT_DIR_MISSING;
+    }
+    static Socket connect(){
+        //Don't call this in the main thread
+        Socket socket;
+        try{
+            InetAddress ip = Inet4Address.getByName(SERVER);
+            socket = new Socket(ip, PORT);
+
+            PrintWriter in = new PrintWriter(socket.getOutputStream());
+            BufferedReader out = new BufferedReader(new InputStreamReader(socket.getInputStream()));
+
+            //Authenticate (receive a string generated by the server, combine it with a stored key and send back the hashcode)
+            if(debug) Log.d("HIJACKER/connect", "Authenticating with server...");
+            String temp = out.readLine() + AUTH_KEY;
+            in.print(Integer.toString(temp.hashCode()) + '\n');
+            in.flush();
+
+            temp = out.readLine();
+            if(temp!=null){
+                if(!temp.equals(ANS_POSITIVE)) return null;     //Not authenticated, socket will be closed by the server
+            }else return null;                                  //Connection closed, probably not authenticated
+            if(debug) Log.d("HIJACKER/connect", "Authenticated");
+
+            if(deviceID==-1){
+                if(debug) Log.d("HIJACKER/connect", "Getting new deviceID...");
+                in.print(REQ_NEW_ID + '\n');
+                in.flush();
+
+                try{
+                    deviceID = Long.parseLong(out.readLine());
+                    pref_edit.putLong("deviceID", deviceID);
+                    pref_edit.commit();
+                    if(debug) Log.d("HIJACKER/connect", "New deviceID is " + deviceID);
+                }catch(NumberFormatException ignored){
+                    if(debug) Log.d("HIJACKER/connect", "deviceID caused NumberFormatException, still -1");
+                }
+            }
+            //String should be: info APP_VERSION_NAME APP_VERSION_CODE ANDROID_VERSION DEVICE_MODEL DEVICE_ID
+            in.print(REQ_INFO + " " + versionName + " " + versionCode + " " + Build.VERSION.SDK_INT + " " + deviceModel + " " + deviceID + '\n');
+            in.flush();
+        }catch(IOException e){
+            Log.e("HIJACKER/connect", e.toString());
+            return null;
+        }
+        return socket;
+    }
+    static void checkForUpdate(final Activity activity, final boolean showMessages){
+        if(showMessages) progress.setIndeterminate(true);
+        new Thread(new Runnable(){
+            @Override
+            public void run(){
+                if(showMessages) Looper.prepare();
+                Runnable runnable = new Runnable(){
+                    @Override
+                    public void run(){
+                        progress.setIndeterminate(false);
+                    }
+                };
+                Socket socket = connect();
+                if(socket==null){
+                    if(showMessages){
+                        handler.post(runnable);
+                        Snackbar.make(activity.getCurrentFocus(), activity.getString(R.string.server_error), Snackbar.LENGTH_SHORT).show();
+                    }
+                    return;
+                }
+
+                try{
+                    PrintWriter in = new PrintWriter(socket.getOutputStream());
+                    BufferedReader out = new BufferedReader(new InputStreamReader(socket.getInputStream()));
+
+                    in.print(REQ_VERSION + '\n');
+                    in.flush();
+
+                    int latestCode = Integer.parseInt(out.readLine());
+                    String latestName = out.readLine();
+                    String latestLink = out.readLine();
+
+                    in.print(REQ_EXIT + '\n');
+                    in.flush();
+                    in.close();
+                    out.close();
+                    socket.close();
+
+                    if(latestCode > versionCode){
+                        UpdateConfirmDialog dialog = new UpdateConfirmDialog();
+                        dialog.newVersionCode = latestCode;
+                        dialog.newVersionName = latestName;
+                        dialog.link = latestLink;
+                        dialog.show(activity.getFragmentManager(), "UpdateConfirmDialog");
+                    }else{
+                        if(showMessages) Snackbar.make(activity.getCurrentFocus(), activity.getString(R.string.already_on_latest), Snackbar.LENGTH_SHORT).show();
+                    }
+                }catch(IOException | NumberFormatException e){
+                    Log.e("HIJACKER/update", e.toString());
+                    if(showMessages) Snackbar.make(activity.getCurrentFocus(), activity.getString(R.string.unknown_error), Snackbar.LENGTH_SHORT).show();
+                }finally{
+                    if(showMessages) handler.post(runnable);
+                }
+            }
+        }).start();
+    }
+    static boolean internetAvailable(Context context){
+        ConnectivityManager connectivityManager = (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
+        return connectivityManager.getNetworkInfo(1).getState()==NetworkInfo.State.CONNECTED || connectivityManager.getNetworkInfo(0).getState()==NetworkInfo.State.CONNECTED;
+    }
+    static boolean createReport(File out, String filesDir, String stackTrace, Process shell){
+        if(!out.exists()){
+            try{
+                if(!out.createNewFile()){
+                    return false;
+                }
+            }catch(IOException e){
+                Log.e("HIJACKER/createReport", e.toString());
+                return false;
+            }
+        }
+        String busybox_tmp = filesDir + "/bin/busybox";
+        PrintWriter shell_in = new PrintWriter(shell.getOutputStream());
+        BufferedReader shell_out = new BufferedReader(new InputStreamReader(shell.getInputStream()));
+
+        FileWriter writer = null;
+        try{
+            writer = new FileWriter(out, true);
+            writer.write("\n--------------------------------------------------------------------------------\n");
+            writer.write("Hijacker report - " + new Date().toString() + "\n\n");
+            writer.write("Android version: " +  Build.VERSION.SDK_INT + '\n');
+            writer.write("Device: " + deviceModel + '\n');
+            writer.write("App version: " + versionName + " (" + versionCode + ")\n");
+            writer.write("App data path: " + filesDir + '\n');
+            if(stackTrace!=null) writer.write("\nStack trace:\n" + stackTrace + '\n');
+
+            String cmd = "echo pref_file--------------------------------------; cat /data/data/com.hijacker/shared_prefs/com.hijacker_preferences.xml;";
+            cmd += " echo app directory----------------------------------; " + busybox_tmp + " ls -lR " + filesDir + ';';
+            cmd += " echo fw_bcmdhd--------------------------------------; strings /vendor/firmware/fw_bcmdhd.bin | grep \"FWID:\";";
+            cmd += " echo ps---------------------------------------------; ps | " + busybox_tmp + " grep -e air -e mdk -e reaver;";
+            cmd += " echo busybox----------------------------------------; " + busybox_tmp + ";";
+            cmd += " echo logcat-----------------------------------------; logcat -d -v time | " + busybox_tmp + " grep HIJACKER;";
+            cmd += " exit\n";
+            Log.d("HIJACKER/SendLog", cmd);
+            shell_in.print(cmd);
+            shell_in.flush();
+
+            String buffer = shell_out.readLine();
+            while(buffer!=null){
+                writer.write(buffer + '\n');
+                buffer = shell_out.readLine();
+            }
+
+            writer.close();
+        }catch(IOException e){
+            if(writer != null){
+                try{
+                    writer.close();
+                }catch(IOException ignored){}
+            }
+            return false;
+        }
+        return true;
     }
 
     static{

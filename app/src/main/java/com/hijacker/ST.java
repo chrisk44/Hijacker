@@ -28,6 +28,7 @@ import static com.hijacker.MainActivity.SORT_DATA_FRAMES;
 import static com.hijacker.MainActivity.SORT_NOSORT;
 import static com.hijacker.MainActivity.SORT_PWR;
 import static com.hijacker.MainActivity.completed;
+import static com.hijacker.MainActivity.getFixed;
 import static com.hijacker.MainActivity.getManuf;
 import static com.hijacker.MainActivity.runInHandler;
 import static com.hijacker.MainActivity.sort;
@@ -160,7 +161,16 @@ class ST {
         Tile.filter();
     }
     public String toString(){
-        return mac + '\t' + (bssid==null ? "(not associated)" : bssid) + '\t' + pwr + '\t' + getFrames() + '\t' + getLost() + '\t' + manuf + '\n';
+        //MAC                BSSID               PWR  Frames    Lost  Manufacturer - Probes
+        //00:11:22:33:44:55  00:11:22:33:44:55  -100  123456  123456  ExampleManufacturer - Probe1, Probe2, Probe3...
+        String str = mac;
+        str += getFixed(bssid==null ? "(not associated) " : bssid, 19);
+        str += getFixed(Integer.toString(pwr), 6);
+        str += getFixed(Integer.toString(getFrames()), 8);
+        str += getFixed(Integer.toString(getLost()), 8);
+        str += "  " + manuf + " - " + probes;
+
+        return str;
     }
     public int getFrames(){ return total_frames + frames; }
     public int getLost(){ return total_lost + lost; }

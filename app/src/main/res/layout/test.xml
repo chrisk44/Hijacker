@@ -3,140 +3,142 @@
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
+    android:layout_height="wrap_content"
     android:orientation="vertical"
-    android:layout_height="wrap_content">
+    android:paddingTop="5dp">
 
     <ProgressBar
-        style="?android:attr/progressBarStyleHorizontal"
         android:id="@+id/test_progress"
+        style="?android:attr/progressBarStyleHorizontal"
         android:layout_width="match_parent"
-        android:progressDrawable="@drawable/progress_horizontal_holo_blue_dark"
         android:layout_height="wrap_content"
+        android:max="5"
+        android:maxHeight="5dp"
         android:minHeight="5dp"
         android:minWidth="0dp"
-        android:maxHeight="5dp"
-        android:max="6"/>
+        android:progressDrawable="@drawable/progress_horizontal_holo_blue_dark"/>
 
     <LinearLayout
-        android:orientation="vertical"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:paddingStart="20dp"
+        android:orientation="vertical"
         android:paddingEnd="35dp"
+        android:paddingStart="20dp"
         android:paddingTop="10dp">
 
         <LinearLayout
-            android:orientation="horizontal"
             android:layout_width="match_parent"
-            android:layout_height="match_parent">
+            android:layout_height="match_parent"
+            android:orientation="horizontal">
 
             <TextView
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:padding="2dp"
                 android:text="Airodump-ng"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:textColor="@android:color/white"
-                android:layout_weight="1"
-                android:padding="2dp" />
+                android:textColor="@android:color/white"/>
 
             <ImageView
+                android:id="@+id/imageView1"
                 android:layout_width="wrap_content"
                 android:layout_height="match_parent"
-                app:srcCompat="@drawable/failed"
-                android:id="@+id/imageView1" />
+                app:srcCompat="@drawable/failed_drawable"/>
         </LinearLayout>
 
         <LinearLayout
-            android:orientation="horizontal"
             android:layout_width="match_parent"
-            android:layout_height="match_parent">
+            android:layout_height="match_parent"
+            android:orientation="horizontal">
 
             <TextView
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:padding="2dp"
                 android:text="Aireplay-ng"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:textColor="@android:color/white"
-                android:layout_weight="1"
-                android:padding="2dp" />
+                android:textColor="@android:color/white"/>
 
             <ImageView
+                android:id="@+id/imageView2"
                 android:layout_width="wrap_content"
                 android:layout_height="match_parent"
-                app:srcCompat="@drawable/passed"
-                android:id="@+id/imageView2" />
+                app:srcCompat="@drawable/done_drawable"/>
         </LinearLayout>
 
         <LinearLayout
-            android:orientation="horizontal"
             android:layout_width="match_parent"
-            android:layout_height="match_parent">
+            android:layout_height="match_parent"
+            android:orientation="horizontal">
 
             <TextView
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:padding="2dp"
                 android:text="MDK3"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:textColor="@android:color/white"
-                android:layout_weight="1"
-                android:padding="2dp" />
+                android:textColor="@android:color/white"/>
 
             <ImageView
+                android:id="@+id/imageView3"
                 android:layout_width="wrap_content"
                 android:layout_height="match_parent"
-                app:srcCompat="@drawable/testing"
-                android:id="@+id/imageView3" />
+                app:srcCompat="@drawable/testing_drawable"/>
         </LinearLayout>
 
         <LinearLayout
-            android:orientation="horizontal"
             android:layout_width="match_parent"
-            android:layout_height="match_parent">
+            android:layout_height="match_parent"
+            android:orientation="horizontal">
 
             <TextView
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:padding="2dp"
                 android:text="Reaver"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:textColor="@android:color/white"
-                android:layout_weight="1"
-                android:padding="2dp" />
+                android:textColor="@android:color/white"/>
 
             <ImageView
+                android:id="@+id/imageView4"
                 android:layout_width="wrap_content"
                 android:layout_height="match_parent"
-                app:srcCompat="@drawable/testing"
-                android:id="@+id/imageView4" />
+                app:srcCompat="@drawable/testing_drawable"/>
         </LinearLayout>
 
         <LinearLayout
-            android:orientation="horizontal"
             android:layout_width="match_parent"
-            android:layout_height="match_parent">
+            android:layout_height="match_parent"
+            android:orientation="horizontal">
 
             <TextView
-                android:text="Kali chroot"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
-                android:textColor="@android:color/white"
                 android:layout_weight="1"
-                android:padding="2dp" />
+                android:padding="2dp"
+                android:text="Kali chroot"
+                android:textColor="@android:color/white"/>
 
             <ImageView
+                android:id="@+id/imageView5"
                 android:layout_width="wrap_content"
                 android:layout_height="match_parent"
-                app:srcCompat="@drawable/testing"
-                android:id="@+id/imageView5" />
+                app:srcCompat="@drawable/testing_drawable"/>
         </LinearLayout>
 
         <TextView
+            android:id="@+id/current_cmd"
             android:layout_width="wrap_content"
             android:layout_height="0dp"
-            android:textColor="@android:color/white"
             android:layout_weight="1"
+            android:clickable="true"
+            android:lines="4"
             android:paddingLeft="2dp"
             android:paddingRight="2dp"
             android:paddingTop="5dp"
-            android:typeface="monospace"
+            android:textColor="@android:color/white"
             android:textSize="12sp"
-            android:clickable="true"
-            android:id="@+id/current_cmd" />
+            android:typeface="monospace"/>
     </LinearLayout>
 
 </LinearLayout>

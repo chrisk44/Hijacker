@@ -20,13 +20,17 @@ package com.hijacker;
 
 import android.Manifest;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Environment;
+import android.os.Handler;
+import android.os.Looper;
+import android.preference.PreferenceManager;
+import android.support.design.widget.Snackbar;
 import android.support.v4.app.ActivityCompat;
-import android.support.v4.content.ContextCompat;
 import android.support.v4.content.FileProvider;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -34,33 +38,51 @@ import android.text.method.ScrollingMovementMethod;
 import android.util.Log;
 import android.view.View;
 import android.view.Window;
+import android.widget.EditText;
+import android.widget.ImageView;
+import android.widget.ProgressBar;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
-import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
+import java.net.Socket;
 import java.util.ArrayList;
-import java.util.Date;
+
+import static com.hijacker.MainActivity.ANS_POSITIVE;
+import static com.hijacker.MainActivity.REQ_EXIT;
+import static com.hijacker.MainActivity.REQ_REPORT;
+import static com.hijacker.MainActivity.connect;
+import static com.hijacker.MainActivity.createReport;
+import static com.hijacker.MainActivity.deviceID;
+import static com.hijacker.MainActivity.deviceModel;
+import static com.hijacker.MainActivity.internetAvailable;
+import static com.hijacker.MainActivity.versionCode;
+import static com.hijacker.MainActivity.versionName;
 
 public class SendLogActivity extends AppCompatActivity{
     static String busybox;
-    String filename, stackTrace;
+    String stackTrace, user_email = null;
+    EditText user_email_et, extra_et;
+    File report;
     Process shell;
     PrintWriter shell_in;
     BufferedReader shell_out;
+    SharedPreferences pref;
+    SharedPreferences.Editor pref_edit;
     @Override
     protected void onCreate(Bundle savedInstanceState){
         super.onCreate(savedInstanceState);
-        requestWindowFeature(Window.FEATURE_NO_TITLE); // make a dialog without a titlebar
-        setFinishOnTouchOutside(false); // prevent users from dismissing the dialog by tapping outside
+        requestWindowFeature(Window.FEATURE_NO_TITLE);
+        setFinishOnTouchOutside(false);
         setContentView(R.layout.activity_send_log);
+        user_email_et = (EditText)findViewById(R.id.email_et);
+        extra_et = (EditText)findViewById(R.id.extra_et);
 
-        busybox = getFilesDir().getAbsolutePath() + "/busybox";
+        busybox = getFilesDir().getAbsolutePath() + "/bin/busybox";
         stackTrace = getIntent().getStringExtra("exception");
         Log.e("HIJACKER/SendLog", stackTrace);
 
@@ -68,7 +90,7 @@ public class SendLogActivity extends AppCompatActivity{
             shell = Runtime.getRuntime().exec("su");
         }catch(IOException e){
             Log.e("HIJACKER/onCreate", "Caught Exception in shell start: " + e.toString());
-            Toast.makeText(this, "Couldn't start su shell to stop any remaining processes", Toast.LENGTH_LONG).show();
+            Snackbar.make(getCurrentFocus(), "Couldn't start su shell to stop any remaining processes", Snackbar.LENGTH_LONG).show();
             return;
         }
         shell_in = new PrintWriter(shell.getOutputStream());
@@ -76,96 +98,149 @@ public class SendLogActivity extends AppCompatActivity{
 
         stopAll();
 
-        if(ContextCompat.checkSelfPermission(this, Manifest.permission.WRITE_EXTERNAL_STORAGE)==PackageManager.PERMISSION_DENIED){
-            ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE}, 0);
+        ActivityCompat.requestPermissions(this, new String[]{
+                Manifest.permission.CHANGE_WIFI_STATE,
+                Manifest.permission.ACCESS_WIFI_STATE,
+                Manifest.permission.WRITE_EXTERNAL_STORAGE,
+                Manifest.permission.ACCESS_NETWORK_STATE,
+                Manifest.permission.INTERNET
+        }, 0);
+
+        pref = PreferenceManager.getDefaultSharedPreferences(this);
+        pref_edit = pref.edit();
+
+        PackageManager manager = this.getPackageManager();
+        PackageInfo info;
+        try{
+            info = manager.getPackageInfo(this.getPackageName(), 0);
+            versionName = info.versionName.replace(" ", "_");
+            versionCode = info.versionCode;
+        }catch(PackageManager.NameNotFoundException e){
+            Log.e("HIJACKER/SendLog", e.toString());
         }
-        if(ContextCompat.checkSelfPermission(this, Manifest.permission.WRITE_EXTERNAL_STORAGE)!=PackageManager.PERMISSION_DENIED){
-            filename = extractLogToFile();
-            if(filename==null) Log.d("HIJACKER/SendLog", "filename is null");
-            else{
-                File log = new File(filename);
-                try{
-                    BufferedReader br = new BufferedReader(new FileReader(log));
-                    String buffer;
-                    TextView console = (TextView)findViewById(R.id.console);
-                    console.setMovementMethod(ScrollingMovementMethod.getInstance());
-                    int i=0;
-                    while((buffer = br.readLine())!=null && i<400){
-                        console.append(buffer + '\n');
-                        i++;
-                    }
-                    if(i==400) console.append("...more logcat not displayed here");
-                }catch(IOException ignored){}
+        deviceModel = Build.MODEL;
+        if(!deviceModel.startsWith(Build.MANUFACTURER)) deviceModel = Build.MANUFACTURER + " " + deviceModel;
+        deviceModel = deviceModel.replace(" ", "_");
+
+        deviceID = pref.getLong("deviceID", -1);
+
+        user_email_et.setText(pref.getString("user_email", ""));
+
+        report = new File(Environment.getExternalStorageDirectory() + "/report.txt");
+        createReport(report, getFilesDir().getAbsolutePath(), stackTrace, shell);
+
+        try{
+            BufferedReader br = new BufferedReader(new FileReader(report));
+            TextView console = (TextView)findViewById(R.id.console);
+            console.setMovementMethod(ScrollingMovementMethod.getInstance());
+            int i=0, limit=100;
+            String buffer;
+            while((buffer = br.readLine())!=null && i<limit){
+                console.append(buffer + '\n');
+                i++;
             }
-        }else Log.e("HIJACKER/SendLog", "WRITE_EXTERNAL_STORAGE permission denied");
+            if(i==limit) console.append("...");
+        }catch(IOException ignored){}
     }
-    private void sendLogFile(String fullName){
+    public void onUseEmail(View v){
         Intent intent = new Intent (Intent.ACTION_SEND);
         intent.setType("plain/text");
         intent.putExtra(Intent.EXTRA_EMAIL, new String[] {"kiriakopoulos44@gmail.com"});
         intent.putExtra(Intent.EXTRA_SUBJECT, "Hijacker bug report");
-        Uri attachment = FileProvider.getUriForFile(this, BuildConfig.APPLICATION_ID + ".provider", new File(fullName));
+        Uri attachment = FileProvider.getUriForFile(this, BuildConfig.APPLICATION_ID + ".provider", report);
         intent.putExtra(Intent.EXTRA_STREAM, attachment);
-        intent.putExtra(Intent.EXTRA_TEXT, "Log file attached.\n\nAdd additional details here, like what exactly you were doing when the crash occurred."); // do this so some email clients don't complain about empty body.
+        intent.putExtra(Intent.EXTRA_TEXT, extra_et.getText().toString());
         startActivity(intent);
     }
-    private String extractLogToFile(){
-        PackageManager manager = this.getPackageManager();
-        PackageInfo info = null;
-        try{
-            info = manager.getPackageInfo (this.getPackageName(), 0);
-        }catch(PackageManager.NameNotFoundException ignored){}
-        String model = Build.MODEL;
-        if (!model.startsWith(Build.MANUFACTURER)) model = Build.MANUFACTURER + " " + model;
+    public void onSend(final View v){
+        if(!report.exists()){
+            Log.d("HIJACKER/SendLog", "filename is null");
+            Snackbar.make(getCurrentFocus(), "Report was not created", Snackbar.LENGTH_LONG).show();
+            return;
+        }
+        user_email = user_email_et.getText().toString();
+        pref_edit.putString("user_email", user_email);
+        pref_edit.commit();
 
-        // Make file name - file must be saved to external storage or it wont be readable by the email app.
-        String fullName = Environment.getExternalStorageDirectory() + "/report.txt";
-
-        // Extract to file.
-        File file = new File (fullName);
-        FileWriter writer = null;
-        try{
-            writer = new FileWriter(file, true);
-            writer.write("\n--------------------------------------------------------------------------------\n");
-            writer.write("Hijacker bug report - " + new Date().toString() + "\n\n");
-            writer.write("Android version: " +  Build.VERSION.SDK_INT + '\n');
-            writer.write("Device: " + model + '\n');
-            writer.write("App version: " + (info == null ? "(null)" : info.versionName) + '\n');
-            writer.write("App data path: " + getFilesDir().getAbsolutePath() + '\n');
-            writer.write("\nStack trace:\n" + stackTrace + '\n');
-
-            String cmd = "echo pref_file--------------------------------------; su -c cat /data/data/com.hijacker/shared_prefs/com.hijacker_preferences.xml;";
-            cmd += " echo app directory----------------------------------; " + busybox + " ls -lR " + getFilesDir().getAbsolutePath() + ';';
-            cmd += " echo fw_bcmdhd--------------------------------------; su -c strings /vendor/firmware/fw_bcmdhd.bin | grep \"FWID:\";";
-            cmd += " echo ps---------------------------------------------; su -c ps | " + busybox + " grep -e air -e mdk -e reaver;";
-            cmd += " echo busybox----------------------------------------; " + busybox + ";";
-            cmd += " echo logcat-----------------------------------------; logcat -d -v time | " + busybox + " grep HIJACKER;";
-            cmd += " echo ENDOFLOG\n";
-            Log.d("HIJACKER/SendLog", cmd);
-            shell_in.print(cmd);                //Runtime.getRuntime().exec(cmd) just echos the cmd...
-            shell_in.flush();
-            String buffer = shell_out.readLine();
-            while(!buffer.equals("ENDOFLOG")){
-                writer.write(buffer + '\n');
-                buffer = shell_out.readLine();
-            }
-
-            writer.close();
-        }catch(IOException e){
-            if (writer != null)
-                try {
-                    writer.close();
-                }catch(IOException ignored) {}
-            return null;
+        if(!internetAvailable(this)){
+            Log.d("HIJACKER/SendLog", "No internet connection");
+            Snackbar.make(getCurrentFocus(), getString(R.string.no_internet), Snackbar.LENGTH_SHORT).show();
+            return;
         }
 
-        return fullName;
-    }
-    public void onSend(View v){
-        if(filename==null){
-            Log.d("HIJACKER/SendLog", "filename is null");
-            Toast.makeText(this, "Report was not created", Toast.LENGTH_LONG).show();
-        }else sendLogFile(filename);
+        final ProgressBar progress = (ProgressBar)findViewById(R.id.progress);
+        final ImageView completed = (ImageView)findViewById(R.id.completed);
+        v.setVisibility(View.GONE);
+        progress.setVisibility(View.VISIBLE);
+
+        new Thread(new Runnable(){
+            @Override
+            public void run(){
+                Looper.prepare();
+                Runnable runnable = new Runnable(){
+                    @Override
+                    public void run(){
+                        progress.setVisibility(View.GONE);
+                        v.setVisibility(View.VISIBLE);
+                    }
+                };
+                Socket socket = connect();
+                if(socket==null){
+                    handler.post(runnable);
+                    Snackbar.make(getCurrentFocus(), getString(R.string.server_error) , Snackbar.LENGTH_SHORT).show();
+                    return;
+                }
+                try{
+                    BufferedReader socketOut = new BufferedReader(new InputStreamReader(socket.getInputStream()));
+                    PrintWriter socketIn = new PrintWriter(socket.getOutputStream());
+                    socketIn.print(REQ_REPORT + '\n');
+                    socketIn.flush();
+
+                    String temp = socketOut.readLine();
+                    if(temp!=null){
+                        if(!temp.equals(ANS_POSITIVE)){
+                            Snackbar.make(getCurrentFocus(), getString(R.string.server_denied), Snackbar.LENGTH_SHORT).show();
+                            handler.post(runnable);
+                            return;
+                        }
+                    }else{
+                        Snackbar.make(getCurrentFocus(), getString(R.string.connection_closed), Snackbar.LENGTH_SHORT).show();
+                        handler.post(runnable);
+                        return;
+                    }
+
+                    BufferedReader fileReader = new BufferedReader(new FileReader(report));
+
+                    socketIn.print("User email: " + user_email + '\n');
+                    socketIn.print("Extra details: " + extra_et.getText().toString());
+                    socketIn.flush();
+                    String buffer = fileReader.readLine();
+                    while(buffer!=null){
+                        socketIn.print(buffer + '\n');
+                        socketIn.flush();
+                        buffer = fileReader.readLine();
+                    }
+                    socketIn.print("EOF\n");
+                    socketIn.print(REQ_EXIT + '\n');
+                    socketIn.flush();
+
+                    socketIn.close();
+                    socketOut.close();
+                    socket.close();
+                    handler.post(new Runnable(){
+                        @Override
+                        public void run(){
+                            progress.setVisibility(View.GONE);
+                            completed.setVisibility(View.VISIBLE);
+                        }
+                    });
+                }catch(IOException e){
+                    Log.e("HIJACKER/onSend", e.toString());
+                    Snackbar.make(getCurrentFocus(), getString(R.string.unknown_error), Snackbar.LENGTH_SHORT).show();
+                    handler.post(runnable);
+                }
+            }
+        }).start();
     }
     public void onRestart(View v){
         Intent intent = new Intent(this, MainActivity.class);
@@ -215,4 +290,5 @@ public class SendLogActivity extends AppCompatActivity{
             }
         }
     }
+    static Handler handler = new Handler();
 }

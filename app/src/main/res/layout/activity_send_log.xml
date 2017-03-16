@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/activity_send_log"
     android:layout_width="match_parent"
@@ -26,6 +27,47 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:id="@+id/textView2"/>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:gravity="center_vertical"
+            android:text="E-mail"
+            android:textColor="?android:attr/textColorPrimary"
+            android:textSize="18sp"/>
+
+        <EditText
+            android:id="@+id/email_et"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:ems="10"
+            android:hint="@string/optional"
+            android:inputType="textEmailAddress"
+            android:paddingStart="10dp"/>
+    </LinearLayout>
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:gravity="center_vertical"
+        android:text="@string/extra"
+        android:hint="@string/optional"
+        android:textColor="?android:attr/textColorPrimary"
+        android:textSize="18sp"/>
+
+    <EditText
+        android:id="@+id/extra_et"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:ems="10"
+        android:inputType="textMultiLine"
+        android:lines="2"
+        android:maxLines="2"/>
 
     <TextView
         android:layout_width="match_parent"
@@ -55,17 +97,47 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:id="@+id/restart"
-            android:onClick="onRestart"
-            />
+            android:onClick="onRestart"/>
 
         <Button
             style="?android:attr/buttonBarButtonStyle"
-            android:text="@string/send_report"
-            android:layout_width="match_parent"
+            android:text="@string/use_email"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:id="@+id/start"
-            android:onClick="onSend"
-            />
+            android:id="@+id/useEmail"
+            android:onClick="onUseEmail"/>
+
+        <FrameLayout
+            android:id="@+id/send_frame"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent">
+
+            <Button
+                android:id="@+id/start"
+                style="?android:attr/buttonBarButtonStyle"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:onClick="onSend"
+                android:text="@string/send_report"
+                android:visibility="visible"/>
+
+            <ProgressBar
+                android:id="@+id/progress"
+                style="?android:attr/progressBarStyle"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:indeterminate="true"
+                android:visibility="gone"/>
+
+            <ImageView
+                android:id="@+id/completed"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:padding="5dp"
+                android:visibility="gone"
+                app:srcCompat="@drawable/done_drawable"/>
+        </FrameLayout>
+
     </LinearLayout>
 
 </LinearLayout>

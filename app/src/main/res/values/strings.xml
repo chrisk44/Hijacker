@@ -23,6 +23,14 @@
     <string name="clear">Clear</string>
     <string name="settings">Settings</string>
     <string name="select">Select</string>
+    <string name="send">Send</string>
+    <string name="download">Download</string>
+    <!-- Server Connection -->
+    <string name="no_internet">No internet connection</string>
+    <string name="server_error">An error occurred while connecting to server</string>
+    <string name="server_denied">Server denied the request</string>
+    <string name="connection_closed">Connection closed unexpectedly</string>
+    <string name="unknown_error">An unknown error occurred</string>
 
     <!-- APDialog (xml) -->
     <string name="mac">MAC:</string>
@@ -113,6 +121,12 @@
     <string name="output_file_exported">Exported</string>
     <string name="filename_empty">Filename is empty</string>
     <string name="file_not_created">File could not be created</string>
+
+    <!-- FeedbackDialog -->
+    <string name="feedback">Feedback</string>
+    <string name="include_report">Include a report</string>
+    <string name="feedback_empty">Feedback field cannot be empty</string>
+    <string name="send_email">Send email</string>
 
     <!-- FileExplorerDialog -->
     <string name="folder_name">Folder name</string>
@@ -228,11 +242,11 @@
 
     <!-- SendLogActivity -->
     <string name="unexpected_error_title">Unexpected Error</string>
-    <string name="unexpected_error_message">An unexpected error has occurred. A report has been generated in your external storage directory.
-        It contains the app version, the Android version, the model of your device, and a Logcat to help troubleshoot the problem. Below is the report.txt that will be sent.
-        Click \"Send report\" to report the problem.</string>
+    <string name="unexpected_error_message">An unexpected error has occurred. A bug report has been generated in your external storage directory.</string>
     <string name="send_report">Send report</string>
-    <string name="restart_hijacker">Restart Hijacker</string>
+    <string name="restart_hijacker">Restart</string>
+    <string name="use_email">Use email</string>
+    <string name="extra">Extra</string>
 
     <!-- ST -->
     <string name="paired">Paired:</string>
@@ -252,9 +266,12 @@
 
     <!-- TestDialog -->
     <string name="testing">Testing tools…</string>
-    <string name="make_sure_wifi">Make sure that WiFi is enabled</string>
     <string name="checking_chroot">Checking chroot…</string>
     <string name="done">Done</string>
+
+    <!-- UpdateConfirmDialog -->
+    <string name="update_title">New update available</string>
+    <string name="update_text">There is a new update available.</string>
 
     <!-- Default Preferences -->
     <string name="iface" translatable="false">wlan0</string>
@@ -275,6 +292,7 @@
     <string name="cont_on_fail" translatable="false">false</string>
     <string name="watchdog" translatable="false">true</string>
     <string name="target_deauth" translatable="false">false</string>
+    <string name="auto_update" translatable="false">true</string>
 
     <!-- Settings -->
 
@@ -370,7 +388,8 @@
     <string name="restore_firmware">Restore firmware</string>
     <string name="reset_title">Reset Preferences</string>
     <string name="send_feedback_title">Send feedback</string>
-    <string name="send_feedback_sum">Via email</string>
+    <string name="update_on_startup">Check for updates on startup</string>
+    <string name="already_on_latest">You are running the latest version</string>
     <string name="github_title">Go to GitHub</string>
     <string name="version_title">Version</string>
 </resources>

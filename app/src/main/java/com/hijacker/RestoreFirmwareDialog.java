@@ -108,7 +108,7 @@ public class RestoreFirmwareDialog extends DialogFragment {
                         Snackbar.make(dialogView, R.string.firm_notfound, Snackbar.LENGTH_SHORT).show();
                     }else{
                         if(debug) Log.d("HIJACKER/RestoreFirm", "Restoring firmware in " + firm_location);
-                        WifiManager wifiManager = (WifiManager) getActivity().getSystemService(Context.WIFI_SERVICE);
+                        WifiManager wifiManager = (WifiManager) getActivity().getApplicationContext().getSystemService(Context.WIFI_SERVICE);
                         wifiManager.setWifiEnabled(false);
 
                         shell.run(busybox + " mount -o rw,remount,rw /system");

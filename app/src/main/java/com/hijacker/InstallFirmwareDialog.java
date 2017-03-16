@@ -212,7 +212,7 @@ public class InstallFirmwareDialog extends DialogFragment {
             start_airodump = true;
             stop(PROCESS_AIRODUMP);
         }
-        WifiManager wifiManager = (WifiManager) getActivity().getSystemService(Context.WIFI_SERVICE);
+        WifiManager wifiManager = (WifiManager) getActivity().getApplicationContext().getSystemService(Context.WIFI_SERVICE);
         wifiManager.setWifiEnabled(false);
         if(debug) Log.d("HIJACKER/InstFirmware", "Backing up firmware from " + firm_location);
         if(backup_cb.isChecked()){

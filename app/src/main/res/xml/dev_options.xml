@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
+    <Preference
+        android:key="causeNPE"
+        android:title="Generate NPE" />
+    <Preference
+        android:key="connect"
+        android:title="Connect to server" />
+    <Preference
+        android:key="disconnect"
+        android:title="Disconnect from server"
+        android:enabled="false" />
+    <SwitchPreference
+        android:key="useTestKey"
+        android:title="Use AUTH_KEY_TEST"
+        android:defaultValue="false" />
+    <EditTextPreference
+        android:inputType="number"
+        android:key="port"
+        android:title="Change server port"/>
+    <Preference
+        android:key="resetID"
+        android:title="Reset deviceID" />
+
+</PreferenceScreen>

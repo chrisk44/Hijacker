@@ -136,8 +136,8 @@ public class CrackFragment extends Fragment{
             public void onClick(View view){
                 capfile = cap_et.getText().toString();
                 wordlist = wordlist_et.getText().toString();
-                File cap = new File(capfile);
-                File word = new File(wordlist);
+                RootFile cap = new RootFile(capfile);
+                RootFile word = new RootFile(wordlist);
                 if(thread.isAlive()){
                     cont = false;
                 }else if(!cap.exists() || !cap.isFile()){

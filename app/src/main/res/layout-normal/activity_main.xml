@@ -19,7 +19,7 @@
         <android.support.v7.widget.Toolbar
             android:id="@+id/my_toolbar"
             android:layout_width="match_parent"
-            android:layout_height="56dp"
+            android:layout_height="?attr/actionBarSize"
             android:background="?attr/colorPrimary"
             android:elevation="4dp"
             android:theme="@style/ThemeOverlay.AppCompat.ActionBar"
@@ -27,7 +27,7 @@
 
             <ImageView
                 android:layout_height="@android:dimen/app_icon_size"
-                app:srcCompat="@drawable/ap2"
+                app:srcCompat="@drawable/ap_drawable"
                 android:adjustViewBounds="false"
                 android:layout_width="48dip"
                 android:paddingStart="20dp"
@@ -49,7 +49,7 @@
 
             <ImageView
                 android:layout_height="@android:dimen/app_icon_size"
-                app:srcCompat="@drawable/st2"
+                app:srcCompat="@drawable/st_drawable"
                 android:adjustViewBounds="false"
                 android:layout_width="48dip"
                 android:paddingStart="20dp"
