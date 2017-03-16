@@ -14,4 +14,5 @@
         <item name="android:windowBackground">?android:attr/colorBackground</item>
     </style>
 
+    <dimen name="actionBarIconSize">48dp</dimen>
 </resources>

@@ -171,6 +171,7 @@ public class FeedbackDialog extends DialogFragment{
                         @Override
                         public void run(){
                             Looper.prepare();
+                            FeedbackDialog.this.setCancelable(false);
                             Runnable runnable = new Runnable(){
                                 @Override
                                 public void run(){
@@ -257,6 +258,7 @@ public class FeedbackDialog extends DialogFragment{
                                 Snackbar.make(v, getString(R.string.unknown_error), Snackbar.LENGTH_SHORT).show();
                             }finally{
                                 handler.post(runnable);
+                                FeedbackDialog.this.setCancelable(true);
                             }
                         }
                     }).start();

@@ -93,7 +93,7 @@ public class TestDialog extends DialogFragment {
                 runInHandler(new Runnable(){        //stop everything and turn on monitor mode
                     @Override
                     public void run(){
-                        status[0].setImageResource(R.drawable.testing);
+                        status[0].setImageResource(R.drawable.testing_drawable);
                         test_cur_cmd.setText(cmdAirodump);
                     }
                 });
@@ -112,11 +112,11 @@ public class TestDialog extends DialogFragment {
                 runInHandler(new Runnable(){
                     @Override
                     public void run(){
-                        status[0].setImageResource(results[0] ? R.drawable.passed : R.drawable.failed);
+                        status[0].setImageResource(results[0] ? R.drawable.done_drawable : R.drawable.failed_drawable);
                         test_progress.setProgress(1);
 
                         test_cur_cmd.setText(cmdAireplay);
-                        status[1].setImageResource(R.drawable.testing);
+                        status[1].setImageResource(R.drawable.testing_drawable);
                     }
                 });
 
@@ -133,10 +133,10 @@ public class TestDialog extends DialogFragment {
                 runInHandler(new Runnable(){
                     @Override
                     public void run(){
-                        status[1].setImageResource(results[1] ? R.drawable.passed : R.drawable.failed);
+                        status[1].setImageResource(results[1] ? R.drawable.done_drawable : R.drawable.failed_drawable);
                         test_progress.setProgress(2);
 
-                        status[2].setImageResource(R.drawable.testing);
+                        status[2].setImageResource(R.drawable.testing_drawable);
                         test_cur_cmd.setText(cmdMdk);
                     }
                 });
@@ -154,10 +154,10 @@ public class TestDialog extends DialogFragment {
                 runInHandler(new Runnable(){
                     @Override
                     public void run(){
-                        status[2].setImageResource(results[2] ? R.drawable.passed : R.drawable.failed);
+                        status[2].setImageResource(results[2] ? R.drawable.done_drawable : R.drawable.failed_drawable);
                         test_progress.setProgress(3);
 
-                        status[3].setImageResource(R.drawable.testing);
+                        status[3].setImageResource(R.drawable.testing_drawable);
                         test_cur_cmd.setText(cmdReaver);
                     }
                 });
@@ -175,10 +175,10 @@ public class TestDialog extends DialogFragment {
                 runInHandler(new Runnable(){
                     @Override
                     public void run(){
-                        status[3].setImageResource(results[3] ? R.drawable.passed : R.drawable.failed);
+                        status[3].setImageResource(results[3] ? R.drawable.done_drawable : R.drawable.failed_drawable);
                         test_progress.setProgress(4);
 
-                        status[4].setImageResource(R.drawable.testing);
+                        status[4].setImageResource(R.drawable.testing_drawable);
                         test_cur_cmd.setText(R.string.checking_chroot);
                     }
                 });
@@ -190,13 +190,13 @@ public class TestDialog extends DialogFragment {
                     @Override
                     public void run(){
                         if(chroot_check!=CHROOT_FOUND){
-                            status[4].setImageResource(R.drawable.failed);
+                            status[4].setImageResource(R.drawable.failed_drawable);
                             if(chroot_check==CHROOT_DIR_MISSING) test_cur_cmd.setText(R.string.chroot_notfound);
                             else if(chroot_check==CHROOT_BIN_MISSING) test_cur_cmd.setText(R.string.kali_notfound);
                             else test_cur_cmd.setText(R.string.chroot_both_notfound);
                         }else{
                             test_cur_cmd.setText(R.string.done);
-                            status[4].setImageResource(R.drawable.passed);
+                            status[4].setImageResource(R.drawable.done_drawable);
                         }
                         test_progress.setProgress(5);
                     }
@@ -208,7 +208,7 @@ public class TestDialog extends DialogFragment {
                     @Override
                     public void run(){
                         for(int i=0;i<status.length;i++){
-                            status[i].setImageResource(results[i] ? R.drawable.passed : R.drawable.failed);
+                            status[i].setImageResource(results[i] ? R.drawable.done_drawable : R.drawable.failed_drawable);
                         }
                         test_progress.setProgress(5);
                     }

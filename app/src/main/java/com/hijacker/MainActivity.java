@@ -494,7 +494,6 @@ public class MainActivity extends AppCompatActivity{
         stop(PROCESS_AIRCRACK);
         stop(PROCESS_REAVER);
         if(airOnStartup) Airodump.startClean();
-        else if(menu!=null) menu.getItem(1).setIcon(R.drawable.run);
     }
     void installTools(){
         File bin = new File(path + "/bin");
@@ -868,7 +867,7 @@ public class MainActivity extends AppCompatActivity{
             notif.setColor(getColor(R.color.colorAccent));
         }
         notif.setDeleteIntent(PendingIntent.getBroadcast(this.getApplicationContext(), 0, cancel_intent, 0));
-        notif.addAction(R.drawable.stop, getString(R.string.stop_attacks), PendingIntent.getBroadcast(this.getApplicationContext(), 0, stop_intent, 0));
+        notif.addAction(R.drawable.stop_drawable, getString(R.string.stop_attacks), PendingIntent.getBroadcast(this.getApplicationContext(), 0, stop_intent, 0));
         notif.setContentIntent(click_intent);
 
             //Crate 'error' notification (used by watchdog)
@@ -1091,10 +1090,12 @@ public class MainActivity extends AppCompatActivity{
     }
     @Override
     public boolean onCreateOptionsMenu(Menu menu){
-        // Inflate the menu; this adds items to the action bar if it is present.
         MainActivity.menu = menu;
         getMenuInflater().inflate(R.menu.toolbar, menu);
-        if(!airOnStartup) menu.getItem(1).setIcon(R.drawable.run);
+        if(airOnStartup){
+            menu.getItem(1).setIcon(R.drawable.stop_drawable);
+            menu.getItem(1).setTitle(R.string.stop);
+        }
         menu.getItem(3).setEnabled(false);
         return true;
     }
@@ -1563,7 +1564,6 @@ public class MainActivity extends AppCompatActivity{
         ConnectivityManager connectivityManager = (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
         return connectivityManager.getNetworkInfo(1).getState()==NetworkInfo.State.CONNECTED || connectivityManager.getNetworkInfo(0).getState()==NetworkInfo.State.CONNECTED;
     }
-
     static boolean createReport(File out, String filesDir, String stackTrace, Process shell){
         if(!out.exists()){
             try{
@@ -1583,12 +1583,12 @@ public class MainActivity extends AppCompatActivity{
         try{
             writer = new FileWriter(out, true);
             writer.write("\n--------------------------------------------------------------------------------\n");
-            writer.write("Hijacker bug report - " + new Date().toString() + "\n\n");
+            writer.write("Hijacker report - " + new Date().toString() + "\n\n");
             writer.write("Android version: " +  Build.VERSION.SDK_INT + '\n');
             writer.write("Device: " + deviceModel + '\n');
             writer.write("App version: " + versionName + " (" + versionCode + ")\n");
             writer.write("App data path: " + filesDir + '\n');
-            writer.write("\nStack trace:\n" + stackTrace + '\n');
+            if(stackTrace!=null) writer.write("\nStack trace:\n" + stackTrace + '\n');
 
             String cmd = "echo pref_file--------------------------------------; cat /data/data/com.hijacker/shared_prefs/com.hijacker_preferences.xml;";
             cmd += " echo app directory----------------------------------; " + busybox_tmp + " ls -lR " + filesDir + ';';

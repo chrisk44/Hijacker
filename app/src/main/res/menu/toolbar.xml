@@ -3,24 +3,25 @@
 
     <item
         android:id="@+id/filter"
-        android:icon="@drawable/filter"
+        android:icon="@drawable/filter_drawable"
         android:title="@string/filter"
         app:showAsAction="ifRoom"/>
 
     <item
         android:id="@+id/stop_run"
-        android:icon="@drawable/stop"
-        android:title="@string/stop"
+        android:icon="@drawable/start_drawable"
+        android:title="@string/start"
         app:showAsAction="ifRoom"/>
 
-    <item android:id="@+id/reset"
+    <item
+        android:id="@+id/reset"
+        android:icon="@drawable/clear_drawable"
         android:title="@string/clear"
-        android:icon="@drawable/clear"
         app:showAsAction="ifRoom"/>
 
-    <item android:id="@+id/stop_aireplay"
+    <item
+        android:id="@+id/stop_aireplay"
         android:title="@string/stop_aireplay"
-        android:icon="@drawable/stop_aireplay"
         app:showAsAction="never"/>
 
     <item android:id="@+id/export"

@@ -135,7 +135,7 @@
                 android:layout_height="wrap_content"
                 android:padding="5dp"
                 android:visibility="gone"
-                app:srcCompat="@drawable/passed"/>
+                app:srcCompat="@drawable/done_drawable"/>
         </FrameLayout>
 
     </LinearLayout>

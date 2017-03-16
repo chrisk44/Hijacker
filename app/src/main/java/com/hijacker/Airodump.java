@@ -251,7 +251,10 @@ class Airodump{
         runInHandler(new Runnable(){
             @Override
             public void run(){
-                if(menu!=null) menu.getItem(1).setIcon(R.drawable.stop);
+                if(menu!=null){
+                    menu.getItem(1).setIcon(R.drawable.stop_drawable);
+                    menu.getItem(1).setTitle(R.string.stop);
+                }
                 refreshState();
                 notification();
             }
@@ -265,7 +268,10 @@ class Airodump{
         runInHandler(new Runnable(){
             @Override
             public void run(){
-                if(menu!=null) menu.getItem(1).setIcon(R.drawable.run);
+                if(menu!=null){
+                    menu.getItem(1).setIcon(R.drawable.start_drawable);
+                    menu.getItem(1).setTitle(R.string.start);
+                }
             }
         });
         stopWPA();
