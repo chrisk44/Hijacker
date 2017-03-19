@@ -291,8 +291,21 @@ public class MainActivity extends AppCompatActivity{
                             }
 
                             if(found){
-                                if(!background) Snackbar.make(findViewById(R.id.fragment1), getString(R.string.handshake_captured) + ' ' + capfile, Snackbar.LENGTH_LONG).show();
-                                else{
+                                if(!background){
+                                    Snackbar s = Snackbar.make(findViewById(R.id.fragment1), getString(R.string.handshake_captured) + ' ' + capfile, Snackbar.LENGTH_LONG);
+                                    s.setAction(R.string.crack, new View.OnClickListener(){
+                                        @Override
+                                        public void onClick(View v){
+                                            CrackFragment.capfile_text = capfile;
+                                            FragmentTransaction ft = mFragmentManager.beginTransaction();
+                                            ft.replace(R.id.fragment1, new CrackFragment());
+                                            ft.setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN);
+                                            ft.addToBackStack(null);
+                                            ft.commitAllowingStateLoss();
+                                        }
+                                    });
+                                    s.show();
+                                }else{
                                     handshake_notif.setContentText(getString(R.string.saved_in_file) + ' ' + capfile);
                                     mNotificationManager.notify(2, handshake_notif.build());
                                 }
@@ -769,6 +782,13 @@ public class MainActivity extends AppCompatActivity{
     }
 
     void setup(){
+        pref = PreferenceManager.getDefaultSharedPreferences(this);
+        pref_edit = pref.edit();
+        clipboard = (ClipboardManager) getSystemService(CLIPBOARD_SERVICE);
+        mNotificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
+        mFragmentManager = getFragmentManager();
+
+        //Load device information
         PackageManager manager = this.getPackageManager();
         PackageInfo info;
         try{
@@ -781,8 +801,10 @@ public class MainActivity extends AppCompatActivity{
         deviceModel = Build.MODEL;
         if(!deviceModel.startsWith(Build.MANUFACTURER)) deviceModel = Build.MANUFACTURER + " " + deviceModel;
         deviceModel = deviceModel.replace(" ", "_");
-
+        deviceID = pref.getLong("deviceID", -1);
         arch = System.getProperty("os.arch");
+
+        //Find views
         ap_count = (TextView) findViewById(R.id.ap_count);
         st_count = (TextView) findViewById(R.id.st_count);
         progress = (ProgressBar) findViewById(R.id.progressBar);
@@ -796,13 +818,10 @@ public class MainActivity extends AppCompatActivity{
         overflow[5] = getDrawable(R.drawable.overflow5);
         overflow[6] = getDrawable(R.drawable.overflow6);
         overflow[7] = getDrawable(R.drawable.overflow7);
-        toolbar.setOverflowIcon(overflow[0]);
-        pref = PreferenceManager.getDefaultSharedPreferences(this);
-        pref_edit = pref.edit();
-        clipboard = (ClipboardManager) getSystemService(CLIPBOARD_SERVICE);
-        mNotificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
-        mFragmentManager = getFragmentManager();
         actionBar = getSupportActionBar();
+        toolbar.setOverflowIcon(overflow[0]);
+
+        //Initialize paths
         path = getFilesDir().getAbsolutePath();
         data_path = Environment.getExternalStorageDirectory() + "/Hijacker";
         actions_path = data_path + "/actions";
@@ -825,8 +844,6 @@ public class MainActivity extends AppCompatActivity{
                 new File(data_dir + "/actions").mkdir();
             }
         }
-
-        deviceID = pref.getLong("deviceID", -1);
 
         //Load defaults
         iface = getString(R.string.iface);
@@ -870,7 +887,7 @@ public class MainActivity extends AppCompatActivity{
         notif.addAction(R.drawable.stop_drawable, getString(R.string.stop_attacks), PendingIntent.getBroadcast(this.getApplicationContext(), 0, stop_intent, 0));
         notif.setContentIntent(click_intent);
 
-            //Crate 'error' notification (used by watchdog)
+            //Create 'error' notification (used by watchdog)
         error_notif = new NotificationCompat.Builder(this);
         error_notif.setContentTitle(getString(R.string.notification2_title));
         error_notif.setContentText("");
@@ -902,19 +919,15 @@ public class MainActivity extends AppCompatActivity{
         mDrawerList = (ListView) findViewById(R.id.left_drawer);
         mDrawerList.setAdapter(new ArrayAdapter<>(this, R.layout.drawer_list_item, R.id.navDrawerTv, mPlanetTitles));
         mDrawerList.setOnItemClickListener(new DrawerItemClickListener());
-        mDrawerList.setOnSystemUiVisibilityChangeListener(new View.OnSystemUiVisibilityChangeListener(){
-            @Override                   //Works only for the first run
-            public void onSystemUiVisibilityChange(int visibility){
-                mDrawerList.getChildAt(currentFragment).setBackgroundResource(R.color.colorAccent);
-            }
-        });
 
         //Load default fragment (airodump)
-        FragmentTransaction ft = mFragmentManager.beginTransaction();
-        ft.replace(R.id.fragment1, new MyListFragment());
-        ft.setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN);
-        ft.addToBackStack(null);
-        ft.commitAllowingStateLoss();
+        if(mFragmentManager.getBackStackEntryCount()==0){
+            FragmentTransaction ft = mFragmentManager.beginTransaction();
+            ft.replace(R.id.fragment1, new MyListFragment());
+            ft.setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN);
+            ft.addToBackStack(null);
+            ft.commitAllowingStateLoss();
+        }
 
         //Google AppIndex
         client = new GoogleApiClient.Builder(this).addApi(AppIndex.API).build();
@@ -1176,7 +1189,7 @@ public class MainActivity extends AppCompatActivity{
 
             //Image
             ImageView iv = (ImageView) itemview.findViewById(R.id.iv);
-            if(!current.type){
+            if(current.getType()==TYPE_ST){
                 iv.setImageResource(R.drawable.st2);
                 firstText.setTextColor(ContextCompat.getColor(getContext(), current.st.isMarked ? R.color.colorAccent : android.R.color.white));
             }else{

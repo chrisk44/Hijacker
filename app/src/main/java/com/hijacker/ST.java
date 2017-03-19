@@ -135,7 +135,7 @@ class ST {
             @Override
             public void run(){
                 if(tile!=null) tile.update(ST.this.mac, b, c, ST.this.manuf);
-                else tile = new Tile(AP.APs.size() + id, ST.this.mac, b, c, ST.this.manuf, false, null, ST.this);
+                else tile = new Tile(AP.APs.size() + id, ST.this.mac, b, c, ST.this.manuf, ST.this);
                 if(tile.st==null) tile = null;
                 completed = true;
             }

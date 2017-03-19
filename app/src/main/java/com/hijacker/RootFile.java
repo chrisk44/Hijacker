@@ -25,7 +25,7 @@ package com.hijacker;
     the variables absolutePath and name have something wrong, the results could be catastrophic.
 
     Results for /path/to/something: absolutePath = /path/to/something, parentPath = /path/to/, name = something
-    Results for /: absolutePath = /, parentPath = /, name = "";
+    Results for /: absolutePath = /, parentPath = /, name = ""
  */
 
 import android.util.Log;

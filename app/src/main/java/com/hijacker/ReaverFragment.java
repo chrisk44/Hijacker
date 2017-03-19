@@ -202,6 +202,14 @@ public class ReaverFragment extends Fragment{
                     if(ap==null && custom_mac==null){
                         Snackbar.make(fragmentView, select_button.getText(), Snackbar.LENGTH_LONG).show();
                     }else{
+                        if(pin_delay_et.getText().toString().equals("")){
+                            Snackbar.make(fragmentView, getString(R.string.pin_delay_empty), Snackbar.LENGTH_LONG).show();
+                            return;
+                        }
+                        if(locked_delay_et.getText().toString().equals("")){
+                            Snackbar.make(fragmentView, getString(R.string.locked_delay_empty), Snackbar.LENGTH_LONG).show();
+                            return;
+                        }
                         start_button.setText(R.string.stop);
                         cont = true;
                         stop(PROCESS_AIRODUMP);            //Can't have channels changing from anywhere else
