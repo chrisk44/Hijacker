@@ -136,6 +136,14 @@ public class CrackFragment extends Fragment{
             public void onClick(View view){
                 capfile = cap_et.getText().toString();
                 wordlist = wordlist_et.getText().toString();
+                if(!capfile.startsWith("/")){
+                    Snackbar.make(fragmentView, getString(R.string.capfile_invalid), Snackbar.LENGTH_LONG).show();
+                    return;
+                }
+                if(!wordlist.startsWith("/")){
+                    Snackbar.make(fragmentView, getString(R.string.wordlist_invalid), Snackbar.LENGTH_LONG).show();
+                    return;
+                }
                 RootFile cap = new RootFile(capfile);
                 RootFile word = new RootFile(wordlist);
                 if(thread.isAlive()){

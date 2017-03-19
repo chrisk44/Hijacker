@@ -29,6 +29,8 @@ import static com.hijacker.AP.UNKNOWN;
 import static com.hijacker.AP.WEP;
 import static com.hijacker.AP.WPA;
 import static com.hijacker.AP.WPA2;
+import static com.hijacker.CustomAction.TYPE_AP;
+import static com.hijacker.CustomAction.TYPE_ST;
 import static com.hijacker.IsolatedFragment.is_ap;
 import static com.hijacker.MainActivity.SORT_BEACONS_FRAMES;
 import static com.hijacker.MainActivity.SORT_DATA_FRAMES;
@@ -59,16 +61,20 @@ class Tile {
     static List<Tile> allTiles = new ArrayList<>();
     AP ap=null;
     ST st=null;
-    boolean type=true, show=true;        //type: true=AP, false=ST
+    boolean show=true;
     String s1, s2, s3, s4;
-    Tile(int index, String s1, String s2, String s3, String s4, boolean type, AP _ap, ST _st){
+    Tile(int index, String s1, String s2, String s3, String s4, Object obj){
         if(index > allTiles.size() || clearing){
             if(debug) Log.d("HIJACKER/Tile", "Rejected tile");
             return;
         }
-        this.type = type;
-        this.ap = _ap;
-        this.st = _st;
+
+        if(obj instanceof AP){
+            this.ap = (AP)obj;
+        }else if(obj instanceof ST){
+            this.st = (ST)obj;
+        }else throw new IllegalArgumentException("obj must be of type AP or ST");
+
         allTiles.add(index, this);
 
         this.s1 = s1;
@@ -78,7 +84,7 @@ class Tile {
 
         this.check();
         if(this.show){
-            if(type){
+            if(getType()==TYPE_AP){
                 tiles.add(i, this);
                 adapter.insert(this, i);
                 i++;
@@ -97,7 +103,7 @@ class Tile {
         if(!this.show){
             this.check();
             if(this.show){
-                if(type){
+                if(getType()==TYPE_AP){
                     tiles.add(i, this);
                     adapter.insert(this, i);
                     i++;
@@ -116,18 +122,22 @@ class Tile {
     }
     void check(){
         if(is_ap==null) {
-            if(type){
+            if(getType()==TYPE_AP){
                 //ap
                 this.show = show_ap && (show_ch[0] || show_ch[this.ap.ch]) && this.ap.pwr>=pwr_filter*(-1) &&
                         ((wpa && (this.ap.sec == WPA || this.ap.sec == WPA2)) || (wep && this.ap.sec == WEP) || (opn && this.ap.sec == OPN) || this.ap.sec==UNKNOWN);
-            } else this.show = show_st && (show_na_st || this.st.bssid != null) && this.st.pwr>=pwr_filter*(-1); //st
+            }else this.show = show_st && (show_na_st || this.st.bssid != null) && this.st.pwr>=pwr_filter*(-1); //st
         }else{
-            if(type){
+            if(getType()==TYPE_AP){
                 this.show = false;
             }else{
                 this.show = is_ap.mac.equals(this.st.bssid) && show_st && this.st.pwr>=pwr_filter*(-1);
             }
         }
+    }
+    int getType(){
+        if(ap!=null) return TYPE_AP;
+        else return TYPE_ST;
     }
     static void clear(){
         allTiles.clear();
@@ -147,7 +157,7 @@ class Tile {
             temp = allTiles.get(j);
             temp.check();
             if(temp.show){
-                if(temp.type){
+                if(temp.getType()==TYPE_AP){
                     tiles.add(i, temp);
                     adapter.insert(temp, i);
                     i++;

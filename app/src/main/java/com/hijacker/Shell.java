@@ -23,7 +23,7 @@ package com.hijacker;
     its output is reset and it's saved to be used later, when a new one is needed
     without starting a new one.
 
-    To create a new one just do Shell shell = new Shell();
+    To get a Shell call getFreeShell();
     run commands with shell.run(command);
     and when you're done with it, call shell.done() for it to be registered as free
     so it can be used later.
@@ -46,7 +46,6 @@ class Shell{
     private BufferedReader shell_out;
     private static List<Shell> free = new ArrayList<>();
     private static int total=0;
-    private static boolean wait = false;        //To handle simultaneous calls to getFreeShell();
     Shell(){
         total++;
         try{
@@ -73,14 +72,11 @@ class Shell{
         MainActivity.getLastLine(shell_out, term_str);      //This will read up to the last line and stop, effectively clearing shell_out
         if(!free.contains(this)) free.add(this);
     }
-    static Shell getFreeShell(){
-        while(wait){}
+    static synchronized Shell getFreeShell(){
         if(free.isEmpty()) return new Shell();
         else{
-            wait = true;
             Shell temp = free.get(0);
             free.remove(0);
-            wait = false;
             return temp;
         }
     }

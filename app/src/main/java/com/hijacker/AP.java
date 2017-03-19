@@ -151,7 +151,7 @@ class AP {
             @Override
             public void run(){
                 if(tile!=null) tile.update(AP.this.essid, AP.this.mac, c, AP.this.manuf);
-                else tile = new Tile(id, AP.this.essid, AP.this.mac, c, AP.this.manuf, true, AP.this, null);
+                else tile = new Tile(id, AP.this.essid, AP.this.mac, c, AP.this.manuf, AP.this);
                 if(tile.ap==null) tile = null;
                 completed = true;
             }
