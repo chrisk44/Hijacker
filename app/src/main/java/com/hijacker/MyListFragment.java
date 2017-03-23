@@ -30,6 +30,7 @@ import android.widget.PopupMenu;
 import static com.hijacker.AP.WEP;
 import static com.hijacker.AP.WPA;
 import static com.hijacker.AP.WPA2;
+import static com.hijacker.CustomAction.TYPE_AP;
 import static com.hijacker.MainActivity.FRAGMENT_AIRODUMP;
 import static com.hijacker.MainActivity.MDK_ADOS;
 import static com.hijacker.MainActivity.aireplay_dir;
@@ -54,7 +55,7 @@ public class MyListFragment extends ListFragment {
     public void onListItemClick(ListView l, final View v, int position, long id){
         super.onListItemClick(l, v, position, id);
         final Tile clicked = Tile.tiles.get(position);
-        if(clicked.type){
+        if(clicked.getType()==TYPE_AP){
             //AP
             PopupMenu popup = new PopupMenu(getActivity(), v);
             popup.getMenuInflater().inflate(R.menu.popup_menu, popup.getMenu());

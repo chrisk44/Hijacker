@@ -20,6 +20,7 @@ package com.hijacker;
 import android.app.Fragment;
 import android.os.Bundle;
 import android.os.Environment;
+import android.support.design.widget.Snackbar;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -100,7 +101,7 @@ public class MDKFragment extends Fragment{
                     aes = aes_cb.isChecked();
                     String args = "";
                     if(!managed && !adhoc){
-                        Toast.makeText(getActivity(), getString(R.string.select_type), Toast.LENGTH_SHORT).show();
+                        Snackbar.make(fragmentView, getString(R.string.select_type), Snackbar.LENGTH_LONG).show();
                         bf_switch.setChecked(false);
                         return;
                     }
@@ -109,7 +110,12 @@ public class MDKFragment extends Fragment{
                         if(adhoc) args += " -t 1";
                     }
                     if(!(opn || wep || tkip || aes)){
-                        Toast.makeText(getActivity(), getString(R.string.select_enc), Toast.LENGTH_SHORT).show();
+                        Snackbar.make(fragmentView, getString(R.string.select_enc), Snackbar.LENGTH_LONG).show();
+                        bf_switch.setChecked(false);
+                        return;
+                    }
+                    if(!(ssid_file.equals("") || ssid_file.startsWith("/"))){
+                        Snackbar.make(fragmentView, getString(R.string.filename_invalid), Snackbar.LENGTH_LONG).show();
                         bf_switch.setChecked(false);
                         return;
                     }
@@ -119,8 +125,9 @@ public class MDKFragment extends Fragment{
                     if(tkip) args += 't';
                     if(aes) args += 'a';
                     if(!ssid_file.equals("")){
-                        if(!(new RootFile(ssid_file).exists())){
-                            Toast.makeText(getActivity(), ssid_file + " doesn't exist", Toast.LENGTH_SHORT).show();
+                        RootFile ssidRootFile = new RootFile(ssid_file);
+                        if(!ssidRootFile.isFile()){
+                            Snackbar.make(fragmentView, ssid_file + ' ' + getString(R.string.not_file_or_exists), Snackbar.LENGTH_LONG).show();
                             bf_switch.setChecked(false);
                             return;
                         }else{

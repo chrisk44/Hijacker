@@ -58,6 +58,8 @@
     <string name="wordlist_notfound">Wordlist not found</string>
     <string name="select_wpa_wep">Please select WPA/WEP</string>
     <string name="select_wep_bits">Select how many bits the key is</string>
+    <string name="capfile_invalid">Capfile is invalid</string>
+    <string name="wordlist_invalid">Wordlist is invalid</string>
 
     <!-- CustomActionFragment -->
     <string name="select_action">Select action</string>
@@ -183,7 +185,7 @@
     <string name="app_dir_notfound1">App file directory doesn\'t exist: </string>
     <string name="app_dir_notfound2">. Reinstall the app.</string>
     <string name="disconnect_started">Disconnect All started</string>
-    <string name="watchdog_message">This could be caused by improper installation of busybox. Make sure you have busybox installed and updated.</string>
+    <string name="watchdog_message">This could be caused by improper installation of the tools, WiFi card not in monitor mode or improperly installed/configured.</string>
     <string name="airodump_still_running">Airodump is still running!</string>
     <string name="airodump_not_running">Airodump is not running!</string>
     <string name="aireplay_still_running">Aireplay is still running!</string>
@@ -216,6 +218,8 @@
     <string name="ad_hoc">Ad-hoc</string>
     <string name="select_enc">Select at least one encryption</string>
     <string name="select_type">Select at least one type of network</string>
+    <string name="filename_invalid">Filename is invalid</string>
+    <string name="not_file_or_exists">doesn\'t exist or is not a file</string>
     <string name="custom_ap_title">Custom AP</string>
     <string name="mac_address">MAC Address</string>
     <string name="optional">(Optional)</string>
@@ -235,6 +239,8 @@
     <string name="pin_delay">PIN delay</string>
     <string name="locked_delay">Locked Delay</string>
     <string name="custom_chroot_cmd_illegal">The custom command can\'t contain the character \'</string>
+    <string name="pin_delay_empty">Pin delay cannot be empty</string>
+    <string name="locked_delay_empty">Locked delay cannot be empty</string>
 
     <!-- RestoreFirmwareDialog -->
     <string name="restore">Restore</string>
