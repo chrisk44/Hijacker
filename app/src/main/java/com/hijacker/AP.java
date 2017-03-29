@@ -32,6 +32,7 @@ import static com.hijacker.MainActivity.SORT_ESSID;
 import static com.hijacker.MainActivity.SORT_NOSORT;
 import static com.hijacker.MainActivity.SORT_PWR;
 import static com.hijacker.MainActivity.adapter;
+import static com.hijacker.MainActivity.aliases;
 import static com.hijacker.MainActivity.completed;
 import static com.hijacker.MainActivity.debug;
 import static com.hijacker.MainActivity.getFixed;
@@ -59,7 +60,7 @@ class AP {
     int pwr, ch, id, sec=UNKNOWN;
     private int beacons, data, ivs, total_beacons=0, total_data=0, total_ivs=0;
     long lastseen = 0;
-    String essid, mac, enc, cipher, auth, manuf;
+    String essid, mac, enc, cipher, auth, manuf, alias;
     List<ST> clients = new ArrayList<>();
     Tile tile;
     AP(String essid, String mac, String enc, String cipher, String auth,
@@ -67,6 +68,7 @@ class AP {
         this.mac = mac;
         id = APs.size();
         this.manuf = getManuf(this.mac);
+        this.alias = aliases.get(this.mac);
         this.update(essid, enc, cipher, auth, pwr, beacons, data, ivs, ch);
 
         APs.add(this);
@@ -78,6 +80,10 @@ class AP {
         if(currentTargetDeauth.contains(this)){
             client.disconnect();
         }
+    }
+    void update(){
+        //For refresh
+        this.update(this.essid, this.enc, this.cipher, this.auth, this.pwr, this.beacons, this.data, this.ivs, this.ch);
     }
     void update(String essid, String enc, String cipher, String auth,
                               int pwr, int beacons, int data, int ivs, int ch){
@@ -145,13 +151,14 @@ class AP {
                     break;
             }
         }
-        final String c;
+        final String a, c;
+        a = this.essid + (this.alias==null ? "" : " (" + alias + ')');
         c = "PWR: " + this.pwr + " | SEC: " + this.enc + " | CH: " + this.ch + " | B:" + this.getBeacons() + " | D:" + this.getData();
         runInHandler(new Runnable(){
             @Override
             public void run(){
-                if(tile!=null) tile.update(AP.this.essid, AP.this.mac, c, AP.this.manuf);
-                else tile = new Tile(id, AP.this.essid, AP.this.mac, c, AP.this.manuf, AP.this);
+                if(tile!=null) tile.update(a, AP.this.mac, c, AP.this.manuf);
+                else tile = new Tile(id, a, AP.this.mac, c, AP.this.manuf, AP.this);
                 if(tile.ap==null) tile = null;
                 completed = true;
             }

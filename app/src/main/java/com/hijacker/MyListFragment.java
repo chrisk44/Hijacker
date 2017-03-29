@@ -27,6 +27,13 @@ import android.view.ViewGroup;
 import android.widget.ListView;
 import android.widget.PopupMenu;
 
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileReader;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.io.PrintWriter;
+
 import static com.hijacker.AP.WEP;
 import static com.hijacker.AP.WPA;
 import static com.hijacker.AP.WPA2;
@@ -35,9 +42,13 @@ import static com.hijacker.MainActivity.FRAGMENT_AIRODUMP;
 import static com.hijacker.MainActivity.MDK_ADOS;
 import static com.hijacker.MainActivity.aireplay_dir;
 import static com.hijacker.MainActivity.airodump_dir;
+import static com.hijacker.MainActivity.aliases;
+import static com.hijacker.MainActivity.aliases_file;
+import static com.hijacker.MainActivity.aliases_in;
 import static com.hijacker.MainActivity.cap_dir;
 import static com.hijacker.MainActivity.copy;
 import static com.hijacker.MainActivity.currentFragment;
+import static com.hijacker.MainActivity.data_path;
 import static com.hijacker.MainActivity.debug;
 import static com.hijacker.MainActivity.iface;
 import static com.hijacker.MainActivity.mFragmentManager;
@@ -65,7 +76,8 @@ public class MyListFragment extends ListFragment {
             popup.getMenu().add(0, 1, 1, clicked.ap.isMarked ? "Unmark" : "Mark");
             popup.getMenu().add(0, 2, 2, "Copy MAC");
             popup.getMenu().add(0, 3, 3, "Watch");
-            popup.getMenu().add(0, 4, 4, "Attack...");
+            popup.getMenu().add(0, 5, 4, "Set alias");
+            popup.getMenu().add(0, 4, 5, "Attack...");
 
             popup.setOnMenuItemClickListener(new PopupMenu.OnMenuItemClickListener() {
                 public boolean onMenuItemClick(android.view.MenuItem item) {
@@ -164,6 +176,63 @@ public class MyListFragment extends ListFragment {
                                 }
                             });
                             popup2.show();
+                            break;
+                        case 5:
+                            //Set alias
+                            final EditTextDialog dialog = new EditTextDialog();
+                            dialog.setTitle(getString(R.string.set_alias));
+                            dialog.setDefaultText(clicked.ap.alias);
+                            dialog.setAllowEmpty(true);
+                            dialog.setRunnable(new Runnable(){
+                                @Override
+                                public void run(){
+                                    if(dialog.result.equals("")) dialog.result = null;
+                                    try{
+                                        if(clicked.ap.alias==null ^ dialog.result==null){
+                                            //Need to remove previous alias
+                                            File temp_aliases = new File(data_path + "/temp_aliases");
+                                            if(temp_aliases.exists()) temp_aliases.delete();
+                                            temp_aliases.createNewFile();
+                                            PrintWriter temp_in = new PrintWriter(new FileWriter(temp_aliases));
+
+                                            BufferedReader aliases_out = new BufferedReader(new FileReader(aliases_file));
+
+                                            //Copy current aliases to temp file, except the one we are changing
+                                            String buffer = aliases_out.readLine();
+                                            while(buffer!=null){
+                                                //Line format: 00:11:22:33:44:55 Alias
+                                                if(buffer.charAt(17)==' ' && buffer.length()>18){
+                                                    String mac = buffer.substring(0, 17);
+                                                    String alias = buffer.substring(18);
+                                                    if(!mac.equals(clicked.ap.mac)){
+                                                        temp_in.println(mac + ' ' + alias);
+                                                    }
+                                                }else{
+                                                    Log.e("HIJACKER/setup", "Aliases file format error: " + buffer);
+                                                }
+                                                buffer = aliases_out.readLine();
+                                            }
+                                            temp_in.flush();
+                                            temp_in.close();
+                                            aliases_out.close();
+
+                                            aliases_file.delete();
+                                            temp_aliases.renameTo(aliases_file);
+                                            aliases_in = new FileWriter(aliases_file, true);
+                                        }
+                                        if(dialog.result!=null){
+                                            aliases_in.write(clicked.ap.mac + ' ' + dialog.result + '\n');
+                                            aliases_in.flush();
+                                        }
+                                    }catch(IOException e){
+                                        Log.e("HIJACKER/MyListFrgm", e.toString());
+                                    }
+                                    aliases.put(clicked.ap.mac, dialog.result);
+                                    clicked.ap.alias = dialog.result;
+                                    clicked.ap.update();
+                                }
+                            });
+                            dialog.show(getFragmentManager(), "EditTextDialog");
                     }
                     return true;
                 }
@@ -177,9 +246,10 @@ public class MyListFragment extends ListFragment {
             popup.getMenu().add(0, 0, 0, "Info");
             popup.getMenu().add(0, 4, 1, clicked.st.isMarked ? "Unmark" : "Mark");
             popup.getMenu().add(0, 1, 2, "Copy MAC");
+            popup.getMenu().add(0, 5, 3, "Set alias");
             if(clicked.st.bssid!=null){
-                popup.getMenu().add(0, 2, 3, "Disconnect");
-                popup.getMenu().add(0, 3, 4, "Copy disconnect command");
+                popup.getMenu().add(0, 2, 4, "Disconnect");
+                popup.getMenu().add(0, 3, 5, "Copy disconnect command");
             }
 
             popup.setOnMenuItemClickListener(new PopupMenu.OnMenuItemClickListener() {
@@ -211,6 +281,62 @@ public class MyListFragment extends ListFragment {
                                 clicked.st.mark();
                             }
                             break;
+                        case 5:
+                            //Set alias
+                            final EditTextDialog dialog = new EditTextDialog();
+                            dialog.setTitle(getString(R.string.set_alias));
+                            dialog.setAllowEmpty(false);
+                            dialog.setDefaultText(clicked.st.alias);
+                            dialog.setRunnable(new Runnable(){
+                                @Override
+                                public void run(){
+                                    if(dialog.result.equals("")) dialog.result = null;
+                                    try{
+                                        if(clicked.st.alias==null ^ dialog.result==null){
+                                            //Need to remove previous alias
+                                            File temp_aliases = new File(data_path + "/temp_aliases");
+                                            if(temp_aliases.exists()) temp_aliases.delete();
+                                            temp_aliases.createNewFile();
+                                            PrintWriter temp_in = new PrintWriter(new FileWriter(temp_aliases));
+
+                                            BufferedReader aliases_out = new BufferedReader(new FileReader(aliases_file));
+
+                                            //Copy current aliases to temp file, except the one we are changing
+                                            String buffer = aliases_out.readLine();
+                                            while(buffer!=null){
+                                                //Line format: 00:11:22:33:44:55 Alias
+                                                if(buffer.charAt(17)==' ' && buffer.length()>18){
+                                                    String mac = buffer.substring(0, 17);
+                                                    String alias = buffer.substring(18);
+                                                    if(!mac.equals(clicked.st.mac)){
+                                                        temp_in.println(mac + ' ' + alias);
+                                                    }
+                                                }else{
+                                                    Log.e("HIJACKER/setup", "Aliases file format error: " + buffer);
+                                                }
+                                                buffer = aliases_out.readLine();
+                                            }
+                                            temp_in.flush();
+                                            temp_in.close();
+                                            aliases_out.close();
+
+                                            aliases_file.delete();
+                                            temp_aliases.renameTo(aliases_file);
+                                            aliases_in = new FileWriter(aliases_file, true);
+                                        }
+                                        if(dialog.result!=null){
+                                            aliases_in.write(clicked.st.mac + ' ' + dialog.result + '\n');
+                                            aliases_in.flush();
+                                        }
+                                    }catch(IOException e){
+                                        Log.e("HIJACKER/MyListFrgm", e.toString());
+                                    }
+                                    aliases.put(clicked.st.mac, dialog.result);
+                                    clicked.st.alias = dialog.result;
+                                    clicked.st.update();
+                                }
+                            });
+                            dialog.show(getFragmentManager(), "EditTextDialog");
                     }
                     return true;
                 }

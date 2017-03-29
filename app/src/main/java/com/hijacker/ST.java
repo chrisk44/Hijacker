@@ -27,6 +27,7 @@ import static com.hijacker.MainActivity.SORT_BEACONS_FRAMES;
 import static com.hijacker.MainActivity.SORT_DATA_FRAMES;
 import static com.hijacker.MainActivity.SORT_NOSORT;
 import static com.hijacker.MainActivity.SORT_PWR;
+import static com.hijacker.MainActivity.aliases;
 import static com.hijacker.MainActivity.completed;
 import static com.hijacker.MainActivity.getFixed;
 import static com.hijacker.MainActivity.getManuf;
@@ -47,11 +48,12 @@ class ST {
     boolean isMarked = false;
     Tile tile;
     AP connectedTo = null;
-    String mac, bssid, manuf, probes;
+    String mac, bssid, manuf, probes, alias;
     ST(String mac, String bssid, int pwr, int lost, int frames, String probes){
         this.mac = mac;
         this.id = STs.size();
         this.manuf = getManuf(this.mac);
+        this.alias = aliases.get(this.mac);
         this.update(bssid, pwr, lost, frames, probes);
         STs.add(this);
         if(sort!=SORT_NOSORT) toSort = true;
@@ -63,6 +65,10 @@ class ST {
             Airodump.startClean(connectedTo.ch);
         }
         startAireplay(this.bssid, this.mac);
+    }
+    void update(){
+        //For refresh
+        this.update(this.bssid, this.pwr, this.lost, this.frames, this.probes);
     }
     void update(String bssid, int pwr, int lost, int frames, String probes){
         if(connectedTo!=null){
@@ -126,7 +132,8 @@ class ST {
         this.pwr = pwr;
         this.probes = probes.equals("") ? "No probes" : probes.replace(",", ", ");
 
-        final String b, c;
+        final String a, b, c;
+        a = this.mac + (this.alias==null ? "" : " (" + alias + ')');
         if(connectedTo!=null){
             b = paired + connectedTo.mac + " (" + connectedTo.essid + ")";
         }else b = not_connected;
@@ -134,8 +141,8 @@ class ST {
         runInHandler(new Runnable(){
             @Override
             public void run(){
-                if(tile!=null) tile.update(ST.this.mac, b, c, ST.this.manuf);
-                else tile = new Tile(AP.APs.size() + id, ST.this.mac, b, c, ST.this.manuf, ST.this);
+                if(tile!=null) tile.update(a, b, c, ST.this.manuf);
+                else tile = new Tile(AP.APs.size() + id, a, b, c, ST.this.manuf, ST.this);
                 if(tile.st==null) tile = null;
                 completed = true;
             }

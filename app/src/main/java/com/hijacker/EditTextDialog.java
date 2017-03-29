@@ -30,11 +30,11 @@ import android.widget.EditText;
 import static com.hijacker.MainActivity.background;
 
 public class EditTextDialog extends DialogFragment {
-    String title = null, hint = null, result = null;
-    boolean allowEmpty = false;
+    String title = null, hint = null, defaultText = null, result = null;
+    private boolean allowEmpty = false;
     View dialogView;
     EditText field;
-    Runnable runnable = null;
+    private Runnable runnable = null;
     @Override
     public Dialog onCreateDialog(Bundle savedInstanceState) {
         AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
@@ -43,6 +43,7 @@ public class EditTextDialog extends DialogFragment {
 
         if(title!=null) builder.setTitle(title);
         if(hint!=null) field.setHint(hint);
+        if(defaultText!=null) field.setText(defaultText);
 
         builder.setView(dialogView);
         builder.setPositiveButton(R.string.ok, new DialogInterface.OnClickListener() {
@@ -89,4 +90,5 @@ public class EditTextDialog extends DialogFragment {
     void setAllowEmpty(boolean allowEmpty){
         this.allowEmpty = allowEmpty;
     }
+    void setDefaultText(String text){ this.defaultText = text; }
 }

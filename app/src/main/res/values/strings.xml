@@ -224,6 +224,9 @@
     <string name="mac_address">MAC Address</string>
     <string name="optional">(Optional)</string>
 
+    <!-- MyListFragment -->
+    <string name="set_alias">Set alias</string>
+
     <!-- ReaverFragment -->
     <string name="select_ap">Select Access Point</string>
     <string name="pixie_dust">Use pixie-dust (requires NetHunter chroot)</string>

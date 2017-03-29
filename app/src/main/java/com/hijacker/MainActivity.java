@@ -72,6 +72,7 @@ import com.google.android.gms.common.api.GoogleApiClient;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileOutputStream;
+import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
@@ -82,6 +83,7 @@ import java.net.InetAddress;
 import java.net.Socket;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
 
 import static com.hijacker.CustomAction.TYPE_ST;
@@ -140,6 +142,9 @@ public class MainActivity extends AppCompatActivity{
     static NotificationManager mNotificationManager;
     static FragmentManager mFragmentManager;
     static String path, data_path, actions_path, firm_backup_file, arch, busybox;             //path: App files path (ends with .../files)
+    static File aliases_file;
+    static FileWriter aliases_in;
+    static HashMap<String, String> aliases = new HashMap<>();
     //App and device info
     static String versionName, deviceModel;
     static int versionCode;
@@ -821,6 +826,31 @@ public class MainActivity extends AppCompatActivity{
         actionBar = getSupportActionBar();
         toolbar.setOverflowIcon(overflow[0]);
 
+        //Load defaults
+        iface = getString(R.string.iface);
+        prefix = getString(R.string.prefix);
+        cap_dir = getString(R.string.cap_dir);
+        enable_monMode = getString(R.string.enable_monMode);
+        disable_monMode = getString(R.string.disable_monMode);
+        enable_on_airodump = Boolean.parseBoolean(getString(R.string.enable_on_airodump));
+        deauthWait = Integer.parseInt(getString(R.string.deauthWait));
+        show_notif = Boolean.parseBoolean(getString(R.string.show_notif));
+        show_details = Boolean.parseBoolean(getString(R.string.show_details));
+        airOnStartup = Boolean.parseBoolean(getString(R.string.airOnStartup));
+        debug = Boolean.parseBoolean(getString(R.string.debug));
+        delete_extra = Boolean.parseBoolean(getString(R.string.delete_extra));
+        always_cap = Boolean.parseBoolean(getString(R.string.always_cap));
+        chroot_dir = getString(R.string.chroot_dir);
+        monstart = Boolean.parseBoolean(getString(R.string.monstart));
+        custom_chroot_cmd = "";
+        cont_on_fail = Boolean.parseBoolean(getString(R.string.cont_on_fail));
+        watchdog = Boolean.parseBoolean(getString(R.string.watchdog));
+        target_deauth = Boolean.parseBoolean(getString(R.string.target_deauth));
+        update_on_startup = Boolean.parseBoolean(getString(R.string.auto_update));
+
+        //Load preferences
+        load();
+
         //Initialize paths
         path = getFilesDir().getAbsolutePath();
         data_path = Environment.getExternalStorageDirectory() + "/Hijacker";
@@ -845,27 +875,38 @@ public class MainActivity extends AppCompatActivity{
             }
         }
 
-        //Load defaults
-        iface = getString(R.string.iface);
-        prefix = getString(R.string.prefix);
-        cap_dir = getString(R.string.cap_dir);
-        enable_monMode = getString(R.string.enable_monMode);
-        disable_monMode = getString(R.string.disable_monMode);
-        enable_on_airodump = Boolean.parseBoolean(getString(R.string.enable_on_airodump));
-        deauthWait = Integer.parseInt(getString(R.string.deauthWait));
-        show_notif = Boolean.parseBoolean(getString(R.string.show_notif));
-        show_details = Boolean.parseBoolean(getString(R.string.show_details));
-        airOnStartup = Boolean.parseBoolean(getString(R.string.airOnStartup));
-        debug = Boolean.parseBoolean(getString(R.string.debug));
-        delete_extra = Boolean.parseBoolean(getString(R.string.delete_extra));
-        always_cap = Boolean.parseBoolean(getString(R.string.always_cap));
-        chroot_dir = getString(R.string.chroot_dir);
-        monstart = Boolean.parseBoolean(getString(R.string.monstart));
-        custom_chroot_cmd = "";
-        cont_on_fail = Boolean.parseBoolean(getString(R.string.cont_on_fail));
-        watchdog = Boolean.parseBoolean(getString(R.string.watchdog));
-        target_deauth = Boolean.parseBoolean(getString(R.string.target_deauth));
-        update_on_startup = Boolean.parseBoolean(getString(R.string.auto_update));
+        //Create or read aliases file
+        aliases_file = new File(data_path + "/aliases");
+        try{
+            if(!aliases_file.exists()){
+                aliases_file.createNewFile();
+            }else{
+                if(debug) Log.d("HIJACKER/setup", "Reading aliases file...");
+                try{
+                    BufferedReader aliases_out = new BufferedReader(new FileReader(aliases_file));
+                    String buffer = aliases_out.readLine();
+                    while(buffer!=null){
+                        //Line format: 00:11:22:33:44:55 Alias
+                        if(buffer.charAt(17)==' ' && buffer.length()>18){
+                            String mac = buffer.substring(0, 17);
+                            String alias = buffer.substring(18);
+                            aliases.put(mac, alias);
+                            if(debug) Log.d("HIJACKER/setup", "Found alias for " + mac + ": " + alias);
+                        }else{
+                            Log.e("HIJACKER/setup", "Aliases file format error: " + buffer);
+                        }
+                        buffer = aliases_out.readLine();
+                    }
+                    aliases_out.close();
+                }catch(IOException e){
+                    Log.e("HIJACKER/setup", e.toString());
+                }
+            }
+            aliases_in = new FileWriter(aliases_file, true);
+        }catch(IOException e){
+            Log.e("HIJACKER/setup", e.toString());
+            aliases_in = null;
+        }
 
         //Initialize notifications
             //Create intents
@@ -932,7 +973,6 @@ public class MainActivity extends AppCompatActivity{
         //Google AppIndex
         client = new GoogleApiClient.Builder(this).addApi(AppIndex.API).build();
 
-        load();                     //Load preferences
         CustomAction.load();        //Load custom actions
 
         if(!(new File(path).exists())){
@@ -971,7 +1011,7 @@ public class MainActivity extends AppCompatActivity{
     }
     static void load(){
         //Load Preferences
-        if(debug) Log.d("HIJACKER/load", "Loading preferences...");
+        Log.d("HIJACKER/load", "Loading preferences...");
 
         iface = pref.getString("iface", iface);
         if(!(arch.equals("armv7l") || arch.equals("aarch64"))){
