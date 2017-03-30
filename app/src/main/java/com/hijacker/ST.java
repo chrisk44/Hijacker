@@ -168,6 +168,9 @@ class ST {
         Tile.filter();
     }
     public String toString(){
+        return this.mac + (this.alias==null ? "" : " (" + this.alias + ')') + ((this.bssid==null) ? "" : " (" + AP.getAPByMac(this.bssid).essid + ')');
+    }
+    public String getExported(){
         //MAC                BSSID               PWR  Frames    Lost  Manufacturer - Probes
         //00:11:22:33:44:55  00:11:22:33:44:55  -100  123456  123456  ExampleManufacturer - Probe1, Probe2, Probe3...
         String str = mac;
@@ -175,7 +178,7 @@ class ST {
         str += getFixed(Integer.toString(pwr), 6);
         str += getFixed(Integer.toString(getFrames()), 8);
         str += getFixed(Integer.toString(getLost()), 8);
-        str += "  " + manuf + " - " + probes;
+        str += "  " + manuf  + (alias==null ? "" : " (" + alias + ')') + " - " + probes;
 
         return str;
     }

@@ -251,6 +251,9 @@ class AP {
         Tile.filter();
     }
     public String toString(){
+        return this.essid + (this.alias==null ? "" : " (" + this.alias + ')') + " (" + this.mac + ')';
+    }
+    public String getExported(){
         //MAC                 PWR  CH  Beacons    Data      #s   ENC  AUTH  CIPHER  Hidden  ESSID - Manufacturer
         //00:11:22:33:44:55  -100  13   123456  123456  123456  WPA2  TKIP    CCMP     Yes  ExampleESSID - ExampleManufacturer
         String str = mac;
@@ -263,7 +266,7 @@ class AP {
         str += getFixed(auth, 6);
         str += getFixed(cipher, 8);
         str += getFixed(isHidden ? "Yes" : "No", 8);
-        str += "  " + essid + " - " + manuf;
+        str += "  " + essid  + (alias==null ? "" : " (" + alias + ')') + " - " + manuf;
 
         return str;
     }

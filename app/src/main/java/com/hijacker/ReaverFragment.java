@@ -109,7 +109,7 @@ public class ReaverFragment extends Fragment{
                 popup.getMenuInflater().inflate(R.menu.popup_menu, popup.getMenu());
                 int i;
                 for (i = 0; i < AP.APs.size(); i++) {
-                    popup.getMenu().add(0, i, i, AP.APs.get(i).essid + " (" + AP.APs.get(i).mac + ')');
+                    popup.getMenu().add(0, i, i, AP.APs.get(i).toString());
                 }
                 popup.getMenu().add(1, i, i, "Custom");
                 popup.setOnMenuItemClickListener(new PopupMenu.OnMenuItemClickListener() {
@@ -122,7 +122,7 @@ public class ReaverFragment extends Fragment{
                                 ap = temp;
                                 stop.obtainMessage().sendToTarget();
                             }
-                            select_button.setText(ap.essid + " (" + ap.mac + ')');
+                            select_button.setText(ap.toString());
                         }else{
                             //Clcked custom
                             final EditTextDialog dialog = new EditTextDialog();
@@ -259,10 +259,10 @@ public class ReaverFragment extends Fragment{
         eap_fail_cb.setChecked(eap_fail);
         small_dh_cb.setChecked(small_dh);
         if(custom_mac!=null) select_button.setText(custom_mac);
-        else if(ap!=null) select_button.setText(ap.essid + " (" + ap.mac + ')');
+        else if(ap!=null) select_button.setText(ap.toString());
         else if(!AP.marked.isEmpty()){
             ap = AP.marked.get(AP.marked.size()-1);
-            select_button.setText(ap.essid + " (" + ap.mac + ')');
+            select_button.setText(ap.toString());
         }
         start_button.setText(thread.isAlive() ? R.string.stop : R.string.start);
     }

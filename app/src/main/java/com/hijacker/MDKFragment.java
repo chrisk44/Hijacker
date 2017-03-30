@@ -31,7 +31,6 @@ import android.widget.CompoundButton;
 import android.widget.EditText;
 import android.widget.PopupMenu;
 import android.widget.Switch;
-import android.widget.Toast;
 
 import static com.hijacker.MainActivity.FRAGMENT_MDK;
 import static com.hijacker.MainActivity.MDK_ADOS;
@@ -163,7 +162,7 @@ public class MDKFragment extends Fragment{
                 popup.getMenuInflater().inflate(R.menu.popup_menu, popup.getMenu());
                 int i;
                 for (i = 0; i < AP.APs.size(); i++) {
-                    popup.getMenu().add(0, i, i, AP.APs.get(i).essid + " (" + AP.APs.get(i).mac + ')');
+                    popup.getMenu().add(0, i, i, AP.APs.get(i).toString());
                 }
                 popup.getMenu().add(1, i, i, "Custom");
                 popup.setOnMenuItemClickListener(new PopupMenu.OnMenuItemClickListener() {
@@ -182,7 +181,7 @@ public class MDKFragment extends Fragment{
                                     }
                                 });
                             }
-                            select_button.setText(ados_ap.essid + " (" + ados_ap.mac + ')');
+                            select_button.setText(ados_ap.toString());
                         }else{
                             //Clcked custom
                             final EditTextDialog dialog = new EditTextDialog();
@@ -215,10 +214,10 @@ public class MDKFragment extends Fragment{
         bf_switch.setChecked(bf);
         ados_switch.setChecked(ados);
         if(custom_mac!=null) select_button.setText(custom_mac);
-        else if(ados_ap!=null) select_button.setText(ados_ap.essid + " (" + ados_ap.mac + ')');
+        else if(ados_ap!=null) select_button.setText(ados_ap.toString());
         else if(!AP.marked.isEmpty()){
             ados_ap = AP.marked.get(AP.marked.size()-1);
-            select_button.setText(ados_ap.essid + " (" + ados_ap.mac + ')');
+            select_button.setText(ados_ap.toString());
         }
         if(ssid_file!=null) ssid_edittext.setText(ssid_file);
         CompoundButton.OnCheckedChangeListener listener = new CompoundButton.OnCheckedChangeListener(){

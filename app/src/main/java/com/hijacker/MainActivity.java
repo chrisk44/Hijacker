@@ -876,7 +876,7 @@ public class MainActivity extends AppCompatActivity{
         }
 
         //Create or read aliases file
-        aliases_file = new File(data_path + "/aliases");
+        aliases_file = new File(data_path + "/aliases.txt");
         try{
             if(!aliases_file.exists()){
                 aliases_file.createNewFile();

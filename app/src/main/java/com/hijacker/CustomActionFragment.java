@@ -155,7 +155,7 @@ public class CustomActionFragment extends Fragment{
                     AP temp;
                     for(i = 0; i<AP.APs.size(); i++){
                         temp = AP.APs.get(i);
-                        popup.getMenu().add(TYPE_AP, i, i, temp.essid + " (" + temp.mac + ")");
+                        popup.getMenu().add(TYPE_AP, i, i, temp.toString());
                         if(selected_action.requiresClients() && temp.clients.size()==0){
                             popup.getMenu().findItem(i).setEnabled(false);
                         }
@@ -164,7 +164,7 @@ public class CustomActionFragment extends Fragment{
                     ST temp;
                     for(i = 0; i<ST.STs.size(); i++){
                         temp = ST.STs.get(i);
-                        popup.getMenu().add(TYPE_ST, i, i, temp.mac + ((temp.bssid==null) ? "" : " (" + AP.getAPByMac(temp.bssid).essid + ")"));
+                        popup.getMenu().add(TYPE_ST, i, i, temp.toString());
                         if(selected_action.requiresConnected() && temp.bssid==null){
                             popup.getMenu().findItem(i).setEnabled(false);
                         }
@@ -247,25 +247,25 @@ public class CustomActionFragment extends Fragment{
     void setTarget(){
         if(ap!=null){
             start_button.setEnabled(true);
-            select_target.setText(ap.essid + " (" + ap.mac + ")");
+            select_target.setText(ap.toString());
             return;
         }
         if(st!=null){
             start_button.setEnabled(true);
-            select_target.setText(st.mac + ((st.bssid==null) ? "" : " (" + AP.getAPByMac(st.bssid).essid + ")"));
+            select_target.setText(st.toString());
             return;
         }
         if(selected_action.getType()==TYPE_AP && !AP.marked.isEmpty()){
             start_button.setEnabled(true);
 
             ap = AP.marked.get(AP.marked.size()-1);
-            select_target.setText(ap.essid + " (" + ap.mac + ")");
+            select_target.setText(ap.toString());
 
         }else if(selected_action.getType()==TYPE_ST && !ST.marked.isEmpty()){
             start_button.setEnabled(true);
 
             st = ST.marked.get(ST.marked.size()-1);
-            select_target.setText(st.mac + ((st.bssid==null) ? "" : " (" + AP.getAPByMac(st.bssid).essid + ")"));
+            select_target.setText(st.toString());
         }
     }
 

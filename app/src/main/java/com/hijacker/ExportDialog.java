@@ -127,22 +127,22 @@ public class ExportDialog extends DialogFragment{
                 //export all
                 out.write(ap_str + '\n');
                 for(int i=0;i<AP.APs.size();i++){
-                    out.write(AP.APs.get(i).toString() + '\n');
+                    out.write(AP.APs.get(i).getExported() + '\n');
                 }
                 out.write('\n' + st_str + '\n');
                 for(int i=0;i<ST.STs.size();i++){
-                    out.write(ST.STs.get(i).toString() + '\n');
+                    out.write(ST.STs.get(i).getExported() + '\n');
                 }
             }else{
                 //export visible
                 out.write(ap_str + '\n');
                 int i;
                 for(i=0;i<Tile.i;i++){
-                    out.write(Tile.tiles.get(i).ap.toString() + '\n');
+                    out.write(Tile.tiles.get(i).ap.getExported() + '\n');
                 }
                 out.write('\n' + st_str + '\n');
                 for(;i<Tile.tiles.size();i++){
-                    out.write(Tile.tiles.get(i).st.toString() + '\n');
+                    out.write(Tile.tiles.get(i).st.getExported() + '\n');
                 }
             }
             out.close();

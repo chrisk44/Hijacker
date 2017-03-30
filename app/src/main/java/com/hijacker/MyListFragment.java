@@ -135,7 +135,7 @@ public class MyListFragment extends ListFragment {
 
                                             popup.getMenuInflater().inflate(R.menu.popup_menu, popup.getMenu());
                                             for (int i = 0; i < clicked.ap.clients.size(); i++) {
-                                                popup.getMenu().add(0, i, i, clicked.ap.clients.get(i).mac);
+                                                popup.getMenu().add(0, i, i, clicked.ap.clients.get(i).toString());
                                             }
                                             popup.setOnMenuItemClickListener(new PopupMenu.OnMenuItemClickListener() {
                                                 public boolean onMenuItemClick(android.view.MenuItem item) {
