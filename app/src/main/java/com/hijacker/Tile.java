@@ -41,6 +41,7 @@ import static com.hijacker.MainActivity.adapter;
 import static com.hijacker.MainActivity.ap_count;
 import static com.hijacker.MainActivity.clearing;
 import static com.hijacker.MainActivity.debug;
+import static com.hijacker.MainActivity.manuf_filter;
 import static com.hijacker.MainActivity.notification;
 import static com.hijacker.MainActivity.opn;
 import static com.hijacker.MainActivity.pwr_filter;
@@ -125,13 +126,15 @@ class Tile {
             if(getType()==TYPE_AP){
                 //ap
                 this.show = show_ap && (show_ch[0] || show_ch[this.ap.ch]) && this.ap.pwr>=pwr_filter*(-1) &&
-                        ((wpa && (this.ap.sec == WPA || this.ap.sec == WPA2)) || (wep && this.ap.sec == WEP) || (opn && this.ap.sec == OPN) || this.ap.sec==UNKNOWN);
-            }else this.show = show_st && (show_na_st || this.st.bssid != null) && this.st.pwr>=pwr_filter*(-1); //st
+                        ((wpa && (this.ap.sec == WPA || this.ap.sec == WPA2)) || (wep && this.ap.sec == WEP) ||
+                                (opn && this.ap.sec == OPN) || this.ap.sec==UNKNOWN) && this.ap.manuf.contains(manuf_filter);
+            }else this.show = show_st && (show_na_st || this.st.bssid != null) && this.st.pwr>=pwr_filter*(-1)  &&
+                    this.st.manuf.contains(manuf_filter); //st
         }else{
             if(getType()==TYPE_AP){
                 this.show = false;
             }else{
-                this.show = is_ap.mac.equals(this.st.bssid) && show_st && this.st.pwr>=pwr_filter*(-1);
+                this.show = is_ap.mac.equals(this.st.bssid) && show_st && this.st.pwr>=pwr_filter*(-1) && this.st.manuf.contains(manuf_filter);
             }
         }
     }

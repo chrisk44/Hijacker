@@ -245,24 +245,45 @@
             android:layout_height="wrap_content"
             android:textColor="@android:color/white"
             android:textSize="18sp"
-            android:padding="5dp"
-            />
+            android:padding="5dp"/>
 
         <CheckBox
             android:text="@string/reverse_sort"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:id="@+id/sort_reverse"
-            />
+            android:id="@+id/sort_reverse"/>
 
         <Button
             style="?android:attr/buttonBarButtonStyle"
             android:text="@string/sort_nosort"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:id="@+id/select_sort"
-            />
+            android:id="@+id/select_sort"/>
 
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:gravity="center_vertical"
+            android:labelFor="@+id/manuf_filter_et"
+            android:text="@string/manuf_filter"
+            android:textColor="?android:attr/textColorPrimary"
+            android:focusable="true"
+            android:focusableInTouchMode="true"
+            android:textSize="18sp"/>
+
+        <EditText
+            android:id="@+id/manuf_filter_et"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:ems="10"
+            android:paddingStart="10dp"/>
     </LinearLayout>
 
 </LinearLayout>

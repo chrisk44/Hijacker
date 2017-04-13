@@ -49,6 +49,7 @@
                 android:gravity="end|center_vertical"
                 android:maxLines="2"
                 android:text="Manufacturer"
+                android:paddingStart="4dp"
                 android:textSize="13sp"/>
         </LinearLayout>
 
@@ -78,6 +79,7 @@
                 android:gravity="end|center_vertical"
                 android:maxLines="2"
                 android:text="dsadfasdfasdfas"
+                android:paddingStart="4dp"
                 android:textSize="13sp"/>
         </LinearLayout>
 

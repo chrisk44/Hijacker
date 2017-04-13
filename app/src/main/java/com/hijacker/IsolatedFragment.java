@@ -85,45 +85,7 @@ public class IsolatedFragment extends Fragment{
         listview.setOnItemClickListener(new AdapterView.OnItemClickListener(){
             @Override
             public void onItemClick(AdapterView<?> adapterView, final View v, int i, long l){
-                final Tile clicked = Tile.tiles.get(i);
-
-                //ST
-                PopupMenu popup = new PopupMenu(getActivity(), v);
-                popup.getMenuInflater().inflate(R.menu.popup_menu, popup.getMenu());
-
-                popup.getMenu().add(0, 0, 0, "Info");
-                popup.getMenu().add(0, 1, 1, "Copy MAC");
-                if(clicked.st.bssid!=null){
-                    popup.getMenu().add(0, 2, 2, "Disconnect");
-                    popup.getMenu().add(0, 3, 3, "Copy disconnect command");
-                }
-
-                popup.setOnMenuItemClickListener(new PopupMenu.OnMenuItemClickListener() {
-                    public boolean onMenuItemClick(android.view.MenuItem item) {
-                        if(debug) Log.d("HIJACKER/MyListFragment", "Clicked " + item.getItemId() + " for st");
-                        switch(item.getItemId()) {
-                            case 0:
-                                //Info
-                                clicked.st.showInfo(mFragmentManager);
-                                break;
-                            case 1:
-                                //copy to clipboard
-                                copy(clicked.st.mac, v);
-                                break;
-                            case 2:
-                                //Disconnect this
-                                clicked.st.disconnect();
-                                break;
-                            case 3:
-                                //copy disconnect command to clipboard
-                                String str = prefix + " " + aireplay_dir + " --ignore-negative-one --deauth 0 -a " + clicked.st.bssid + " -c " + clicked.st.mac + " " + iface;
-                                copy(str, v);
-                                break;
-                        }
-                        return true;
-                    }
-                });
-                popup.show();
+                Tile.tiles.get(i).st.getPopupMenu(getActivity(), v).show();
             }
         });
 

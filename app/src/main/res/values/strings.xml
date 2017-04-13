@@ -148,6 +148,7 @@
     <string name="sort_beacons_frames">By beacons/frames</string>
     <string name="sort_data_frames">By data/frames</string>
     <string name="sort_pwr">By power</string>
+    <string name="manuf_filter">Manuf. Filter</string>
 
     <!-- FirstRunDialog -->
     <string name="first_run_title">Welcome</string>

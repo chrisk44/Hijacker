@@ -20,13 +20,17 @@ package com.hijacker;
 import android.app.Dialog;
 import android.app.DialogFragment;
 import android.app.FragmentManager;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.os.Bundle;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.widget.PopupMenu;
 import android.view.View;
+import android.view.WindowManager;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
 import android.widget.CheckBox;
+import android.widget.EditText;
 import android.widget.SeekBar;
 import android.widget.TextView;
 
@@ -36,6 +40,7 @@ import static com.hijacker.MainActivity.SORT_ESSID;
 import static com.hijacker.MainActivity.SORT_NOSORT;
 import static com.hijacker.MainActivity.SORT_PWR;
 import static com.hijacker.MainActivity.background;
+import static com.hijacker.MainActivity.manuf_filter;
 import static com.hijacker.MainActivity.opn;
 import static com.hijacker.MainActivity.pwr_filter;
 import static com.hijacker.MainActivity.show_ap;
@@ -92,6 +97,8 @@ public class FiltersDialog extends DialogFragment {
         });
 
         ((TextView)view.findViewById(R.id.pwr)).setText("-" + pwr_filter);
+
+        ((EditText)view.findViewById(R.id.manuf_filter_et)).setText(manuf_filter);
 
         final Button select_sort = (Button)view.findViewById(R.id.select_sort);
         final String sort_texts[] = {
@@ -165,9 +172,12 @@ public class FiltersDialog extends DialogFragment {
                 sort = FiltersDialog.this.temp_sort;
                 sort_reverse = ((CheckBox)view.findViewById(R.id.sort_reverse)).isChecked();
 
+                manuf_filter = ((EditText)view.findViewById(R.id.manuf_filter_et)).getText().toString();
+
                 Tile.filter();
             }
         });
+
         return builder.create();
     }
     @Override

@@ -44,8 +44,9 @@ class Shell{
     private Process shell;
     private PrintWriter shell_in;
     private BufferedReader shell_out;
-    private static List<Shell> free = new ArrayList<>();
+    private static final List<Shell> free = new ArrayList<>();
     private static int total=0;
+    private boolean valid = true;
     Shell(){
         total++;
         try{
@@ -63,6 +64,9 @@ class Shell{
     BufferedReader getShell_out(){ return this.shell_out; }
     Process getShell(){ return this.shell; }
     void run(String cmd){
+        if(!valid){
+            throw new IllegalStateException("Shell has been registered as free");
+        }
         this.shell_in.print(cmd + '\n');
         this.shell_in.flush();
     }
@@ -70,13 +74,17 @@ class Shell{
         String term_str = "ENDOFCLEAR" + System.currentTimeMillis();    //Use unique string
         run("echo; echo " + term_str);
         MainActivity.getLastLine(shell_out, term_str);      //This will read up to the last line and stop, effectively clearing shell_out
-        if(!free.contains(this)) free.add(this);
+        synchronized(free){
+            if(!free.contains(this)) free.add(this);
+            valid = false;
+        }
     }
     static synchronized Shell getFreeShell(){
         if(free.isEmpty()) return new Shell();
         else{
             Shell temp = free.get(0);
             free.remove(0);
+            temp.valid = true;
             return temp;
         }
     }
@@ -88,6 +96,7 @@ class Shell{
     static void exitAll(){
         total -= free.size();
         for(int i=0;i<free.size();i++){
+            free.get(i).valid = true;
             free.get(i).run("exit");
             free.get(i).shell.destroy();
         }

@@ -17,8 +17,18 @@ package com.hijacker;
     along with this program.  If not, see <http://www.gnu.org/licenses/>
  */
 
+import android.app.Activity;
 import android.app.FragmentManager;
+import android.util.Log;
+import android.view.View;
+import android.widget.PopupMenu;
 
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileReader;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -27,10 +37,19 @@ import static com.hijacker.MainActivity.SORT_BEACONS_FRAMES;
 import static com.hijacker.MainActivity.SORT_DATA_FRAMES;
 import static com.hijacker.MainActivity.SORT_NOSORT;
 import static com.hijacker.MainActivity.SORT_PWR;
+import static com.hijacker.MainActivity.aireplay_dir;
 import static com.hijacker.MainActivity.aliases;
+import static com.hijacker.MainActivity.aliases_file;
+import static com.hijacker.MainActivity.aliases_in;
 import static com.hijacker.MainActivity.completed;
+import static com.hijacker.MainActivity.copy;
+import static com.hijacker.MainActivity.data_path;
+import static com.hijacker.MainActivity.debug;
 import static com.hijacker.MainActivity.getFixed;
 import static com.hijacker.MainActivity.getManuf;
+import static com.hijacker.MainActivity.iface;
+import static com.hijacker.MainActivity.mFragmentManager;
+import static com.hijacker.MainActivity.prefix;
 import static com.hijacker.MainActivity.runInHandler;
 import static com.hijacker.MainActivity.sort;
 import static com.hijacker.MainActivity.startAireplay;
@@ -194,6 +213,111 @@ class ST {
         for(int i=0;i<ST.STs.size();i++){
             ST.STs.get(i).saveData();
         }
+    }
+
+    PopupMenu getPopupMenu(final Activity activity, final View v){
+        PopupMenu popup = new PopupMenu(activity, v);
+        popup.getMenuInflater().inflate(R.menu.popup_menu, popup.getMenu());
+
+        popup.getMenu().add(0, 0, 0, "Info");
+        popup.getMenu().add(0, 4, 1, ST.this.isMarked ? "Unmark" : "Mark");
+        popup.getMenu().add(0, 1, 2, "Copy MAC");
+        popup.getMenu().add(0, 5, 3, "Set alias");
+        if(ST.this.bssid!=null){
+            popup.getMenu().add(0, 2, 4, "Disconnect");
+            popup.getMenu().add(0, 3, 5, "Copy disconnect command");
+        }
+
+        popup.setOnMenuItemClickListener(new PopupMenu.OnMenuItemClickListener() {
+            public boolean onMenuItemClick(android.view.MenuItem item) {
+                if(debug) Log.d("HIJACKER/MyListFragment", "Clicked " + item.getItemId() + " for st");
+                switch(item.getItemId()) {
+                    case 0:
+                        //Info
+                        ST.this.showInfo(activity.getFragmentManager());
+                        break;
+                    case 1:
+                        //copy to clipboard
+                        copy(ST.this.mac, v);
+                        break;
+                    case 2:
+                        //Disconnect this
+                        ST.this.disconnect();
+                        break;
+                    case 3:
+                        //copy disconnect command to clipboard
+                        String str = prefix + " " + aireplay_dir + " --ignore-negative-one --deauth 0 -a " + ST.this.bssid + " -c " + ST.this.mac + " " + iface;
+                        copy(str, v);
+                        break;
+                    case 4:
+                        //mark or unmark
+                        if(ST.this.isMarked){
+                            ST.this.unmark();
+                        }else{
+                            ST.this.mark();
+                        }
+                        break;
+                    case 5:
+                        //Set alias
+                        final EditTextDialog dialog = new EditTextDialog();
+                        dialog.setTitle(activity.getString(R.string.set_alias));
+                        dialog.setAllowEmpty(false);
+                        dialog.setDefaultText(ST.this.alias);
+                        dialog.setRunnable(new Runnable(){
+                            @Override
+                            public void run(){
+                                if(dialog.result.equals("")) dialog.result = null;
+                                try{
+                                    if(ST.this.alias==null ^ dialog.result==null){
+                                        //Need to remove previous alias
+                                        File temp_aliases = new File(data_path + "/temp_aliases");
+                                        if(temp_aliases.exists()) temp_aliases.delete();
+                                        temp_aliases.createNewFile();
+                                        PrintWriter temp_in = new PrintWriter(new FileWriter(temp_aliases));
+
+                                        BufferedReader aliases_out = new BufferedReader(new FileReader(aliases_file));
+
+                                        //Copy current aliases to temp file, except the one we are changing
+                                        String buffer = aliases_out.readLine();
+                                        while(buffer!=null){
+                                            //Line format: 00:11:22:33:44:55 Alias
+                                            if(buffer.charAt(17)==' ' && buffer.length()>18){
+                                                String mac = buffer.substring(0, 17);
+                                                String alias = buffer.substring(18);
+                                                if(!mac.equals(ST.this.mac)){
+                                                    temp_in.println(mac + ' ' + alias);
+                                                }
+                                            }else{
+                                                Log.e("HIJACKER/setup", "Aliases file format error: " + buffer);
+                                            }
+                                            buffer = aliases_out.readLine();
+                                        }
+                                        temp_in.flush();
+                                        temp_in.close();
+                                        aliases_out.close();
+
+                                        aliases_file.delete();
+                                        temp_aliases.renameTo(aliases_file);
+                                        aliases_in = new FileWriter(aliases_file, true);
+                                    }
+                                    if(dialog.result!=null){
+                                        aliases_in.write(ST.this.mac + ' ' + dialog.result + '\n');
+                                        aliases_in.flush();
+                                    }
+                                }catch(IOException e){
+                                    Log.e("HIJACKER/MyListFrgm", e.toString());
+                                }
+                                aliases.put(ST.this.mac, dialog.result);
+                                ST.this.alias = dialog.result;
+                                ST.this.update();
+                            }
+                        });
+                        dialog.show(activity.getFragmentManager(), "EditTextDialog");
+                }
+                return true;
+            }
+        });
+        return popup;
     }
     static ST getSTByMac(String mac){
         for(int i=STs.size()-1;i>=0;i--){

@@ -40,15 +40,17 @@
                 android:textColor="?android:attr/textColorPrimary"
                 android:textSize="19sp"/>
 
-            <TextView
+            <com.hijacker.AutoResizeTextView
                 android:id="@+id/top_right"
-                android:layout_width="0dp"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_gravity="center_vertical"
                 android:layout_weight="1"
                 android:gravity="end|center_vertical"
-                android:maxLines="2"
-                android:text="Manufacturer"/>
+                android:maxLines="1"
+                android:text="Manufacturer"
+                android:paddingStart="4dp"
+                android:textColor="@android:color/secondary_text_dark"/>
         </LinearLayout>
 
         <LinearLayout
@@ -67,15 +69,17 @@
                 android:maxLines="1"
                 android:text="00:11:22:33:44:55"/>
 
-            <TextView
+            <com.hijacker.AutoResizeTextView
                 android:id="@+id/bottom_right"
-                android:layout_width="0dp"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_gravity="center_vertical"
                 android:layout_weight="1"
                 android:gravity="end|center_vertical"
-                android:maxLines="2"
-                android:text="dsadfasdfasdfas"/>
+                android:maxLines="1"
+                android:text="dsadfasdfasdfas"
+                android:paddingStart="4dp"
+                android:textColor="@android:color/secondary_text_dark"/>
         </LinearLayout>
 
     </RelativeLayout>

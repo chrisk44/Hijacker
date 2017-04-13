@@ -68,13 +68,6 @@ class RootFile{
         this.absolutePath = path;
         this.parentPath = absolutePath.substring(0, absolutePath.lastIndexOf('/') + 1);
 
-        if(buffer.contains("No such")){
-            this.isUnknownType = true;
-            return;
-        }
-
-        exists = true;
-
         //Eliminate multiple spaces
         String before = "";
         while(!before.equals(buffer)){
@@ -82,10 +75,17 @@ class RootFile{
             buffer = buffer.replace("  ", " ");
         }
 
+        if(buffer.contains("No such") || buffer.startsWith("ls:")){
+            this.isUnknownType = true;
+            return;
+        }
+
+        exists = true;
+
         String temp[] = buffer.split(" ");
         //0: type & permissions, 4: size, 5,6,7: last edited date, rest is name
         if(temp[0].length()!=10){
-            throw new IllegalFormatFlagsException(temp[0] + " is not how it should be");
+            throw new IllegalFormatFlagsException(temp[0] + " is not how it should be\nbuffer: " + buffer + "\nbuffer before: " + before);
         }
         if(temp[0].charAt(0)=='d'){
             this.isDirectory = true;

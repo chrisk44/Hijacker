@@ -97,7 +97,7 @@ import static com.hijacker.Shell.runOne;
 
 public class MainActivity extends AppCompatActivity{
     static String AUTH_KEY = "key-that-will-be-changed-in-the-release-build_this-is-for-testing";
-    static String SERVER = "192.168.1.4";         //This will be a DNS resolvable name
+    static String SERVER = "hijacker-android.ddns.net";
     static int PORT = 1025;
     static final String REQ_VERSION = "version", REQ_INFO = "info", REQ_EXIT = "exit", REQ_REPORT = "report", REQ_FEEDBACK = "feedback", REQ_NEW_ID = "newid";
     static final String ANS_POSITIVE = "OK", ANS_NEGATIVE = "NO";
@@ -117,6 +117,7 @@ public class MainActivity extends AppCompatActivity{
     static boolean show_ap = true, show_st = true, show_na_st = true, wpa = true, wep = true, opn = true;
     static boolean show_ch[] = {true, false, false, false, false, false, false, false, false, false, false, false, false, false, false};
     static int pwr_filter = 120;
+    static String manuf_filter = "";
     static int sort = SORT_NOSORT;
     static boolean sort_reverse = false;
     static boolean toSort = false;     //Variable to mark that the list must be sorted, so Tile.sort() must be called
