@@ -50,7 +50,8 @@
                 android:maxLines="1"
                 android:paddingStart="4dp"
                 android:text="Manufacturer"
-                android:textColor="@android:color/secondary_text_dark"/>
+                android:textColorHighlight="@android:color/darker_gray"
+                android:textColor="@android:color/darker_gray"/>
         </LinearLayout>
 
         <LinearLayout
@@ -79,9 +80,8 @@
                 android:maxLines="1"
                 android:text="dsadfasdfasdfas"
                 android:paddingStart="4dp"
-                android:textColor="@android:color/secondary_text_dark"/>
+                android:textColorHighlight="@android:color/darker_gray"
+                android:textColor="@android:color/darker_gray"/>
         </LinearLayout>
-
     </RelativeLayout>
-
 </LinearLayout>

@@ -1222,10 +1222,10 @@ public class MainActivity extends AppCompatActivity{
             TextView secondText = (TextView) itemview.findViewById(R.id.bottom_left);
             secondText.setText(current.s2);
 
-            TextView thirdText = (TextView) itemview.findViewById(R.id.bottom_right);
+            AutoResizeTextView thirdText = (AutoResizeTextView) itemview.findViewById(R.id.bottom_right);
             thirdText.setText(current.s3);
 
-            TextView text4 = (TextView) itemview.findViewById(R.id.top_right);
+            AutoResizeTextView text4 = (AutoResizeTextView) itemview.findViewById(R.id.top_right);
             text4.setText(current.s4);
 
             //Image

@@ -48,7 +48,6 @@ import static com.hijacker.MainActivity.debug;
 import static com.hijacker.MainActivity.getFixed;
 import static com.hijacker.MainActivity.getManuf;
 import static com.hijacker.MainActivity.iface;
-import static com.hijacker.MainActivity.mFragmentManager;
 import static com.hijacker.MainActivity.prefix;
 import static com.hijacker.MainActivity.runInHandler;
 import static com.hijacker.MainActivity.sort;
