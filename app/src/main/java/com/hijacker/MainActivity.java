@@ -88,6 +88,7 @@ import java.util.List;
 
 import static com.hijacker.CustomAction.TYPE_ST;
 import static com.hijacker.Device.getByMac;
+import static com.hijacker.Device.toLong;
 import static com.hijacker.IsolatedFragment.is_ap;
 import static com.hijacker.MDKFragment.ados;
 import static com.hijacker.MDKFragment.ados_pid;
@@ -143,10 +144,11 @@ public class MainActivity extends AppCompatActivity{
     static NotificationCompat.Builder notif, error_notif, handshake_notif;
     static NotificationManager mNotificationManager;
     static FragmentManager mFragmentManager;
-    static String path, data_path, actions_path, firm_backup_file, arch, busybox;             //path: App files path (ends with .../files)
+    static String path, data_path, actions_path, firm_backup_file, manufDBFile, arch, busybox;             //path: App files path (ends with .../files)
     static File aliases_file;
     static FileWriter aliases_in;
     static HashMap<String, String> aliases = new HashMap<>();
+    static AVLTree<String> manufAVL;
     //App and device info
     static String versionName, deviceModel;
     static int versionCode;
@@ -421,9 +423,6 @@ public class MainActivity extends AppCompatActivity{
                 Manifest.permission.ACCESS_NETWORK_STATE,
                 Manifest.permission.INTERNET
         }, 0);
-
-        //Extract and verify oui.txt for Manufacturer look-up
-        extract("oui.txt", path, false);
 
         //Thread to wait for the drawer to be initialized, so that the first option (airodump) can be highlighted
         new Thread(new Runnable(){      //Thread to wait until the drawer is initialized and then highlight airodump
@@ -858,6 +857,7 @@ public class MainActivity extends AppCompatActivity{
         data_path = Environment.getExternalStorageDirectory() + "/Hijacker";
         actions_path = data_path + "/actions";
         firm_backup_file = data_path + "/fw_bcmdhd.orig.bin";
+        manufDBFile = data_path + "/manuf.db";
         File data_dir = new File(data_path);
         if(!data_dir.exists()){
             //Create directory, subdirectories and files
@@ -1010,6 +1010,96 @@ public class MainActivity extends AppCompatActivity{
         }
 
         RootFile.init();
+
+        //Load manufacturer AVL tree
+        loadManufAVL();
+    }
+    void loadManufAVL(){
+        final LoadingDialog dialog = new LoadingDialog();
+        dialog.setTitle("Building manufacturer database...");
+        dialog.show(getFragmentManager(), "LoadingDialog");
+
+        new Thread(new Runnable(){
+            @Override
+            public void run(){
+                if(manufAVL==null){
+                    manufAVL = new AVLTree<>();
+                }else{
+                    manufAVL.clear();
+                }
+                File db = new File(manufDBFile);
+                if(!db.exists()){
+                    //Database has not been created
+                    try{
+                        //Create the database
+                        if(!db.createNewFile()){
+                            Log.e("HIJACKER/loadManufAVL", "Error creating database file");
+                            runInHandler(new Runnable(){
+                                @Override
+                                public void run(){
+                                    dialog.dismissAllowingStateLoss();
+                                }
+                            });
+                            return;
+                        }
+                        BufferedReader out = new BufferedReader(new InputStreamReader(getResources().getAssets().open("oui.txt")));
+                        FileWriter in = new FileWriter(db);
+
+                        //Load data from oui.txt and write to the new database file
+                        String buffer = out.readLine();
+                        while(buffer!=null){
+                            if(buffer.length()<18 || !buffer.contains("(base 16)")){
+                                buffer = out.readLine();
+                                continue;
+                            }
+
+                            long macID = toLong(buffer.substring(0, 6));
+                            String manuf = buffer.substring(22);
+                            manufAVL.add(manuf, macID);
+                            in.write(Long.toString(macID) + ";" + manuf + '\n');
+
+                            buffer = out.readLine();
+                        }
+                        in.close();
+                        out.close();
+                    }catch(IOException e){
+                        Log.e("HIJACKER/loadManufAVL", e.toString());
+                        manufAVL = null;
+                    }
+                }else{
+                    //Load database on the AVL
+                    try{
+                        //Database format:
+                        //01B256;Manufacturer co.\n
+                        BufferedReader out = new BufferedReader(new FileReader(db));
+
+                        String buffer = out.readLine();
+                        while(buffer!=null){
+
+                            String temp[] = buffer.split(";");
+                            if(temp.length!=2){
+                                Log.e("HIJACKER/loadManufAVL", "Invalid database format");
+                                buffer = out.readLine();
+                                continue;
+                            }
+
+                            manufAVL.add(temp[1], Long.parseLong(temp[0]));
+
+                            buffer = out.readLine();
+                        }
+                    }catch(IOException e){
+                        Log.e("HIJACKER/loadManufAVL", e.toString());
+                        manufAVL = null;
+                    }
+                }
+                runInHandler(new Runnable(){
+                    @Override
+                    public void run(){
+                        dialog.dismissAllowingStateLoss();
+                    }
+                });
+            }
+        }).start();
     }
     static void load(){
         //Load Preferences
@@ -1429,14 +1519,9 @@ public class MainActivity extends AppCompatActivity{
     }
     static String getManuf(String mac){
         String temp = mac.subSequence(0, 2).toString() + mac.subSequence(3, 5).toString() + mac.subSequence(6, 8).toString();
-        Shell shell = getFreeShell();
-        shell.run(busybox + " grep -m 1 -i " + temp + " " + path + "/oui.txt; echo ENDOFGREP");
-        String manuf = getLastLine(shell.getShell_out(), "ENDOFGREP");
-        shell.done();
-
-        if(manuf.equals("ENDOFGREP") || manuf.length()<23) manuf = "Unknown Manufacturer";
-        else manuf = manuf.substring(22);
-        return manuf;
+        temp = manufAVL.findById(toLong(temp));
+        if(temp==null) return "Unknown Manufacturer";
+        else return temp;
     }
     static String getLastLine(BufferedReader out, String end){
         //Returns the last line printed in out BEFORE end. If no other line is present, end is returned.

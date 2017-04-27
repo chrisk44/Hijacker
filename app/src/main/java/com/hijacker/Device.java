@@ -20,9 +20,6 @@ package com.hijacker;
     This class is used to provide a more general object than AP and ST.
     This makes the implementation of an AVL tree easier (the AVL class has not been made public (yet)),
     as well as the creation of a new class like AP and ST.
-
-    For a build without the AVL class, uncomment all the code lines that refer to List<Device> devices
-    and comment everything that refers to the AVL.
  */
 
 import android.app.Activity;
@@ -30,32 +27,27 @@ import android.app.FragmentManager;
 import android.view.View;
 import android.widget.PopupMenu;
 
-//import java.util.ArrayList;
-//import java.util.List;
-
 import static com.hijacker.MainActivity.SORT_NOSORT;
 import static com.hijacker.MainActivity.aliases;
 import static com.hijacker.MainActivity.getManuf;
 import static com.hijacker.MainActivity.sort;
 import static com.hijacker.MainActivity.toSort;
 
-public abstract class Device{
-    //static List<Device> devices = new ArrayList<>();
+abstract class Device{
     static AVLTree<Device> avl = new AVLTree<>();
     String mac, manuf, alias;
     int pwr;
-    long macID, lastseen = 0;    //MAC in Long
+    long macID, lastseen = 0;    //macID is the mac as Long
     boolean isMarked = false;
     Tile tile;
     Device(String mac){
         this.mac = mac;
-        macID = getLong(mac);
+        macID = toLong(mac);
         this.manuf = getManuf(this.mac);
         this.alias = aliases.get(this.mac);
         if(sort!=SORT_NOSORT) toSort = true;
 
         avl.add(this, macID);
-        //devices.add(this);
     }
     public abstract String toString();
     abstract String getExported();
@@ -66,16 +58,12 @@ public abstract class Device{
     abstract PopupMenu getPopupMenu(final Activity activity, final View v);
 
     static Device getByMac(String mac){
-        return mac==null ? null : avl.findById(getLong(mac));
-        /*for(int i=0;i<devices.size();i++){        //Linear search (much slower than AVL)
-            if(devices.get(i).mac.equals(mac)) return devices.get(i);
-        }*/
+        return mac==null ? null : avl.findById(toLong(mac));
     }
     static void clear(){
         avl.clear();
-        //devices.clear();
     }
-    static long getLong(String mac){
+    static long toLong(String mac){
         return Long.decode("0x" + mac.replace(":", "").toLowerCase());
     }
 }
