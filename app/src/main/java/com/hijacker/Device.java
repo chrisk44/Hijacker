@@ -34,7 +34,7 @@ import static com.hijacker.MainActivity.sort;
 import static com.hijacker.MainActivity.toSort;
 
 abstract class Device{
-    static AVLTree<Device> avl = new AVLTree<>();
+    final static AVLTree<Device> avl = new AVLTree<>();
     String mac, manuf, alias;
     int pwr;
     long macID, lastseen = 0;    //macID is the mac as Long

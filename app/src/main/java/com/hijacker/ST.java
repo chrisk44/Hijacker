@@ -41,12 +41,10 @@ import static com.hijacker.MainActivity.aireplay_dir;
 import static com.hijacker.MainActivity.aliases;
 import static com.hijacker.MainActivity.aliases_file;
 import static com.hijacker.MainActivity.aliases_in;
-import static com.hijacker.MainActivity.completed;
 import static com.hijacker.MainActivity.copy;
 import static com.hijacker.MainActivity.data_path;
 import static com.hijacker.MainActivity.debug;
 import static com.hijacker.MainActivity.getFixed;
-import static com.hijacker.MainActivity.getManuf;
 import static com.hijacker.MainActivity.iface;
 import static com.hijacker.MainActivity.prefix;
 import static com.hijacker.MainActivity.runInHandler;
@@ -56,8 +54,8 @@ import static com.hijacker.MainActivity.stop;
 import static com.hijacker.MainActivity.toSort;
 
 class ST extends Device{
-    static List<ST> STs = new ArrayList<>();
-    static List<ST> marked = new ArrayList<>();
+    static final List<ST> STs = new ArrayList<>();
+    static final List<ST> marked = new ArrayList<>();
     static String paired, not_connected;
     static int connected=0;     //Stations that are connected to an AP
     int id;
@@ -155,8 +153,6 @@ class ST extends Device{
             public void run(){
                 if(tile!=null) tile.update(a, b, c, ST.this.manuf);
                 else tile = new Tile(AP.APs.size() + id, a, b, c, ST.this.manuf, ST.this);
-                if(tile.st==null) tile = null;
-                completed = true;
             }
         });
     }

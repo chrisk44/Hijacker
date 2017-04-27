@@ -50,7 +50,6 @@ import static com.hijacker.MainActivity.aliases;
 import static com.hijacker.MainActivity.aliases_file;
 import static com.hijacker.MainActivity.aliases_in;
 import static com.hijacker.MainActivity.cap_dir;
-import static com.hijacker.MainActivity.completed;
 import static com.hijacker.MainActivity.copy;
 import static com.hijacker.MainActivity.data_path;
 import static com.hijacker.MainActivity.debug;
@@ -75,14 +74,14 @@ import static com.hijacker.MainActivity.wpa_thread;
 class AP extends Device{
     static final int WPA=0, WPA2=1, WEP=2, OPN=3, UNKNOWN=4;
     static int wpa=0, wpa2=0, wep=0, opn=0, hidden=0;
-    static List<AP> APs = new ArrayList<>();
-    static List<AP> marked = new ArrayList<>();
-    static List<AP> currentTargetDeauth = new ArrayList<>();
+    static final List<AP> APs = new ArrayList<>();
+    static final List<AP> marked = new ArrayList<>();
+    static final List<AP> currentTargetDeauth = new ArrayList<>();
     boolean isHidden = false;
     int ch, id, sec=UNKNOWN;
     private int beacons, data, ivs, total_beacons=0, total_data=0, total_ivs=0;
     String essid, enc, cipher, auth;
-    List<ST> clients = new ArrayList<>();
+    final List<ST> clients = new ArrayList<>();
     AP(String essid, String mac, String enc, String cipher, String auth,
        int pwr, int beacons, int data, int ivs, int ch) {
         super(mac);
@@ -176,8 +175,6 @@ class AP extends Device{
             public void run(){
                 if(tile!=null) tile.update(a, AP.this.mac, c, AP.this.manuf);
                 else tile = new Tile(id, a, AP.this.mac, c, AP.this.manuf, AP.this);
-                if(tile.ap==null) tile = null;
-                completed = true;
             }
         });
     }

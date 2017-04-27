@@ -99,7 +99,7 @@ import static com.hijacker.Shell.runOne;
 
 public class MainActivity extends AppCompatActivity{
     static String AUTH_KEY = "key-that-will-be-changed-in-the-release-build_this-is-for-testing";
-    static String SERVER = "hijacker-android.ddns.net";
+    static final String SERVER = "hijacker-android.ddns.net";
     static int PORT = 1025;
     static final String REQ_VERSION = "version", REQ_INFO = "info", REQ_EXIT = "exit", REQ_REPORT = "report", REQ_FEEDBACK = "feedback", REQ_NEW_ID = "newid";
     static final String ANS_POSITIVE = "OK", ANS_NEGATIVE = "NO";
@@ -112,7 +112,7 @@ public class MainActivity extends AppCompatActivity{
     static final int SORT_NOSORT = 0, SORT_ESSID = 1, SORT_BEACONS_FRAMES = 2, SORT_DATA_FRAMES = 3, SORT_PWR = 4;
     static final int CHROOT_FOUND = 0, CHROOT_BIN_MISSING = 1, CHROOT_DIR_MISSING = 2, CHROOT_BOTH_MISSING = 3;
     //State variables
-    static boolean wpacheckcont = false, completed = true, clearing = false;
+    static boolean wpacheckcont = false;
     static boolean notif_on = false, background = false;    //notif_on: notification should be shown, background: the app is running in the background
     static int aireplay_running = 0, currentFragment=FRAGMENT_AIRODUMP;         //Set currentFragment in onResume of each Fragment
     //Filters
@@ -129,7 +129,7 @@ public class MainActivity extends AppCompatActivity{
     static Toolbar toolbar;
     static View rootView;
     static Drawable overflow[] = {null, null, null, null, null, null, null, null};      //Drawables to use for overflow button icon
-    static ImageView[] status = {null, null, null, null, null};                         //Icons in TestDialog, set in TestDialog class
+    static ImageView status[] = {null, null, null, null, null};                         //Icons in TestDialog, set in TestDialog class
     static int progress_int;
     static long last_action;                        //Timestamp for the last action. Used in watchdog to avoid false positives
     static Thread wpa_thread, watchdog_thread;
@@ -147,7 +147,7 @@ public class MainActivity extends AppCompatActivity{
     static String path, data_path, actions_path, firm_backup_file, manufDBFile, arch, busybox;             //path: App files path (ends with .../files)
     static File aliases_file;
     static FileWriter aliases_in;
-    static HashMap<String, String> aliases = new HashMap<>();
+    static final HashMap<String, String> aliases = new HashMap<>();
     static AVLTree<String> manufAVL;
     //App and device info
     static String versionName, deviceModel;
@@ -1055,8 +1055,10 @@ public class MainActivity extends AppCompatActivity{
 
                             long macID = toLong(buffer.substring(0, 6));
                             String manuf = buffer.substring(22);
-                            manufAVL.add(manuf, macID);
-                            in.write(Long.toString(macID) + ";" + manuf + '\n');
+                            if(manufAVL.add(manuf, macID)){
+                                //Write to file only if it was added to the AVL (it's unique)
+                                in.write(Long.toString(macID) + ";" + manuf + '\n');
+                            }
 
                             buffer = out.readLine();
                         }
@@ -1073,18 +1075,11 @@ public class MainActivity extends AppCompatActivity{
                         //01B256;Manufacturer co.\n
                         BufferedReader out = new BufferedReader(new FileReader(db));
 
+                        int i=0;
                         String buffer = out.readLine();
                         while(buffer!=null){
-
-                            String temp[] = buffer.split(";");
-                            if(temp.length!=2){
-                                Log.e("HIJACKER/loadManufAVL", "Invalid database format");
-                                buffer = out.readLine();
-                                continue;
-                            }
-
-                            manufAVL.add(temp[1], Long.parseLong(temp[0]));
-
+                            i++;
+                            manufAVL.add(buffer.substring(buffer.indexOf(';')+1), Long.parseLong(buffer.substring(0, buffer.indexOf(';'))));
                             buffer = out.readLine();
                         }
                     }catch(IOException e){
@@ -1140,13 +1135,11 @@ public class MainActivity extends AppCompatActivity{
     public boolean onOptionsItemSelected(MenuItem item){
         switch(item.getItemId()){
             case R.id.reset:
-                clearing = true;
                 stop(PROCESS_AIRODUMP);
                 Tile.clear();
                 ap_count.setText("0");
                 st_count.setText("0");
                 Airodump.startClean();
-                clearing = false;
                 return true;
 
             case R.id.stop_run:
@@ -1309,6 +1302,7 @@ public class MainActivity extends AppCompatActivity{
 
             TextView firstText = (TextView) itemview.findViewById(R.id.top_left);
             firstText.setText(current.s1);
+            firstText.setTextColor(ContextCompat.getColor(getContext(), current.device.isMarked ? R.color.colorAccent : android.R.color.white));
 
             TextView secondText = (TextView) itemview.findViewById(R.id.bottom_left);
             secondText.setText(current.s2);
@@ -1321,13 +1315,11 @@ public class MainActivity extends AppCompatActivity{
 
             //Image
             ImageView iv = (ImageView) itemview.findViewById(R.id.iv);
-            if(current.getType()==TYPE_ST){
-                iv.setImageResource(R.drawable.st2);
-                firstText.setTextColor(ContextCompat.getColor(getContext(), current.st.isMarked ? R.color.colorAccent : android.R.color.white));
-            }else{
-                if(current.ap.isHidden) iv.setImageResource(R.drawable.ap_hidden);
+            if(current.device instanceof AP){
+                if(((AP)current.device).isHidden) iv.setImageResource(R.drawable.ap_hidden);
                 else iv.setImageResource(R.drawable.ap2);
-                firstText.setTextColor(ContextCompat.getColor(getContext(), current.ap.isMarked ? R.color.colorAccent : android.R.color.white));
+            }else{
+                iv.setImageResource(R.drawable.st2);
             }
 
             return itemview;

@@ -59,12 +59,11 @@ import static com.hijacker.Shell.runOne;
 
 public class TestDialog extends DialogFragment {
     static final int TEST_WAIT = 500;
-    boolean test_wait;
     View dialogView;
     TextView test_cur_cmd;
     ProgressBar test_progress;
     Thread thread;
-    Runnable runnable = new Runnable(){
+    final Runnable runnable = new Runnable(){
         @Override
         public void run(){
             watchdog_thread.interrupt();
@@ -99,7 +98,6 @@ public class TestDialog extends DialogFragment {
                 });
 
                 //Airodump
-                test_wait = true;
                 Log.d("HIJACKER/test_thread", cmdAirodump);
                 Runtime.getRuntime().exec(cmdAirodump);
                 Thread.sleep(TEST_WAIT);

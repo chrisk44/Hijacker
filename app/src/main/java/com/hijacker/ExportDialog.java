@@ -138,11 +138,8 @@ public class ExportDialog extends DialogFragment{
                 out.write(ap_str + '\n');
                 int i;
                 for(i=0;i<Tile.i;i++){
-                    out.write(Tile.tiles.get(i).ap.getExported() + '\n');
-                }
-                out.write('\n' + st_str + '\n');
-                for(;i<Tile.tiles.size();i++){
-                    out.write(Tile.tiles.get(i).st.getExported() + '\n');
+                    out.write(Tile.tiles.get(i).device.getExported() + '\n');
+                    if(i==AP.APs.size()-1) out.write('\n' + st_str + '\n');
                 }
             }
             out.close();

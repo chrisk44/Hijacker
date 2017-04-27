@@ -53,21 +53,21 @@ class AVLTree<T>{
             else return node;
         }
     }
-    void add(T newObj, long newID){
-        //Insert a new Object in the tree
+    boolean add(T newObj, long newID){
+        //Insert a new Object in the tree, returns whether the new object was added
         if(root==null){
             root = new Node(newObj, newID, null);
-            return;
+            return true;
         }
         Node node = find(newID, root);
         if(node==null){
             Log.e("HIJACKER/AVL", "[E] node in add() is null");
-            return;
+            return false;
         }
 
         if(node.id==newID){
             Log.e("HIJACKER/AVL", "[E] Object with id " + newID + " already exists");
-            return;
+            return false;
         }
 
         //node is the leaf under which the new object will be inserted
@@ -105,6 +105,7 @@ class AVLTree<T>{
 
             newParent = newParent.P;
         }
+        return true;
     }
     void print(Node node){
         if(node==null){

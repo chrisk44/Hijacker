@@ -23,7 +23,6 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ListView;
-import static com.hijacker.CustomAction.TYPE_AP;
 import static com.hijacker.MainActivity.FRAGMENT_AIRODUMP;
 import static com.hijacker.MainActivity.currentFragment;
 import static com.hijacker.MainActivity.refreshDrawer;
@@ -37,13 +36,7 @@ public class MyListFragment extends ListFragment {
     @Override
     public void onListItemClick(ListView l, final View v, int position, long id){
         super.onListItemClick(l, v, position, id);
-        Tile clicked = Tile.tiles.get(position);
-
-        if(clicked.getType()==TYPE_AP){
-            clicked.ap.getPopupMenu(getActivity(), v).show();
-        }else{
-            clicked.st.getPopupMenu(getActivity(), v).show();
-        }
+        Tile.tiles.get(position).device.getPopupMenu(getActivity(), v).show();
     }
     @Override
     public void onResume(){

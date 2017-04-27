@@ -41,7 +41,7 @@ import static com.hijacker.MainActivity.reaver_dir;
 
 class CustomAction{
     static final int TYPE_AP=0, TYPE_ST=1;
-    static List<CustomAction> cmds = new ArrayList<>();
+    static final List<CustomAction> cmds = new ArrayList<>();
     private String title, start_cmd, stop_cmd, process_name;
     private int type;
     private boolean requires_clients=false, requires_connected=false, has_process_name=false;
