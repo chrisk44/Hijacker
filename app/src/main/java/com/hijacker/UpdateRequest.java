@@ -19,6 +19,7 @@ package com.hijacker;
 
 import static com.hijacker.CustomAction.TYPE_AP;
 import static com.hijacker.CustomAction.TYPE_ST;
+import static com.hijacker.Device.getByMac;
 
 class UpdateRequest {
     int i1, i2, i3, i4 ,i5;
@@ -51,12 +52,12 @@ class UpdateRequest {
     void add(){
         if(this.type==TYPE_AP){
             //AP
-            AP temp = AP.getAPByMac(str2);
+            AP temp = (AP)getByMac(str2);
             if(temp==null) new AP(str1, str2, str3, str4, str5, i1, i2, i3, i4, i5);
             else temp.update(str1, str3, str4, str5, i1, i2, i3, i4, i5);
         }else{
             //ST
-            ST temp = ST.getSTByMac(str1);
+            ST temp = (ST)getByMac(str1);
             if (str2.equals("na")) str2=null;
             if (temp == null) new ST(str1, str2, i1, i2, i3, str3);
             else temp.update(str2, i1, i2, i3, str3);

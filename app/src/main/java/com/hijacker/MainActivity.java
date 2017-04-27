@@ -87,6 +87,7 @@ import java.util.HashMap;
 import java.util.List;
 
 import static com.hijacker.CustomAction.TYPE_ST;
+import static com.hijacker.Device.getByMac;
 import static com.hijacker.IsolatedFragment.is_ap;
 import static com.hijacker.MDKFragment.ados;
 import static com.hijacker.MDKFragment.ados_pid;
@@ -1222,10 +1223,10 @@ public class MainActivity extends AppCompatActivity{
             TextView secondText = (TextView) itemview.findViewById(R.id.bottom_left);
             secondText.setText(current.s2);
 
-            AutoResizeTextView thirdText = (AutoResizeTextView) itemview.findViewById(R.id.bottom_right);
+            TextView thirdText = (TextView) itemview.findViewById(R.id.bottom_right);
             thirdText.setText(current.s3);
 
-            AutoResizeTextView text4 = (AutoResizeTextView) itemview.findViewById(R.id.top_right);
+            TextView text4 = (TextView) itemview.findViewById(R.id.top_right);
             text4.setText(current.s4);
 
             //Image
@@ -1390,7 +1391,7 @@ public class MainActivity extends AppCompatActivity{
         }
     }
     static void isolate(String mac){
-        is_ap = AP.getAPByMac(mac);
+        is_ap = (AP)getByMac(mac);
         if(is_ap!=null){
             IsolatedFragment.exit_on = mFragmentManager.getBackStackEntryCount();
             FragmentTransaction ft = mFragmentManager.beginTransaction();

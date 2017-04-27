@@ -31,6 +31,7 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.net.Socket;
 
+import static com.hijacker.Device.getByMac;
 import static com.hijacker.MainActivity.AUTH_KEY;
 import static com.hijacker.MainActivity.FRAGMENT_SETTINGS;
 import static com.hijacker.MainActivity.PORT;
@@ -69,7 +70,7 @@ public class DevOptionsFragment extends PreferenceFragment{
         causeNPE.setOnPreferenceClickListener(new Preference.OnPreferenceClickListener(){
             @Override
             public boolean onPreferenceClick(Preference preference){
-                AP.getAPByMac(null).crack();
+                ((AP)getByMac(null)).crack();
                 return false;
             }
         });

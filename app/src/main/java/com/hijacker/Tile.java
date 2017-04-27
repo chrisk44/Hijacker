@@ -148,6 +148,7 @@ class Tile {
         adapter.clear();
         AP.clear();
         ST.clear();
+        Device.clear();
         i=0;
     }
     static void filter(){
