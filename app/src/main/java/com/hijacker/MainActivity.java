@@ -1346,17 +1346,17 @@ public class MainActivity extends AppCompatActivity{
             // find the item to work with
             CustomAction currentItem = CustomAction.cmds.get(position);
 
-            TextView firstText = (TextView) itemview.findViewById(R.id.top_left);
-            firstText.setText(currentItem.getTitle());
+            TextView upperLeft = (TextView) itemview.findViewById(R.id.upperLeft);
+            upperLeft.setText(currentItem.getTitle());
 
-            TextView secondText = (TextView) itemview.findViewById(R.id.bottom_left);
-            secondText.setText(currentItem.getStartCmd());
+            TextView lowerLeft = (TextView) itemview.findViewById(R.id.lowerLeft);
+            lowerLeft.setText(currentItem.getStartCmd());
 
-            TextView thirdText = (TextView) itemview.findViewById(R.id.bottom_right);
-            thirdText.setText("");
+            TextView lowerRight = (TextView) itemview.findViewById(R.id.lowerRight);
+            lowerRight.setText("");
 
-            TextView text4 = (TextView) itemview.findViewById(R.id.top_right);
-            text4.setText("");
+            TextView upperRight = (TextView) itemview.findViewById(R.id.upperRight);
+            upperRight.setText("");
 
             //Image
             ImageView iv = (ImageView) itemview.findViewById(R.id.iv);
