@@ -425,59 +425,20 @@ public class MainActivity extends AppCompatActivity{
                 Manifest.permission.INTERNET
         }, 0);
 
-        //Thread to wait for the drawer to be initialized, so that the first option (airodump) can be highlighted
-        new Thread(new Runnable(){      //Thread to wait until the drawer is initialized and then highlight airodump
-            @Override
-            public void run(){
-                try{
-                    while(mDrawerList.getChildAt(0)==null){
-                        Thread.sleep(100);
-                    }
-                    runInHandler(new Runnable(){
-                        @Override
-                        public void run(){
-                            refreshDrawer();
-                        }
-                    });
-                }catch(InterruptedException ignored){}
-            }
-        }).start();
-
-        if(watchdog){
-            watchdog_thread = new Thread(watchdog_runnable);
-            watchdog_thread.start();
-        }
-
         //First start
         if(!pref.getBoolean("disclaimer", false)){
-            new DisclaimerDialog().show(mFragmentManager, "Disclaimer");
+            new DisclaimerDialog().show(getFragmentManager(), "Disclaimer");
             //Check for SuperSU
             if(!new File("/su").exists()){
                 ErrorDialog dialog = new ErrorDialog();
                 dialog.setTitle(getString(R.string.su_notfound_title));
                 dialog.setMessage(getString(R.string.su_notfound));
-                dialog.show(mFragmentManager, "ErrorDialog");
+                dialog.show(getFragmentManager(), "ErrorDialog");
             }
         }else main();
 
-        //Start background service so the app won't get killed if it goes to the background
-        startService(new Intent(this, PersistenceService.class));
-
-        if(update_on_startup){
-            //Spawn new thread to wait for internet connection
-            //This should be changed to a broadcast receiver
-            new Thread(new Runnable(){
-                @Override
-                public void run(){
-                    try{
-                        while(!internetAvailable(MainActivity.this)){
-                            Thread.sleep(1000);
-                        }
-                        checkForUpdate(MainActivity.this, false);
-                    }catch(InterruptedException ignored){}
-                }
-            }).start();
-        }
+        //Load manufacturer AVL tree
+        loadManufAVL();
 
         //Delete old report, it's not needed if no exception is thrown up to this point
         File report = new File(Environment.getExternalStorageDirectory() + "/report.txt");
@@ -897,7 +858,6 @@ public class MainActivity extends AppCompatActivity{
                             String mac = buffer.substring(0, 17);
                             String alias = buffer.substring(18);
                             aliases.put(mac, alias);
-                            if(debug) Log.d("HIJACKER/setup", "Found alias for " + mac + ": " + alias);
                         }else{
                             Log.e("HIJACKER/setup", "Aliases file format error: " + buffer);
                         }
@@ -979,15 +939,10 @@ public class MainActivity extends AppCompatActivity{
         //Google AppIndex
         client = new GoogleApiClient.Builder(this).addApi(AppIndex.API).build();
 
-        CustomAction.load();        //Load custom actions
+        //Load custom actions
+        CustomAction.load();
 
-        if(!(new File(path).exists())){
-            Log.e("HIJACKER/onCreate", "App file directory doesn't exist");
-            ErrorDialog dialog = new ErrorDialog();
-            dialog.setMessage(getString(R.string.app_dir_notfound1) + path + getString(R.string.app_dir_notfound2));
-            dialog.show(mFragmentManager, "ErrorDialog");
-        }
-
+        //Setup tools
         if(arch.equals("armv7l") || arch.equals("aarch64")){
             installTools();
             busybox = path + "/bin/busybox";
@@ -1015,8 +970,47 @@ public class MainActivity extends AppCompatActivity{
 
         RootFile.init();
 
-        //Load manufacturer AVL tree
-        loadManufAVL();
+        //Thread to wait for the drawer to be initialized, so that the first option (airodump) can be highlighted
+        new Thread(new Runnable(){      //Thread to wait until the drawer is initialized and then highlight airodump
+            @Override
+            public void run(){
+                try{
+                    while(mDrawerList.getChildAt(0)==null){
+                        Thread.sleep(100);
+                    }
+                    runInHandler(new Runnable(){
+                        @Override
+                        public void run(){
+                            refreshDrawer();
+                        }
+                    });
+                }catch(InterruptedException ignored){}
+            }
+        }).start();
+
+        if(watchdog){
+            watchdog_thread = new Thread(watchdog_runnable);
+            watchdog_thread.start();
+        }
+
+        //Start background service so the app won't get killed if it goes to the background
+        startService(new Intent(this, PersistenceService.class));
+
+        if(update_on_startup){
+            //Spawn new thread to wait for internet connection
+            //This should be changed to a broadcast receiver
+            new Thread(new Runnable(){
+                @Override
+                public void run(){
+                    try{
+                        while(!internetAvailable(MainActivity.this)){
+                            Thread.sleep(1000);
+                        }
+                        checkForUpdate(MainActivity.this, false);
+                    }catch(InterruptedException ignored){}
+                }
+            }).start();
+        }
     }
     void loadManufAVL(){
         final LoadingDialog dialog = new LoadingDialog();

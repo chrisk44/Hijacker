@@ -144,7 +144,7 @@ class CustomAction{
         }
         File actions[] = folder.listFiles();
         if(actions!=null){
-            if(debug) Log.d("HIJACKER/CustomAction", "Reading files...");
+            if(debug) Log.d("HIJACKER/CustomAction", "Reading custom actions...");
             FileReader reader0;
             BufferedReader reader;
             for(File file : actions){
@@ -158,8 +158,6 @@ class CustomAction{
                     boolean requirement = Boolean.parseBoolean(reader.readLine());
                     String process_name = reader.readLine();
                     if(process_name==null) process_name = "";   //For files that were created before process_name was implemented
-                    if(debug) Log.d("HIJACKER/CustomAction", "Read from file " + file.getName() + ": " + title + ", " +
-                            start_cmd + ", " + stop_cmd + ", " + Integer.toString(type) + ", " + Boolean.toString(requirement) + ", " + process_name);
                     CustomAction action = new CustomAction(title, start_cmd, stop_cmd, process_name, type);
                     if(type==TYPE_AP){
                         action.setRequiresClients(requirement);
