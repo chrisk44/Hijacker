@@ -120,6 +120,7 @@ public class MainActivity extends AppCompatActivity{
     static boolean show_ch[] = {true, false, false, false, false, false, false, false, false, false, false, false, false, false, false};
     static int pwr_filter = 120;
     static String manuf_filter = "";
+    //Airodump list sort
     static int sort = SORT_NOSORT;
     static boolean sort_reverse = false;
     static boolean toSort = false;     //Variable to mark that the list must be sorted, so Tile.sort() must be called
@@ -541,6 +542,9 @@ public class MainActivity extends AppCompatActivity{
             if(info.versionCode<=pref.getInt("tools_version", 0)){
                 if(debug) Log.d("HIJACKER/installTools", "Tools already installed");
                 return;
+            }else{
+                File manufDB = new File(manufDBFile);
+                if(manufDB.exists()) manufDB.delete();
             }
         }
         String tools_location = path + "/bin/";
@@ -725,7 +729,7 @@ public class MainActivity extends AppCompatActivity{
                 });
                 progress_int = deauthWait;
                 runOne(busybox + " kill $(" + busybox + " pidof aireplay-ng)");
-                if(is_ap==null && aireplay_running==AIREPLAY_DEAUTH){
+                if(is_ap==null && aireplay_running==AIREPLAY_DEAUTH && Airodump.isRunning()){
                     //Aireplay was just deauthenticating so airodump has locked a channel, no more needed
                     Airodump.startClean();
                 }
@@ -857,7 +861,7 @@ public class MainActivity extends AppCompatActivity{
         data_path = Environment.getExternalStorageDirectory() + "/Hijacker";
         actions_path = data_path + "/actions";
         firm_backup_file = data_path + "/fw_bcmdhd.orig.bin";
-        manufDBFile = data_path + "/manuf.db";
+        manufDBFile = path + "/manuf.db";
         File data_dir = new File(data_path);
         if(!data_dir.exists()){
             //Create directory, subdirectories and files
@@ -1137,17 +1141,13 @@ public class MainActivity extends AppCompatActivity{
             case R.id.reset:
                 stop(PROCESS_AIRODUMP);
                 Tile.clear();
-                ap_count.setText("0");
-                st_count.setText("0");
+                Tile.onCountsChanged();
                 Airodump.startClean();
                 return true;
 
             case R.id.stop_run:
-                if(Airodump.isRunning()){
-                    stop(PROCESS_AIRODUMP);
-                }else{
-                    Airodump.start();
-                }
+                if(Airodump.isRunning()) stop(PROCESS_AIRODUMP);
+                else Airodump.start();
                 return true;
 
             case R.id.stop_aireplay:
@@ -1447,23 +1447,20 @@ public class MainActivity extends AppCompatActivity{
         if(view!=null) Snackbar.make(view, "\"" + str + "\" copied to clipboard", Snackbar.LENGTH_SHORT).show();
     }
     static void notification(){
-        if(notif_on && show_notif && !(!Airodump.isRunning() && aireplay_running==0 &&
-                !bf && !ados && !CrackFragment.cont && !ReaverFragment.cont)){
+        if(notif_on && show_notif){
             if(show_details){
                 String str;
                 if(is_ap==null) str = "APs: " + Tile.i + " | STs: " + (Tile.tiles.size() - Tile.i);
                 else str = is_ap.essid + " | STs: " + (Tile.tiles.size() - Tile.i);
 
-                if(show_details){
-                    if(aireplay_running==AIREPLAY_DEAUTH) str += " | Aireplay deauthenticating...";
-                    else if(aireplay_running==AIREPLAY_WEP) str += " | Aireplay replaying for wep...";
-                    if(wpa_thread.isAlive()) str += " | WPA cracking...";
-                    if(bf) str += " | MDK3 Beacon Flooding...";
-                    if(ados) str += " | MDK3 Authentication DoS...";
-                    if(ReaverFragment.cont) str += " | Reaver running...";
-                    if(CrackFragment.cont) str += " | Cracking .cap file...";
-                    if(CustomActionFragment.cont) str += " | Running action " + CustomActionFragment.selected_action.getTitle() + "...";
-                }
+                if(aireplay_running==AIREPLAY_DEAUTH) str += " | Aireplay deauthenticating...";
+                else if(aireplay_running==AIREPLAY_WEP) str += " | Aireplay replaying for wep...";
+                if(wpa_thread.isAlive()) str += " | WPA cracking...";
+                if(bf) str += " | MDK3 Beacon Flooding...";
+                if(ados) str += " | MDK3 Authentication DoS...";
+                if(ReaverFragment.cont) str += " | Reaver running...";
+                if(CrackFragment.cont) str += " | Cracking .cap file...";
+                if(CustomActionFragment.cont) str += " | Running action " + CustomActionFragment.selected_action.getTitle() + "...";
 
                 notif.setContentText(str);
             }else notif.setContentText(null);
@@ -1510,6 +1507,7 @@ public class MainActivity extends AppCompatActivity{
         actionBar.setTitle(mPlanetTitles[currentFragment]);
     }
     static String getManuf(String mac){
+        if(manufAVL==null) return "Unknown Manufacturer";
         String temp = mac.subSequence(0, 2).toString() + mac.subSequence(3, 5).toString() + mac.subSequence(6, 8).toString();
         temp = manufAVL.findById(toLong(temp));
         if(temp==null) return "Unknown Manufacturer";

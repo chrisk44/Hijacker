@@ -7,7 +7,7 @@ android {
         minSdkVersion 21
         targetSdkVersion 25
         versionCode 10
-        versionName "v1.2-beta.3.2"
+        versionName "v1.3-exp.1"
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
         externalNativeBuild {
             cmake {

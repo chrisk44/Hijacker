@@ -107,36 +107,6 @@ class AVLTree<T>{
         }
         return true;
     }
-    void print(Node node){
-        if(node==null){
-            Log.e("HIJACKER/AVL", "[E] Null node in print(node)");
-            return;
-        }
-
-        String str = "[" + node.id + "(" + node.balance + "," + node.height + ")]";
-        str += "(" + (node.LS==null ? "null" : node.LS.id + "(" + node.LS.balance + "," + node.LS.height + ")");
-        str += "," + (node.RS==null ? "null" : node.RS.id + "(" + node.RS.balance + "," + node.RS.height + ")") + ")";
-        System.out.println(str);
-        if(node.LS!=null){
-            print(node.LS);
-        }
-        if(node.RS!=null){
-            print(node.RS);
-        }
-    }
-    void printTree(Node root, int level){
-        if(root==null) return;
-
-        printTree(root.RS, level+1);
-        if(level!=0){
-            for(int i=0;i<level;i++){
-                System.out.print("|\t");
-            }
-
-            System.out.println("|-------" + root.id);
-        }else System.out.println(root.id);
-        printTree(root.LS, level+1);
-    }
 
     private void rebalance(Node root){
         //root is the root of the subtree that needs to be rebalanced

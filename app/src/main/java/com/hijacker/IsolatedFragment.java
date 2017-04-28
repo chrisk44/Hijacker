@@ -38,6 +38,7 @@ import static com.hijacker.MainActivity.isolate;
 import static com.hijacker.MainActivity.mFragmentManager;
 import static com.hijacker.MainActivity.menu;
 import static com.hijacker.MainActivity.refreshDrawer;
+import static com.hijacker.MainActivity.runInHandler;
 import static com.hijacker.MainActivity.wpa_thread;
 
 public class IsolatedFragment extends Fragment{
@@ -59,7 +60,7 @@ public class IsolatedFragment extends Fragment{
                 try{
                     while(cont){
                         Thread.sleep(1000);
-                        refresh.obtainMessage().sendToTarget();
+                        runInHandler(refreshRunnable);
                     }
                 }catch(InterruptedException ignored){}
             }
@@ -84,8 +85,9 @@ public class IsolatedFragment extends Fragment{
 
         return fragmentView;
     }
-    public Handler refresh = new Handler(){
-        public void handleMessage(Message msg){
+    Runnable refreshRunnable = new Runnable(){
+        @Override
+        public void run(){
             if(cont && is_ap !=null){
                 essid.setText(is_ap.essid);
                 manuf.setText(is_ap.manuf);
@@ -106,7 +108,7 @@ public class IsolatedFragment extends Fragment{
         ((Button)fragmentView.findViewById(R.id.crack)).setText(wpa_thread.isAlive() ? R.string.stop : R.string.crack);
         fragmentView.findViewById(R.id.crack).setEnabled(is_ap.sec==WPA || is_ap.sec==WPA2 || is_ap.sec==WEP);
         ((Button)fragmentView.findViewById(R.id.dos)).setText(MDKFragment.ados ? R.string.stop : R.string.dos);
-        refresh.obtainMessage().sendToTarget();
+        runInHandler(refreshRunnable);
         menu.findItem(R.id.reset).setVisible(false);
     }
     @Override

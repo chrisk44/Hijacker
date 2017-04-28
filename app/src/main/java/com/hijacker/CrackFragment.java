@@ -51,6 +51,7 @@ import static com.hijacker.MainActivity.getLastLine;
 import static com.hijacker.MainActivity.path;
 import static com.hijacker.MainActivity.progress;
 import static com.hijacker.MainActivity.refreshDrawer;
+import static com.hijacker.MainActivity.runInHandler;
 import static com.hijacker.MainActivity.stop;
 
 public class CrackFragment extends Fragment{
@@ -116,7 +117,28 @@ public class CrackFragment extends Fragment{
                     }
                 }catch(IOException | InterruptedException e){ Log.e("HIJACKER/Exception", "Caught Exception in CrackFragment: " + e.toString()); }
 
-                stop.obtainMessage().sendToTarget();
+                runInHandler(new Runnable(){
+                    @Override
+                    public void run(){
+                        button.setText(R.string.start);
+                        cont = false;
+                        progress.setIndeterminate(false);
+                        stop(PROCESS_AIRCRACK);
+                        if(new File(path + "/aircrack-out.txt").exists()){
+                            Shell shell = Shell.getFreeShell();     //Using root shell because "new File(path + "/aircrack-out.txt");" throws FileNotFoundException (permission denied)
+                            BufferedReader out = shell.getShell_out();
+                            shell.run("cat " + path + "/aircrack-out.txt; echo ");              //No newline at the end of the file, readLine will hang
+                            try{
+                                console.append("Key found: " + out.readLine() + '\n');
+                            }catch(IOException ignored){}
+                            shell.run("rm " + path + "/aircrack-out.txt");
+                            shell.done();
+                        }else{
+                            console.append("Key not found\n");
+                            if(mode==WEP) console.append("Try with different wep bit selection or more IVs\n");
+                        }
+                    }
+                });
             }
         };
         thread = new Thread(runnable);
@@ -214,27 +236,6 @@ public class CrackFragment extends Fragment{
 
         return fragmentView;
     }
-    public Handler stop = new Handler(){
-        public void handleMessage(Message msg){
-            button.setText(R.string.start);
-            cont = false;
-            progress.setIndeterminate(false);
-            stop(PROCESS_AIRCRACK);
-            if(new File(path + "/aircrack-out.txt").exists()){
-                Shell shell = Shell.getFreeShell();     //Using root shell because "new File(path + "/aircrack-out.txt");" throws FileNotFoundException (permission denied)
-                BufferedReader out = shell.getShell_out();
-                shell.run("cat " + path + "/aircrack-out.txt; echo ");              //No newline at the end of the file, readLine will hang
-                try{
-                    console.append("Key found: " + out.readLine() + '\n');
-                }catch(IOException ignored){}
-                shell.run("rm " + path + "/aircrack-out.txt");
-                shell.done();
-            }else{
-                console.append("Key not found\n");
-                if(mode==WEP) console.append("Try with different wep bit selection or more IVs\n");
-            }
-        }
-    };
     @Override
     public void onResume() {
         super.onResume();

@@ -180,7 +180,7 @@ public class FeedbackDialog extends DialogFragment{
                             };
                             Socket socket = connect();
                             if(socket==null){
-                                handler.post(runnable);
+                                runInHandler(runnable);
                                 Snackbar.make(v, getString(R.string.server_error), Snackbar.LENGTH_SHORT).show();
                                 return;
                             }
@@ -196,12 +196,12 @@ public class FeedbackDialog extends DialogFragment{
                                 buffer = out.readLine();
                                 if(buffer!=null){
                                     if(!buffer.equals(ANS_POSITIVE)){
-                                        handler.post(runnable);
+                                        runInHandler(runnable);
                                         Snackbar.make(v, getString(R.string.server_denied), Snackbar.LENGTH_SHORT).show();
                                         return;
                                     }
                                 }else{
-                                    handler.post(runnable);
+                                    runInHandler(runnable);
                                     Snackbar.make(v, getString(R.string.connection_closed), Snackbar.LENGTH_SHORT).show();
                                     return;
                                 }
@@ -224,12 +224,12 @@ public class FeedbackDialog extends DialogFragment{
                                     if(buffer!=null){
                                         if(!buffer.equals(ANS_POSITIVE)){
                                             Snackbar.make(v, getString(R.string.server_denied), Toast.LENGTH_SHORT).show();
-                                            handler.post(runnable);
+                                            runInHandler(runnable);
                                             return;
                                         }
                                     }else{
                                         Snackbar.make(v, getString(R.string.connection_closed), Toast.LENGTH_SHORT).show();
-                                        handler.post(runnable);
+                                        runInHandler(runnable);
                                         return;
                                     }
 
@@ -257,7 +257,7 @@ public class FeedbackDialog extends DialogFragment{
                                 Log.e("HIJACKER/FeedbackOnSend", e.toString());
                                 Snackbar.make(v, getString(R.string.unknown_error), Snackbar.LENGTH_SHORT).show();
                             }finally{
-                                handler.post(runnable);
+                                runInHandler(runnable);
                                 FeedbackDialog.this.setCancelable(true);
                             }
                         }
@@ -267,5 +267,4 @@ public class FeedbackDialog extends DialogFragment{
             });
         }
     }
-    static Handler handler = new Handler();
 }

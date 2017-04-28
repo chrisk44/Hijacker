@@ -45,6 +45,7 @@ import static com.hijacker.MainActivity.debug;
 import static com.hijacker.MainActivity.mFragmentManager;
 import static com.hijacker.MainActivity.progress;
 import static com.hijacker.MainActivity.refreshDrawer;
+import static com.hijacker.MainActivity.runInHandler;
 
 public class CustomActionFragment extends Fragment{
     static CustomAction selected_action=null;
@@ -68,17 +69,24 @@ public class CustomActionFragment extends Fragment{
                 if(debug) Log.d("HIJACKER/CustomCMDFrag", "thread running");
                 BufferedReader out = shell.getShell_out();
                 try{
-                    Message msg;
                     cont = true;
                     String end = "ENDOFCUSTOM";
                     String buffer = out.readLine();
                     while(!end.equals(buffer) && cont){
-                        msg = new Message();
-                        msg.obj = buffer;
-                        refresh.sendMessage(msg);
+                        if(currentFragment==FRAGMENT_CUSTOM && !background){
+                            final String temp = buffer;
+                            runInHandler(new Runnable(){
+                                @Override
+                                public void run(){
+                                    console.append(temp + '\n');
+                                }
+                            });
+                        }else{
+                            console_text += buffer + '\n';
+                        }
                         buffer = out.readLine();
                     }
-                    stop.obtainMessage().sendToTarget();
+                    runInHandler(stopRunnable);
                     if(debug) Log.d("HIJACKER/CustomCMDFrag", "thread done");
                 }catch(IOException ignored){}
             }
@@ -134,7 +142,7 @@ public class CustomActionFragment extends Fragment{
                             select_target.setText(R.string.select_target);
                             start_button.setEnabled(false);
                             setTarget();
-                            stop.obtainMessage().sendToTarget();
+                            runInHandler(stopRunnable);
                         }
                         return true;
                     }
@@ -186,7 +194,7 @@ public class CustomActionFragment extends Fragment{
                                 break;
                         }
                         select_target.setText(item.getTitle());
-                        stop.obtainMessage().sendToTarget();
+                        runInHandler(stopRunnable);
                         start_button.setEnabled(true);
                         return true;
                     }
@@ -209,17 +217,33 @@ public class CustomActionFragment extends Fragment{
                     progress.setIndeterminate(true);
                 }else{
                     //started
-                    if(selected_action.hasProcessName()){
-                        console.append("Killing process named " + selected_action.getProcessName() + '\n');
-                        if(debug) Log.d("HIJACKER/CustomCMDFrag", "Killing process named " + selected_action.getProcessName());
-                    }
-                    if(debug) Log.d("HIJACKER/CustomCMDFrag", "Running: " + selected_action.getStopCmd());
-                    cont = false;
-                    if(selected_action.hasStopCmd()){
-                        console.append("Running: " + selected_action.getStopCmd() + '\n');
-                    }
-                    selected_action.stop();
-                    stop.obtainMessage().sendToTarget();
+                    start_button.setEnabled(false);
+                    new Thread(new Runnable(){
+                        @Override
+                        public void run(){
+                            if(selected_action.hasProcessName()){
+                                runInHandler(new Runnable(){
+                                    @Override
+                                    public void run(){
+                                        console.append("Killing process named " + selected_action.getProcessName() + '\n');
+                                    }
+                                });
+                                if(debug) Log.d("HIJACKER/CustomCMDFrag", "Killing process named " + selected_action.getProcessName());
+                            }
+                            if(debug) Log.d("HIJACKER/CustomCMDFrag", "Running: " + selected_action.getStopCmd());
+                            cont = false;
+                            if(selected_action.hasStopCmd()){
+                                runInHandler(new Runnable(){
+                                    @Override
+                                    public void run(){
+                                        console.append("Running: " + selected_action.getStopCmd() + '\n');
+                                    }
+                                });
+                            }
+                            selected_action.stop();
+                            runInHandler(stopRunnable);
+                        }
+                    }).start();
                 }
             }
         });
@@ -269,22 +293,15 @@ public class CustomActionFragment extends Fragment{
         }
     }
 
-    public Handler stop = new Handler(){
-        public void handleMessage(Message msg){
+    Runnable stopRunnable = new Runnable(){
+        @Override
+        public void run(){
+            start_button.setEnabled(true);
             start_button.setText(R.string.start);
             cont = false;
             progress.setIndeterminate(false);
             if(shell!=null) shell.done();
             shell = null;
-        }
-    };
-    public Handler refresh = new Handler(){
-        public void handleMessage(Message msg){
-            if(currentFragment==FRAGMENT_CUSTOM && !background){
-                console.append((String)msg.obj + '\n');
-            }else{
-                console_text += (String)msg.obj + '\n';
-            }
         }
     };
 }

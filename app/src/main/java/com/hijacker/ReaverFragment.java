@@ -120,7 +120,7 @@ public class ReaverFragment extends Fragment{
                             AP temp = AP.APs.get(item.getItemId());
                             if(ap!=temp){
                                 ap = temp;
-                                stop.obtainMessage().sendToTarget();
+                                runInHandler(stopRunnable);
                             }
                             select_button.setText(ap.toString());
                         }else{
@@ -190,7 +190,7 @@ public class ReaverFragment extends Fragment{
                     Log.e("HIJACKER/Exception", "Caught Exception in ReaverFragment: " + e.toString());
                 }
 
-                stop.obtainMessage().sendToTarget();
+                runInHandler(stopRunnable);
             }
         };
         if(thread==null) thread = new Thread(runnable);
@@ -218,33 +218,32 @@ public class ReaverFragment extends Fragment{
                         thread.start();
                     }
                 }else{
-                    stop.obtainMessage().sendToTarget();
+                    runInHandler(stopRunnable);
                 }
             }
         });
         return fragmentView;
     }
-    public Handler stop = new Handler(){
-        public void handleMessage(Message msg){
+    Runnable stopRunnable = new Runnable(){
+        @Override
+        public void run(){
             start_button.setText(R.string.start);
             cont = false;
             progress.setIndeterminate(false);
             stop(PROCESS_REAVER);
         }
     };
-    public Handler refresh = new Handler(){
-        public void handleMessage(Message msg){
-            if(currentFragment==FRAGMENT_REAVER && !background){
-                console.append((String)msg.obj + '\n');
-            }else{
-                console_text += (String)msg.obj + '\n';
-            }
+    void writeToConsole(final String str){
+        if(currentFragment==FRAGMENT_REAVER && !background){
+            runInHandler(new Runnable(){
+                @Override
+                public void run(){
+                    console.append(str + '\n');
+                }
+            });
+        }else{
+            console_text += str + '\n';
         }
-    };
-    void writeToConsole(String str){
-        Message msg = new Message();
-        msg.obj = str;
-        refresh.sendMessage(msg);
     }
     @Override
     public void onResume() {
