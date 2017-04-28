@@ -41,6 +41,7 @@ import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
 import android.preference.PreferenceManager;
+import android.support.annotation.NonNull;
 import android.support.design.widget.Snackbar;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
@@ -198,251 +199,757 @@ public class MainActivity extends AppCompatActivity{
         file_explorer_adapter.setNotifyOnChange(true);
         setContentView(R.layout.activity_main);
         setSupportActionBar((Toolbar) findViewById(R.id.my_toolbar));
-        setup();
 
-        if(debug) Log.d("HIJACKER/Main", "path is " + path);
+        //Google AppIndex
+        client = new GoogleApiClient.Builder(MainActivity.this).addApi(AppIndex.API).build();
 
-        wpa_runnable = new Runnable(){
+        fullSetup();
+    }
+    void fullSetup(){
+        final LoadingDialog loadingDialog = new LoadingDialog();
+        loadingDialog.setInitText(getString(R.string.starting_hijacker));
+        loadingDialog.show(getFragmentManager(), "LoadingDialog");
+
+        new Thread(new Runnable(){
             @Override
             public void run(){
-                if(debug) Log.d("HIJACKER/wpa_thread", "Started wpa_thread");
-
-                Thread counter_thread = new Thread(new Runnable(){
-                    @Override
-                    public void run(){
-                        if(debug) Log.d("HIJACKER/wpa_subthread", "wpa_subthread started");
-                        try{
-                            progress_int = 0;
-                            while(progress_int<=deauthWait && wpacheckcont){
-                                Thread.sleep(1000);
-                                progress_int++;
-                                runInHandler(new Runnable(){
-                                    @Override
-                                    public void run(){
-                                        progress.setProgress(progress_int);
-                                    }
-                                });
-                            }
-                            if(wpacheckcont){
-                                runInHandler(new Runnable(){
-                                    @Override
-                                    public void run(){
-                                        if(!background) Snackbar.make(findViewById(R.id.fragment1), getString(R.string.stopped_to_capture), Snackbar.LENGTH_SHORT).show();
-                                        else Toast.makeText(MainActivity.this, getString(R.string.stopped_to_capture), Toast.LENGTH_SHORT).show();
-                                        progress.setProgress(deauthWait);
-                                        progress.setIndeterminate(true);
-                                    }
-                                });
-                            }
-                        }catch(InterruptedException e){
-                            Log.e("HIJACKER/Exception", "Caught Exception in wpa_subthread: " + e.toString());
-                            runInHandler(new Runnable(){
-                                @Override
-                                public void run(){
-                                    progress.setIndeterminate(false);
-                                    progress.setProgress(deauthWait);
-                                }
-                            });
-                        }finally{
-                            stop(PROCESS_AIREPLAY);
-                        }
-                        if(debug) Log.d("HIJACKER/wpa_subthread", "wpa_subthread finished");
-                    }
-                });
-
-                boolean handshake_captured = false;
-                final String capfile = Airodump.getCapFile();
-                Shell shell = getFreeShell();
-                try{
-                    if(capfile==null){
-                        if(debug) Log.d("HIJACKER/wpa_thread", "cap file not found, airodump is probably not running...");
-                    }else{
-                        if(debug) Log.d("HIJACKER/wpa_thread", capfile);
-                        wpacheckcont = true;
-                        counter_thread.start();
-
-                        BufferedReader out = shell.getShell_out();
-                        String buffer;
-                        while(!handshake_captured && wpacheckcont){
-                            //Check loop
-                            if(debug) Log.d("HIJACKER/wpa_thread", "Checking cap file...");
-                            shell.run(aircrack_dir + " " + capfile + "; echo ENDOFAIR");
-                            buffer = out.readLine();
-                            if(buffer==null) break;
-                            else{
-                                while(!buffer.equals("ENDOFAIR")){
-                                    if(buffer.length()>=56){
-                                        if(buffer.charAt(56)=='1' || buffer.charAt(56)=='2' || buffer.charAt(56)=='3'){
-                                            handshake_captured = true;
-                                            break;
-                                        }
-                                    }
-                                    buffer = out.readLine();
-                                }
-                                Thread.sleep(700);
-                            }
-                        }
-                    }
-                }catch(IOException | InterruptedException e){
-                    Log.e("HIJACKER/Exception", "Caught Exception in wpa_thread: " + e.toString());
-                }finally{
-                    wpacheckcont = false;
-                    counter_thread.interrupt();
-                    shell.done();
-                    final boolean found = handshake_captured;
-                    if(found) Airodump.startClean(is_ap);
+                Looper.prepare();
+                if(ContextCompat.checkSelfPermission(MainActivity.this, Manifest.permission.READ_EXTERNAL_STORAGE)!=PackageManager.PERMISSION_GRANTED){
+                    //Request permissions
                     runInHandler(new Runnable(){
                         @Override
                         public void run(){
-                            Button crack_btn = (Button) findViewById(R.id.crack);
-                            if(crack_btn!=null){
-                                //We are in IsolatedFragment
-                                crack_btn.setText(getString(R.string.crack));
-                            }
-
-                            if(found){
-                                if(!background){
-                                    Snackbar s = Snackbar.make(findViewById(R.id.fragment1), getString(R.string.handshake_captured) + ' ' + capfile, Snackbar.LENGTH_LONG);
-                                    s.setAction(R.string.crack, new View.OnClickListener(){
-                                        @Override
-                                        public void onClick(View v){
-                                            CrackFragment.capfile_text = capfile;
-                                            FragmentTransaction ft = mFragmentManager.beginTransaction();
-                                            ft.replace(R.id.fragment1, new CrackFragment());
-                                            ft.setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN);
-                                            ft.addToBackStack(null);
-                                            ft.commitAllowingStateLoss();
-                                        }
-                                    });
-                                    s.show();
-                                }else{
-                                    handshake_notif.setContentText(getString(R.string.saved_in_file) + ' ' + capfile);
-                                    mNotificationManager.notify(2, handshake_notif.build());
-                                }
-                                progress.setIndeterminate(false);
-                            }
-                            if(debug) Log.d("HIJACKER/wpa_thread", "wpa_thread finished");
+                            loadingDialog.setText(getString(R.string.requesting_permissions));
                         }
                     });
+                    ActivityCompat.requestPermissions(MainActivity.this, new String[]{Manifest.permission.CHANGE_WIFI_STATE, Manifest.permission.ACCESS_WIFI_STATE, Manifest.permission.WRITE_EXTERNAL_STORAGE, Manifest.permission.READ_EXTERNAL_STORAGE, Manifest.permission.ACCESS_NETWORK_STATE, Manifest.permission.INTERNET}, 0);
                 }
-            }
-        };
-        wpa_thread = new Thread(wpa_runnable);
 
-        watchdog_runnable = new Runnable(){        //Thread to check whether the tools we think are running, are actually running
-            @Override
-            public void run(){
+                //Initialize managers
+                runInHandler(new Runnable(){
+                    @Override
+                    public void run(){
+                        loadingDialog.setText(getString(R.string.init_managers));
+                    }
+                });
+                pref = PreferenceManager.getDefaultSharedPreferences(MainActivity.this);
+                pref_edit = pref.edit();
+                clipboard = (ClipboardManager) getSystemService(CLIPBOARD_SERVICE);
+                mNotificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
+                mFragmentManager = getFragmentManager();
+
+                //Load device information
+                runInHandler(new Runnable(){
+                    @Override
+                    public void run(){
+                        loadingDialog.setText(getString(R.string.loading_device_information));
+                    }
+                });
+                PackageManager manager = MainActivity.this.getPackageManager();
+                PackageInfo info = null;
                 try{
-                    boolean flag = true;
-                    while(flag){
-                        Thread.sleep(5000);
-                        while(System.currentTimeMillis()-last_action < 1000){
-                            if(debug) Log.d("HIJACKER/watchdog", "Watchdog waiting for 1 sec...");
-                            Thread.sleep(1000);
-                        }
-                        if(debug) Log.d("HIJACKER/watchdog", "Watchdog watching...");
-                        List<Integer> list;
-                        Message msg;
-                        list = getPIDs(PROCESS_AIRODUMP);
-                        if(Airodump.isRunning() && list.size()==0){          //airodump not running
-                            msg = new Message();
-                            msg.obj = getString(R.string.airodump_not_running);
-                            watchdog_handler.sendMessage(msg);
-                            flag = false;
-                            stop(PROCESS_AIRODUMP);
-                        }else if(!Airodump.isRunning() && list.size()>0){     //airodump still running
-                            if(debug) Log.d("HIJACKER/watchdog", "Airodump is still running. Trying to kill it...");
-                            stop(PROCESS_AIRODUMP);
-                            if(getPIDs(PROCESS_AIRODUMP).size()>0){
-                                msg = new Message();
-                                msg.obj = getString(R.string.airodump_still_running);
-                                watchdog_handler.sendMessage(msg);
-                                flag = false;
-                            }
-                        }
-                        list = getPIDs(PROCESS_AIREPLAY);
-                        if(aireplay_running!=0 && list.size()==0){      //aireplay not running
-                            msg = new Message();
-                            msg.obj = getString(R.string.aireplay_not_running);
-                            watchdog_handler.sendMessage(msg);
-                            flag = false;
-                            stop(PROCESS_AIREPLAY);
-                        }else if(aireplay_running==0 && list.size()>0){ //aireplay still running
-                            if(debug) Log.d("HIJACKER/watchdog", "Aireplay is still running. Trying to kill it...");
-                            stop(PROCESS_AIREPLAY);
-                            if(getPIDs(PROCESS_AIREPLAY).size()>0){
-                                msg = new Message();
-                                msg.obj = getString(R.string.aireplay_still_running);
-                                watchdog_handler.sendMessage(msg);
-                                flag = false;
-                            }
-                        }
-                        list = getPIDs(PROCESS_MDK);
-                        if((bf || ados) && list.size()==0){         //mdk not running
-                            msg = new Message();
-                            msg.obj = getString(R.string.mdk_not_running);
-                            watchdog_handler.sendMessage(msg);
-                            flag = false;
-                            stop(PROCESS_MDK);
-                        }else if(!(bf || ados) && list.size()>0){   //mdk still running
-                            if(debug) Log.d("HIJACKER/watchdog", "MDK is still running. Trying to kill it...");
-                            stop(PROCESS_MDK);
-                            if(getPIDs(PROCESS_MDK).size()>0){
-                                msg = new Message();
-                                msg.obj = getString(R.string.mdk_still_running);
-                                watchdog_handler.sendMessage(msg);
-                                flag = false;
-                            }
-                        }
-                        list = getPIDs(PROCESS_REAVER);
-                        if(ReaverFragment.cont && list.size()==0){         //reaver not running
-                            msg = new Message();
-                            msg.obj = getString(R.string.reaver_not_running);
-                            watchdog_handler.sendMessage(msg);
-                            flag = false;
-                            stop(PROCESS_REAVER);
-                        }else if(!ReaverFragment.cont && list.size()>0){   //reaver still running
-                            if(debug) Log.d("HIJACKER/watchdog", "Reaver is still running. Trying to kill it...");
-                            stop(PROCESS_REAVER);
-                            if(getPIDs(PROCESS_REAVER).size()>0){
-                                msg = new Message();
-                                msg.obj = getString(R.string.reaver_still_running);
-                                watchdog_handler.sendMessage(msg);
-                                flag = false;
-                            }
+                    info = manager.getPackageInfo(MainActivity.this.getPackageName(), 0);
+                    versionName = info.versionName.replace(" ", "_");
+                    versionCode = info.versionCode;
+                }catch(PackageManager.NameNotFoundException e){
+                    Log.e("HIJACKER/setup", e.toString());
+                }
+                deviceModel = Build.MODEL;
+                if(!deviceModel.startsWith(Build.MANUFACTURER)) deviceModel = Build.MANUFACTURER + " " + deviceModel;
+                deviceModel = deviceModel.replace(" ", "_");
+                deviceID = pref.getLong("deviceID", -1);
+                arch = System.getProperty("os.arch");
+
+                //Find views
+                runInHandler(new Runnable(){
+                    @Override
+                    public void run(){
+                        loadingDialog.setText(getString(R.string.init_views));
+                    }
+                });
+                ap_count = (TextView) findViewById(R.id.ap_count);
+                st_count = (TextView) findViewById(R.id.st_count);
+                progress = (ProgressBar) findViewById(R.id.progressBar);
+                toolbar = (Toolbar) findViewById(R.id.my_toolbar);
+                rootView = findViewById(R.id.fragment1);
+                overflow[0] = getDrawable(R.drawable.overflow0);
+                overflow[1] = getDrawable(R.drawable.overflow1);
+                overflow[2] = getDrawable(R.drawable.overflow2);
+                overflow[3] = getDrawable(R.drawable.overflow3);
+                overflow[4] = getDrawable(R.drawable.overflow4);
+                overflow[5] = getDrawable(R.drawable.overflow5);
+                overflow[6] = getDrawable(R.drawable.overflow6);
+                overflow[7] = getDrawable(R.drawable.overflow7);
+                actionBar = getSupportActionBar();
+                toolbar.setOverflowIcon(overflow[0]);
+
+                //Load defaults
+                runInHandler(new Runnable(){
+                    @Override
+                    public void run(){
+                        loadingDialog.setText(getString(R.string.loading_defaults));
+                    }
+                });
+                iface = getString(R.string.iface);
+                prefix = getString(R.string.prefix);
+                cap_dir = getString(R.string.cap_dir);
+                enable_monMode = getString(R.string.enable_monMode);
+                disable_monMode = getString(R.string.disable_monMode);
+                enable_on_airodump = Boolean.parseBoolean(getString(R.string.enable_on_airodump));
+                deauthWait = Integer.parseInt(getString(R.string.deauthWait));
+                show_notif = Boolean.parseBoolean(getString(R.string.show_notif));
+                show_details = Boolean.parseBoolean(getString(R.string.show_details));
+                airOnStartup = Boolean.parseBoolean(getString(R.string.airOnStartup));
+                debug = Boolean.parseBoolean(getString(R.string.debug));
+                delete_extra = Boolean.parseBoolean(getString(R.string.delete_extra));
+                always_cap = Boolean.parseBoolean(getString(R.string.always_cap));
+                chroot_dir = getString(R.string.chroot_dir);
+                monstart = Boolean.parseBoolean(getString(R.string.monstart));
+                custom_chroot_cmd = "";
+                cont_on_fail = Boolean.parseBoolean(getString(R.string.cont_on_fail));
+                watchdog = Boolean.parseBoolean(getString(R.string.watchdog));
+                target_deauth = Boolean.parseBoolean(getString(R.string.target_deauth));
+                update_on_startup = Boolean.parseBoolean(getString(R.string.auto_update));
+
+                //Load preferences
+                runInHandler(new Runnable(){
+                    @Override
+                    public void run(){
+                        loadingDialog.setText(getString(R.string.loading_preferences));
+                    }
+                });
+                load();
+
+                //Initialize paths
+                runInHandler(new Runnable(){
+                    @Override
+                    public void run(){
+                        loadingDialog.setText(getString(R.string.init_files));
+                    }
+                });
+                path = getFilesDir().getAbsolutePath();
+                data_path = Environment.getExternalStorageDirectory() + "/Hijacker";
+                actions_path = data_path + "/actions";
+                firm_backup_file = data_path + "/fw_bcmdhd.orig.bin";
+                manufDBFile = path + "/manuf.db";
+                File data_dir = new File(data_path);
+                if(!data_dir.exists()){
+                    //Create directory, subdirectories and files
+                    data_dir.mkdir();
+
+                    //Move app files from other directories in /Hijacker
+                    File firm_backup_old = new File(Environment.getExternalStorageDirectory() + "/fw_bcmdhd.orig.bin");
+                    if(firm_backup_old.exists()){
+                        firm_backup_old.renameTo(new File(data_path + "/fw_bcmdhd.orig.bin"));
+                    }
+
+                    File actions_dir_old = new File(Environment.getExternalStorageDirectory() + "/Hijacker-actions");
+                    if(actions_dir_old.exists()){
+                        actions_dir_old.renameTo(new File(actions_path));
+                    }else{
+                        new File(data_dir + "/actions").mkdir();
+                    }
+                }
+
+                //Initialize notifications
+                runInHandler(new Runnable(){
+                    @Override
+                    public void run(){
+                        loadingDialog.setText(getString(R.string.init_notifications));
+                    }
+                });
+                //Create intents
+                Intent cancel_intent = new Intent(MainActivity.this, DismissReceiver.class);
+                Intent stop_intent = new Intent(MainActivity.this, StopReceiver.class);
+                Intent notificationIntent = new Intent(MainActivity.this, MainActivity.class);
+                notificationIntent.setFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT);
+                PendingIntent click_intent = PendingIntent.getActivity(MainActivity.this, 0, notificationIntent, 0);
+
+                //Create 'running' notification
+                notif = new NotificationCompat.Builder(MainActivity.this);
+                notif.setContentTitle(getString(R.string.notification_title));
+                notif.setContentText(" ");
+                notif.setSmallIcon(R.drawable.ic_notification);
+                if(Build.VERSION.SDK_INT>=Build.VERSION_CODES.M){
+                    notif.setColor(getColor(R.color.colorAccent));
+                }
+                notif.setDeleteIntent(PendingIntent.getBroadcast(MainActivity.this.getApplicationContext(), 0, cancel_intent, 0));
+                notif.addAction(R.drawable.stop_drawable, getString(R.string.stop_attacks), PendingIntent.getBroadcast(MainActivity.this.getApplicationContext(), 0, stop_intent, 0));
+                notif.setContentIntent(click_intent);
+
+                //Create 'error' notification (used by watchdog)
+                error_notif = new NotificationCompat.Builder(MainActivity.this);
+                error_notif.setContentTitle(getString(R.string.notification2_title));
+                error_notif.setContentText("");
+                error_notif.setSmallIcon(R.drawable.ic_notification);
+                if(Build.VERSION.SDK_INT>=Build.VERSION_CODES.M){
+                    error_notif.setColor(getColor(android.R.color.holo_red_dark));
+                }
+                error_notif.setContentIntent(click_intent);
+                error_notif.setVibrate(new long[]{500, 500});
+
+                //Create 'handshake captured' notification (used by wpa_thread)
+                handshake_notif = new NotificationCompat.Builder(MainActivity.this);
+                handshake_notif.setContentTitle(getString(R.string.handshake_captured));
+                if(Build.VERSION.SDK_INT>=Build.VERSION_CODES.M){
+                    handshake_notif.setColor(getColor(android.R.color.holo_green_dark));
+                }
+                handshake_notif.setSmallIcon(R.drawable.ic_notification);
+                handshake_notif.setContentIntent(click_intent);
+                handshake_notif.setVibrate(new long[]{500, 500});
+
+                //Load strings for when they cannot be retrieved with getString or R.string...
+                runInHandler(new Runnable(){
+                    @Override
+                    public void run(){
+                        loadingDialog.setText(getString(R.string.loading_strings));
+                    }
+                });
+                ST.not_connected = getString(R.string.not_connected);
+                ST.paired = getString(R.string.paired) + ' ';
+                ErrorDialog.notification2_title =  getString(R.string.notification2_title);
+
+                //Initialize the drawer
+                runInHandler(new Runnable(){
+                    @Override
+                    public void run(){
+                        loadingDialog.setText(getString(R.string.init_drawer));
+                    }
+                });
+                mPlanetTitles = getResources().getStringArray(R.array.planets_array);
+                mDrawerLayout = (DrawerLayout) findViewById(R.id.drawer_layout);
+                mDrawerList = (ListView) findViewById(R.id.left_drawer);
+                mDrawerList.setAdapter(new ArrayAdapter<>(MainActivity.this, R.layout.drawer_list_item, R.id.navDrawerTv, mPlanetTitles));
+                mDrawerList.setOnItemClickListener(new DrawerItemClickListener());
+
+                //Setup tools
+                runInHandler(new Runnable(){
+                    @Override
+                    public void run(){
+                        loadingDialog.setText(getString(R.string.setting_up_tools));
+                    }
+                });
+                if(arch.equals("armv7l") || arch.equals("aarch64")){
+                    File bin = new File(path + "/bin");
+                    File lib = new File(path + "/lib");
+                    if(!bin.exists()){
+                        if(!bin.mkdir()){
+                            final ErrorDialog dialog = new ErrorDialog();
+                            dialog.setMessage(getString(R.string.bin_not_created));
+                            runInHandler(new Runnable(){
+                                @Override
+                                public void run(){
+                                    dialog.show(mFragmentManager, "ErrorDialog");
+                                }
+                            });
+                            return;
                         }
                     }
-                }catch(InterruptedException e){ Log.e("HIJACKER/watchdog", "Exception: " + e.toString()); }
+                    if(!lib.exists()){
+                        if(!lib.mkdir()){
+                            final ErrorDialog dialog = new ErrorDialog();
+                            dialog.setMessage(getString(R.string.lib_not_created));
+                            runInHandler(new Runnable(){
+                                @Override
+                                public void run(){
+                                    dialog.show(mFragmentManager, "ErrorDialog");
+                                }
+                            });
+                            return;
+                        }
+                    }
+                    boolean install = true;
+                    if(bin.list().length==20 && lib.list().length==1 && info!=null){
+                        if(info.versionCode<=pref.getInt("tools_version", 0)){
+                            if(debug) Log.d("HIJACKER/installTools", "Tools already installed");
+                            install = false;
+                        }else{
+                            File manufDB = new File(manufDBFile);
+                            if(manufDB.exists()) manufDB.delete();
+                        }
+                    }
+                    if(install){
+                        String tools_location = path + "/bin/";
+                        String lib_location = path + "/lib/";
+                        extract("airbase-ng", tools_location, true);
+                        extract("aircrack-ng", tools_location, true);
+                        extract("aireplay-ng", tools_location, true);
+                        extract("airodump-ng", tools_location, true);
+                        extract("besside-ng", tools_location, true);
+                        extract("busybox", tools_location, true);
+                        extract("ivstools", tools_location, true);
+                        extract("iw", tools_location, true);
+                        extract("iwconfig", tools_location, true);
+                        extract("iwlist", tools_location, true);
+                        extract("iwpriv", tools_location, true);
+                        extract("kstats", tools_location, true);
+                        extract("makeivs-ng", tools_location, true);
+                        extract("mdk3", tools_location, true);
+                        extract("nc", tools_location, true);
+                        extract("packetforge-ng", tools_location, true);
+                        extract("reaver", tools_location, true);
+                        extract("reaver-wash", tools_location, true);
+                        extract("wesside-ng", tools_location, true);
+                        extract("wpaclean", tools_location, true);
+                        extract("libfakeioctl.so", lib_location, true);
+
+                        if(info!=null){
+                            pref_edit.putInt("tools_version", info.versionCode);
+                            pref_edit.apply();
+                        }
+                    }
+                    busybox = path + "/bin/busybox";
+
+                    prefix = "LD_PRELOAD=" + path + "/lib/libfakeioctl.so";
+                    airodump_dir = path + "/bin/airodump-ng";
+                    aireplay_dir = path + "/bin/aireplay-ng";
+                    aircrack_dir = path + "/bin/aircrack-ng";
+                    mdk3_dir = path + "/bin/mdk3";
+                    reaver_dir = path + "/bin/reaver";
+                }else{
+                    Log.e("HIJACKER/onCreate", "Device not armv7l or aarch64, can't install tools");
+                    busybox = "busybox";
+                    final ErrorDialog dialog = new ErrorDialog();
+                    dialog.setMessage(getString(R.string.not_armv7l));
+                    runInHandler(new Runnable(){
+                        @Override
+                        public void run(){
+                            dialog.show(getFragmentManager(), "ErrorDialog");
+                        }
+                    });
+
+                    prefix = pref.getString("prefix", prefix);
+                    airodump_dir = "airodump-ng";
+                    aireplay_dir = "aireplay-ng";
+                    aircrack_dir = "aircrack-ng";
+                    mdk3_dir = "mdk3";
+                    reaver_dir = "reaver";
+                }
+
+                //Initialize RootFile
+                runInHandler(new Runnable(){
+                    @Override
+                    public void run(){
+                        loadingDialog.setText(getString(R.string.init_rootFile));
+                    }
+                });
+                RootFile.init();
+
+                //Initialize threads
+                runInHandler(new Runnable(){
+                    @Override
+                    public void run(){
+                        loadingDialog.setText(getString(R.string.init_threads));
+                    }
+                });
+                wpa_runnable = new Runnable(){
+                    @Override
+                    public void run(){
+                        if(debug) Log.d("HIJACKER/wpa_thread", "Started wpa_thread");
+
+                        Thread counter_thread = new Thread(new Runnable(){
+                            @Override
+                            public void run(){
+                                if(debug) Log.d("HIJACKER/wpa_subthread", "wpa_subthread started");
+                                try{
+                                    progress_int = 0;
+                                    while(progress_int<=deauthWait && wpacheckcont){
+                                        Thread.sleep(1000);
+                                        progress_int++;
+                                        runInHandler(new Runnable(){
+                                            @Override
+                                            public void run(){
+                                                progress.setProgress(progress_int);
+                                            }
+                                        });
+                                    }
+                                    if(wpacheckcont){
+                                        runInHandler(new Runnable(){
+                                            @Override
+                                            public void run(){
+                                                if(!background) Snackbar.make(findViewById(R.id.fragment1), getString(R.string.stopped_to_capture), Snackbar.LENGTH_SHORT).show();
+                                                else Toast.makeText(MainActivity.this, getString(R.string.stopped_to_capture), Toast.LENGTH_SHORT).show();
+                                                progress.setProgress(deauthWait);
+                                                progress.setIndeterminate(true);
+                                            }
+                                        });
+                                    }
+                                }catch(InterruptedException e){
+                                    Log.e("HIJACKER/Exception", "Caught Exception in wpa_subthread: " + e.toString());
+                                    runInHandler(new Runnable(){
+                                        @Override
+                                        public void run(){
+                                            progress.setIndeterminate(false);
+                                            progress.setProgress(deauthWait);
+                                        }
+                                    });
+                                }finally{
+                                    stop(PROCESS_AIREPLAY);
+                                }
+                                if(debug) Log.d("HIJACKER/wpa_subthread", "wpa_subthread finished");
+                            }
+                        });
+
+                        boolean handshake_captured = false;
+                        final String capfile = Airodump.getCapFile();
+                        Shell shell = getFreeShell();
+                        try{
+                            if(capfile==null){
+                                if(debug) Log.d("HIJACKER/wpa_thread", "cap file not found, airodump is probably not running...");
+                            }else{
+                                if(debug) Log.d("HIJACKER/wpa_thread", capfile);
+                                wpacheckcont = true;
+                                counter_thread.start();
+
+                                BufferedReader out = shell.getShell_out();
+                                String buffer;
+                                while(!handshake_captured && wpacheckcont){
+                                    //Check loop
+                                    if(debug) Log.d("HIJACKER/wpa_thread", "Checking cap file...");
+                                    shell.run(aircrack_dir + " " + capfile + "; echo ENDOFAIR");
+                                    buffer = out.readLine();
+                                    if(buffer==null) break;
+                                    else{
+                                        while(!buffer.equals("ENDOFAIR")){
+                                            if(buffer.length()>=56){
+                                                if(buffer.charAt(56)=='1' || buffer.charAt(56)=='2' || buffer.charAt(56)=='3'){
+                                                    handshake_captured = true;
+                                                    break;
+                                                }
+                                            }
+                                            buffer = out.readLine();
+                                        }
+                                        Thread.sleep(700);
+                                    }
+                                }
+                            }
+                        }catch(IOException | InterruptedException e){
+                            Log.e("HIJACKER/Exception", "Caught Exception in wpa_thread: " + e.toString());
+                        }finally{
+                            wpacheckcont = false;
+                            counter_thread.interrupt();
+                            shell.done();
+                            final boolean found = handshake_captured;
+                            if(found) Airodump.startClean(is_ap);
+                            runInHandler(new Runnable(){
+                                @Override
+                                public void run(){
+                                    Button crack_btn = (Button) findViewById(R.id.crack);
+                                    if(crack_btn!=null){
+                                        //We are in IsolatedFragment
+                                        crack_btn.setText(getString(R.string.crack));
+                                    }
+
+                                    if(found){
+                                        if(!background){
+                                            Snackbar s = Snackbar.make(findViewById(R.id.fragment1), getString(R.string.handshake_captured) + ' ' + capfile, Snackbar.LENGTH_LONG);
+                                            s.setAction(R.string.crack, new View.OnClickListener(){
+                                                @Override
+                                                public void onClick(View v){
+                                                    CrackFragment.capfile_text = capfile;
+                                                    FragmentTransaction ft = mFragmentManager.beginTransaction();
+                                                    ft.replace(R.id.fragment1, new CrackFragment());
+                                                    ft.setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN);
+                                                    ft.addToBackStack(null);
+                                                    ft.commitAllowingStateLoss();
+                                                }
+                                            });
+                                            s.show();
+                                        }else{
+                                            handshake_notif.setContentText(getString(R.string.saved_in_file) + ' ' + capfile);
+                                            mNotificationManager.notify(2, handshake_notif.build());
+                                        }
+                                        progress.setIndeterminate(false);
+                                    }
+                                    if(debug) Log.d("HIJACKER/wpa_thread", "wpa_thread finished");
+                                }
+                            });
+                        }
+                    }
+                };
+                wpa_thread = new Thread(wpa_runnable);
+
+                watchdog_runnable = new Runnable(){        //Thread to check whether the tools we think are running, are actually running
+                    @Override
+                    public void run(){
+                        try{
+                            boolean flag = true;
+                            while(flag){
+                                Thread.sleep(5000);
+                                while(System.currentTimeMillis()-last_action < 1000){
+                                    if(debug) Log.d("HIJACKER/watchdog", "Watchdog waiting for 1 sec...");
+                                    Thread.sleep(1000);
+                                }
+                                if(debug) Log.d("HIJACKER/watchdog", "Watchdog watching...");
+                                List<Integer> list;
+                                Message msg;
+                                list = getPIDs(PROCESS_AIRODUMP);
+                                if(Airodump.isRunning() && list.size()==0){          //airodump not running
+                                    msg = new Message();
+                                    msg.obj = getString(R.string.airodump_not_running);
+                                    watchdog_handler.sendMessage(msg);
+                                    flag = false;
+                                    stop(PROCESS_AIRODUMP);
+                                }else if(!Airodump.isRunning() && list.size()>0){     //airodump still running
+                                    if(debug) Log.d("HIJACKER/watchdog", "Airodump is still running. Trying to kill it...");
+                                    stop(PROCESS_AIRODUMP);
+                                    if(getPIDs(PROCESS_AIRODUMP).size()>0){
+                                        msg = new Message();
+                                        msg.obj = getString(R.string.airodump_still_running);
+                                        watchdog_handler.sendMessage(msg);
+                                        flag = false;
+                                    }
+                                }
+                                list = getPIDs(PROCESS_AIREPLAY);
+                                if(aireplay_running!=0 && list.size()==0){      //aireplay not running
+                                    msg = new Message();
+                                    msg.obj = getString(R.string.aireplay_not_running);
+                                    watchdog_handler.sendMessage(msg);
+                                    flag = false;
+                                    stop(PROCESS_AIREPLAY);
+                                }else if(aireplay_running==0 && list.size()>0){ //aireplay still running
+                                    if(debug) Log.d("HIJACKER/watchdog", "Aireplay is still running. Trying to kill it...");
+                                    stop(PROCESS_AIREPLAY);
+                                    if(getPIDs(PROCESS_AIREPLAY).size()>0){
+                                        msg = new Message();
+                                        msg.obj = getString(R.string.aireplay_still_running);
+                                        watchdog_handler.sendMessage(msg);
+                                        flag = false;
+                                    }
+                                }
+                                list = getPIDs(PROCESS_MDK);
+                                if((bf || ados) && list.size()==0){         //mdk not running
+                                    msg = new Message();
+                                    msg.obj = getString(R.string.mdk_not_running);
+                                    watchdog_handler.sendMessage(msg);
+                                    flag = false;
+                                    stop(PROCESS_MDK);
+                                }else if(!(bf || ados) && list.size()>0){   //mdk still running
+                                    if(debug) Log.d("HIJACKER/watchdog", "MDK is still running. Trying to kill it...");
+                                    stop(PROCESS_MDK);
+                                    if(getPIDs(PROCESS_MDK).size()>0){
+                                        msg = new Message();
+                                        msg.obj = getString(R.string.mdk_still_running);
+                                        watchdog_handler.sendMessage(msg);
+                                        flag = false;
+                                    }
+                                }
+                                list = getPIDs(PROCESS_REAVER);
+                                if(ReaverFragment.cont && list.size()==0){         //reaver not running
+                                    msg = new Message();
+                                    msg.obj = getString(R.string.reaver_not_running);
+                                    watchdog_handler.sendMessage(msg);
+                                    flag = false;
+                                    stop(PROCESS_REAVER);
+                                }else if(!ReaverFragment.cont && list.size()>0){   //reaver still running
+                                    if(debug) Log.d("HIJACKER/watchdog", "Reaver is still running. Trying to kill it...");
+                                    stop(PROCESS_REAVER);
+                                    if(getPIDs(PROCESS_REAVER).size()>0){
+                                        msg = new Message();
+                                        msg.obj = getString(R.string.reaver_still_running);
+                                        watchdog_handler.sendMessage(msg);
+                                        flag = false;
+                                    }
+                                }
+                            }
+                        }catch(InterruptedException e){ Log.e("HIJACKER/watchdog", "Exception: " + e.toString()); }
+                    }
+                };
+                watchdog_thread = new Thread(watchdog_runnable);
+
+                //Start threads
+                runInHandler(new Runnable(){
+                    @Override
+                    public void run(){
+                        loadingDialog.setText(getString(R.string.starting_threads));
+                    }
+                });
+                new Thread(new Runnable(){      //Thread to wait until the drawer is initialized and then highlight airodump
+                    @Override
+                    public void run(){
+                        //Thread to wait for the drawer to be initialized, so that the first option (airodump) can be highlighted
+                        try{
+                            while(mDrawerList.getChildAt(0)==null){
+                                Thread.sleep(100);
+                            }
+                            runInHandler(new Runnable(){
+                                @Override
+                                public void run(){
+                                    refreshDrawer();
+                                }
+                            });
+                        }catch(InterruptedException ignored){}
+                    }
+                }).start();
+
+                if(watchdog){
+                    watchdog_thread = new Thread(watchdog_runnable);
+                    watchdog_thread.start();
+                }
+
+                if(update_on_startup){
+                    //Spawn new thread to wait for internet connection
+                    //This should be changed to a broadcast receiver
+                    new Thread(new Runnable(){
+                        @Override
+                        public void run(){
+                            try{
+                                while(!internetAvailable(MainActivity.this)){
+                                    Thread.sleep(1000);
+                                }
+                                checkForUpdate(MainActivity.this, false);
+                            }catch(InterruptedException ignored){}
+                        }
+                    }).start();
+                }
+
+                //Start background service so the app won't get killed if it goes to the background
+                runInHandler(new Runnable(){
+                    @Override
+                    public void run(){
+                        loadingDialog.setText(getString(R.string.starting_pers_service));
+                    }
+                });
+                startService(new Intent(MainActivity.this, PersistenceService.class));
+
+                //Load manufacturer AVL tree
+                runInHandler(new Runnable(){
+                    @Override
+                    public void run(){
+                        loadingDialog.setText(getString(R.string.loading_manuf_db));
+                    }
+                });
+                if(manufAVL==null){
+                    manufAVL = new AVLTree<>();
+                }else{
+                    manufAVL.clear();
+                }
+                File db = new File(manufDBFile);
+                if(!db.exists()){
+                    //Database has not been created
+                    try{
+                        //Create the database
+                        if(!db.createNewFile()){
+                            Log.e("HIJACKER/loadManufAVL", "Error creating database file");
+                        }else{
+                            runInHandler(new Runnable(){
+                                @Override
+                                public void run(){
+                                    loadingDialog.setText(getString(R.string.building_manuf_db));
+                                }
+                            });
+                            BufferedReader out = new BufferedReader(new InputStreamReader(getResources().getAssets().open("oui.txt")));
+                            FileWriter in = new FileWriter(db);
+
+                            //Load data from oui.txt and write to the new database file
+                            String buffer = out.readLine();
+                            while(buffer!=null){
+                                if(buffer.length()<18 || !buffer.contains("(base 16)")){
+                                    buffer = out.readLine();
+                                    continue;
+                                }
+
+                                long macID = toLong(buffer.substring(0, 6));
+                                String manuf = buffer.substring(22);
+                                if(manufAVL.add(manuf, macID)){
+                                    //Write to file only if it was added to the AVL (it's unique)
+                                    in.write(Long.toString(macID) + ";" + manuf + '\n');
+                                }
+
+                                buffer = out.readLine();
+                            }
+                            in.close();
+                            out.close();
+                        }
+                    }catch(IOException e){
+                        Log.e("HIJACKER/loadManufAVL", e.toString());
+                        manufAVL = null;
+                    }
+                }else{
+                    //Load database on the AVL
+                    try{
+                        //Database format:
+                        //01B256;Manufacturer co.\n
+                        BufferedReader out = new BufferedReader(new FileReader(db));
+
+                        String buffer = out.readLine();
+                        while(buffer!=null){
+                            manufAVL.add(buffer.substring(buffer.indexOf(';')+1), Long.parseLong(buffer.substring(0, buffer.indexOf(';'))));
+                            buffer = out.readLine();
+                        }
+                    }catch(IOException e){
+                        Log.e("HIJACKER/loadManufAVL", e.toString());
+                        manufAVL = null;
+                    }
+                }
+
+                if(ContextCompat.checkSelfPermission(MainActivity.this, Manifest.permission.READ_EXTERNAL_STORAGE)==PackageManager.PERMISSION_GRANTED){
+                    //Load custom actions
+                    runInHandler(new Runnable(){
+                        @Override
+                        public void run(){
+                            loadingDialog.setText(getString(R.string.loading_custom_actions));
+                        }
+                    });
+                    CustomAction.load();
+
+                    //Create or read aliases file
+                    runInHandler(new Runnable(){
+                        @Override
+                        public void run(){
+                            loadingDialog.setText(getString(R.string.loading_aliases));
+                        }
+                    });
+                    loadAliases();
+                }
+
+                //Delete old report, it's not needed if no exception is thrown up to this point
+                runInHandler(new Runnable(){
+                    @Override
+                    public void run(){
+                        loadingDialog.setText(getString(R.string.deleting_bug_report));
+                    }
+                });
+                File report = new File(Environment.getExternalStorageDirectory() + "/report.txt");
+                if(report.exists()) report.delete();
+
+                runInHandler(new Runnable(){
+                    @Override
+                    public void run(){
+                        //Load default fragment (airodump)
+                        loadingDialog.setText(getString(R.string.starting_hijacker));
+                        if(mFragmentManager.getBackStackEntryCount()==0){
+                            FragmentTransaction ft = mFragmentManager.beginTransaction();
+                            ft.replace(R.id.fragment1, new MyListFragment());
+                            ft.setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN);
+                            ft.addToBackStack(null);
+                            ft.commitAllowingStateLoss();
+                        }
+
+                        loadingDialog.dismissAllowingStateLoss();
+
+                        //Start
+                        if(!pref.getBoolean("disclaimer", false)){
+                            //First start
+                            runInHandler(new Runnable(){
+                                @Override
+                                public void run(){
+                                    new DisclaimerDialog().show(getFragmentManager(), "Disclaimer");
+                                    //Check for SuperSU
+                                    if(!new File("/su").exists()){
+                                        ErrorDialog dialog = new ErrorDialog();
+                                        dialog.setTitle(getString(R.string.su_notfound_title));
+                                        dialog.setMessage(getString(R.string.su_notfound));
+                                        dialog.show(getFragmentManager(), "ErrorDialog");
+                                    }
+                                }
+                            });
+                        }else main();
+                    }
+                });
             }
-        };
-        watchdog_thread = new Thread(watchdog_runnable);
+        }).start();
 
-        ActivityCompat.requestPermissions(this, new String[]{
-                Manifest.permission.CHANGE_WIFI_STATE,
-                Manifest.permission.ACCESS_WIFI_STATE,
-                Manifest.permission.WRITE_EXTERNAL_STORAGE,
-                Manifest.permission.ACCESS_NETWORK_STATE,
-                Manifest.permission.INTERNET
-        }, 0);
-
-        //First start
-        if(!pref.getBoolean("disclaimer", false)){
-            new DisclaimerDialog().show(getFragmentManager(), "Disclaimer");
-            //Check for SuperSU
-            if(!new File("/su").exists()){
-                ErrorDialog dialog = new ErrorDialog();
-                dialog.setTitle(getString(R.string.su_notfound_title));
-                dialog.setMessage(getString(R.string.su_notfound));
-                dialog.show(getFragmentManager(), "ErrorDialog");
-            }
-        }else main();
-
-        //Load manufacturer AVL tree
-        loadManufAVL();
-
-        //Delete old report, it's not needed if no exception is thrown up to this point
-        File report = new File(Environment.getExternalStorageDirectory() + "/report.txt");
-        if(report.exists()) report.delete();
     }
     void extract(String filename, String out_dir, boolean chmod){
         File f = new File(out_dir, filename);
@@ -475,67 +982,6 @@ public class MainActivity extends AppCompatActivity{
         stop(PROCESS_AIRCRACK);
         stop(PROCESS_REAVER);
         if(airOnStartup) Airodump.startClean();
-    }
-    void installTools(){
-        File bin = new File(path + "/bin");
-        File lib = new File(path + "/lib");
-        if(!bin.exists()){
-            if(!bin.mkdir()){
-                ErrorDialog dialog = new ErrorDialog();
-                dialog.setMessage(getString(R.string.bin_not_created));
-                dialog.show(mFragmentManager, "ErrorDialog");
-                return;
-            }
-        }
-        if(!lib.exists()){
-            if(!lib.mkdir()){
-                ErrorDialog dialog = new ErrorDialog();
-                dialog.setMessage(getString(R.string.lib_not_created));
-                dialog.show(mFragmentManager, "ErrorDialog");
-                return;
-            }
-        }
-        PackageInfo info = null;
-        try{
-            info = getPackageManager().getPackageInfo(this.getPackageName(), 0);
-        }catch(PackageManager.NameNotFoundException ignored){}
-        if(bin.list().length==20 && lib.list().length==1 && info!=null){
-            if(info.versionCode<=pref.getInt("tools_version", 0)){
-                if(debug) Log.d("HIJACKER/installTools", "Tools already installed");
-                return;
-            }else{
-                File manufDB = new File(manufDBFile);
-                if(manufDB.exists()) manufDB.delete();
-            }
-        }
-        String tools_location = path + "/bin/";
-        String lib_location = path + "/lib/";
-        extract("airbase-ng", tools_location, true);
-        extract("aircrack-ng", tools_location, true);
-        extract("aireplay-ng", tools_location, true);
-        extract("airodump-ng", tools_location, true);
-        extract("besside-ng", tools_location, true);
-        extract("busybox", tools_location, true);
-        extract("ivstools", tools_location, true);
-        extract("iw", tools_location, true);
-        extract("iwconfig", tools_location, true);
-        extract("iwlist", tools_location, true);
-        extract("iwpriv", tools_location, true);
-        extract("kstats", tools_location, true);
-        extract("makeivs-ng", tools_location, true);
-        extract("mdk3", tools_location, true);
-        extract("nc", tools_location, true);
-        extract("packetforge-ng", tools_location, true);
-        extract("reaver", tools_location, true);
-        extract("reaver-wash", tools_location, true);
-        extract("wesside-ng", tools_location, true);
-        extract("wpaclean", tools_location, true);
-        extract("libfakeioctl.so", lib_location, true);
-
-        if(info!=null){
-            pref_edit.putInt("tools_version", info.versionCode);
-            pref_edit.commit();
-        }
     }
 
     public static void _startAireplay(final String str){
@@ -752,348 +1198,6 @@ public class MainActivity extends AppCompatActivity{
         handler.post(runnable);
     }
 
-    void setup(){
-        pref = PreferenceManager.getDefaultSharedPreferences(this);
-        pref_edit = pref.edit();
-        clipboard = (ClipboardManager) getSystemService(CLIPBOARD_SERVICE);
-        mNotificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
-        mFragmentManager = getFragmentManager();
-
-        //Load device information
-        PackageManager manager = this.getPackageManager();
-        PackageInfo info;
-        try{
-            info = manager.getPackageInfo(this.getPackageName(), 0);
-            versionName = info.versionName.replace(" ", "_");
-            versionCode = info.versionCode;
-        }catch(PackageManager.NameNotFoundException e){
-            Log.e("HIJACKER/setup", e.toString());
-        }
-        deviceModel = Build.MODEL;
-        if(!deviceModel.startsWith(Build.MANUFACTURER)) deviceModel = Build.MANUFACTURER + " " + deviceModel;
-        deviceModel = deviceModel.replace(" ", "_");
-        deviceID = pref.getLong("deviceID", -1);
-        arch = System.getProperty("os.arch");
-
-        //Find views
-        ap_count = (TextView) findViewById(R.id.ap_count);
-        st_count = (TextView) findViewById(R.id.st_count);
-        progress = (ProgressBar) findViewById(R.id.progressBar);
-        toolbar = (Toolbar) findViewById(R.id.my_toolbar);
-        rootView = findViewById(R.id.fragment1);
-        overflow[0] = getDrawable(R.drawable.overflow0);
-        overflow[1] = getDrawable(R.drawable.overflow1);
-        overflow[2] = getDrawable(R.drawable.overflow2);
-        overflow[3] = getDrawable(R.drawable.overflow3);
-        overflow[4] = getDrawable(R.drawable.overflow4);
-        overflow[5] = getDrawable(R.drawable.overflow5);
-        overflow[6] = getDrawable(R.drawable.overflow6);
-        overflow[7] = getDrawable(R.drawable.overflow7);
-        actionBar = getSupportActionBar();
-        toolbar.setOverflowIcon(overflow[0]);
-
-        //Load defaults
-        iface = getString(R.string.iface);
-        prefix = getString(R.string.prefix);
-        cap_dir = getString(R.string.cap_dir);
-        enable_monMode = getString(R.string.enable_monMode);
-        disable_monMode = getString(R.string.disable_monMode);
-        enable_on_airodump = Boolean.parseBoolean(getString(R.string.enable_on_airodump));
-        deauthWait = Integer.parseInt(getString(R.string.deauthWait));
-        show_notif = Boolean.parseBoolean(getString(R.string.show_notif));
-        show_details = Boolean.parseBoolean(getString(R.string.show_details));
-        airOnStartup = Boolean.parseBoolean(getString(R.string.airOnStartup));
-        debug = Boolean.parseBoolean(getString(R.string.debug));
-        delete_extra = Boolean.parseBoolean(getString(R.string.delete_extra));
-        always_cap = Boolean.parseBoolean(getString(R.string.always_cap));
-        chroot_dir = getString(R.string.chroot_dir);
-        monstart = Boolean.parseBoolean(getString(R.string.monstart));
-        custom_chroot_cmd = "";
-        cont_on_fail = Boolean.parseBoolean(getString(R.string.cont_on_fail));
-        watchdog = Boolean.parseBoolean(getString(R.string.watchdog));
-        target_deauth = Boolean.parseBoolean(getString(R.string.target_deauth));
-        update_on_startup = Boolean.parseBoolean(getString(R.string.auto_update));
-
-        //Load preferences
-        load();
-
-        //Initialize paths
-        path = getFilesDir().getAbsolutePath();
-        data_path = Environment.getExternalStorageDirectory() + "/Hijacker";
-        actions_path = data_path + "/actions";
-        firm_backup_file = data_path + "/fw_bcmdhd.orig.bin";
-        manufDBFile = path + "/manuf.db";
-        File data_dir = new File(data_path);
-        if(!data_dir.exists()){
-            //Create directory, subdirectories and files
-            data_dir.mkdir();
-
-            //Move app files from other directories in /Hijacker
-            File firm_backup_old = new File(Environment.getExternalStorageDirectory() + "/fw_bcmdhd.orig.bin");
-            if(firm_backup_old.exists()){
-                firm_backup_old.renameTo(new File(data_path + "/fw_bcmdhd.orig.bin"));
-            }
-
-            File actions_dir_old = new File(Environment.getExternalStorageDirectory() + "/Hijacker-actions");
-            if(actions_dir_old.exists()){
-                actions_dir_old.renameTo(new File(actions_path));
-            }else{
-                new File(data_dir + "/actions").mkdir();
-            }
-        }
-
-        //Create or read aliases file
-        aliases_file = new File(data_path + "/aliases.txt");
-        try{
-            if(!aliases_file.exists()){
-                aliases_file.createNewFile();
-            }else{
-                if(debug) Log.d("HIJACKER/setup", "Reading aliases file...");
-                try{
-                    BufferedReader aliases_out = new BufferedReader(new FileReader(aliases_file));
-                    String buffer = aliases_out.readLine();
-                    while(buffer!=null){
-                        //Line format: 00:11:22:33:44:55 Alias
-                        if(buffer.charAt(17)==' ' && buffer.length()>18){
-                            String mac = buffer.substring(0, 17);
-                            String alias = buffer.substring(18);
-                            aliases.put(mac, alias);
-                        }else{
-                            Log.e("HIJACKER/setup", "Aliases file format error: " + buffer);
-                        }
-                        buffer = aliases_out.readLine();
-                    }
-                    aliases_out.close();
-                }catch(IOException e){
-                    Log.e("HIJACKER/setup", e.toString());
-                }
-            }
-            aliases_in = new FileWriter(aliases_file, true);
-        }catch(IOException e){
-            Log.e("HIJACKER/setup", e.toString());
-            aliases_in = null;
-        }
-
-        //Initialize notifications
-            //Create intents
-        Intent cancel_intent = new Intent(this, DismissReceiver.class);
-        Intent stop_intent = new Intent(this, StopReceiver.class);
-        Intent notificationIntent = new Intent(this, MainActivity.class);
-        notificationIntent.setFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT);
-        PendingIntent click_intent = PendingIntent.getActivity(this, 0, notificationIntent, 0);
-
-            //Create 'running' notification
-        notif = new NotificationCompat.Builder(this);
-        notif.setContentTitle(getString(R.string.notification_title));
-        notif.setContentText(" ");
-        notif.setSmallIcon(R.drawable.ic_notification);
-        if(Build.VERSION.SDK_INT>=Build.VERSION_CODES.M){
-            notif.setColor(getColor(R.color.colorAccent));
-        }
-        notif.setDeleteIntent(PendingIntent.getBroadcast(this.getApplicationContext(), 0, cancel_intent, 0));
-        notif.addAction(R.drawable.stop_drawable, getString(R.string.stop_attacks), PendingIntent.getBroadcast(this.getApplicationContext(), 0, stop_intent, 0));
-        notif.setContentIntent(click_intent);
-
-            //Create 'error' notification (used by watchdog)
-        error_notif = new NotificationCompat.Builder(this);
-        error_notif.setContentTitle(getString(R.string.notification2_title));
-        error_notif.setContentText("");
-        error_notif.setSmallIcon(R.drawable.ic_notification);
-        if(Build.VERSION.SDK_INT>=Build.VERSION_CODES.M){
-            error_notif.setColor(getColor(android.R.color.holo_red_dark));
-        }
-        error_notif.setContentIntent(click_intent);
-        error_notif.setVibrate(new long[]{500, 500});
-
-            //Create 'handshake captured' notification (used by wpa_thread)
-        handshake_notif = new NotificationCompat.Builder(this);
-        handshake_notif.setContentTitle(getString(R.string.handshake_captured));
-        if(Build.VERSION.SDK_INT>=Build.VERSION_CODES.M){
-            handshake_notif.setColor(getColor(android.R.color.holo_green_dark));
-        }
-        handshake_notif.setSmallIcon(R.drawable.ic_notification);
-        handshake_notif.setContentIntent(click_intent);
-        handshake_notif.setVibrate(new long[]{500, 500});
-
-        //Load strings for when they cannot be retrived with getString or R.string...
-        ST.not_connected = getString(R.string.not_connected);
-        ST.paired = getString(R.string.paired) + ' ';
-        ErrorDialog.notification2_title =  getString(R.string.notification2_title);
-
-        //Initialize the drawer
-        mPlanetTitles = getResources().getStringArray(R.array.planets_array);
-        mDrawerLayout = (DrawerLayout) findViewById(R.id.drawer_layout);
-        mDrawerList = (ListView) findViewById(R.id.left_drawer);
-        mDrawerList.setAdapter(new ArrayAdapter<>(this, R.layout.drawer_list_item, R.id.navDrawerTv, mPlanetTitles));
-        mDrawerList.setOnItemClickListener(new DrawerItemClickListener());
-
-        //Load default fragment (airodump)
-        if(mFragmentManager.getBackStackEntryCount()==0){
-            FragmentTransaction ft = mFragmentManager.beginTransaction();
-            ft.replace(R.id.fragment1, new MyListFragment());
-            ft.setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN);
-            ft.addToBackStack(null);
-            ft.commitAllowingStateLoss();
-        }
-
-        //Google AppIndex
-        client = new GoogleApiClient.Builder(this).addApi(AppIndex.API).build();
-
-        //Load custom actions
-        CustomAction.load();
-
-        //Setup tools
-        if(arch.equals("armv7l") || arch.equals("aarch64")){
-            installTools();
-            busybox = path + "/bin/busybox";
-
-            prefix = "LD_PRELOAD=" + path + "/lib/libfakeioctl.so";
-            airodump_dir = path + "/bin/airodump-ng";
-            aireplay_dir = path + "/bin/aireplay-ng";
-            aircrack_dir = path + "/bin/aircrack-ng";
-            mdk3_dir = path + "/bin/mdk3";
-            reaver_dir = path + "/bin/reaver";
-        }else{
-            Log.e("HIJACKER/onCreate", "Device not armv7l or aarch64, can't install tools");
-            busybox = "busybox";
-            ErrorDialog dialog = new ErrorDialog();
-            dialog.setMessage(getString(R.string.not_armv7l));
-            dialog.show(getFragmentManager(), "ErrorDialog");
-
-            prefix = pref.getString("prefix", prefix);
-            airodump_dir = "airodump-ng";
-            aireplay_dir = "aireplay-ng";
-            aircrack_dir = "aircrack-ng";
-            mdk3_dir = "mdk3";
-            reaver_dir = "reaver";
-        }
-
-        RootFile.init();
-
-        //Thread to wait for the drawer to be initialized, so that the first option (airodump) can be highlighted
-        new Thread(new Runnable(){      //Thread to wait until the drawer is initialized and then highlight airodump
-            @Override
-            public void run(){
-                try{
-                    while(mDrawerList.getChildAt(0)==null){
-                        Thread.sleep(100);
-                    }
-                    runInHandler(new Runnable(){
-                        @Override
-                        public void run(){
-                            refreshDrawer();
-                        }
-                    });
-                }catch(InterruptedException ignored){}
-            }
-        }).start();
-
-        if(watchdog){
-            watchdog_thread = new Thread(watchdog_runnable);
-            watchdog_thread.start();
-        }
-
-        //Start background service so the app won't get killed if it goes to the background
-        startService(new Intent(this, PersistenceService.class));
-
-        if(update_on_startup){
-            //Spawn new thread to wait for internet connection
-            //This should be changed to a broadcast receiver
-            new Thread(new Runnable(){
-                @Override
-                public void run(){
-                    try{
-                        while(!internetAvailable(MainActivity.this)){
-                            Thread.sleep(1000);
-                        }
-                        checkForUpdate(MainActivity.this, false);
-                    }catch(InterruptedException ignored){}
-                }
-            }).start();
-        }
-    }
-    void loadManufAVL(){
-        final LoadingDialog dialog = new LoadingDialog();
-        dialog.setTitle("Building manufacturer database...");
-        dialog.show(getFragmentManager(), "LoadingDialog");
-
-        new Thread(new Runnable(){
-            @Override
-            public void run(){
-                if(manufAVL==null){
-                    manufAVL = new AVLTree<>();
-                }else{
-                    manufAVL.clear();
-                }
-                File db = new File(manufDBFile);
-                if(!db.exists()){
-                    //Database has not been created
-                    try{
-                        //Create the database
-                        if(!db.createNewFile()){
-                            Log.e("HIJACKER/loadManufAVL", "Error creating database file");
-                            runInHandler(new Runnable(){
-                                @Override
-                                public void run(){
-                                    dialog.dismissAllowingStateLoss();
-                                }
-                            });
-                            return;
-                        }
-                        BufferedReader out = new BufferedReader(new InputStreamReader(getResources().getAssets().open("oui.txt")));
-                        FileWriter in = new FileWriter(db);
-
-                        //Load data from oui.txt and write to the new database file
-                        String buffer = out.readLine();
-                        while(buffer!=null){
-                            if(buffer.length()<18 || !buffer.contains("(base 16)")){
-                                buffer = out.readLine();
-                                continue;
-                            }
-
-                            long macID = toLong(buffer.substring(0, 6));
-                            String manuf = buffer.substring(22);
-                            if(manufAVL.add(manuf, macID)){
-                                //Write to file only if it was added to the AVL (it's unique)
-                                in.write(Long.toString(macID) + ";" + manuf + '\n');
-                            }
-
-                            buffer = out.readLine();
-                        }
-                        in.close();
-                        out.close();
-                    }catch(IOException e){
-                        Log.e("HIJACKER/loadManufAVL", e.toString());
-                        manufAVL = null;
-                    }
-                }else{
-                    //Load database on the AVL
-                    try{
-                        //Database format:
-                        //01B256;Manufacturer co.\n
-                        BufferedReader out = new BufferedReader(new FileReader(db));
-
-                        int i=0;
-                        String buffer = out.readLine();
-                        while(buffer!=null){
-                            i++;
-                            manufAVL.add(buffer.substring(buffer.indexOf(';')+1), Long.parseLong(buffer.substring(0, buffer.indexOf(';'))));
-                            buffer = out.readLine();
-                        }
-                    }catch(IOException e){
-                        Log.e("HIJACKER/loadManufAVL", e.toString());
-                        manufAVL = null;
-                    }
-                }
-                runInHandler(new Runnable(){
-                    @Override
-                    public void run(){
-                        dialog.dismissAllowingStateLoss();
-                    }
-                });
-            }
-        }).start();
-    }
     static void load(){
         //Load Preferences
         Log.d("HIJACKER/load", "Loading preferences...");
@@ -1127,6 +1231,38 @@ public class MainActivity extends AppCompatActivity{
         update_on_startup = pref.getBoolean("update_on_startup", update_on_startup);
         progress.setMax(deauthWait);
         progress.setProgress(deauthWait);
+    }
+    static void loadAliases(){
+        aliases_file = new File(data_path + "/aliases.txt");
+        try{
+            if(!aliases_file.exists()){
+                aliases_file.createNewFile();
+            }else{
+                if(debug) Log.d("HIJACKER/loadAliases", "Reading aliases file...");
+                try{
+                    BufferedReader aliases_out = new BufferedReader(new FileReader(aliases_file));
+                    String buffer = aliases_out.readLine();
+                    while(buffer!=null){
+                        //Line format: 00:11:22:33:44:55 Alias
+                        if(buffer.charAt(17)==' ' && buffer.length()>18){
+                            String mac = buffer.substring(0, 17);
+                            String alias = buffer.substring(18);
+                            aliases.put(mac, alias);
+                        }else{
+                            Log.e("HIJACKER/loadAliases", "Aliases file format error: " + buffer);
+                        }
+                        buffer = aliases_out.readLine();
+                    }
+                    aliases_out.close();
+                }catch(IOException e){
+                    Log.e("HIJACKER/loadAliases", e.toString());
+                }
+            }
+            aliases_in = new FileWriter(aliases_file, true);
+        }catch(IOException e){
+            Log.e("HIJACKER/loadAliases", e.toString());
+            aliases_in = null;
+        }
     }
 
     @Override
@@ -1230,6 +1366,16 @@ public class MainActivity extends AppCompatActivity{
         }
         menu.getItem(3).setEnabled(false);
         return true;
+    }
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String permissions[], @NonNull int[] grantResults) {
+        if(requestCode==0){
+            //The one and only request this app sends
+            if (grantResults.length > 0 && grantResults[0]==PackageManager.PERMISSION_GRANTED) {
+                CustomAction.load();
+                loadAliases();
+            }
+        }
     }
 
     // See https://g.co/AppIndexing/AndroidStudio for more information.
@@ -1691,9 +1837,7 @@ public class MainActivity extends AppCompatActivity{
     static boolean createReport(File out, String filesDir, String stackTrace, Process shell){
         if(!out.exists()){
             try{
-                if(!out.createNewFile()){
-                    return false;
-                }
+                if(!out.createNewFile()) return false;
             }catch(IOException e){
                 Log.e("HIJACKER/createReport", e.toString());
                 return false;

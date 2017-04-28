@@ -47,7 +47,10 @@ public class LoadingDialog extends DialogFragment {
     public void show(FragmentManager fragmentManager, String tag){
         if(!background) super.show(fragmentManager, tag);
     }
-    void setTitle(String str){
+    void setInitText(String str){
         title = str;
+    }
+    void setText(String str){
+        loadingDescription.setText(str);
     }
 }

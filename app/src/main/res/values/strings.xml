@@ -210,6 +210,28 @@
         <string name="stopped_to_capture">Stopped aireplay to capture handshake…</string>
         <string name="handshake_captured">WPA handshake captured.</string>
         <string name="saved_in_file">Saved in file </string>
+    <!-- LoadingDialog -->
+    <string name="init_managers">Initializing Managers…</string>
+    <string name="loading_device_information">Loading device information…</string>
+    <string name="init_views">Initializing views…</string>
+    <string name="loading_defaults">Loading defaults…</string>
+    <string name="loading_preferences">Loading preferences…</string>
+    <string name="init_files">Initializing files and directories…</string>
+    <string name="loading_aliases">Loading aliases…</string>
+    <string name="init_notifications">Initializing notifications…</string>
+    <string name="loading_strings">Loading strings…</string>
+    <string name="init_drawer">Initializing drawer…</string>
+    <string name="loading_custom_actions">Loading custom actions…</string>
+    <string name="setting_up_tools">Setting up tools…</string>
+    <string name="init_rootFile">Initializing RootFile…</string>
+    <string name="init_threads">Initializing threads…</string>
+    <string name="starting_threads">Starting threads…</string>
+    <string name="starting_pers_service">Starting persistence service…</string>
+    <string name="requesting_permissions">Requesting permissions…</string>
+    <string name="loading_manuf_db">Loading manufacturer database…</string>
+    <string name="building_manuf_db">Building manufacturer database…</string>
+    <string name="deleting_bug_report">Deleting old bug report…</string>
+    <string name="starting_hijacker">Starting Hijacker…</string>
 
     <!-- MDKFragment -->
     <string name="bf_title">Beacon Flooding</string>
