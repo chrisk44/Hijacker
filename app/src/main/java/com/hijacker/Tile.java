@@ -59,15 +59,9 @@ class Tile {
     static final List<Tile> allTiles = new ArrayList<>();
     Device device;
     boolean show=true;
-    String s1, s2, s3, s4;
-    Tile(int index, String s1, String s2, String s3, String s4, Device dev){
+    Tile(int index, Device dev){
         this.device = dev;
         allTiles.add(index, this);
-
-        this.s1 = s1;
-        this.s2 = s2;
-        this.s3 = s3;
-        this.s4 = s4;
 
         this.check();
         if(this.show){
@@ -82,11 +76,7 @@ class Tile {
             onCountsChanged();
         }
     }
-    void update(String s1, String s2, String s3, String s4){
-        this.s1 = s1;
-        this.s2 = s2;
-        this.s3 = s3;
-        this.s4 = s4;
+    void update(){
         if(!this.show){
             this.check();
             if(this.show){

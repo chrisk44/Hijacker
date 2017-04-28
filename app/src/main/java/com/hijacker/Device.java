@@ -39,7 +39,9 @@ abstract class Device{
     int pwr;
     long macID, lastseen = 0;    //macID is the mac as Long
     boolean isMarked = false;
+    //UI tile
     Tile tile;
+    String upperLeft, upperRight, lowerLeft, lowerRight;
     Device(String mac){
         this.mac = mac;
         macID = toLong(mac);

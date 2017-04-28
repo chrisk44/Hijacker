@@ -88,6 +88,9 @@ class AP extends Device{
         id = APs.size();
         this.update(essid, enc, cipher, auth, pwr, beacons, data, ivs, ch);
 
+        upperRight = this.manuf;
+        lowerLeft = this.mac;
+
         APs.add(this);
     }
 
@@ -167,14 +170,13 @@ class AP extends Device{
                     break;
             }
         }
-        final String a, c;
-        a = this.essid + (this.alias==null ? "" : " (" + alias + ')');
-        c = "PWR: " + this.pwr + " | SEC: " + this.enc + " | CH: " + this.ch + " | B:" + this.getBeacons() + " | D:" + this.getData();
+        upperLeft = this.essid + (this.alias==null ? "" : " (" + alias + ')');
+        lowerRight = "PWR: " + this.pwr + " | SEC: " + this.enc + " | CH: " + this.ch + " | B:" + this.getBeacons() + " | D:" + this.getData();
         runInHandler(new Runnable(){
             @Override
             public void run(){
-                if(tile!=null) tile.update(a, AP.this.mac, c, AP.this.manuf);
-                else tile = new Tile(id, a, AP.this.mac, c, AP.this.manuf, AP.this);
+                if(tile!=null) tile.update();
+                else tile = new Tile(id, AP.this);
             }
         });
     }

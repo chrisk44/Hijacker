@@ -1300,18 +1300,18 @@ public class MainActivity extends AppCompatActivity{
             // find the item to work with
             Tile current = Tile.tiles.get(position);
 
-            TextView firstText = (TextView) itemview.findViewById(R.id.top_left);
-            firstText.setText(current.s1);
-            firstText.setTextColor(ContextCompat.getColor(getContext(), current.device.isMarked ? R.color.colorAccent : android.R.color.white));
+            TextView upperLeft = (TextView) itemview.findViewById(R.id.upperLeft);
+            upperLeft.setText(current.device.upperLeft);
+            upperLeft.setTextColor(ContextCompat.getColor(getContext(), current.device.isMarked ? R.color.colorAccent : android.R.color.white));
 
-            TextView secondText = (TextView) itemview.findViewById(R.id.bottom_left);
-            secondText.setText(current.s2);
+            TextView lowerLeft = (TextView) itemview.findViewById(R.id.lowerLeft);
+            lowerLeft.setText(current.device.lowerLeft);
 
-            TextView thirdText = (TextView) itemview.findViewById(R.id.bottom_right);
-            thirdText.setText(current.s3);
+            TextView lowerRight = (TextView) itemview.findViewById(R.id.lowerRight);
+            lowerRight.setText(current.device.lowerRight);
 
-            TextView text4 = (TextView) itemview.findViewById(R.id.top_right);
-            text4.setText(current.s4);
+            TextView upperRight = (TextView) itemview.findViewById(R.id.upperRight);
+            upperRight.setText(current.device.upperRight);
 
             //Image
             ImageView iv = (ImageView) itemview.findViewById(R.id.iv);

@@ -66,6 +66,9 @@ class ST extends Device{
         super(mac);
         this.id = STs.size();
         this.update(bssid, pwr, lost, frames, probes);
+
+        upperRight = this.manuf;
+
         STs.add(this);
     }
     void disconnect(){
@@ -142,17 +145,16 @@ class ST extends Device{
         this.pwr = pwr;
         this.probes = probes.equals("") ? "No probes" : probes.replace(",", ", ");
 
-        final String a, b, c;
-        a = this.mac + (this.alias==null ? "" : " (" + alias + ')');
+        upperLeft = this.mac + (this.alias==null ? "" : " (" + alias + ')');
         if(connectedTo!=null){
-            b = paired + connectedTo.mac + " (" + connectedTo.essid + ")";
-        }else b = not_connected;
-        c = "PWR: " + this.pwr + " | Frames: " + this.getFrames();
+            lowerLeft = paired + connectedTo.mac + " (" + connectedTo.essid + ")";
+        }else lowerLeft = not_connected;
+        lowerRight = "PWR: " + this.pwr + " | Frames: " + this.getFrames();
         runInHandler(new Runnable(){
             @Override
             public void run(){
-                if(tile!=null) tile.update(a, b, c, ST.this.manuf);
-                else tile = new Tile(AP.APs.size() + id, a, b, c, ST.this.manuf, ST.this);
+                if(tile!=null) tile.update();
+                else tile = new Tile(AP.APs.size() + id, ST.this);
             }
         });
     }
