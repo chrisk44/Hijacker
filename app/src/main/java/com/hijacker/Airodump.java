@@ -24,7 +24,7 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 
-import static com.hijacker.Device.getByMac;
+import static com.hijacker.AP.getAPByMac;
 import static com.hijacker.MainActivity.adapter;
 import static com.hijacker.MainActivity.airodump_dir;
 import static com.hijacker.MainActivity.always_cap;
@@ -46,6 +46,7 @@ import static com.hijacker.MainActivity.runInHandler;
 import static com.hijacker.MainActivity.stopWPA;
 import static com.hijacker.MainActivity.toSort;
 import static com.hijacker.MainActivity.menu;
+import static com.hijacker.ST.getSTByMac;
 import static com.hijacker.Shell.getFreeShell;
 import static com.hijacker.Shell.runOne;
 
@@ -254,29 +255,15 @@ class Airodump{
     }
     public static void addAP(String essid, String mac, String enc, String cipher, String auth,
                              int pwr, int beacons, int data, int ivs, int ch){
-        AP temp = (AP)getByMac(mac);
+        AP temp = getAPByMac(mac);
         if(temp==null) new AP(essid, mac, enc, cipher, auth, pwr, beacons, data, ivs, ch);
         else temp.update(essid, enc, cipher, auth, pwr, beacons, data, ivs, ch);
-        runInHandler(new Runnable(){
-            @Override
-            public void run(){
-                adapter.notifyDataSetChanged();
-                if(toSort && !background) Tile.sort();
-            }
-        });
     }
     public static void addST(String mac, String bssid, String probes, int pwr, int lost, int frames){
-        ST temp = (ST)getByMac(mac);
+        ST temp = getSTByMac(mac);
         if (bssid.equals("na")) bssid=null;
         if (temp == null) new ST(mac, bssid, pwr, lost, frames, probes);
         else temp.update(bssid, pwr, lost, frames, probes);
-        runInHandler(new Runnable(){
-            @Override
-            public void run(){
-                adapter.notifyDataSetChanged();
-                if(toSort && !background) Tile.sort();
-            }
-        });
     }
 
     public static native int main(String str, int off);

@@ -87,8 +87,8 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 
+import static com.hijacker.AP.getAPByMac;
 import static com.hijacker.CustomAction.TYPE_ST;
-import static com.hijacker.Device.getByMac;
 import static com.hijacker.Device.toLong;
 import static com.hijacker.IsolatedFragment.is_ap;
 import static com.hijacker.MDKFragment.ados;
@@ -214,17 +214,6 @@ public class MainActivity extends AppCompatActivity{
             @Override
             public void run(){
                 Looper.prepare();
-                if(ContextCompat.checkSelfPermission(MainActivity.this, Manifest.permission.READ_EXTERNAL_STORAGE)!=PackageManager.PERMISSION_GRANTED){
-                    //Request permissions
-                    runInHandler(new Runnable(){
-                        @Override
-                        public void run(){
-                            loadingDialog.setText(getString(R.string.requesting_permissions));
-                        }
-                    });
-                    ActivityCompat.requestPermissions(MainActivity.this, new String[]{Manifest.permission.CHANGE_WIFI_STATE, Manifest.permission.ACCESS_WIFI_STATE, Manifest.permission.WRITE_EXTERNAL_STORAGE, Manifest.permission.READ_EXTERNAL_STORAGE, Manifest.permission.ACCESS_NETWORK_STATE, Manifest.permission.INTERNET}, 0);
-                }
-
                 //Initialize managers
                 runInHandler(new Runnable(){
                     @Override
@@ -787,22 +776,6 @@ public class MainActivity extends AppCompatActivity{
                     watchdog_thread.start();
                 }
 
-                if(update_on_startup){
-                    //Spawn new thread to wait for internet connection
-                    //This should be changed to a broadcast receiver
-                    new Thread(new Runnable(){
-                        @Override
-                        public void run(){
-                            try{
-                                while(!internetAvailable(MainActivity.this)){
-                                    Thread.sleep(1000);
-                                }
-                                checkForUpdate(MainActivity.this, false);
-                            }catch(InterruptedException ignored){}
-                        }
-                    }).start();
-                }
-
                 //Start background service so the app won't get killed if it goes to the background
                 runInHandler(new Runnable(){
                     @Override
@@ -912,6 +885,49 @@ public class MainActivity extends AppCompatActivity{
                 });
                 File report = new File(Environment.getExternalStorageDirectory() + "/report.txt");
                 if(report.exists()) report.delete();
+
+                //Checking permissions
+                runInHandler(new Runnable(){
+                    @Override
+                    public void run(){
+                        loadingDialog.setText(getString(R.string.checking_permissions));
+                    }
+                });
+                ActivityCompat.requestPermissions(MainActivity.this, new String[]{
+                        Manifest.permission.CHANGE_WIFI_STATE,
+                        Manifest.permission.ACCESS_WIFI_STATE,
+                        Manifest.permission.WRITE_EXTERNAL_STORAGE,
+                        Manifest.permission.READ_EXTERNAL_STORAGE,
+                        Manifest.permission.ACCESS_NETWORK_STATE,
+                        Manifest.permission.INTERNET
+                }, 0);
+
+                //Check for updates
+                if(update_on_startup){
+                    if(internetAvailable(MainActivity.this)){
+                        runInHandler(new Runnable(){
+                            @Override
+                            public void run(){
+                                loadingDialog.setText(getString(R.string.checking_for_updates));
+                            }
+                        });
+                        checkForUpdate(MainActivity.this, false);
+                    }else{
+                        //Spawn new thread to wait for internet connection
+                        //This should be changed to a broadcast receiver
+                        new Thread(new Runnable(){
+                            @Override
+                            public void run(){
+                                try{
+                                    while(!internetAvailable(MainActivity.this)){
+                                        Thread.sleep(1000);
+                                    }
+                                    checkForUpdate(MainActivity.this, false);
+                                }catch(InterruptedException ignored){}
+                            }
+                        }).start();
+                    }
+                }
 
                 runInHandler(new Runnable(){
                     @Override
@@ -1610,7 +1626,7 @@ public class MainActivity extends AppCompatActivity{
         }
     }
     static void isolate(String mac){
-        is_ap = (AP)getByMac(mac);
+        is_ap = getAPByMac(mac);
         if(is_ap!=null){
             IsolatedFragment.exit_on = mFragmentManager.getBackStackEntryCount();
             FragmentTransaction ft = mFragmentManager.beginTransaction();
@@ -1775,60 +1791,67 @@ public class MainActivity extends AppCompatActivity{
         return socket;
     }
     static void checkForUpdate(final Activity activity, final boolean showMessages){
-        if(showMessages) progress.setIndeterminate(true);
-        new Thread(new Runnable(){
+        //Can be called from any thread, blocks until the check is finished
+        Runnable runnable = new Runnable(){
             @Override
             public void run(){
-                if(showMessages) Looper.prepare();
-                Runnable runnable = new Runnable(){
+                progress.setIndeterminate(false);
+            }
+        };
+        if(showMessages){
+            runInHandler(new Runnable(){
+                @Override
+                public void run(){
+                    progress.setIndeterminate(true);
+                }
+            });
+        }
+        Socket socket = connect();
+        if(socket==null){
+            if(showMessages){
+                runInHandler(runnable);
+                Snackbar.make(activity.getCurrentFocus(), activity.getString(R.string.server_error), Snackbar.LENGTH_SHORT).show();
+            }
+            return;
+        }
+
+        try{
+            PrintWriter in = new PrintWriter(socket.getOutputStream());
+            BufferedReader out = new BufferedReader(new InputStreamReader(socket.getInputStream()));
+
+            in.print(REQ_VERSION + '\n');
+            in.flush();
+
+            int latestCode = Integer.parseInt(out.readLine());
+            String latestName = out.readLine();
+            String latestLink = out.readLine();
+
+            in.print(REQ_EXIT + '\n');
+            in.flush();
+            in.close();
+            out.close();
+            socket.close();
+
+            if(latestCode > versionCode){
+                final UpdateConfirmDialog dialog = new UpdateConfirmDialog();
+                dialog.newVersionCode = latestCode;
+                dialog.newVersionName = latestName;
+                dialog.link = latestLink;
+                runInHandler(new Runnable(){
                     @Override
                     public void run(){
-                        progress.setIndeterminate(false);
-                    }
-                };
-                Socket socket = connect();
-                if(socket==null){
-                    if(showMessages){
-                        handler.post(runnable);
-                        Snackbar.make(activity.getCurrentFocus(), activity.getString(R.string.server_error), Snackbar.LENGTH_SHORT).show();
-                    }
-                    return;
-                }
-
-                try{
-                    PrintWriter in = new PrintWriter(socket.getOutputStream());
-                    BufferedReader out = new BufferedReader(new InputStreamReader(socket.getInputStream()));
-
-                    in.print(REQ_VERSION + '\n');
-                    in.flush();
-
-                    int latestCode = Integer.parseInt(out.readLine());
-                    String latestName = out.readLine();
-                    String latestLink = out.readLine();
-
-                    in.print(REQ_EXIT + '\n');
-                    in.flush();
-                    in.close();
-                    out.close();
-                    socket.close();
-
-                    if(latestCode > versionCode){
-                        UpdateConfirmDialog dialog = new UpdateConfirmDialog();
-                        dialog.newVersionCode = latestCode;
-                        dialog.newVersionName = latestName;
-                        dialog.link = latestLink;
                         dialog.show(activity.getFragmentManager(), "UpdateConfirmDialog");
-                    }else{
-                        if(showMessages) Snackbar.make(activity.getCurrentFocus(), activity.getString(R.string.already_on_latest), Snackbar.LENGTH_SHORT).show();
                     }
-                }catch(IOException | NumberFormatException e){
-                    Log.e("HIJACKER/update", e.toString());
-                    if(showMessages) Snackbar.make(activity.getCurrentFocus(), activity.getString(R.string.unknown_error), Snackbar.LENGTH_SHORT).show();
-                }finally{
-                    if(showMessages) handler.post(runnable);
-                }
+                });
+            }else{
+                if(showMessages) Snackbar.make(activity.getCurrentFocus(), activity.getString(R.string.already_on_latest), Snackbar.LENGTH_SHORT).show();
             }
-        }).start();
+        }catch(IOException | NumberFormatException e){
+            Log.e("HIJACKER/update", e.toString());
+            if(showMessages) Snackbar.make(activity.getCurrentFocus(), activity.getString(R.string.unknown_error), Snackbar.LENGTH_SHORT).show();
+        }finally{
+            if(showMessages) runInHandler(runnable);
+        }
     }
     static boolean internetAvailable(Context context){
         ConnectivityManager connectivityManager = (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);

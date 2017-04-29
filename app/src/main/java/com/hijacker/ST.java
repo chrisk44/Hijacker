@@ -32,6 +32,7 @@ import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.List;
 
+import static com.hijacker.AP.getAPByMac;
 import static com.hijacker.MainActivity.PROCESS_AIREPLAY;
 import static com.hijacker.MainActivity.SORT_BEACONS_FRAMES;
 import static com.hijacker.MainActivity.SORT_DATA_FRAMES;
@@ -54,6 +55,7 @@ import static com.hijacker.MainActivity.stop;
 import static com.hijacker.MainActivity.toSort;
 
 class ST extends Device{
+    static final AVLTree<ST> STsAVL = new AVLTree<>();
     static final List<ST> STs = new ArrayList<>();
     static final List<ST> marked = new ArrayList<>();
     static String paired, not_connected;
@@ -70,6 +72,7 @@ class ST extends Device{
         upperRight = this.manuf;
 
         STs.add(this);
+        STsAVL.add(this, Device.toLong(this.mac));
     }
     void disconnect(){
         if(Airodump.getChannel() != connectedTo.ch){
@@ -88,7 +91,7 @@ class ST extends Device{
             if(!connectedTo.mac.equals(bssid)){
                 //Connected to a different network
                 connectedTo.removeClient(this);
-                connectedTo = (AP)getByMac(bssid);
+                connectedTo = getAPByMac(bssid);
                 if(connectedTo==null){
                     //Now not connected
                     connected--;
@@ -104,7 +107,7 @@ class ST extends Device{
             }
         }else if(bssid!=null){
             //Now connected somewhere
-            connectedTo = (AP)getByMac(bssid);
+            connectedTo = getAPByMac(bssid);
             if(connectedTo!=null){
                 //Now connected to known AP
                 connected++;
@@ -176,6 +179,7 @@ class ST extends Device{
     }
 
     static void clear(){
+        STsAVL.clear();
         STs.clear();
         marked.clear();
         connected = 0;
@@ -185,6 +189,9 @@ class ST extends Device{
             ST.STs.get(i).saveData();
         }
     }
+    static ST getSTByMac(String mac){
+        return STsAVL.findById(Device.toLong(mac));
+    }
 
     void showInfo(FragmentManager fragmentManager){
         STDialog dialog = new STDialog();
@@ -192,7 +199,7 @@ class ST extends Device{
         dialog.show(fragmentManager, "STDialog");
     }
     public String toString(){
-        return this.mac + (this.alias==null ? "" : " (" + this.alias + ')') + ((this.bssid==null) ? "" : " (" + ((AP)getByMac(this.bssid)).essid + ')');
+        return this.mac + (this.alias==null ? "" : " (" + this.alias + ')') + ((this.bssid==null) ? "" : " (" + getAPByMac(this.bssid).essid + ')');
     }
     public String getExported(){
         //MAC                BSSID               PWR  Frames    Lost  Manufacturer - Probes

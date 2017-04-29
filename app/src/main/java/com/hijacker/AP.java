@@ -74,6 +74,7 @@ import static com.hijacker.MainActivity.wpa_thread;
 class AP extends Device{
     static final int WPA=0, WPA2=1, WEP=2, OPN=3, UNKNOWN=4;
     static int wpa=0, wpa2=0, wep=0, opn=0, hidden=0;
+    static final AVLTree<AP> APsAVL = new AVLTree<>();
     static final List<AP> APs = new ArrayList<>();
     static final List<AP> marked = new ArrayList<>();
     static final List<AP> currentTargetDeauth = new ArrayList<>();
@@ -92,6 +93,7 @@ class AP extends Device{
         lowerLeft = this.mac;
 
         APs.add(this);
+        APsAVL.add(this, Device.toLong(this.mac));
     }
 
     void addClient(ST client){
@@ -246,6 +248,7 @@ class AP extends Device{
     int getIvs(){ return total_ivs + ivs; }
 
     static void clear(){
+        APsAVL.clear();
         APs.clear();
         marked.clear();
         wpa = 0;
@@ -258,6 +261,9 @@ class AP extends Device{
         for(int i=0;i<AP.APs.size();i++){
             AP.APs.get(i).saveData();
         }
+    }
+    static AP getAPByMac(String mac){
+        return APsAVL.findById(Device.toLong(mac));
     }
 
     void showInfo(FragmentManager fragmentManager){

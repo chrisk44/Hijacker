@@ -227,10 +227,11 @@
     <string name="init_threads">Initializing threads…</string>
     <string name="starting_threads">Starting threads…</string>
     <string name="starting_pers_service">Starting persistence service…</string>
-    <string name="requesting_permissions">Requesting permissions…</string>
+    <string name="checking_permissions">Checking permissions…</string>
     <string name="loading_manuf_db">Loading manufacturer database…</string>
     <string name="building_manuf_db">Building manufacturer database…</string>
     <string name="deleting_bug_report">Deleting old bug report…</string>
+    <string name="checking_for_updates">Checking for updates…</string>
     <string name="starting_hijacker">Starting Hijacker…</string>
 
     <!-- MDKFragment -->

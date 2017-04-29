@@ -37,11 +37,13 @@ import static com.hijacker.MainActivity.SORT_NOSORT;
 import static com.hijacker.MainActivity.SORT_PWR;
 import static com.hijacker.MainActivity.adapter;
 import static com.hijacker.MainActivity.ap_count;
+import static com.hijacker.MainActivity.background;
 import static com.hijacker.MainActivity.debug;
 import static com.hijacker.MainActivity.manuf_filter;
 import static com.hijacker.MainActivity.notification;
 import static com.hijacker.MainActivity.opn;
 import static com.hijacker.MainActivity.pwr_filter;
+import static com.hijacker.MainActivity.runInHandler;
 import static com.hijacker.MainActivity.show_ap;
 import static com.hijacker.MainActivity.show_ch;
 import static com.hijacker.MainActivity.show_na_st;
@@ -96,6 +98,8 @@ class Tile {
                 filter();
             }
         }
+        adapter.notifyDataSetChanged();
+        if(toSort && !background) Tile.sort();
     }
     void check(){
         if(is_ap==null) {
@@ -124,7 +128,6 @@ class Tile {
         adapter.clear();
         AP.clear();
         ST.clear();
-        Device.clear();
         i=0;
     }
     static void filter(){

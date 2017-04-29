@@ -23,6 +23,7 @@ import android.content.SharedPreferences;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
+import android.os.Looper;
 import android.preference.Preference;
 import android.preference.PreferenceFragment;
 import java.io.File;
@@ -158,7 +159,13 @@ public class SettingsFragment extends PreferenceFragment {
             @Override
             public boolean onPreferenceChange(Preference preference, Object newValue){
                 if((boolean)newValue){
-                    checkForUpdate(SettingsFragment.this.getActivity(), true);
+                    new Thread(new Runnable(){
+                        @Override
+                        public void run(){
+                            Looper.prepare();
+                            checkForUpdate(SettingsFragment.this.getActivity(), true);
+                        }
+                    }).start();
                 }
                 return true;
             }

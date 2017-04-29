@@ -34,7 +34,7 @@ import static com.hijacker.MainActivity.sort;
 import static com.hijacker.MainActivity.toSort;
 
 abstract class Device{
-    final static AVLTree<Device> avl = new AVLTree<>();
+    //final static AVLTree<Device> avl = new AVLTree<>();
     String mac, manuf, alias;
     int pwr;
     long macID, lastseen = 0;    //macID is the mac as Long
@@ -49,7 +49,7 @@ abstract class Device{
         this.alias = aliases.get(this.mac);
         if(sort!=SORT_NOSORT) toSort = true;
 
-        avl.add(this, macID);
+        //avl.add(this, macID);
     }
     public abstract String toString();
     abstract String getExported();
@@ -59,12 +59,12 @@ abstract class Device{
     abstract void unmark();
     abstract PopupMenu getPopupMenu(final Activity activity, final View v);
 
-    static Device getByMac(String mac){
+    /*static Device getByMac(String mac){
         return mac==null ? null : avl.findById(toLong(mac));
-    }
-    static void clear(){
+    }*/
+    /*static void clear(){
         avl.clear();
-    }
+    }*/
     static long toLong(String mac){
         return Long.decode("0x" + mac.replace(":", "").toLowerCase());
     }

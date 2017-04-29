@@ -22,10 +22,14 @@ import android.util.Log;
 class AVLTree<T>{
     public static final int LEFT_SON = 0, RIGHT_SON = 1;
     Node root;
-    public AVLTree(){}
+    int size;
+    public AVLTree(){
+        size = 0;
+    }
     void clear(){
         //Memory will be reclaimed by GC
         root = null;
+        size = 0;
     }
     T findById(long id){
         //Find an object with a specific id
@@ -57,6 +61,7 @@ class AVLTree<T>{
         //Insert a new Object in the tree, returns whether the new object was added
         if(root==null){
             root = new Node(newObj, newID, null);
+            size++;
             return true;
         }
         Node node = find(newID, root);
@@ -105,8 +110,10 @@ class AVLTree<T>{
 
             newParent = newParent.P;
         }
+        size++;
         return true;
     }
+    int size(){ return size; }
 
     private void rebalance(Node root){
         //root is the root of the subtree that needs to be rebalanced
