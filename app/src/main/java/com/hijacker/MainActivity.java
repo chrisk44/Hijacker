@@ -102,6 +102,7 @@ public class MainActivity extends AppCompatActivity{
     static String AUTH_KEY = "key-that-will-be-changed-in-the-release-build_this-is-for-testing";
     static final String SERVER = "hijacker-android.ddns.net";
     static int PORT = 1025;
+    static final String DEFAULT_BOOTKALI_INIT = "/data/data/com.offsec.nethunter/files/scripts/bootkali_init";
     static final String REQ_VERSION = "version", REQ_INFO = "info", REQ_EXIT = "exit", REQ_REPORT = "report", REQ_FEEDBACK = "feedback", REQ_NEW_ID = "newid";
     static final String ANS_POSITIVE = "OK", ANS_NEGATIVE = "NO";
     static final int BUFFER_SIZE = 1048576;
@@ -130,6 +131,9 @@ public class MainActivity extends AppCompatActivity{
     static ProgressBar progress;
     static Toolbar toolbar;
     static View rootView;
+    static DrawerLayout mDrawerLayout;
+    static ListView mDrawerList;
+    static String[] mPlanetTitles;
     static Drawable overflow[] = {null, null, null, null, null, null, null, null};      //Drawables to use for overflow button icon
     static ImageView status[] = {null, null, null, null, null};                         //Icons in TestDialog, set in TestDialog class
     static int progress_int;
@@ -158,9 +162,7 @@ public class MainActivity extends AppCompatActivity{
     static boolean init=false;      //True on first run to swap the dialogs for initialization
     static ActionBar actionBar;
     private GoogleApiClient client;
-    static String[] mPlanetTitles;
-    static DrawerLayout mDrawerLayout;
-    static ListView mDrawerList;
+    static String bootkali_init_bin = "bootkali_init";
     //Preferences - Defaults are in strings.xml
     static String iface, prefix, airodump_dir, aireplay_dir, aircrack_dir, mdk3_dir, reaver_dir, cap_dir, chroot_dir,
             enable_monMode, disable_monMode, custom_chroot_cmd;
@@ -1735,7 +1737,14 @@ public class MainActivity extends AppCompatActivity{
         for(String temp : paths){
             if(new RootFile(temp + "/bootkali_init").exists()){
                 bin = true;
+                bootkali_init_bin = temp + "/bootkali_init";
                 break;
+            }
+        }
+        if(!bin){
+            if(new RootFile(DEFAULT_BOOTKALI_INIT).exists()){
+                bin = true;
+                bootkali_init_bin = DEFAULT_BOOTKALI_INIT;
             }
         }
 

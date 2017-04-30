@@ -46,6 +46,7 @@ import static com.hijacker.MainActivity.FRAGMENT_REAVER;
 import static com.hijacker.MainActivity.PROCESS_AIRODUMP;
 import static com.hijacker.MainActivity.PROCESS_REAVER;
 import static com.hijacker.MainActivity.background;
+import static com.hijacker.MainActivity.bootkali_init_bin;
 import static com.hijacker.MainActivity.checkChroot;
 import static com.hijacker.MainActivity.cont_on_fail;
 import static com.hijacker.MainActivity.currentFragment;
@@ -159,7 +160,7 @@ public class ReaverFragment extends Fragment{
                     String cmd;
                     if(pixie_dust_et.isChecked()){
                         writeToConsole(getString(R.string.chroot_warning));
-                        Runtime.getRuntime().exec("su -c bootkali_init");       //Make sure kali has booted
+                        Runtime.getRuntime().exec("su -c " + bootkali_init_bin);       //Make sure kali has booted
                         args += " -K 1";
                         cmd = "chroot " + MainActivity.chroot_dir + " /bin/bash -c \'" + get_chroot_env(getActivity()) + "reaver " + args + "\'";
                         writeToConsole("\nRunning: " + cmd + '\n');
