@@ -70,3 +70,10 @@ It is extremely illegal to use this application against networks for which you d
 The app gives you the option to install the nexmon firmware on your device. Even though the app performs a chipset check, you have the option to override it, if you believe that your device has the BCM4339 wireless adapter. However, installing a custom firmware intended for BCM4339 on a different chipset can possibly damage your device (and I mean hardware, not something that is fixable with factory reset). I am not responsible for any damage caused to your device by this software.
 
 #### Consider yourself warned.
+
+## Donate
+
+If you like my work, you can buy me a beer. :)
+
+[![paypal](https://www.paypalobjects.com/en_US/i/btn/btn_donateCC_LG.gif)](https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=VV5TEHL8S6UQ2)
+
