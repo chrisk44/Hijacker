@@ -16,11 +16,6 @@ package com.hijacker;
     You should have received a copy of the GNU General Public License
     along with this program.  If not, see <http://www.gnu.org/licenses/>
  */
-/*
-    This class is used to provide a more general object than AP and ST.
-    This makes the implementation of an AVL tree easier (the AVL class has not been made public (yet)),
-    as well as the creation of a new class like AP and ST.
- */
 
 import android.app.Activity;
 import android.app.FragmentManager;
@@ -34,22 +29,18 @@ import static com.hijacker.MainActivity.sort;
 import static com.hijacker.MainActivity.toSort;
 
 abstract class Device{
-    //final static AVLTree<Device> avl = new AVLTree<>();
     String mac, manuf, alias;
     int pwr;
-    long macID, lastseen = 0;    //macID is the mac as Long
+    long lastseen = 0;
     boolean isMarked = false;
     //UI tile
     Tile tile;
     String upperLeft, upperRight, lowerLeft, lowerRight;
     Device(String mac){
         this.mac = mac;
-        macID = toLong(mac);
         this.manuf = getManuf(this.mac);
         this.alias = aliases.get(this.mac);
         if(sort!=SORT_NOSORT) toSort = true;
-
-        //avl.add(this, macID);
     }
     public abstract String toString();
     abstract String getExported();
@@ -59,13 +50,8 @@ abstract class Device{
     abstract void unmark();
     abstract PopupMenu getPopupMenu(final Activity activity, final View v);
 
-    /*static Device getByMac(String mac){
-        return mac==null ? null : avl.findById(toLong(mac));
-    }*/
-    /*static void clear(){
-        avl.clear();
-    }*/
     static long toLong(String mac){
+        if(mac==null) return -1;
         return Long.decode("0x" + mac.replace(":", "").toLowerCase());
     }
 }

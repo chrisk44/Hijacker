@@ -932,8 +932,9 @@ public class MainActivity extends AppCompatActivity{
                 runInHandler(new Runnable(){
                     @Override
                     public void run(){
-                        //Load default fragment (airodump)
                         loadingDialog.setText(getString(R.string.starting_hijacker));
+
+                        //Load default fragment (airodump)
                         if(mFragmentManager.getBackStackEntryCount()==0){
                             FragmentTransaction ft = mFragmentManager.beginTransaction();
                             ft.replace(R.id.fragment1, new MyListFragment());
@@ -1387,7 +1388,7 @@ public class MainActivity extends AppCompatActivity{
     public void onRequestPermissionsResult(int requestCode, @NonNull String permissions[], @NonNull int[] grantResults) {
         if(requestCode==0){
             //The one and only request this app sends
-            if (grantResults.length > 0 && grantResults[0]==PackageManager.PERMISSION_GRANTED) {
+            if (grantResults.length > 0 && grantResults[2]==PackageManager.PERMISSION_GRANTED) {
                 CustomAction.load();
                 loadAliases();
             }
@@ -1746,7 +1747,7 @@ public class MainActivity extends AppCompatActivity{
         else return CHROOT_DIR_MISSING;
     }
     static Socket connect(){
-        //Don't call this in the main thread
+        //Can be called from any thread, blocks until the job is finished
         Socket socket;
         try{
             InetAddress ip = Inet4Address.getByName(SERVER);
@@ -1791,7 +1792,7 @@ public class MainActivity extends AppCompatActivity{
         return socket;
     }
     static void checkForUpdate(final Activity activity, final boolean showMessages){
-        //Can be called from any thread, blocks until the check is finished
+        //Can be called from any thread, blocks until the job is finished
         Runnable runnable = new Runnable(){
             @Override
             public void run(){
@@ -1888,7 +1889,7 @@ public class MainActivity extends AppCompatActivity{
             cmd += " echo busybox----------------------------------------; " + busybox_tmp + ";";
             cmd += " echo logcat-----------------------------------------; logcat -d -v time | " + busybox_tmp + " grep HIJACKER;";
             cmd += " exit\n";
-            Log.d("HIJACKER/SendLog", cmd);
+            Log.d("HIJACKER/createReport", cmd);
             shell_in.print(cmd);
             shell_in.flush();
 

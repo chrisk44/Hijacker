@@ -44,7 +44,7 @@ import static com.hijacker.Shell.getFreeShell;
 class RootFile{
     static Shell shell;
     static BufferedReader out;
-    private int length = -1;
+    private long length = -1;
     private String absolutePath = null, parentPath = null, name = null;
     private boolean exists = false, isFile = false, isDirectory = false, isUnknownType = false;
     RootFile(String path) throws IllegalArgumentException{
@@ -95,7 +95,9 @@ class RootFile{
             this.isUnknownType = true;
         }
 
-        this.length = Integer.parseInt(temp[4]);
+        try{
+            this.length = Long.parseLong(temp[4]);
+        }catch(NumberFormatException ignored){}
     }
     String getAbsolutePath(){ return absolutePath; }
     String getName(){ return name; }
@@ -107,7 +109,7 @@ class RootFile{
     boolean canRead(){ return true; }           //We are root
     boolean canWrite(){ return true; }          //We are root
     boolean canExecute(){ return true; }        //We are root
-    int length(){ return length; }
+    long length(){ return length; }
     void createNewFile(){
         if(!exists()){
             if(absolutePath==null || name==null) throw new IllegalStateException("path or name is null");
