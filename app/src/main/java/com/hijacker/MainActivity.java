@@ -102,7 +102,7 @@ public class MainActivity extends AppCompatActivity{
     static String AUTH_KEY = "key-that-will-be-changed-in-the-release-build_this-is-for-testing";
     static final String SERVER = "hijacker-android.ddns.net";
     static int PORT = 1025;
-    static final String DEFAULT_BOOTKALI_INIT = "/data/data/com.offsec.nethunter/files/scripts/bootkali_init";
+    static final String NETHUNTER_BOOTKALI_BASH = "/data/data/com.offsec.nethunter/files/scripts/bootkali_bash";
     static final String REQ_VERSION = "version", REQ_INFO = "info", REQ_EXIT = "exit", REQ_REPORT = "report", REQ_FEEDBACK = "feedback", REQ_NEW_ID = "newid";
     static final String ANS_POSITIVE = "OK", ANS_NEGATIVE = "NO";
     static final int BUFFER_SIZE = 1048576;
@@ -122,7 +122,7 @@ public class MainActivity extends AppCompatActivity{
     static boolean show_ch[] = {true, false, false, false, false, false, false, false, false, false, false, false, false, false, false};
     static int pwr_filter = 120;
     static String manuf_filter = "";
-    //Airodump list sort
+    //Airodump list sort 
     static int sort = SORT_NOSORT;
     static boolean sort_reverse = false;
     static boolean toSort = false;     //Variable to mark that the list must be sorted, so Tile.sort() must be called
@@ -1742,9 +1742,9 @@ public class MainActivity extends AppCompatActivity{
             }
         }
         if(!bin){
-            if(new RootFile(DEFAULT_BOOTKALI_INIT).exists()){
+            if(new RootFile(NETHUNTER_BOOTKALI_BASH).exists()){
                 bin = true;
-                bootkali_init_bin = DEFAULT_BOOTKALI_INIT;
+                bootkali_init_bin = NETHUNTER_BOOTKALI_BASH;
             }
         }
 
