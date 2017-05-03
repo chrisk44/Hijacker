@@ -20,7 +20,7 @@ package com.hijacker;
 import android.util.Log;
 
 class AVLTree<T>{
-    public static final int LEFT_SON = 0, RIGHT_SON = 1;
+    public static final int LEFT_SON = 0, RIGHT_SON = 1, ROTATE_LEFT = 0, ROTATE_RIGHT = 1;
     Node root;
     int size;
     public AVLTree(){
@@ -117,56 +117,45 @@ class AVLTree<T>{
 
     private void rebalance(Node root){
         //root is the root of the subtree that needs to be rebalanced
-        if(root.balance==2){
-            //Right-heavy
-            if(root.RS.balance>0){
-                rotateLeft(root, root.RS);
-            }else{
-                rotateRight(root.RS, root.RS.LS);
-                rotateLeft(root, root.RS);
+        while(root.balance < -1 || root.balance > 1){
+            if(root.balance > 0){
+                //Right-heavy
+                if(root.RS.balance > 0){
+                    rotate(ROTATE_LEFT, root, root.RS);
+                }else{
+                    rotate(ROTATE_RIGHT, root.RS, root.RS.LS);
+                    rotate(ROTATE_LEFT, root, root.RS);
+                }
+            }else if(root.balance < 0){
+                //Left-heavy
+                if(root.LS.balance < 0){
+                    rotate(ROTATE_RIGHT, root, root.LS);
+                }else{
+                    rotate(ROTATE_LEFT, root.LS, root.LS.RS);
+                    rotate(ROTATE_RIGHT, root, root.LS);
+                }
             }
-        }else if(root.balance==-2){
-            //Left-heavy
-            if(root.LS.balance<0){
-                rotateRight(root, root.LS);
-            }else{
-                rotateLeft(root.LS, root.LS.RS);
-                rotateRight(root, root.LS);
-            }
-        }else{
-            Log.e("HIJACKER/AVL", "[E] Node with id " + root.id + " has a balance of " + root.balance + ". No rebalance (shouldn't be here)");
         }
     }
-    private void rotateLeft(Node root, Node pivot){
+    private void rotate(int mode, Node root, Node pivot){
         int initRootType = root.sonType();
 
-        root.RS = pivot.LS;
-        root.RS.P = root;
+        if(mode==ROTATE_LEFT){
+            root.RS = pivot.LS;
+            root.RS.P = root;
+        }else if(mode==ROTATE_RIGHT){
+            root.LS = pivot.RS;
+            root.LS.P = root;
+        }else Log.e("HIJACKER/AVL.rebalance", "Can't rebalance with mode " + mode);
+
         pivot.P = root.P;
         root.P = pivot;
-        pivot.LS = root;
 
-        if(initRootType==LEFT_SON){
-            pivot.P.LS = pivot;
-        }else if(initRootType==RIGHT_SON){
-            pivot.P.RS = pivot;
-        }else{
-            //root was AVLRoot
-            this.root = pivot;
-        }
-
-        root.recalc();
-        pivot.recalc();
-        if(pivot.P!=null) pivot.P.recalc();
-    }
-    private void rotateRight(Node root, Node pivot){
-        int initRootType = root.sonType();
-
-        root.LS = pivot.RS;
-        root.LS.P = root;
-        pivot.P = root.P;
-        root.P = pivot;
-        pivot.RS = root;
+        if(mode==ROTATE_LEFT){
+            pivot.LS = root;
+        }else if(mode==ROTATE_RIGHT){
+            pivot.RS = root;
+        }else Log.e("HIJACKER/AVL.rebalance", "Can't rebalance with mode " + mode);
 
         if(initRootType==LEFT_SON){
             pivot.P.LS = pivot;

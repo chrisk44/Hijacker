@@ -57,8 +57,11 @@ extern "C" jint Java_com_hijacker_Airodump_main(JNIEnv* env, jobject obj, jstrin
             }
         }
         if(buffer[22]==':'){
+            //logd("0         1         2         3         4         5         6");
+            //logd("0123456789012345678901234567890123456789012345678901234567890");
+            //logd(buffer);
             //st
-            char st_mac[18], bssid[18], pwr_c[5], lost_c[7], frames_c[10], probes[100];
+            char st_mac[18], bssid[18], pwr_c[6], lost_c[7], frames_c[10], probes[100];
             int pwr, lost, frames;
 
             strncpy(st_mac, buffer+20, 17);
@@ -68,8 +71,8 @@ extern "C" jint Java_com_hijacker_Airodump_main(JNIEnv* env, jobject obj, jstrin
             else strncpy(bssid, buffer+1, 17);
             bssid[17]='\0';
 
-            strncpy(pwr_c, buffer+37, 5);
-            pwr_c[4]='\0';
+            strncpy(pwr_c, buffer+37, 6);
+            pwr_c[5]='\0';
             pwr = atoi(pwr_c);
 
             strncpy(lost_c, buffer+52, 6);

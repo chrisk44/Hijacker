@@ -43,7 +43,6 @@ import static com.hijacker.MainActivity.manuf_filter;
 import static com.hijacker.MainActivity.notification;
 import static com.hijacker.MainActivity.opn;
 import static com.hijacker.MainActivity.pwr_filter;
-import static com.hijacker.MainActivity.runInHandler;
 import static com.hijacker.MainActivity.show_ap;
 import static com.hijacker.MainActivity.show_ch;
 import static com.hijacker.MainActivity.show_na_st;
@@ -56,9 +55,9 @@ import static com.hijacker.MainActivity.wep;
 import static com.hijacker.MainActivity.wpa;
 
 class Tile {
-    static int i=0;                                //End of APs in items
     static final ArrayList<Tile> tiles = new ArrayList<>();
     static final List<Tile> allTiles = new ArrayList<>();
+    static int i=0;                                //End of APs in items
     Device device;
     boolean show=true;
     Tile(int index, Device dev){
@@ -67,30 +66,14 @@ class Tile {
 
         this.check();
         if(this.show){
-            if(device instanceof AP){
-                tiles.add(i, this);
-                adapter.insert(this, i);
-                i++;
-            }else{
-                tiles.add(this);
-                adapter.add(this);
-            }
-            onCountsChanged();
+            addToView();
         }
     }
     void update(){
         if(!this.show){
             this.check();
             if(this.show){
-                if(device instanceof AP){
-                    tiles.add(i, this);
-                    adapter.insert(this, i);
-                    i++;
-                }else{
-                    tiles.add(this);
-                    adapter.add(this);
-                }
-                onCountsChanged();
+                addToView();
             }
         }else{
             this.check();
@@ -122,6 +105,44 @@ class Tile {
             }
         }
     }
+    void addToView(){
+        int index;
+        if(this.device instanceof AP){
+            index = i;
+            if(i>0 && getComparatorForAP()!=null){
+                index = findIndex(tiles.subList(0, i), this, getComparatorForAP());
+            }
+            i++;
+        }else{
+            index = tiles.size();
+            if(tiles.size() - i > 0 && getComparatorForST()!=null){
+                index = findIndex(tiles.subList(i, tiles.size()), this, getComparatorForST()) + i;
+            }
+        }
+        tiles.add(index, this);
+        adapter.insert(this, index);
+        onCountsChanged();
+    }
+    static int findIndex(List<Tile> list, Tile tile, Comparator<Tile> comp){
+        /*
+            Returns the index of 'list' in which 'tile' should be added for the array to remain sorted according to 'comp'.
+            Use binary search to find an item that 'tile' "equals" to (according to 'comp')
+            If nothing is found, then the new item should be added at the index we were
+            when we gave up on searching.
+        */
+        if(list.size()==0) return 0;
+        Tile array[] = list.toArray(new Tile[list.size()]);
+        int L = 0, R = list.size()-1, M = 0;
+        while(L<=R){
+            M = (L + R)/2;
+
+            if(comp.compare(array[M], tile)==0) return M;
+            else if(comp.compare(array[M], tile)<0) L = M + 1;
+            else R = M - 1;
+        }
+        if(comp.compare(array[M], tile)>0) return M;
+        else return M + 1;
+    }
     static void clear(){
         allTiles.clear();
         tiles.clear();
@@ -140,99 +161,20 @@ class Tile {
             temp = allTiles.get(j);
             temp.check();
             if(temp.show){
-                if(temp.device instanceof AP){
-                    tiles.add(i, temp);
-                    adapter.insert(temp, i);
-                    i++;
-                }else{
-                    tiles.add(temp);
-                    adapter.add(temp);
-                }
+                temp.addToView();
             }
         }
         sort();
-        onCountsChanged();
     }
     static void sort(){
         //sort allTiles 0/i for APs and i/allTiles.size() for STs
         if(sort!=SORT_NOSORT){
             if(debug) Log.d("HIJACKER/Tile", "Sorting: sort is " + sort + ", sort_reverse is " + sort_reverse);
-            List<Tile> ap_sublist = null;
-            List<Tile> st_sublist = null;
-            if(i>0) ap_sublist = tiles.subList(0, i);
-            if(tiles.size() - i > 0) st_sublist = tiles.subList(i, tiles.size());
-            switch(sort){
-                case SORT_ESSID:
-                    if(show_ap && ap_sublist!=null){
-                        Collections.sort(ap_sublist, new Comparator<Tile>(){
-                            @Override
-                            public int compare(Tile o1, Tile o2){
-                                if(sort_reverse) return ((AP)o2.device).essid.compareToIgnoreCase(((AP)o1.device).essid);
-                                else return ((AP)o1.device).essid.compareToIgnoreCase(((AP)o2.device).essid);
-                            }
-                        });
-                    }
-                    break;
-                case SORT_BEACONS_FRAMES:
-                    if(show_ap && ap_sublist!=null){
-                        Collections.sort(ap_sublist, new Comparator<Tile>(){
-                            @Override
-                            public int compare(Tile o1, Tile o2){
-                                if(sort_reverse) return ((AP)o1.device).getBeacons() - ((AP)o2.device).getBeacons();
-                                else return ((AP)o2.device).getBeacons() - ((AP)o1.device).getBeacons();
-                            }
-                        });
-                    }
-                    if(show_st && st_sublist!=null){
-                        Collections.sort(st_sublist, new Comparator<Tile>(){
-                            @Override
-                            public int compare(Tile o1, Tile o2){
-                                if(sort_reverse) return ((ST)o1.device).getFrames() - ((ST)o2.device).getFrames();
-                                else return ((ST)o2.device).getFrames() - ((ST)o1.device).getFrames();
-                            }
-                        });
-                    }
-                    break;
-                case SORT_DATA_FRAMES:
-                    if(show_ap && ap_sublist!=null){
-                        Collections.sort(ap_sublist, new Comparator<Tile>(){
-                            @Override
-                            public int compare(Tile o1, Tile o2){
-                                if(sort_reverse) return ((AP)o1.device).getData() - ((AP)o2.device).getData();
-                                else return ((AP)o2.device).getData() - ((AP)o1.device).getData();
-                            }
-                        });
-                    }
-                    if(show_st && st_sublist!=null){
-                        Collections.sort(st_sublist, new Comparator<Tile>(){
-                            @Override
-                            public int compare(Tile o1, Tile o2){
-                                if(sort_reverse) return((ST)o1.device).getFrames() - ((ST)o2.device).getFrames();
-                                else return ((ST)o2.device).getFrames() - ((ST)o1.device).getFrames();
-                            }
-                        });
-                    }
-                    break;
-                case SORT_PWR:
-                    if(show_ap && ap_sublist!=null){
-                        Collections.sort(ap_sublist, new Comparator<Tile>(){
-                            @Override
-                            public int compare(Tile o1, Tile o2){
-                                if(sort_reverse) return o1.device.pwr - o2.device.pwr;
-                                else return o2.device.pwr - o1.device.pwr;
-                            }
-                        });
-                    }
-                    if(show_st && st_sublist!=null){
-                        Collections.sort(st_sublist, new Comparator<Tile>(){
-                            @Override
-                            public int compare(Tile o1, Tile o2){
-                                if(sort_reverse) return o1.device.pwr - o2.device.pwr;
-                                else return o2.device.pwr - o1.device.pwr;
-                            }
-                        });
-                    }
-                    break;
+            if(show_ap && i>0 && getComparatorForAP()!=null){
+                Collections.sort(tiles.subList(0, i), getComparatorForAP());
+            }
+            if(show_st && tiles.size()-i > 0 && getComparatorForST()!=null){
+                Collections.sort(tiles.subList(i, tiles.size()), getComparatorForST());
             }
         }
         toSort = false;
@@ -245,5 +187,69 @@ class Tile {
             StatsDialog.runnable.run();
         }
         notification();
+    }
+
+    static Comparator<Tile> AP_ESSID = new Comparator<Tile>(){
+        @Override
+        public int compare(Tile o1, Tile o2){
+            if(sort_reverse) return ((AP)o2.device).essid.compareToIgnoreCase(((AP)o1.device).essid);
+            else return ((AP)o1.device).essid.compareToIgnoreCase(((AP)o2.device).essid);
+        }
+    };
+    static Comparator<Tile> AP_BEACONS = new Comparator<Tile>(){
+        @Override
+        public int compare(Tile o1, Tile o2){
+            if(sort_reverse) return ((AP)o1.device).getBeacons() - ((AP)o2.device).getBeacons();
+            else return ((AP)o2.device).getBeacons() - ((AP)o1.device).getBeacons();
+        }
+    };
+    static Comparator<Tile> AP_DATA = new Comparator<Tile>(){
+        @Override
+        public int compare(Tile o1, Tile o2){
+            if(sort_reverse) return ((AP)o1.device).getData() - ((AP)o2.device).getData();
+            else return ((AP)o2.device).getData() - ((AP)o1.device).getData();
+        }
+    };
+    static Comparator<Tile> ST_FRAMES = new Comparator<Tile>(){
+        @Override
+        public int compare(Tile o1, Tile o2){
+            if(sort_reverse) return ((ST)o1.device).getFrames() - ((ST)o2.device).getFrames();
+            else return ((ST)o2.device).getFrames() - ((ST)o1.device).getFrames();
+        }
+    };
+    static Comparator<Tile> AP_ST_PWR = new Comparator<Tile>(){
+        @Override
+        public int compare(Tile o1, Tile o2){
+            if(sort_reverse) return o1.device.pwr - o2.device.pwr;
+            else return o2.device.pwr - o1.device.pwr;
+        }
+    };
+    static Comparator<Tile> getComparatorForAP(){
+        switch(sort){
+            case SORT_ESSID:
+                return AP_ESSID;
+            case SORT_BEACONS_FRAMES:
+                return AP_BEACONS;
+            case SORT_DATA_FRAMES:
+                return AP_DATA;
+            case SORT_PWR:
+                return AP_ST_PWR;
+            default:
+                return null;
+        }
+    }
+    static Comparator<Tile> getComparatorForST(){
+        switch(sort){
+            case SORT_ESSID:
+                return null;
+            case SORT_BEACONS_FRAMES:
+                return ST_FRAMES;
+            case SORT_DATA_FRAMES:
+                return ST_FRAMES;
+            case SORT_PWR:
+                return AP_ST_PWR;
+            default:
+                return null;
+        }
     }
 }
