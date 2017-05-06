@@ -82,7 +82,6 @@ class Tile {
             }
         }
         adapter.notifyDataSetChanged();
-        if(toSort && !background) Tile.sort();
     }
     void check(){
         if(is_ap==null) {

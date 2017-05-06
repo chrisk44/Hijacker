@@ -81,6 +81,7 @@ import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.net.Inet4Address;
 import java.net.InetAddress;
+import java.net.InetSocketAddress;
 import java.net.Socket;
 import java.util.ArrayList;
 import java.util.Date;
@@ -1760,7 +1761,8 @@ public class MainActivity extends AppCompatActivity{
         Socket socket;
         try{
             InetAddress ip = Inet4Address.getByName(SERVER);
-            socket = new Socket(ip, PORT);
+            socket = new Socket();
+            socket.connect(new InetSocketAddress(ip, PORT), 2000);
 
             PrintWriter in = new PrintWriter(socket.getOutputStream());
             BufferedReader out = new BufferedReader(new InputStreamReader(socket.getInputStream()));
