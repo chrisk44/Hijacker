@@ -19,6 +19,7 @@ package com.hijacker;
 
 import android.app.Activity;
 import android.app.Fragment;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.design.widget.Snackbar;
 import android.text.method.ScrollingMovementMethod;
@@ -69,10 +70,8 @@ public class ReaverFragment extends Fragment{
     static Button start_button, select_button;
     TextView console;
     EditText pinDelayView, lockedDelayView;
-    CheckBox pixie_dust_et, ignored_locked_cb, eap_fail_cb, small_dh_cb;
-    static Thread thread;
-    static Runnable runnable;
-    static boolean cont=false;
+    CheckBox pixie_dust_cb, ignored_locked_cb, eap_fail_cb, small_dh_cb;
+    static ReaverTask task;
     static String console_text = null, pin_delay="1", locked_delay="60", custom_mac=null;       //delays are always used as strings
     static boolean pixie_dust, ignore_locked, eap_fail, small_dh;
     static AP ap=null;
@@ -84,18 +83,20 @@ public class ReaverFragment extends Fragment{
         console = (TextView)fragmentView.findViewById(R.id.console);
         pinDelayView = (EditText)fragmentView.findViewById(R.id.pin_delay);
         lockedDelayView = (EditText)fragmentView.findViewById(R.id.locked_delay);
-        pixie_dust_et = (CheckBox)fragmentView.findViewById(R.id.pixie_dust);
+        pixie_dust_cb = (CheckBox)fragmentView.findViewById(R.id.pixie_dust);
         ignored_locked_cb = (CheckBox)fragmentView.findViewById(R.id.ignore_locked);
         eap_fail_cb = (CheckBox)fragmentView.findViewById(R.id.eap_fail);
         small_dh_cb = (CheckBox)fragmentView.findViewById(R.id.small_dh);
         select_button = (Button)fragmentView.findViewById(R.id.select_ap);
         start_button = (Button)fragmentView.findViewById(R.id.start_button);
 
+        task = new ReaverTask();
+
         console.setMovementMethod(new ScrollingMovementMethod());
 
         int chroot_check = checkChroot();
         if(chroot_check!=CHROOT_FOUND){
-            pixie_dust_et.setEnabled(false);
+            pixie_dust_cb.setEnabled(false);
             if(chroot_check==CHROOT_DIR_MISSING) Toast.makeText(getActivity(), getString(R.string.chroot_notfound), LENGTH_SHORT).show();
             else if(chroot_check==CHROOT_BIN_MISSING) Toast.makeText(getActivity(), getString(R.string.kali_notfound), LENGTH_SHORT).show();
             else Toast.makeText(getActivity(), getString(R.string.chroot_both_notfound), LENGTH_SHORT).show();
@@ -121,7 +122,7 @@ public class ReaverFragment extends Fragment{
                             AP temp = AP.APs.get(item.getItemId());
                             if(ap!=temp){
                                 ap = temp;
-                                runInHandler(stopRunnable);
+                                task.cancel(true);
                             }
                             select_button.setText(ap.toString());
                         }else{
@@ -146,111 +147,50 @@ public class ReaverFragment extends Fragment{
             }
         });
 
-        runnable = new Runnable(){
-            @Override
-            public void run(){
-                if(debug) Log.d("HIJACKER/ReaverFragment", "in thread");
-                try{
-                    BufferedReader out;
-                    String args = "-i " + iface + " -vv";
-                    args += ap==null ? " -b " + custom_mac : " -b " + ap.mac + " --channel " + ap.ch;
-                    args += " -d " + pinDelayView.getText();
-                    args += " -l " + lockedDelayView.getText();
-                    if(ignored_locked_cb.isChecked()) args += " -L";
-                    if(eap_fail_cb.isChecked()) args += " -E";
-                    if(small_dh_cb.isChecked()) args += " -S";
-                    String cmd;
-                    if(pixie_dust_et.isChecked()){
-                        writeToConsole(getString(R.string.chroot_warning));
-                        if(bootkali_init_bin.equals(NETHUNTER_BOOTKALI_BASH)){
-                            //Not in nethunter, need to initialize the chroot environment
-                            Runtime.getRuntime().exec("su -c " + bootkali_init_bin);       //Make sure kali has booted
-                        }
-                        args += " -K 1";
-                        cmd = "chroot " + MainActivity.chroot_dir + " /bin/bash -c \'" + get_chroot_env(getActivity()) + "reaver " + args + "\'";
-                        writeToConsole("\nRunning: " + cmd + '\n');
-                        ProcessBuilder pb = new ProcessBuilder("su");
-                        pb.redirectErrorStream(true);
-                        Process dc = pb.start();
-                        out = new BufferedReader(new InputStreamReader(dc.getInputStream()));
-                        PrintWriter in = new PrintWriter(dc.getOutputStream());
-                        in.print(cmd + "\nexit\n");
-                        in.flush();
-                    }else{
-                        cmd = "su -c " + prefix + " " + reaver_dir + " " + args;
-                        writeToConsole("Running: " + cmd);
-                        Process dc = Runtime.getRuntime().exec(cmd);
-                        out = new BufferedReader(new InputStreamReader(dc.getInputStream()));
-                    }
-                    last_action = System.currentTimeMillis();
-                    if(debug) Log.d("HIJACKER/ReaverFragment", cmd);
-                    cont = true;
-                    String buffer;
-                    while(cont && (buffer = out.readLine())!=null){
-                        writeToConsole(buffer);
-                    }
-                    writeToConsole("\nDone\n");
-                }catch(IOException e){
-                    Log.e("HIJACKER/Exception", "Caught Exception in ReaverFragment: " + e.toString());
-                }
-
-                runInHandler(stopRunnable);
-            }
-        };
-        if(thread==null) thread = new Thread(runnable);
-
         start_button.setOnClickListener(new View.OnClickListener(){
             @Override
             public void onClick(View view){
-                pinDelayView.setError(null);
-                lockedDelayView.setError(null);
-                if(!thread.isAlive()){
-                    if(ap==null && custom_mac==null){
-                        Snackbar.make(fragmentView, select_button.getText(), Snackbar.LENGTH_LONG).show();
-                    }else{
-                        if(pinDelayView.getText().toString().equals("")){
-                            pinDelayView.setError(getString(R.string.field_required));
-                            pinDelayView.requestFocus();
-                            return;
-                        }
-                        if(lockedDelayView.getText().toString().equals("")){
-                            lockedDelayView.setError(getString(R.string.field_required));
-                            lockedDelayView.requestFocus();
-                            return;
-                        }
-                        start_button.setText(R.string.stop);
-                        cont = true;
-                        stop(PROCESS_AIRODUMP);            //Can't have channels changing from anywhere else
-                        progress.setIndeterminate(true);
-                        thread = new Thread(runnable);
-                        thread.start();
-                    }
+                if(task.getStatus()!=AsyncTask.Status.RUNNING){
+                    attemptStart();
                 }else{
-                    runInHandler(stopRunnable);
+                    stop(PROCESS_REAVER);
+                    task.cancel(true);
                 }
             }
         });
         return fragmentView;
     }
-    Runnable stopRunnable = new Runnable(){
-        @Override
-        public void run(){
-            start_button.setText(R.string.start);
-            cont = false;
-            progress.setIndeterminate(false);
-            stop(PROCESS_REAVER);
-        }
-    };
-    void writeToConsole(final String str){
-        if(currentFragment==FRAGMENT_REAVER && !background){
-            runInHandler(new Runnable(){
-                @Override
-                public void run(){
-                    console.append(str + '\n');
-                }
-            });
+    void attemptStart(){
+        pinDelayView.setError(null);
+        lockedDelayView.setError(null);
+
+        if(ap==null && custom_mac==null){
+            Snackbar.make(fragmentView, getString(R.string.select_ap), Snackbar.LENGTH_LONG).show();
         }else{
-            console_text += str + '\n';
+            if(pinDelayView.getText().toString().equals("")){
+                pinDelayView.setError(getString(R.string.field_required));
+                pinDelayView.requestFocus();
+                return;
+            }
+            if(lockedDelayView.getText().toString().equals("")){
+                lockedDelayView.setError(getString(R.string.field_required));
+                lockedDelayView.requestFocus();
+                return;
+            }
+
+            task = new ReaverTask();
+            task.execute();
+        }
+    }
+    static boolean isRunning(){
+        if(task==null) return false;
+        return task.getStatus()==AsyncTask.Status.RUNNING;
+    }
+    static void stopReaver(){
+        //Does NOT completely stop reaver, only the app's task
+        //MainActivity.stop(PROCESS_REAVER) should be also called
+        if(task!=null){
+            task.cancel(true);
         }
     }
     @Override
@@ -261,7 +201,7 @@ public class ReaverFragment extends Fragment{
         console.setText(console_text);
         pinDelayView.setText(pin_delay);
         lockedDelayView.setText(locked_delay);
-        pixie_dust_et.setChecked(pixie_dust);
+        pixie_dust_cb.setChecked(pixie_dust);
         ignored_locked_cb.setChecked(ignore_locked);
         eap_fail_cb.setChecked(eap_fail);
         small_dh_cb.setChecked(small_dh);
@@ -271,7 +211,7 @@ public class ReaverFragment extends Fragment{
             ap = AP.marked.get(AP.marked.size()-1);
             select_button.setText(ap.toString());
         }
-        start_button.setText(thread.isAlive() ? R.string.stop : R.string.start);
+        start_button.setText(task.getStatus()==AsyncTask.Status.RUNNING ? R.string.stop : R.string.start);
     }
     @Override
     public void onPause(){
@@ -279,7 +219,7 @@ public class ReaverFragment extends Fragment{
         console_text = console.getText().toString();
         pin_delay = pinDelayView.getText().toString();
         locked_delay = lockedDelayView.getText().toString();
-        pixie_dust = pixie_dust_et.isChecked();
+        pixie_dust = pixie_dust_cb.isChecked();
         ignore_locked = ignored_locked_cb.isChecked();
         eap_fail = eap_fail_cb.isChecked();
         small_dh = small_dh_cb.isChecked();
@@ -319,6 +259,89 @@ public class ReaverFragment extends Fragment{
             }
         }
         return ENV_OUT;
+    }
+    class ReaverTask extends AsyncTask<Void, String, Boolean>{
+        String pinDelay, lockedDelay;
+        boolean ignoreLocked, eapFail, smallDH, pixieDust;
+        @Override
+        protected void onPreExecute(){
+            pinDelay = pinDelayView.getText().toString();
+            lockedDelay = lockedDelayView.getText().toString();
+            ignoreLocked = ignored_locked_cb.isChecked();
+            eapFail = eap_fail_cb.isChecked();
+            smallDH = small_dh_cb.isChecked();
+            pixieDust = pixie_dust_cb.isChecked();
+
+            start_button.setText(R.string.stop);
+            progress.setIndeterminate(true);
+        }
+        @Override
+        protected Boolean doInBackground(Void... params){
+            stop(PROCESS_AIRODUMP);            //Can't have channels changing from anywhere else
+            try{
+                BufferedReader out;
+                String args = "-i " + iface + " -vv";
+                args += ap==null ? " -b " + custom_mac : " -b " + ap.mac + " --channel " + ap.ch;
+                args += " -d " + pinDelay;
+                args += " -l " + lockedDelay;
+                if(ignoreLocked) args += " -L";
+                if(eapFail) args += " -E";
+                if(smallDH) args += " -S";
+                String cmd;
+                if(pixieDust){
+                    publishProgress(getString(R.string.chroot_warning));
+                    if(bootkali_init_bin.equals(NETHUNTER_BOOTKALI_BASH)){
+                        //Not in nethunter, need to initialize the chroot environment
+                        Runtime.getRuntime().exec("su -c " + bootkali_init_bin);       //Make sure kali has booted
+                    }
+                    args += " -K 1";
+                    cmd = "chroot " + MainActivity.chroot_dir + " /bin/bash -c \'" + get_chroot_env(getActivity()) + "reaver " + args + "\'";
+                    publishProgress("\nRunning: " + cmd + '\n');
+                    ProcessBuilder pb = new ProcessBuilder("su");
+                    pb.redirectErrorStream(true);
+                    Process dc = pb.start();
+                    out = new BufferedReader(new InputStreamReader(dc.getInputStream()));
+                    PrintWriter in = new PrintWriter(dc.getOutputStream());
+                    in.print(cmd + "\nexit\n");
+                    in.flush();
+                }else{
+                    cmd = "su -c " + prefix + " " + reaver_dir + " " + args;
+                    publishProgress("Running: " + cmd);
+                    Process dc = Runtime.getRuntime().exec(cmd);
+                    out = new BufferedReader(new InputStreamReader(dc.getInputStream()));
+                }
+                last_action = System.currentTimeMillis();
+                if(debug) Log.d("HIJACKER/ReaverFragment", cmd);
+
+                String buffer;
+                while(!isCancelled() && (buffer = out.readLine())!=null){
+                    publishProgress(buffer);
+                }
+                publishProgress("\nDone\n");
+            }catch(IOException e){
+                Log.e("HIJACKER/Exception", "Caught Exception in ReaverFragment: " + e.toString());
+            }
+
+            return true;
+        }
+        @Override
+        protected void onProgressUpdate(String... text){
+            if(currentFragment==FRAGMENT_REAVER && !background){
+                console.append(text[0] + '\n');
+            }else{
+                console_text += text[0] + '\n';
+            }
+        }
+        @Override
+        protected void onPostExecute(final Boolean success){
+            start_button.setText(R.string.start);
+            progress.setIndeterminate(false);
+        }
+        @Override
+        protected void onCancelled(){
+            start_button.setText(R.string.start);
+            progress.setIndeterminate(false);
+        }
     }
 }
 

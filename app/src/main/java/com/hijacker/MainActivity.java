@@ -670,13 +670,13 @@ public class MainActivity extends AppCompatActivity{
                                 }
                             }
                             list = getPIDs(PROCESS_REAVER);
-                            if(ReaverFragment.cont && list.size()==0){         //reaver not running
+                            if(ReaverFragment.isRunning() && list.size()==0){         //reaver not running
                                 msg = new Message();
                                 msg.obj = getString(R.string.reaver_not_running);
                                 watchdog_handler.sendMessage(msg);
                                 flag = false;
                                 stop(PROCESS_REAVER);
-                            }else if(!ReaverFragment.cont && list.size()>0){   //reaver still running
+                            }else if(!ReaverFragment.isRunning() && list.size()>0){   //reaver still running
                                 if(debug) Log.d("HIJACKER/watchdog", "Reaver is still running. Trying to kill it...");
                                 stop(PROCESS_REAVER);
                                 if(getPIDs(PROCESS_REAVER).size()>0){
@@ -1082,7 +1082,7 @@ public class MainActivity extends AppCompatActivity{
                 runOne(busybox + " kill $(" + busybox + " pidof aircrack-ng)");
                 break;
             case PROCESS_REAVER:
-                ReaverFragment.cont = false;
+                ReaverFragment.stopReaver();
                 runOne(busybox + " kill $(" + busybox + " pidof reaver)");
                 break;
             default:
@@ -1515,10 +1515,12 @@ public class MainActivity extends AppCompatActivity{
 
                 if(aireplay_running==AIREPLAY_DEAUTH) str += " | Aireplay deauthenticating...";
                 else if(aireplay_running==AIREPLAY_WEP) str += " | Aireplay replaying for wep...";
-                if(wpa_thread.isAlive()) str += " | WPA cracking...";
+                if(wpa_thread!=null){
+                    if(wpa_thread.isAlive()) str += " | WPA cracking...";
+                }
                 if(bf) str += " | MDK3 Beacon Flooding...";
                 if(ados) str += " | MDK3 Authentication DoS...";
-                if(ReaverFragment.cont) str += " | Reaver running...";
+                if(ReaverFragment.isRunning()) str += " | Reaver running...";
                 if(CrackFragment.cont) str += " | Cracking .cap file...";
                 if(CustomActionFragment.cont) str += " | Running action " + CustomActionFragment.selected_action.getTitle() + "...";
 
@@ -1552,7 +1554,7 @@ public class MainActivity extends AppCompatActivity{
         if(bf || ados) state += 4;
         toolbar.setOverflowIcon(overflow[state]);
 
-        if(!(ReaverFragment.cont || CrackFragment.cont || wpa_thread.isAlive())){
+        if(!(ReaverFragment.isRunning() || CrackFragment.cont || wpa_thread.isAlive())){
             progress.setIndeterminate(false);
             progress.setProgress(deauthWait);
         }
