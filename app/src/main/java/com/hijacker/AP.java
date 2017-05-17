@@ -150,7 +150,8 @@ class AP extends Device{
         this.cipher = cipher;
         this.auth = auth;
         this.pwr = pwr;
-        this.ch = ch==-1 ? 0 : ch;      //for hidden networks
+        if(ch==-1 || ch>14) this.ch = 0;
+        else this.ch = ch;      //for hidden networks
 
         if(sec==UNKNOWN){
             switch(this.enc){
