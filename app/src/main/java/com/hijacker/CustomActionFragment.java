@@ -158,22 +158,22 @@ public class CustomActionFragment extends Fragment{
                 //add(groupId, itemId, order, title)
                 int i;
                 if(selected_action.getType()==TYPE_AP){
-                    AP temp;
-                    for(i = 0; i<AP.APs.size(); i++){
-                        temp = AP.APs.get(i);
-                        popup.getMenu().add(TYPE_AP, i, i, temp.toString());
-                        if(selected_action.requiresClients() && temp.clients.size()==0){
+                    i = 0;
+                    for(AP ap : AP.APs){
+                        popup.getMenu().add(TYPE_AP, i, i, ap.toString());
+                        if(selected_action.requiresClients() && ap.clients.size()==0){
                             popup.getMenu().findItem(i).setEnabled(false);
                         }
+                        i++;
                     }
                 }else{
-                    ST temp;
-                    for(i = 0; i<ST.STs.size(); i++){
-                        temp = ST.STs.get(i);
-                        popup.getMenu().add(TYPE_ST, i, i, temp.toString());
-                        if(selected_action.requiresConnected() && temp.bssid==null){
+                    i = 0;
+                    for(ST st : ST.STs){
+                        popup.getMenu().add(TYPE_ST, i, i, st.toString());
+                        if(selected_action.requiresConnected() && st.bssid==null){
                             popup.getMenu().findItem(i).setEnabled(false);
                         }
+                        i++;
                     }
                 }
 

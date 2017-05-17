@@ -35,55 +35,50 @@
             android:layout_weight="1"/>
     </RadioGroup>
 
-    <TextView
-        android:text="@string/custom_action_title"
+    <android.support.design.widget.TextInputLayout
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:labelFor="@+id/title"
-        android:textColor="?android:attr/textColorPrimary"
-        android:textSize="18sp"/>
+        android:layout_height="wrap_content">
 
-    <EditText
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:inputType="text"
-        android:ems="10"
-        android:id="@+id/title"
-        android:enabled="false"/>
+        <EditText
+            android:enabled="false"
+            android:id="@+id/title"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="@string/custom_action_title"
+            android:inputType="text"
+            android:maxLines="1"/>
 
-    <TextView
-        android:text="@string/start_command"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:labelFor="@+id/start_cmd"
-        android:textColor="?android:attr/textColorPrimary"
-        android:textSize="18sp"/>
+    </android.support.design.widget.TextInputLayout>
 
-    <EditText
+    <android.support.design.widget.TextInputLayout
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:inputType="text"
-        android:ems="10"
-        android:id="@+id/start_cmd"
-        android:hint="echo $MAC"
-        android:enabled="false"/>
+        android:layout_height="wrap_content">
 
-    <TextView
-        android:text="@string/stop_command"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:labelFor="@+id/stop_cmd"
-        android:textColor="?android:attr/textColorPrimary"
-        android:textSize="18sp"/>
+        <EditText
+            android:enabled="false"
+            android:id="@+id/start_cmd"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="@string/start_command"
+            android:inputType="text"
+            android:maxLines="1"/>
 
-    <EditText
+    </android.support.design.widget.TextInputLayout>
+
+    <android.support.design.widget.TextInputLayout
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:inputType="text"
-        android:ems="10"
-        android:id="@+id/stop_cmd"
-        android:hint="echo $MAC"
-        android:enabled="false"/>
+        android:layout_height="wrap_content">
+
+        <EditText
+            android:enabled="false"
+            android:id="@+id/stop_cmd"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="@string/stop_command"
+            android:inputType="text"
+            android:maxLines="1"/>
+
+    </android.support.design.widget.TextInputLayout>
 
     <CheckBox
         android:text="@string/kill_process_on_stop"
@@ -92,14 +87,20 @@
         android:id="@+id/has_process_name"
         android:enabled="false"/>
 
-    <EditText
+    <android.support.design.widget.TextInputLayout
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:inputType="text"
-        android:ems="10"
-        android:id="@+id/process_name"
-        android:hint="my_app"
-        android:enabled="false"/>
+        android:layout_height="wrap_content">
+
+        <EditText
+            android:enabled="false"
+            android:id="@+id/process_name"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="@string/process_name"
+            android:inputType="text"
+            android:maxLines="1"/>
+
+    </android.support.design.widget.TextInputLayout>
 
     <CheckBox
         android:text="@string/requires_clients"

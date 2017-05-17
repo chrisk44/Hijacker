@@ -68,7 +68,7 @@ public class ReaverFragment extends Fragment{
     View fragmentView;
     static Button start_button, select_button;
     TextView console;
-    EditText pin_delay_et, locked_delay_et;
+    EditText pinDelayView, lockedDelayView;
     CheckBox pixie_dust_et, ignored_locked_cb, eap_fail_cb, small_dh_cb;
     static Thread thread;
     static Runnable runnable;
@@ -82,8 +82,8 @@ public class ReaverFragment extends Fragment{
         setRetainInstance(true);
 
         console = (TextView)fragmentView.findViewById(R.id.console);
-        pin_delay_et = (EditText)fragmentView.findViewById(R.id.pin_delay);
-        locked_delay_et = (EditText)fragmentView.findViewById(R.id.locked_delay);
+        pinDelayView = (EditText)fragmentView.findViewById(R.id.pin_delay);
+        lockedDelayView = (EditText)fragmentView.findViewById(R.id.locked_delay);
         pixie_dust_et = (CheckBox)fragmentView.findViewById(R.id.pixie_dust);
         ignored_locked_cb = (CheckBox)fragmentView.findViewById(R.id.ignore_locked);
         eap_fail_cb = (CheckBox)fragmentView.findViewById(R.id.eap_fail);
@@ -107,9 +107,10 @@ public class ReaverFragment extends Fragment{
                 PopupMenu popup = new PopupMenu(getActivity(), view);
 
                 popup.getMenuInflater().inflate(R.menu.popup_menu, popup.getMenu());
-                int i;
-                for (i = 0; i < AP.APs.size(); i++) {
-                    popup.getMenu().add(0, i, i, AP.APs.get(i).toString());
+                int i = 0;
+                for(AP ap : AP.APs){
+                    popup.getMenu().add(0, i, i, ap.toString());
+                    i++;
                 }
                 popup.getMenu().add(1, i, i, "Custom");
                 popup.setOnMenuItemClickListener(new PopupMenu.OnMenuItemClickListener() {
@@ -153,8 +154,8 @@ public class ReaverFragment extends Fragment{
                     BufferedReader out;
                     String args = "-i " + iface + " -vv";
                     args += ap==null ? " -b " + custom_mac : " -b " + ap.mac + " --channel " + ap.ch;
-                    args += " -d " + pin_delay_et.getText();
-                    args += " -l " + locked_delay_et.getText();
+                    args += " -d " + pinDelayView.getText();
+                    args += " -l " + lockedDelayView.getText();
                     if(ignored_locked_cb.isChecked()) args += " -L";
                     if(eap_fail_cb.isChecked()) args += " -E";
                     if(small_dh_cb.isChecked()) args += " -S";
@@ -201,16 +202,20 @@ public class ReaverFragment extends Fragment{
         start_button.setOnClickListener(new View.OnClickListener(){
             @Override
             public void onClick(View view){
+                pinDelayView.setError(null);
+                lockedDelayView.setError(null);
                 if(!thread.isAlive()){
                     if(ap==null && custom_mac==null){
                         Snackbar.make(fragmentView, select_button.getText(), Snackbar.LENGTH_LONG).show();
                     }else{
-                        if(pin_delay_et.getText().toString().equals("")){
-                            Snackbar.make(fragmentView, getString(R.string.pin_delay_empty), Snackbar.LENGTH_LONG).show();
+                        if(pinDelayView.getText().toString().equals("")){
+                            pinDelayView.setError(getString(R.string.field_required));
+                            pinDelayView.requestFocus();
                             return;
                         }
-                        if(locked_delay_et.getText().toString().equals("")){
-                            Snackbar.make(fragmentView, getString(R.string.locked_delay_empty), Snackbar.LENGTH_LONG).show();
+                        if(lockedDelayView.getText().toString().equals("")){
+                            lockedDelayView.setError(getString(R.string.field_required));
+                            lockedDelayView.requestFocus();
                             return;
                         }
                         start_button.setText(R.string.stop);
@@ -254,8 +259,8 @@ public class ReaverFragment extends Fragment{
         currentFragment = FRAGMENT_REAVER;
         refreshDrawer();
         console.setText(console_text);
-        pin_delay_et.setText(pin_delay);
-        locked_delay_et.setText(locked_delay);
+        pinDelayView.setText(pin_delay);
+        lockedDelayView.setText(locked_delay);
         pixie_dust_et.setChecked(pixie_dust);
         ignored_locked_cb.setChecked(ignore_locked);
         eap_fail_cb.setChecked(eap_fail);
@@ -272,8 +277,8 @@ public class ReaverFragment extends Fragment{
     public void onPause(){
         super.onPause();
         console_text = console.getText().toString();
-        pin_delay = pin_delay_et.getText().toString();
-        locked_delay = locked_delay_et.getText().toString();
+        pin_delay = pinDelayView.getText().toString();
+        locked_delay = lockedDelayView.getText().toString();
         pixie_dust = pixie_dust_et.isChecked();
         ignore_locked = ignored_locked_cb.isChecked();
         eap_fail = eap_fail_cb.isChecked();

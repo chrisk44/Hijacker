@@ -30,7 +30,7 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.ArrayList;
-import java.util.List;
+import java.util.HashMap;
 
 import static com.hijacker.AP.getAPByMac;
 import static com.hijacker.MainActivity.PROCESS_AIREPLAY;
@@ -55,9 +55,9 @@ import static com.hijacker.MainActivity.stop;
 import static com.hijacker.MainActivity.toSort;
 
 class ST extends Device{
-    static final AVLTree<ST> STsAVL = new AVLTree<>();
-    static final List<ST> STs = new ArrayList<>();
-    static final List<ST> marked = new ArrayList<>();
+    static final HashMap<String, ST> STsHM = new HashMap<>();
+    static final ArrayList<ST> STs = new ArrayList<>();
+    static final ArrayList<ST> marked = new ArrayList<>();
     static String paired, not_connected;
     static int connected=0;     //Stations that are connected to an AP
     int id;
@@ -72,7 +72,7 @@ class ST extends Device{
         upperRight = this.manuf;
 
         STs.add(this);
-        STsAVL.add(this, Device.toLong(this.mac));
+        STsHM.put(this.mac, this);
     }
     void disconnect(){
         if(Airodump.getChannel() != connectedTo.ch){
@@ -179,18 +179,18 @@ class ST extends Device{
     }
 
     static void clear(){
-        STsAVL.clear();
+        STsHM.clear();
         STs.clear();
         marked.clear();
         connected = 0;
     }
     static void saveAll(){
-        for(int i=0;i<ST.STs.size();i++){
-            ST.STs.get(i).saveData();
+        for(ST st : STs){
+            st.saveData();
         }
     }
     static ST getSTByMac(String mac){
-        return STsAVL.findById(Device.toLong(mac));
+        return STsHM.get(mac);
     }
 
     void showInfo(FragmentManager fragmentManager){

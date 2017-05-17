@@ -91,7 +91,7 @@ import java.util.List;
 
 import static com.hijacker.AP.getAPByMac;
 import static com.hijacker.CustomAction.TYPE_ST;
-import static com.hijacker.Device.toLong;
+import static com.hijacker.Device.trimMac;
 import static com.hijacker.IsolatedFragment.is_ap;
 import static com.hijacker.MDKFragment.ados;
 import static com.hijacker.MDKFragment.ados_pid;
@@ -156,7 +156,7 @@ public class MainActivity extends AppCompatActivity{
     static File aliases_file;
     static FileWriter aliases_in;
     static final HashMap<String, String> aliases = new HashMap<>();
-    static AVLTree<String> manufAVL;
+    static HashMap<String, String> manufHashMap;
     //App and device info
     static String versionName, deviceModel;
     static int versionCode;
@@ -723,11 +723,7 @@ public class MainActivity extends AppCompatActivity{
 
             //Load manufacturer AVL tree
             publishProgress(getString(R.string.loading_manuf_db));
-            if(manufAVL==null){
-                manufAVL = new AVLTree<>();
-            }else{
-                manufAVL.clear();
-            }
+            manufHashMap = new HashMap<>();
             File db = new File(manufDBFile);
             if(!db.exists()){
                 //Database has not been created
@@ -748,11 +744,12 @@ public class MainActivity extends AppCompatActivity{
                                 continue;
                             }
 
-                            long macID = toLong(buffer.substring(0, 6));
+                            String mac = buffer.substring(0, 6);
                             String manuf = buffer.substring(22);
-                            if(manufAVL.add(manuf, macID)){
+                            if(manufHashMap.get(mac)==null){
                                 //Write to file only if it was added to the AVL (it's unique)
-                                in.write(Long.toString(macID) + ";" + manuf + '\n');
+                                manufHashMap.put(mac, manuf);
+                                in.write(mac + ";" + manuf + '\n');
                             }
 
                             buffer = out.readLine();
@@ -762,7 +759,7 @@ public class MainActivity extends AppCompatActivity{
                     }
                 }catch(IOException e){
                     Log.e("HIJACKER/loadManufAVL", e.toString());
-                    manufAVL = null;
+                    manufHashMap = null;
                 }
             }else{
                 //Load database on the AVL
@@ -773,12 +770,14 @@ public class MainActivity extends AppCompatActivity{
 
                     String buffer = out.readLine();
                     while(buffer!=null){
-                        manufAVL.add(buffer.substring(buffer.indexOf(';')+1), Long.parseLong(buffer.substring(0, buffer.indexOf(';'))));
+                        String mac = buffer.substring(0, buffer.indexOf(';'));
+                        String manuf = buffer.substring(buffer.indexOf(';')+1);
+                        manufHashMap.put(mac, manuf);
                         buffer = out.readLine();
                     }
                 }catch(IOException e){
                     Log.e("HIJACKER/loadManufAVL", e.toString());
-                    manufAVL = null;
+                    manufHashMap = null;
                 }
             }
 
@@ -1568,11 +1567,11 @@ public class MainActivity extends AppCompatActivity{
         actionBar.setTitle(mPlanetTitles[currentFragment]);
     }
     static String getManuf(String mac){
-        if(manufAVL==null) return "Unknown Manufacturer";
-        String temp = mac.subSequence(0, 2).toString() + mac.subSequence(3, 5).toString() + mac.subSequence(6, 8).toString();
-        temp = manufAVL.findById(toLong(temp));
-        if(temp==null) return "Unknown Manufacturer";
-        else return temp;
+        mac = trimMac(mac);
+        if(manufHashMap==null) return "Unknown Manufacturer";
+        String manuf = manufHashMap.get(mac);
+        if(manuf==null) return "Unknown Manufacturer";
+        else return manuf;
     }
     static String getLastLine(BufferedReader out, String end){
         //Returns the last line printed in out BEFORE end. If no other line is present, end is returned.

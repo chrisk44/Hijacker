@@ -7,39 +7,33 @@
               android:focusableInTouchMode="true"
               android:paddingTop="10dp">
 
-    <TextView
-        android:text="@string/output_file_title"
+    <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:textColor="@android:color/white"
-        android:textSize="18sp"
-        android:labelFor="@+id/output_file"
-        android:paddingEnd="8dp"
-        android:paddingStart="8dp"/>
+        android:orientation="horizontal">
 
-    <LinearLayout
-        android:orientation="horizontal"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content">
-
-        <EditText
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:ems="10"
-            android:id="@+id/output_file"
-            android:inputType="text"
-            android:paddingEnd="8dp"
-            android:paddingStart="8dp"
-            android:layout_weight="1"
-            android:layout_gravity="center_vertical"/>
-
-        <Button
-            style="?android:attr/buttonBarButtonStyle"
-            android:text="..."
+        <android.support.design.widget.TextInputLayout
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:layout_weight="1">
+
+            <EditText
+                android:id="@+id/output_file"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:hint="@string/output_file_title"
+                android:inputType="text"
+                android:maxLines="1"/>
+
+        </android.support.design.widget.TextInputLayout>
+
+        <Button
             android:id="@+id/export_fe_btn"
-            android:layout_gravity="center_vertical"/>
+            style="?android:attr/buttonBarButtonStyle"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_vertical"
+            android:text="..."/>
     </LinearLayout>
 
     <RadioGroup

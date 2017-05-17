@@ -42,13 +42,13 @@ import static com.hijacker.MainActivity.background;
 
 public class ExportDialog extends DialogFragment{
     View dialogView;
-    EditText output_file;
+    EditText filenameView;
     @Override
     public Dialog onCreateDialog(Bundle savedInstanceState) {
         AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
         dialogView = getActivity().getLayoutInflater().inflate(R.layout.export, null);
 
-        output_file = (EditText)dialogView.findViewById(R.id.output_file);
+        filenameView = (EditText)dialogView.findViewById(R.id.output_file);
         dialogView.findViewById(R.id.export_fe_btn).setOnClickListener(new View.OnClickListener(){
             @Override
             public void onClick(View v){
@@ -58,7 +58,7 @@ public class ExportDialog extends DialogFragment{
                 dialog.setOnSelect(new Runnable(){
                     @Override
                     public void run(){
-                        output_file.setText(dialog.result.getAbsolutePath() + "/output.txt");
+                        filenameView.setText(dialog.result.getAbsolutePath() + "/output.txt");
                     }
                 });
                 dialog.show(getFragmentManager(), "FileExplorerDialog");
@@ -85,23 +85,29 @@ public class ExportDialog extends DialogFragment{
             positiveButton.setOnLongClickListener(new View.OnLongClickListener(){
                 @Override
                 public boolean onLongClick(View v){
+                    filenameView.setError(null);
+                    String filename = filenameView.getText().toString();
                     v.performHapticFeedback(HapticFeedbackConstants.LONG_PRESS);
-                    if(output_file.getText().toString().equals("")){
-                        Snackbar.make(dialogView, getString(R.string.filename_empty), Snackbar.LENGTH_SHORT).show();
+                    if(filename.equals("")){
+                        filenameView.setError(getString(R.string.field_required));
+                        filenameView.requestFocus();
                         return false;
                     }
-                    export(new File(output_file.getText().toString()));
+                    export(new File(filename));
                     return false;
                 }
             });
             positiveButton.setOnClickListener(new View.OnClickListener(){
                 @Override
                 public void onClick(View v){
-                    if(output_file.getText().toString().equals("")){
-                        Snackbar.make(dialogView, getString(R.string.filename_empty), Snackbar.LENGTH_SHORT).show();
+                    filenameView.setError(null);
+                    String filename = filenameView.getText().toString();
+                    if(filename.equals("")){
+                        filenameView.setError(getString(R.string.field_required));
+                        filenameView.requestFocus();
                         return;
                     }
-                    File out_file = new File(output_file.getText().toString());
+                    File out_file = new File(filename);
 
                     if(out_file.exists()){
                         Snackbar.make(dialogView, R.string.output_file_exists, Snackbar.LENGTH_LONG).show();
@@ -116,7 +122,8 @@ public class ExportDialog extends DialogFragment{
         try{
             out_file.createNewFile();
             if(!out_file.canWrite()){
-                Snackbar.make(dialogView, R.string.output_file_cant_write, Snackbar.LENGTH_SHORT).show();
+                filenameView.setError(getString(R.string.output_file_cant_write));
+                filenameView.requestFocus();
                 return;
             }
             FileWriter out = new FileWriter(out_file);
@@ -143,7 +150,8 @@ public class ExportDialog extends DialogFragment{
             Toast.makeText(getActivity(), R.string.output_file_exported, Toast.LENGTH_SHORT).show();
         }catch(IOException e){
             Log.e("HIJACKER/ExportDialog", "Exception: " + e.toString());
-            Snackbar.make(dialogView, getString(R.string.file_not_created), Snackbar.LENGTH_SHORT).show();
+            filenameView.setError(getString(R.string.file_not_created));
+            filenameView.requestFocus();
         }
     }
     @Override

@@ -85,38 +85,32 @@
         </LinearLayout>
 
         <LinearLayout
-            android:orientation="horizontal"
             android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:paddingEnd="20dp"
-            android:paddingStart="20dp">
+            android:layout_height="wrap_content"
+            android:orientation="horizontal">
 
-            <TextView
-                android:text="@string/ssid_file"
+            <android.support.design.widget.TextInputLayout
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:textColor="?android:attr/textColorPrimary"
-                android:layout_gravity="center_vertical"
-                android:textSize="18sp"
-                android:paddingEnd="5dp"/>
+                android:layout_weight="1">
 
-            <EditText
-                android:layout_height="wrap_content"
-                android:id="@+id/ssid_file"
-                android:inputType="text"
-                android:layout_width="0dp"
-                android:layout_gravity="center_vertical"
-                android:hint="@string/optional"
-                android:layout_weight="1"/>
+                <EditText
+                    android:id="@+id/ssid_file"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:hint="@string/ssid_file_optional"
+                    android:inputType="text"
+                    android:maxLines="1"/>
+
+            </android.support.design.widget.TextInputLayout>
 
             <Button
+                android:id="@+id/ssid_file_fe_btn"
                 style="?android:attr/buttonBarButtonStyle"
-                android:text="..."
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:id="@+id/ssid_file_fe_btn"
-                android:layout_gravity="center_vertical"/>
-
+                android:layout_gravity="center_vertical"
+                android:text="..."/>
         </LinearLayout>
 
     </LinearLayout>

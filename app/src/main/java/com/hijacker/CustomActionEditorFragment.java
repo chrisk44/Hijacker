@@ -44,7 +44,7 @@ import static com.hijacker.MainActivity.refreshDrawer;
 
 public class CustomActionEditorFragment extends Fragment{
     View fragmentView;
-    EditText title_et, start_cmd_et, stop_cmd_et, process_name_et;
+    EditText titleView, startCmdView, stopCmdView, processNameView;
     CheckBox requirement_cb, has_process_name_cb;
     Button save_btn;
     CustomAction action;
@@ -52,10 +52,10 @@ public class CustomActionEditorFragment extends Fragment{
     public View onCreateView(LayoutInflater inflater, final ViewGroup container, Bundle savedInstanceState){
         fragmentView = inflater.inflate(R.layout.custom_action_editor, container, false);
 
-        title_et = (EditText)fragmentView.findViewById(R.id.title);
-        start_cmd_et = (EditText)fragmentView.findViewById(R.id.start_cmd);
-        stop_cmd_et = (EditText)fragmentView.findViewById(R.id.stop_cmd);
-        process_name_et = (EditText)fragmentView.findViewById(R.id.process_name);
+        titleView = (EditText)fragmentView.findViewById(R.id.title);
+        startCmdView = (EditText)fragmentView.findViewById(R.id.start_cmd);
+        stopCmdView = (EditText)fragmentView.findViewById(R.id.stop_cmd);
+        processNameView = (EditText)fragmentView.findViewById(R.id.process_name);
         requirement_cb = (CheckBox)fragmentView.findViewById(R.id.requirement);
         has_process_name_cb = (CheckBox)fragmentView.findViewById(R.id.has_process_name);
         save_btn = (Button)fragmentView.findViewById(R.id.save_button);
@@ -63,9 +63,9 @@ public class CustomActionEditorFragment extends Fragment{
         ((RadioGroup)fragmentView.findViewById(R.id.radio_group)).setOnCheckedChangeListener(new RadioGroup.OnCheckedChangeListener(){
             @Override
             public void onCheckedChanged(RadioGroup radioGroup, int i){
-                title_et.setEnabled(true);
-                start_cmd_et.setEnabled(true);
-                stop_cmd_et.setEnabled(true);
+                titleView.setEnabled(true);
+                startCmdView.setEnabled(true);
+                stopCmdView.setEnabled(true);
                 requirement_cb.setEnabled(true);
                 has_process_name_cb.setEnabled(true);
                 save_btn.setEnabled(true);
@@ -76,31 +76,43 @@ public class CustomActionEditorFragment extends Fragment{
         has_process_name_cb.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener(){
             @Override
             public void onCheckedChanged(CompoundButton buttonView, boolean isChecked){
-                process_name_et.setEnabled(isChecked);
+                processNameView.setEnabled(isChecked);
             }
         });
 
         save_btn.setOnClickListener(new View.OnClickListener(){
             @Override
             public void onClick(View view){
-                String title = title_et.getText().toString();
-                String start_cmd = start_cmd_et.getText().toString();
-                String stop_cmd = stop_cmd_et.getText().toString();
-                String process_name = process_name_et.getText().toString();
+                titleView.setError(null);
+                startCmdView.setError(null);
+                stopCmdView.setError(null);
+                processNameView.setError(null);
+
+                String title = titleView.getText().toString();
+                String start_cmd = startCmdView.getText().toString();
+                String stop_cmd = stopCmdView.getText().toString();
+                String process_name = processNameView.getText().toString();
                 if(title.equals("")){
-                    Snackbar.make(fragmentView, getString(R.string.title_empty), Snackbar.LENGTH_SHORT).show();
-                }else if(start_cmd.equals("")){
-                    Snackbar.make(fragmentView, getString(R.string.start_cmd_empty), Snackbar.LENGTH_SHORT).show();
+                    titleView.setError(getString(R.string.title_empty));
+                    titleView.requestFocus();
                 }else if(title.contains("\n")){
-                    Snackbar.make(fragmentView, getString(R.string.title_newline), Snackbar.LENGTH_SHORT).show();
+                    titleView.setError(getString(R.string.title_newline));
+                    titleView.requestFocus();
+                }else if(start_cmd.equals("")){
+                    startCmdView.setError(getString(R.string.start_cmd_empty));
+                    startCmdView.requestFocus();
                 }else if(start_cmd.contains("\n")){
-                    Snackbar.make(fragmentView, getString(R.string.start_cmd_newline), Snackbar.LENGTH_SHORT).show();
+                    startCmdView.setError(getString(R.string.start_cmd_newline));
+                    startCmdView.requestFocus();
                 }else if(stop_cmd.contains("\n")){
-                    Snackbar.make(fragmentView, getString(R.string.stop_cmd_newline), Snackbar.LENGTH_SHORT).show();
+                    stopCmdView.setError(getString(R.string.stop_cmd_newline));
+                    stopCmdView.requestFocus();
                 }else if(process_name.contains("\n")){
-                    Snackbar.make(fragmentView, getString(R.string.process_name_newline), Snackbar.LENGTH_SHORT).show();
-                }else if(process_name.equals("") && ((CheckBox)fragmentView.findViewById(R.id.has_process_name)).isChecked()){
-                    Snackbar.make(fragmentView, getString(R.string.process_name_empty), Snackbar.LENGTH_SHORT).show();
+                    processNameView.setError(getString(R.string.process_name_newline));
+                    processNameView.requestFocus();
+                }else if(process_name.equals("") && has_process_name_cb.isChecked()){
+                    processNameView.setError(getString(R.string.process_name_empty));
+                    processNameView.requestFocus();
                 }else if(action!=null){
                     //update existing action
                     if(!action.getTitle().equals(title)){
@@ -128,7 +140,8 @@ public class CustomActionEditorFragment extends Fragment{
                         }
                     }
                     if(found){
-                        Snackbar.make(fragmentView, getString(R.string.action_exists), Snackbar.LENGTH_SHORT).show();
+                        titleView.setError(getString(R.string.action_exists));
+                        titleView.requestFocus();
                     }else{
                         //create new action
                         if(((RadioGroup) fragmentView.findViewById(R.id.radio_group)).getCheckedRadioButtonId()==R.id.ap_rb){
@@ -155,9 +168,9 @@ public class CustomActionEditorFragment extends Fragment{
         super.onResume();
         currentFragment = FRAGMENT_CUSTOM;
         if(action!=null){
-            title_et.setText(action.getTitle());
-            start_cmd_et.setText(action.getStartCmd());
-            stop_cmd_et.setText(action.getStopCmd());
+            titleView.setText(action.getTitle());
+            startCmdView.setText(action.getStartCmd());
+            stopCmdView.setText(action.getStopCmd());
             if(action.getType()==TYPE_AP){
                 ((RadioButton)fragmentView.findViewById(R.id.ap_rb)).setChecked(true);
                 fragmentView.findViewById(R.id.st_rb).setEnabled(false);
@@ -170,14 +183,14 @@ public class CustomActionEditorFragment extends Fragment{
             }
             if(action.hasProcessName()){
                 has_process_name_cb.setChecked(true);
-                process_name_et.setText(action.getProcessName());
+                processNameView.setText(action.getProcessName());
             }
-            title_et.setEnabled(true);
-            start_cmd_et.setEnabled(true);
-            stop_cmd_et.setEnabled(true);
+            titleView.setEnabled(true);
+            startCmdView.setEnabled(true);
+            stopCmdView.setEnabled(true);
             requirement_cb.setEnabled(true);
             has_process_name_cb.setEnabled(true);
-            process_name_et.setEnabled(action.hasProcessName());
+            processNameView.setEnabled(action.hasProcessName());
             save_btn.setEnabled(true);
         }
 

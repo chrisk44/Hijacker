@@ -32,7 +32,7 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.ArrayList;
-import java.util.List;
+import java.util.HashMap;
 
 import static com.hijacker.IsolatedFragment.is_ap;
 import static com.hijacker.MainActivity.MDK_ADOS;
@@ -74,15 +74,15 @@ import static com.hijacker.MainActivity.wpa_thread;
 class AP extends Device{
     static final int WPA=0, WPA2=1, WEP=2, OPN=3, UNKNOWN=4;
     static int wpa=0, wpa2=0, wep=0, opn=0, hidden=0;
-    static final AVLTree<AP> APsAVL = new AVLTree<>();
-    static final List<AP> APs = new ArrayList<>();
-    static final List<AP> marked = new ArrayList<>();
-    static final List<AP> currentTargetDeauth = new ArrayList<>();
+    static final HashMap<String, AP> APsHM = new HashMap<>();
+    static final ArrayList<AP> APs = new ArrayList<>();
+    static final ArrayList<AP> marked = new ArrayList<>();
+    static final ArrayList<AP> currentTargetDeauth = new ArrayList<>();
     boolean isHidden = false;
     int ch, id, sec=UNKNOWN;
     private int beacons, data, ivs, total_beacons=0, total_data=0, total_ivs=0;
     String essid, enc, cipher, auth;
-    final List<ST> clients = new ArrayList<>();
+    final ArrayList<ST> clients = new ArrayList<>();
     AP(String essid, String mac, String enc, String cipher, String auth,
        int pwr, int beacons, int data, int ivs, int ch) {
         super(mac);
@@ -93,7 +93,7 @@ class AP extends Device{
         lowerLeft = this.mac;
 
         APs.add(this);
-        APsAVL.add(this, Device.toLong(this.mac));
+        APsHM.put(this.mac, this);
     }
 
     void addClient(ST client){
@@ -249,7 +249,7 @@ class AP extends Device{
     int getIvs(){ return total_ivs + ivs; }
 
     static void clear(){
-        APsAVL.clear();
+        APsHM.clear();
         APs.clear();
         marked.clear();
         wpa = 0;
@@ -259,12 +259,12 @@ class AP extends Device{
         hidden = 0;
     }
     static void saveAll(){
-        for(int i=0;i<AP.APs.size();i++){
-            AP.APs.get(i).saveData();
+        for(AP ap : APs){
+            ap.saveData();
         }
     }
     static AP getAPByMac(String mac){
-        return APsAVL.findById(Device.toLong(mac));
+        return APsHM.get(mac);
     }
 
     void showInfo(FragmentManager fragmentManager){

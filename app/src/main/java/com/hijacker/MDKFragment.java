@@ -47,7 +47,7 @@ public class MDKFragment extends Fragment{
     View fragmentView;
     static AP ados_ap=null;
     static Switch bf_switch, ados_switch;
-    EditText ssid_edittext;
+    EditText ssidView;
     CheckBox managed_cb, adhoc_cb, opn_cb, wep_cb, tkip_cb, aes_cb;
     Button select_button;
     static String custom_mac=null, ssid_file=null;
@@ -59,7 +59,7 @@ public class MDKFragment extends Fragment{
         setRetainInstance(true);
         fragmentView = inflater.inflate(R.layout.mdk_fragment, container, false);
 
-        ssid_edittext = (EditText)fragmentView.findViewById(R.id.ssid_file);
+        ssidView = (EditText)fragmentView.findViewById(R.id.ssid_file);
         managed_cb = ((CheckBox)fragmentView.findViewById(R.id.managed));
         adhoc_cb = ((CheckBox)fragmentView.findViewById(R.id.adhoc));
         opn_cb = ((CheckBox)fragmentView.findViewById(R.id.opn));
@@ -79,7 +79,8 @@ public class MDKFragment extends Fragment{
                 dialog.setOnSelect(new Runnable(){
                     @Override
                     public void run(){
-                        ssid_edittext.setText(dialog.result.getAbsolutePath());
+                        ssidView.setText(dialog.result.getAbsolutePath());
+                        ssidView.setError(null);
                     }
                 });
                 dialog.show(getFragmentManager(), "FileExplorerDialog");
@@ -91,7 +92,8 @@ public class MDKFragment extends Fragment{
             public void onCheckedChanged(CompoundButton compoundButton, boolean b){
                 //Beacon Flooding
                 if(b){
-                    String ssid_file = ssid_edittext.getText().toString();
+                    ssidView.setError(null);
+                    String ssid_file = ssidView.getText().toString();
                     managed = managed_cb.isChecked();
                     adhoc = adhoc_cb.isChecked();
                     opn = opn_cb.isChecked();
@@ -114,7 +116,8 @@ public class MDKFragment extends Fragment{
                         return;
                     }
                     if(!(ssid_file.equals("") || ssid_file.startsWith("/"))){
-                        Snackbar.make(fragmentView, getString(R.string.filename_invalid), Snackbar.LENGTH_LONG).show();
+                        ssidView.setError(getString(R.string.filename_invalid));
+                        ssidView.requestFocus();
                         bf_switch.setChecked(false);
                         return;
                     }
@@ -126,7 +129,8 @@ public class MDKFragment extends Fragment{
                     if(!ssid_file.equals("")){
                         RootFile ssidRootFile = new RootFile(ssid_file);
                         if(!ssidRootFile.isFile()){
-                            Snackbar.make(fragmentView, ssid_file + ' ' + getString(R.string.not_file_or_exists), Snackbar.LENGTH_LONG).show();
+                            ssidView.setError(getString(R.string.not_file_or_exists));
+                            ssidView.requestFocus();
                             bf_switch.setChecked(false);
                             return;
                         }else{
@@ -160,9 +164,10 @@ public class MDKFragment extends Fragment{
                 PopupMenu popup = new PopupMenu(getActivity(), view);
 
                 popup.getMenuInflater().inflate(R.menu.popup_menu, popup.getMenu());
-                int i;
-                for (i = 0; i < AP.APs.size(); i++) {
-                    popup.getMenu().add(0, i, i, AP.APs.get(i).toString());
+                int i = 0;
+                for(AP ap : AP.APs){
+                    popup.getMenu().add(0, i, i, ap.toString());
+                    i++;
                 }
                 popup.getMenu().add(1, i, i, "Custom");
                 popup.setOnMenuItemClickListener(new PopupMenu.OnMenuItemClickListener() {
@@ -219,7 +224,7 @@ public class MDKFragment extends Fragment{
             ados_ap = AP.marked.get(AP.marked.size()-1);
             select_button.setText(ados_ap.toString());
         }
-        if(ssid_file!=null) ssid_edittext.setText(ssid_file);
+        if(ssid_file!=null) ssidView.setText(ssid_file);
         CompoundButton.OnCheckedChangeListener listener = new CompoundButton.OnCheckedChangeListener(){
             @Override
             public void onCheckedChanged(CompoundButton buttonView, boolean isChecked){
@@ -244,7 +249,7 @@ public class MDKFragment extends Fragment{
     public void onPause(){
         super.onPause();
         //Save options
-        ssid_file = ssid_edittext.getText().toString();
+        ssid_file = ssidView.getText().toString();
         managed = managed_cb.isChecked();
         adhoc = adhoc_cb.isChecked();
         opn = opn_cb.isChecked();

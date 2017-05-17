@@ -50,8 +50,7 @@ abstract class Device{
     abstract void unmark();
     abstract PopupMenu getPopupMenu(final Activity activity, final View v);
 
-    static long toLong(String mac){
-        if(mac==null) return -1;
-        return Long.decode("0x" + mac.replace(":", "").toLowerCase());
+    static String trimMac(String mac){
+        return mac.subSequence(0, 2).toString() + mac.subSequence(3, 5).toString() + mac.subSequence(6, 8).toString();
     }
 }

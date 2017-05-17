@@ -56,7 +56,7 @@ public class CrackFragment extends Fragment{
     static final int WPA=2, WEP=1;
     View fragmentView;
     TextView console;
-    EditText cap_et, wordlist_et;
+    EditText capfileView, wordlistView;
     Button button;
     static int mode;
     static Thread thread;
@@ -70,8 +70,8 @@ public class CrackFragment extends Fragment{
         console.setText("");
         console.setMovementMethod(new ScrollingMovementMethod());
 
-        cap_et = (EditText)fragmentView.findViewById(R.id.capfile);
-        wordlist_et = (EditText)fragmentView.findViewById(R.id.wordlist);
+        capfileView = (EditText)fragmentView.findViewById(R.id.capfile);
+        wordlistView = (EditText)fragmentView.findViewById(R.id.wordlist);
 
         final RadioGroup wep_rg = (RadioGroup)fragmentView.findViewById(R.id.wep_rg);
         for (int i = 0; i < wep_rg.getChildCount(); i++) {
@@ -154,14 +154,19 @@ public class CrackFragment extends Fragment{
         button.setOnClickListener(new View.OnClickListener(){
             @Override
             public void onClick(View view){
-                capfile = cap_et.getText().toString();
-                wordlist = wordlist_et.getText().toString();
+                capfileView.setError(null);
+                wordlistView.setError(null);
+                capfile = capfileView.getText().toString();
+                wordlist = wordlistView.getText().toString();
+
                 if(!capfile.startsWith("/")){
-                    Snackbar.make(fragmentView, getString(R.string.capfile_invalid), Snackbar.LENGTH_LONG).show();
+                    capfileView.setError(getString(R.string.capfile_invalid));
+                    capfileView.requestFocus();
                     return;
                 }
                 if(!wordlist.startsWith("/")){
-                    Snackbar.make(fragmentView, getString(R.string.wordlist_invalid), Snackbar.LENGTH_LONG).show();
+                    wordlistView.setError(getString(R.string.wordlist_invalid));
+                    wordlistView.requestFocus();
                     return;
                 }
                 RootFile cap = new RootFile(capfile);
@@ -169,9 +174,11 @@ public class CrackFragment extends Fragment{
                 if(thread.isAlive()){
                     cont = false;
                 }else if(!cap.exists() || !cap.isFile()){
-                    Snackbar.make(fragmentView, getString(R.string.cap_notfound), Snackbar.LENGTH_LONG).show();
+                    capfileView.setError(getString(R.string.cap_notfound));
+                    capfileView.requestFocus();
                 }else if(!word.exists() || !word.isFile()){
-                    Snackbar.make(fragmentView, getString(R.string.wordlist_notfound), Snackbar.LENGTH_LONG).show();
+                    wordlistView.setError(getString(R.string.wordlist_notfound));
+                    wordlistView.requestFocus();
                 }else{
                     RadioGroup temp = (RadioGroup)fragmentView.findViewById(R.id.radio_group);
                     if(temp.getCheckedRadioButtonId()==-1){
@@ -210,7 +217,8 @@ public class CrackFragment extends Fragment{
                 dialog.setOnSelect(new Runnable(){
                     @Override
                     public void run(){
-                        cap_et.setText(dialog.result.getAbsolutePath());
+                        capfileView.setText(dialog.result.getAbsolutePath());
+                        capfileView.setError(null);
                     }
                 });
                 dialog.show(getFragmentManager(), "FileExplorerDialog");
@@ -225,7 +233,8 @@ public class CrackFragment extends Fragment{
                 dialog.setOnSelect(new Runnable(){
                     @Override
                     public void run(){
-                        wordlist_et.setText(dialog.result.getAbsolutePath());
+                        wordlistView.setText(dialog.result.getAbsolutePath());
+                        wordlistView.setError(null);
                     }
                 });
                 dialog.show(getFragmentManager(), "FileExplorerDialog");
@@ -257,7 +266,7 @@ public class CrackFragment extends Fragment{
     public void onPause(){
         super.onPause();
         console_text = console.getText().toString();
-        capfile_text = cap_et.getText().toString();
-        wordlist_text = wordlist_et.getText().toString();
+        capfile_text = capfileView.getText().toString();
+        wordlist_text = wordlistView.getText().toString();
     }
 }
