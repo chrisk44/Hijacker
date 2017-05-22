@@ -40,7 +40,6 @@ import android.os.Bundle;
 import android.os.Environment;
 import android.os.Handler;
 import android.os.Looper;
-import android.os.Message;
 import android.preference.PreferenceManager;
 import android.support.annotation.NonNull;
 import android.support.design.widget.Snackbar;
@@ -87,7 +86,6 @@ import java.net.Socket;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
-import java.util.List;
 
 import static com.hijacker.AP.getAPByMac;
 import static com.hijacker.CustomAction.TYPE_ST;
@@ -140,8 +138,9 @@ public class MainActivity extends AppCompatActivity{
     static ImageView status[] = {null, null, null, null, null};                         //Icons in TestDialog, set in TestDialog class
     static int progress_int;
     static long last_action;                        //Timestamp for the last action. Used in watchdog to avoid false positives
-    static Thread wpa_thread, watchdog_thread;
-    static Runnable wpa_runnable, watchdog_runnable;
+    static Thread wpa_thread;
+    static Runnable wpa_runnable;
+    static WatchdogTask watchdogTask;
     static Menu menu;
     static MyListAdapter adapter;
     static CustomActionAdapter custom_action_adapter;
@@ -248,7 +247,7 @@ public class MainActivity extends AppCompatActivity{
                 versionName = info.versionName.replace(" ", "_");
                 versionCode = info.versionCode;
             }catch(PackageManager.NameNotFoundException e){
-                Log.e("HIJACKER/setup", e.toString());
+                Log.e("HIJACKER/SetupTask", e.toString());
             }
             deviceModel = Build.MODEL;
             if(!deviceModel.startsWith(Build.MANUFACTURER)) deviceModel = Build.MANUFACTURER + " " + deviceModel;
@@ -348,8 +347,6 @@ public class MainActivity extends AppCompatActivity{
 
             //Create 'error' notification (used by watchdog)
             error_notif = new NotificationCompat.Builder(MainActivity.this);
-            error_notif.setContentTitle(getString(R.string.notification2_title));
-            error_notif.setContentText("");
             error_notif.setSmallIcon(R.drawable.ic_notification);
             if(Build.VERSION.SDK_INT>=Build.VERSION_CODES.M){
                 error_notif.setColor(getColor(android.R.color.holo_red_dark));
@@ -371,7 +368,6 @@ public class MainActivity extends AppCompatActivity{
             publishProgress(getString(R.string.loading_strings));
             ST.not_connected = getString(R.string.not_connected);
             ST.paired = getString(R.string.paired) + ' ';
-            ErrorDialog.notification2_title =  getString(R.string.notification2_title);
 
             //Setup tools
             publishProgress(getString(R.string.setting_up_tools));
@@ -380,34 +376,20 @@ public class MainActivity extends AppCompatActivity{
                 File lib = new File(path + "/lib");
                 if(!bin.exists()){
                     if(!bin.mkdir()){
-                        final ErrorDialog dialog = new ErrorDialog();
-                        dialog.setMessage(getString(R.string.bin_not_created));
-                        runInHandler(new Runnable(){
-                            @Override
-                            public void run(){
-                                dialog.show(mFragmentManager, "ErrorDialog");
-                            }
-                        });
+                        publishProgress(null, getString(R.string.bin_not_created));
                         return false;
                     }
                 }
                 if(!lib.exists()){
                     if(!lib.mkdir()){
-                        final ErrorDialog dialog = new ErrorDialog();
-                        dialog.setMessage(getString(R.string.lib_not_created));
-                        runInHandler(new Runnable(){
-                            @Override
-                            public void run(){
-                                dialog.show(mFragmentManager, "ErrorDialog");
-                            }
-                        });
+                        publishProgress(null, getString(R.string.lib_not_created));
                         return false;
                     }
                 }
                 boolean install = true;
                 if(bin.list().length==20 && lib.list().length==1 && info!=null){
-                    if(info.versionCode!=pref.getInt("tools_version", 0)){
-                        if(debug) Log.d("HIJACKER/installTools", "Tools already installed");
+                    if(info.versionCode==pref.getInt("tools_version", 0)){
+                        if(debug) Log.d("HIJACKER/SetupTask", "Tools already installed");
                         install = false;
                     }else{
                         File manufDB = new File(manufDBFile);
@@ -455,14 +437,7 @@ public class MainActivity extends AppCompatActivity{
             }else{
                 Log.e("HIJACKER/onCreate", "Device not armv7l or aarch64, can't install tools");
                 busybox = "busybox";
-                final ErrorDialog dialog = new ErrorDialog();
-                dialog.setMessage(getString(R.string.not_armv7l));
-                runInHandler(new Runnable(){
-                    @Override
-                    public void run(){
-                        dialog.show(getFragmentManager(), "ErrorDialog");
-                    }
-                });
+                publishProgress(null, getString(R.string.not_armv7l));
 
                 prefix = pref.getString("prefix", prefix);
                 airodump_dir = "airodump-ng";
@@ -605,94 +580,6 @@ public class MainActivity extends AppCompatActivity{
             };
             wpa_thread = new Thread(wpa_runnable);
 
-            watchdog_runnable = new Runnable(){        //Thread to check whether the tools we think are running, are actually running
-                @Override
-                public void run(){
-                    try{
-                        boolean flag = true;
-                        while(flag){
-                            Thread.sleep(5000);
-                            while(System.currentTimeMillis()-last_action < 1000){
-                                if(debug) Log.d("HIJACKER/watchdog", "Watchdog waiting for 1 sec...");
-                                Thread.sleep(1000);
-                            }
-                            if(debug) Log.d("HIJACKER/watchdog", "Watchdog watching...");
-                            List<Integer> list;
-                            Message msg;
-                            list = getPIDs(PROCESS_AIRODUMP);
-                            if(Airodump.isRunning() && list.size()==0){          //airodump not running
-                                msg = new Message();
-                                msg.obj = getString(R.string.airodump_not_running);
-                                watchdog_handler.sendMessage(msg);
-                                flag = false;
-                                stop(PROCESS_AIRODUMP);
-                            }else if(!Airodump.isRunning() && list.size()>0){     //airodump still running
-                                if(debug) Log.d("HIJACKER/watchdog", "Airodump is still running. Trying to kill it...");
-                                stop(PROCESS_AIRODUMP);
-                                if(getPIDs(PROCESS_AIRODUMP).size()>0){
-                                    msg = new Message();
-                                    msg.obj = getString(R.string.airodump_still_running);
-                                    watchdog_handler.sendMessage(msg);
-                                    flag = false;
-                                }
-                            }
-                            list = getPIDs(PROCESS_AIREPLAY);
-                            if(aireplay_running!=0 && list.size()==0){      //aireplay not running
-                                msg = new Message();
-                                msg.obj = getString(R.string.aireplay_not_running);
-                                watchdog_handler.sendMessage(msg);
-                                flag = false;
-                                stop(PROCESS_AIREPLAY);
-                            }else if(aireplay_running==0 && list.size()>0){ //aireplay still running
-                                if(debug) Log.d("HIJACKER/watchdog", "Aireplay is still running. Trying to kill it...");
-                                stop(PROCESS_AIREPLAY);
-                                if(getPIDs(PROCESS_AIREPLAY).size()>0){
-                                    msg = new Message();
-                                    msg.obj = getString(R.string.aireplay_still_running);
-                                    watchdog_handler.sendMessage(msg);
-                                    flag = false;
-                                }
-                            }
-                            list = getPIDs(PROCESS_MDK);
-                            if((bf || ados) && list.size()==0){         //mdk not running
-                                msg = new Message();
-                                msg.obj = getString(R.string.mdk_not_running);
-                                watchdog_handler.sendMessage(msg);
-                                flag = false;
-                                stop(PROCESS_MDK);
-                            }else if(!(bf || ados) && list.size()>0){   //mdk still running
-                                if(debug) Log.d("HIJACKER/watchdog", "MDK is still running. Trying to kill it...");
-                                stop(PROCESS_MDK);
-                                if(getPIDs(PROCESS_MDK).size()>0){
-                                    msg = new Message();
-                                    msg.obj = getString(R.string.mdk_still_running);
-                                    watchdog_handler.sendMessage(msg);
-                                    flag = false;
-                                }
-                            }
-                            list = getPIDs(PROCESS_REAVER);
-                            if(ReaverFragment.isRunning() && list.size()==0){         //reaver not running
-                                msg = new Message();
-                                msg.obj = getString(R.string.reaver_not_running);
-                                watchdog_handler.sendMessage(msg);
-                                flag = false;
-                                stop(PROCESS_REAVER);
-                            }else if(!ReaverFragment.isRunning() && list.size()>0){   //reaver still running
-                                if(debug) Log.d("HIJACKER/watchdog", "Reaver is still running. Trying to kill it...");
-                                stop(PROCESS_REAVER);
-                                if(getPIDs(PROCESS_REAVER).size()>0){
-                                    msg = new Message();
-                                    msg.obj = getString(R.string.reaver_still_running);
-                                    watchdog_handler.sendMessage(msg);
-                                    flag = false;
-                                }
-                            }
-                        }
-                    }catch(InterruptedException e){ Log.e("HIJACKER/watchdog", "Exception: " + e.toString()); }
-                }
-            };
-            watchdog_thread = new Thread(watchdog_runnable);
-
             //Start threads
             publishProgress(getString(R.string.starting_threads));
             new Thread(new Runnable(){      //Thread to wait until the drawer is initialized and then highlight airodump
@@ -713,11 +600,6 @@ public class MainActivity extends AppCompatActivity{
                 }
             }).start();
 
-            if(watchdog){
-                watchdog_thread = new Thread(watchdog_runnable);
-                watchdog_thread.start();
-            }
-
             //Start background service so the app won't get killed if it goes to the background
             publishProgress(getString(R.string.starting_pers_service));
             startService(new Intent(MainActivity.this, PersistenceService.class));
@@ -731,8 +613,9 @@ public class MainActivity extends AppCompatActivity{
                 try{
                     //Create the database
                     if(!db.createNewFile()){
-                        Log.e("HIJACKER/loadManufAVL", "Error creating database file");
+                        Log.e("HIJACKER/SetupTask", "Error creating database file");
                     }else{
+                        if(debug) Log.d("HIJACKER/SetupTask", "Creating manufacturer database...");
                         publishProgress(getString(R.string.building_manuf_db));
                         BufferedReader out = new BufferedReader(new InputStreamReader(getResources().getAssets().open("oui.txt")));
                         FileWriter in = new FileWriter(db);
@@ -757,9 +640,10 @@ public class MainActivity extends AppCompatActivity{
                         }
                         in.close();
                         out.close();
+                        if(debug) Log.d("HIJACKER/SetupTask", "Manufacturer database built");
                     }
                 }catch(IOException e){
-                    Log.e("HIJACKER/loadManufAVL", e.toString());
+                    Log.e("HIJACKER/SetupTask", e.toString());
                     manufHashMap = null;
                 }
             }else{
@@ -777,7 +661,7 @@ public class MainActivity extends AppCompatActivity{
                         buffer = out.readLine();
                     }
                 }catch(IOException e){
-                    Log.e("HIJACKER/loadManufAVL", e.toString());
+                    Log.e("HIJACKER/SetupTask", e.toString());
                     manufHashMap = null;
                 }
             }
@@ -829,11 +713,25 @@ public class MainActivity extends AppCompatActivity{
         }
         @Override
         protected void onProgressUpdate(String... progress){
-            loadingDialog.setText(progress[0]);
+            if(progress[0]!=null){
+                //Update loading dialog with progress[0]
+                loadingDialog.setText(progress[0]);
+            }else if(progress[1]!=null){
+                //Show error message with progress[1]
+                ErrorDialog dialog = new ErrorDialog();
+                dialog.setMessage(progress[1]);
+                dialog.show(getFragmentManager(), "ErrorDialog");
+            }
         }
         @Override
         protected void onPostExecute(final Boolean success){
+            if(!success) return;
             loadingDialog.setText(getString(R.string.starting_hijacker));
+
+            if(watchdog){
+                watchdogTask = new WatchdogTask(MainActivity.this);
+                watchdogTask.execute();
+            }
 
             //Load default fragment (airodump)
             if(mFragmentManager.getBackStackEntryCount()==0){
@@ -870,6 +768,7 @@ public class MainActivity extends AppCompatActivity{
         }
 
     }
+
     void extract(String filename, String out_dir, boolean chmod){
         File f = new File(out_dir, filename);
         if(f.exists()) f.delete();          //Delete file in case it's outdated
@@ -1101,17 +1000,6 @@ public class MainActivity extends AppCompatActivity{
         wpa_thread.interrupt();
     }
 
-    //Handlers used for tasks that require the Main thread to update the view, but need to be run by other threads
-    public Handler watchdog_handler = new Handler(){
-        public void handleMessage(Message msg){
-            if(debug) Log.d("HIJACKER/watchdog", "Message is " + msg.obj);
-            ErrorDialog dialog = new ErrorDialog();
-            dialog.setTitle((String)msg.obj);
-            dialog.setMessage(getString(R.string.watchdog_message));
-            dialog.setWatchdog(true);
-            dialog.show(mFragmentManager, "ErrorDialog");
-        }
-    };
     public static Handler handler = new Handler();
     public static void runInHandler(Runnable runnable){
         handler.post(runnable);
@@ -1230,7 +1118,7 @@ public class MainActivity extends AppCompatActivity{
         notif_on = false;
         mNotificationManager.cancelAll();
         CustomAction.save();
-        watchdog_thread.interrupt();
+        watchdogTask.cancel(true);
         stop(PROCESS_AIRODUMP);
         stop(PROCESS_AIREPLAY);
         stop(PROCESS_MDK);

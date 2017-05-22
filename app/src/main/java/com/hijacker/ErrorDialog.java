@@ -27,25 +27,16 @@ import android.support.v7.app.AlertDialog;
 import static com.hijacker.MainActivity.mNotificationManager;
 import static com.hijacker.MainActivity.error_notif;
 import static com.hijacker.MainActivity.background;
-import static com.hijacker.MainActivity.watchdog_runnable;
-import static com.hijacker.MainActivity.watchdog_thread;
 
 public class ErrorDialog extends DialogFragment {
-    static String notification2_title;
     String message;
     String title=null;
-    boolean watchdog=false;
     @Override
     public Dialog onCreateDialog(Bundle savedInstanceState) {
         if(title==null) title = getString(R.string.error);
         AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
         builder.setPositiveButton(R.string.ok, new DialogInterface.OnClickListener() {
-            public void onClick(DialogInterface dialog, int id) {
-                if(watchdog){
-                    watchdog_thread = new Thread(watchdog_runnable);
-                    watchdog_thread.start();   //If the error was from there restart the thread
-                }
-            }
+            public void onClick(DialogInterface dialog, int id) {}
         });
         builder.setNeutralButton(R.string.exit, new DialogInterface.OnClickListener() {
             @Override
@@ -64,20 +55,12 @@ public class ErrorDialog extends DialogFragment {
     }
     public void setMessage(String msg){ this.message = msg; }
     public void setTitle(String title){ this.title = title; }
-    public void setWatchdog(boolean wd){ this.watchdog = wd; }
     @Override
     public void show(FragmentManager fragmentManager, String tag){
         if(!background) super.show(fragmentManager, tag);
         else{
-            if(this.watchdog){
-                error_notif.setContentTitle(notification2_title);
-                error_notif.setContentText(title);
-                watchdog_thread = new Thread(watchdog_runnable);
-                watchdog_thread.start();   //If the error was from there restart the thread
-            }else{
-                error_notif.setContentTitle(title);
-                error_notif.setContentText(message);
-            }
+            error_notif.setContentTitle(title);
+            error_notif.setContentText(message);
             mNotificationManager.notify(1, error_notif.build());
         }
     }

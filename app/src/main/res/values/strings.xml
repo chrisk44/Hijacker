@@ -205,7 +205,7 @@
         You will have to install the tools manually: aircrack-ng suite, busybox, mdk3, reaver, wireless-tools and libfakeioctl.so (adjust the prefix for this)</string>
         <!-- Notification -->
         <string name="notification_title">Hijacker is running in the background</string>
-        <string name="notification2_title">Hijacker watchdog detected a problem</string>
+        <string name="watchdog_notif_title">Hijacker watchdog detected a problem</string>
         <string name="stop_attacks">Stop attacks</string>
         <!-- wpa_thread -->
         <string name="stopped_to_capture">Stopped aireplay to capture handshake…</string>

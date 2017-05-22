@@ -37,10 +37,9 @@ import static com.hijacker.MainActivity.pref_edit;
 import static com.hijacker.MainActivity.refreshDrawer;
 import static com.hijacker.MainActivity.versionName;
 import static com.hijacker.MainActivity.watchdog;
-import static com.hijacker.MainActivity.watchdog_runnable;
-import static com.hijacker.MainActivity.watchdog_thread;
 import static com.hijacker.MainActivity.currentFragment;
 import static com.hijacker.MainActivity.load;
+import static com.hijacker.MainActivity.watchdogTask;
 
 public class SettingsFragment extends PreferenceFragment {
     int versionClicks = 0;
@@ -201,11 +200,14 @@ public class SettingsFragment extends PreferenceFragment {
             @Override
             public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key) {
                 load();
-                if(watchdog && !watchdog_thread.isAlive()){
-                    watchdog_thread = new Thread(watchdog_runnable);
-                    watchdog_thread.start();
+                if(watchdog && !watchdogTask.isRunning()){
+                    //Turned off
+                    watchdogTask = new WatchdogTask(getActivity());
+                    watchdogTask.execute();
+                }else if(!watchdog && watchdogTask.isRunning()){
+                    //Turned on
+                    watchdogTask.cancel(true);
                 }
-                if(!watchdog && watchdog_thread.isAlive()) watchdog_thread.interrupt();
             }
         };
         getPreferenceManager().getSharedPreferences().registerOnSharedPreferenceChangeListener(listener);

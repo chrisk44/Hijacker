@@ -52,9 +52,7 @@ import static com.hijacker.MainActivity.load;
 import static com.hijacker.MainActivity.runInHandler;
 import static com.hijacker.MainActivity.status;
 import static com.hijacker.MainActivity.stop;
-import static com.hijacker.MainActivity.watchdog;
-import static com.hijacker.MainActivity.watchdog_runnable;
-import static com.hijacker.MainActivity.watchdog_thread;
+import static com.hijacker.MainActivity.watchdogTask;
 import static com.hijacker.Shell.runOne;
 
 public class TestDialog extends DialogFragment {
@@ -66,7 +64,10 @@ public class TestDialog extends DialogFragment {
     final Runnable runnable = new Runnable(){
         @Override
         public void run(){
-            watchdog_thread.interrupt();
+            boolean restartWatchdog = watchdogTask.isRunning();
+            if(restartWatchdog){
+                watchdogTask.cancel(true);
+            }
             final boolean results[] = {false, false, false, false, false};
             final String cmdMonMode = enable_monMode;
             final String cmdAirodump = "su -c " + prefix + " " + airodump_dir + " " + iface;
@@ -216,9 +217,10 @@ public class TestDialog extends DialogFragment {
                 stop(PROCESS_AIREPLAY);
                 stop(PROCESS_MDK);
                 stop(PROCESS_REAVER);
-                if(watchdog){
-                    watchdog_thread = new Thread(watchdog_runnable);
-                    watchdog_thread.start();
+                if(restartWatchdog){
+                    //Restart the watchdog
+                    watchdogTask = new WatchdogTask(getActivity());
+                    watchdogTask.execute();
                 }
             }
         }
