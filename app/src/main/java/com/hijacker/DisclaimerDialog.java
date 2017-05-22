@@ -51,8 +51,4 @@ public class DisclaimerDialog extends DialogFragment {
         });
         return builder.create();
     }
-    @Override
-    public void show(FragmentManager fragmentManager, String tag){
-        if(!background) super.show(fragmentManager, tag);
-    }
 }

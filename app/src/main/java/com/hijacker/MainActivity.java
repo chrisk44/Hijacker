@@ -157,6 +157,7 @@ public class MainActivity extends AppCompatActivity{
     static FileWriter aliases_in;
     static final HashMap<String, String> aliases = new HashMap<>();
     static HashMap<String, String> manufHashMap;
+    Runnable onResumeRunnable = null;
     //App and device info
     static String versionName, deviceModel;
     static int versionCode;
@@ -405,7 +406,7 @@ public class MainActivity extends AppCompatActivity{
                 }
                 boolean install = true;
                 if(bin.list().length==20 && lib.list().length==1 && info!=null){
-                    if(info.versionCode<=pref.getInt("tools_version", 0)){
+                    if(info.versionCode!=pref.getInt("tools_version", 0)){
                         if(debug) Log.d("HIJACKER/installTools", "Tools already installed");
                         install = false;
                     }else{
@@ -791,11 +792,6 @@ public class MainActivity extends AppCompatActivity{
                 loadAliases();
             }
 
-            //Delete old report, it's not needed if no exception is thrown up to this point
-            publishProgress(getString(R.string.deleting_bug_report));
-            File report = new File(Environment.getExternalStorageDirectory() + "/report.txt");
-            if(report.exists()) report.delete();
-
             //Checking permissions
             publishProgress(getString(R.string.checking_permissions));
             ActivityCompat.requestPermissions(MainActivity.this, new String[]{
@@ -848,13 +844,14 @@ public class MainActivity extends AppCompatActivity{
                 ft.commitAllowingStateLoss();
             }
 
+            loadingDialog.dismissAllowingStateLoss();
 
             //Start
             if(!pref.getBoolean("disclaimer", false)){
-                //First start
-                runInHandler(new Runnable(){
+                onResumeRunnable = new Runnable(){
                     @Override
                     public void run(){
+                        //First start
                         new DisclaimerDialog().show(getFragmentManager(), "Disclaimer");
                         //Check for SuperSU
                         if(!new File("/su").exists()){
@@ -863,11 +860,13 @@ public class MainActivity extends AppCompatActivity{
                             dialog.setMessage(getString(R.string.su_notfound));
                             dialog.show(getFragmentManager(), "ErrorDialog");
                         }
+                        onResumeRunnable = null;
                     }
-                });
+                };
+                if(!background){
+                    onResumeRunnable.run();
+                }
             }else main();
-
-            loadingDialog.dismissAllowingStateLoss();
         }
 
     }
@@ -1250,6 +1249,9 @@ public class MainActivity extends AppCompatActivity{
         notif_on = false;
         background = false;
         if(mNotificationManager!=null) mNotificationManager.cancelAll();
+        if(onResumeRunnable!=null){
+            onResumeRunnable.run();
+        }
     }
     @Override
     protected void onStop(){
