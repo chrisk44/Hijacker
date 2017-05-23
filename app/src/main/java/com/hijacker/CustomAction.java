@@ -69,8 +69,7 @@ class CustomAction{
     void setStopCmd(String stop_cmd){ this.stop_cmd = stop_cmd; }
     void setRequiresClients(boolean requires_clients){ this.requires_clients = requires_clients; }
     void setRequiresConnected(boolean requires_connected){ this.requires_connected = requires_connected; }
-    void run(){
-        Shell shell = CustomActionFragment.shell;
+    void run(Shell shell){
         shell.run("export IFACE=\"" + iface + '\"');
         shell.run("export PREFIX=\"" + prefix + '\"');
         shell.run("export AIRODUMP_DIR=\"" + airodump_dir + '\"');
@@ -103,10 +102,7 @@ class CustomAction{
             }
             try{
                 Thread.sleep(100);  //Make sure that the processes have been killed
-            }catch(InterruptedException ignored){
-            }finally{
-                shell.done();
-            }
+            }catch(InterruptedException ignored){}
         }
         shell.done();
     }

@@ -21,6 +21,7 @@ import android.app.Dialog;
 import android.app.DialogFragment;
 import android.app.FragmentManager;
 import android.content.DialogInterface;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v7.app.AlertDialog;
 import android.util.Log;
@@ -52,7 +53,6 @@ import static com.hijacker.MainActivity.load;
 import static com.hijacker.MainActivity.runInHandler;
 import static com.hijacker.MainActivity.status;
 import static com.hijacker.MainActivity.stop;
-import static com.hijacker.MainActivity.watchdogTask;
 import static com.hijacker.Shell.runOne;
 
 public class TestDialog extends DialogFragment {
@@ -64,9 +64,9 @@ public class TestDialog extends DialogFragment {
     final Runnable runnable = new Runnable(){
         @Override
         public void run(){
-            boolean restartWatchdog = watchdogTask.isRunning();
+            boolean restartWatchdog = ((MainActivity)getActivity()).watchdogTask.isRunning();
             if(restartWatchdog){
-                watchdogTask.cancel(true);
+                ((MainActivity)getActivity()).watchdogTask.cancel(true);
             }
             final boolean results[] = {false, false, false, false, false};
             final String cmdMonMode = enable_monMode;
@@ -219,8 +219,8 @@ public class TestDialog extends DialogFragment {
                 stop(PROCESS_REAVER);
                 if(restartWatchdog){
                     //Restart the watchdog
-                    watchdogTask = new WatchdogTask(getActivity());
-                    watchdogTask.execute();
+                    ((MainActivity)getActivity()).watchdogTask = new WatchdogTask(getActivity());
+                    ((MainActivity)getActivity()).watchdogTask.execute();
                 }
             }
         }

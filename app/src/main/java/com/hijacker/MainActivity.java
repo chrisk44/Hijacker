@@ -140,7 +140,6 @@ public class MainActivity extends AppCompatActivity{
     static long last_action;                        //Timestamp for the last action. Used in watchdog to avoid false positives
     static Thread wpa_thread;
     static Runnable wpa_runnable;
-    static WatchdogTask watchdogTask;
     static Menu menu;
     static MyListAdapter adapter;
     static CustomActionAdapter custom_action_adapter;
@@ -156,14 +155,12 @@ public class MainActivity extends AppCompatActivity{
     static FileWriter aliases_in;
     static final HashMap<String, String> aliases = new HashMap<>();
     static HashMap<String, String> manufHashMap;
-    Runnable onResumeRunnable = null;
     //App and device info
     static String versionName, deviceModel;
     static int versionCode;
     static long deviceID;
     static boolean init=false;      //True on first run to swap the dialogs for initialization
     static ActionBar actionBar;
-    private GoogleApiClient client;
     static String bootkali_init_bin = "bootkali_init";
     //Preferences - Defaults are in strings.xml
     static String iface, prefix, airodump_dir, aireplay_dir, aircrack_dir, mdk3_dir, reaver_dir, cap_dir, chroot_dir,
@@ -172,6 +169,9 @@ public class MainActivity extends AppCompatActivity{
     static boolean show_notif, show_details, airOnStartup, debug, delete_extra,
             monstart, always_cap, cont_on_fail, watchdog, target_deauth, enable_on_airodump, update_on_startup;
 
+    private GoogleApiClient client;
+    Runnable onResumeRunnable = null;
+    WatchdogTask watchdogTask;
     @Override
     protected void onCreate(Bundle savedInstanceState){
         super.onCreate(savedInstanceState);
@@ -766,7 +766,6 @@ public class MainActivity extends AppCompatActivity{
                 }
             }else main();
         }
-
     }
 
     void extract(String filename, String out_dir, boolean chmod){
@@ -790,7 +789,7 @@ public class MainActivity extends AppCompatActivity{
             Log.e("HIJACKER/FileProvider", "Exception copying from assets", e);
         }
     }
-    public static void main(){
+    public void main(){
         runOne(enable_monMode);
         runOne("mkdir " + cap_dir);
 
@@ -914,10 +913,9 @@ public class MainActivity extends AppCompatActivity{
             }
         }catch(IOException e){
             Log.e("HIJACKER/getPIDs", "Exception: " + e.toString());
-            return null;
-        }finally{
-            shell.done();
+            list = null;
         }
+        shell.done();
         return list;
     }
     public static ArrayList<Integer> getPIDs(int pr){

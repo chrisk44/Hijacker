@@ -180,6 +180,8 @@ class AP extends Device{
             public void run(){
                 if(tile!=null) tile.update();
                 else tile = new Tile(id, AP.this);
+
+                if(toSort) Tile.sort();
             }
         });
     }

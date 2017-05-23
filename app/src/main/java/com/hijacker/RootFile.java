@@ -190,16 +190,18 @@ class RootFile{
                 }
                 //Separate by ' ' to get the name
                 String temp[] = buffer.split(" ");
-                //Reconstruct the full_name (it may contain spaces, so it's many arguments)
-                String full_name = "";
-                for(int i=8;i<temp.length;i++){
-                    full_name += temp[i] + ' ';
-                }
-                if(full_name.charAt(full_name.length()-1)==' '){
-                    full_name = full_name.substring(0, full_name.length()-1);
-                }
-                if(!full_name.contains(" -> ")){
-                    result.add(new RootFile(absolutePath + (absolutePath.length()==1 ? "" : '/') + full_name));
+                if(temp.length>8){
+                    //Reconstruct the full_name (it may contain spaces, so it's many arguments)
+                    String full_name = "";
+                    for(int i = 8; i<temp.length; i++){
+                        full_name += temp[i] + ' ';
+                    }
+                    if(full_name.charAt(full_name.length() - 1)==' '){
+                        full_name = full_name.substring(0, full_name.length() - 1);
+                    }
+                    if(!full_name.contains(" -> ")){
+                        result.add(new RootFile(absolutePath + (absolutePath.length()==1 ? "" : '/') + full_name));
+                    }
                 }
 
                 buffer = out2.readLine();
@@ -207,19 +209,11 @@ class RootFile{
 
         }catch(IOException e){
             Log.e("HIJACKER/RootFile", e.toString());
-            return null;
-        }finally{
-            shell2.done();
+            result = null;
         }
+        shell2.done();
 
         return result;
-    }
-    void write(String str){
-        //Appends string str to the file
-        if(!this.isFile()) throw new IllegalStateException("This is not a file");
-        if(!this.exists()) throw new IllegalStateException("File doesn't exist");
-
-        shell.run(busybox + " echo \"" + str + "\" >> " + this.absolutePath);
     }
     static void init(){
         shell = getFreeShell();

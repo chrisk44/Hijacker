@@ -52,7 +52,6 @@ import static com.hijacker.MainActivity.background;
 import static com.hijacker.MainActivity.getPIDs;
 import static com.hijacker.MainActivity.init;
 import static com.hijacker.MainActivity.mDrawerLayout;
-import static com.hijacker.MainActivity.main;
 import static com.hijacker.MainActivity.path;
 import static com.hijacker.MainActivity.stop;
 
@@ -199,7 +198,7 @@ public class InstallFirmwareDialog extends DialogFragment {
         if(init){
             init = false;
             mDrawerLayout.openDrawer(GravityCompat.START);
-            main();
+            ((MainActivity)getActivity()).main();
         }
     }
     @Override

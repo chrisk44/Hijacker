@@ -71,6 +71,9 @@ class Shell{
         this.shell_in.flush();
     }
     void done(){
+        if(!valid){
+            throw new IllegalStateException("Shell has already been registered as free");
+        }
         String term_str = "ENDOFCLEAR" + System.currentTimeMillis();    //Use unique string
         run("echo; echo " + term_str);
         MainActivity.getLastLine(shell_out, term_str);      //This will read up to the last line and stop, effectively clearing shell_out

@@ -39,7 +39,6 @@ import static com.hijacker.MainActivity.versionName;
 import static com.hijacker.MainActivity.watchdog;
 import static com.hijacker.MainActivity.currentFragment;
 import static com.hijacker.MainActivity.load;
-import static com.hijacker.MainActivity.watchdogTask;
 
 public class SettingsFragment extends PreferenceFragment {
     int versionClicks = 0;
@@ -200,13 +199,14 @@ public class SettingsFragment extends PreferenceFragment {
             @Override
             public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key) {
                 load();
-                if(watchdog && !watchdogTask.isRunning()){
+                boolean running = ((MainActivity)getActivity()).watchdogTask.isRunning();
+                if(watchdog && !running){
                     //Turned off
-                    watchdogTask = new WatchdogTask(getActivity());
-                    watchdogTask.execute();
-                }else if(!watchdog && watchdogTask.isRunning()){
+                    ((MainActivity)getActivity()).watchdogTask = new WatchdogTask(getActivity());
+                    ((MainActivity)getActivity()).watchdogTask.execute();
+                }else if(!watchdog && running){
                     //Turned on
-                    watchdogTask.cancel(true);
+                    ((MainActivity)getActivity()).watchdogTask.cancel(true);
                 }
             }
         };

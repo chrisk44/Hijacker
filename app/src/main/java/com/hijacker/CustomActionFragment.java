@@ -49,7 +49,7 @@ public class CustomActionFragment extends Fragment{
     static CustomAction selected_action=null;
     static AP ap=null;
     static ST st=null;
-    static Shell shell=null;
+    Shell shell = null;
     static Thread thread;
     static Runnable runnable;
     static boolean cont=false;
@@ -210,7 +210,7 @@ public class CustomActionFragment extends Fragment{
                     shell = Shell.getFreeShell();
                     console.append("Running: " + selected_action.getStartCmd() + '\n');
                     if(debug) Log.d("HIJACKER/CustomCMDFrag", "Running: " + selected_action.getStartCmd());
-                    selected_action.run();
+                    selected_action.run(shell);
                     start_button.setText(R.string.stop);
                     progress.setIndeterminate(true);
                 }else{

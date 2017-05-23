@@ -158,6 +158,8 @@ class ST extends Device{
             public void run(){
                 if(tile!=null) tile.update();
                 else tile = new Tile(AP.APs.size() + id, ST.this);
+
+                if(toSort) Tile.sort();
             }
         });
     }
