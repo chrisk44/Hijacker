@@ -36,9 +36,11 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:hint="@string/firm_location_text"
+                android:imeOptions="actionDone"
                 android:inputType="text"
-                android:text="@string/firm_location_default"
-                android:maxLines="1"/>
+                android:maxLines="1"
+                android:singleLine="true"
+                android:text="@string/firm_location_default"/>
 
         </android.support.design.widget.TextInputLayout>
 

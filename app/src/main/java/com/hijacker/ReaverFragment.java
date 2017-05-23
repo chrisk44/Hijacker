@@ -24,9 +24,11 @@ import android.os.Bundle;
 import android.support.design.widget.Snackbar;
 import android.text.method.ScrollingMovementMethod;
 import android.util.Log;
+import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.inputmethod.EditorInfo;
 import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.EditText;
@@ -89,6 +91,17 @@ public class ReaverFragment extends Fragment{
         small_dh_cb = (CheckBox)fragmentView.findViewById(R.id.small_dh);
         select_button = (Button)fragmentView.findViewById(R.id.select_ap);
         start_button = (Button)fragmentView.findViewById(R.id.start_button);
+
+        pinDelayView.setOnEditorActionListener(new TextView.OnEditorActionListener(){
+            @Override
+            public boolean onEditorAction(TextView v, int actionId, KeyEvent event){
+                if(actionId == EditorInfo.IME_ACTION_NEXT){
+                    lockedDelayView.requestFocus();
+                    return true;
+                }
+                return false;
+            }
+        });
 
         task = new ReaverTask();
 

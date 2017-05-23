@@ -40,13 +40,15 @@
         android:layout_height="wrap_content">
 
         <EditText
-            android:enabled="false"
             android:id="@+id/title"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:enabled="false"
             android:hint="@string/custom_action_title"
+            android:imeOptions="actionNext"
             android:inputType="text"
-            android:maxLines="1"/>
+            android:maxLines="1"
+            android:singleLine="true"/>
 
     </android.support.design.widget.TextInputLayout>
 
@@ -55,13 +57,15 @@
         android:layout_height="wrap_content">
 
         <EditText
-            android:enabled="false"
             android:id="@+id/start_cmd"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:enabled="false"
             android:hint="@string/start_command"
+            android:imeOptions="actionNext"
             android:inputType="text"
-            android:maxLines="1"/>
+            android:maxLines="1"
+            android:singleLine="true"/>
 
     </android.support.design.widget.TextInputLayout>
 
@@ -70,13 +74,15 @@
         android:layout_height="wrap_content">
 
         <EditText
-            android:enabled="false"
             android:id="@+id/stop_cmd"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:enabled="false"
             android:hint="@string/stop_command"
+            android:imeOptions="actionNext"
             android:inputType="text"
-            android:maxLines="1"/>
+            android:maxLines="1"
+            android:singleLine="true"/>
 
     </android.support.design.widget.TextInputLayout>
 
@@ -92,13 +98,15 @@
         android:layout_height="wrap_content">
 
         <EditText
-            android:enabled="false"
             android:id="@+id/process_name"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:enabled="false"
             android:hint="@string/process_name"
+            android:imeOptions="actionDone"
             android:inputType="text"
-            android:maxLines="1"/>
+            android:maxLines="1"
+            android:singleLine="true"/>
 
     </android.support.design.widget.TextInputLayout>
 

@@ -29,11 +29,14 @@ import android.support.v4.view.GravityCompat;
 import android.support.v7.app.AlertDialog;
 import android.util.Log;
 import android.view.HapticFeedbackConstants;
+import android.view.KeyEvent;
 import android.view.View;
+import android.view.inputmethod.EditorInfo;
 import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.EditText;
 import android.widget.ProgressBar;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import java.io.File;
@@ -68,6 +71,27 @@ public class InstallFirmwareDialog extends DialogFragment {
         firmView = (EditText) dialogView.findViewById(R.id.firm_location);
         utilView = (EditText) dialogView.findViewById(R.id.util_location);
         backup_cb = (CheckBox) dialogView.findViewById(R.id.backup);
+
+        firmView.setOnEditorActionListener(new TextView.OnEditorActionListener(){
+            @Override
+            public boolean onEditorAction(TextView v, int actionId, KeyEvent event){
+                if(actionId == EditorInfo.IME_ACTION_NEXT){
+                    utilView.requestFocus();
+                    return true;
+                }
+                return false;
+            }
+        });
+        utilView.setOnEditorActionListener(new TextView.OnEditorActionListener(){
+            @Override
+            public boolean onEditorAction(TextView v, int actionId, KeyEvent event){
+                if(actionId == EditorInfo.IME_ACTION_DONE){
+                    attemptInstall(false);
+                    return true;
+                }
+                return false;
+            }
+        });
 
         //Adjust directories
         if(!(new File("/su").exists())){
@@ -122,6 +146,33 @@ public class InstallFirmwareDialog extends DialogFragment {
         });
         return builder.create();
     }
+    void attemptInstall(boolean override){
+        String firm_location = firmView.getText().toString();
+        String util_location = utilView.getText().toString();
+        firm_location = getDirectory(firm_location);
+        util_location = getDirectory(util_location);
+
+        if(override){
+            if(check(firm_location, util_location, true)){
+                install(firm_location, util_location);
+                dismissAllowingStateLoss();
+            }
+        }else{
+            if(check(firm_location, util_location, false)){
+                shell.run("strings " + firm_location + "fw_bcmdhd.bin | " + busybox + " grep \"FWID:\"; echo ENDOFSTRINGS");
+                String result = getLastLine(shell.getShell_out(), "ENDOFSTRINGS");
+                result = result.substring(0, 4);
+
+                if(result.equals("4339")){
+                    install(firm_location, util_location);
+                    dismissAllowingStateLoss();
+                }else{
+                    Snackbar.make(dialogView, R.string.fw_not_compatible, Snackbar.LENGTH_LONG).show();
+                    if(debug) Log.d("HIJACKER/InstFirmware", "Firmware verification is: " + result);
+                }
+            }
+        }
+    }
     @Override
     public void onStart() {
         super.onStart();
@@ -134,39 +185,14 @@ public class InstallFirmwareDialog extends DialogFragment {
                 @Override
                 public boolean onLongClick(View v){
                     v.performHapticFeedback(HapticFeedbackConstants.LONG_PRESS);
-                    String firm_location = firmView.getText().toString();
-                    String util_location = utilView.getText().toString();
-                    firm_location = getDirectory(firm_location);
-                    util_location = getDirectory(util_location);
-
-                    if(check(firm_location, util_location, true)){
-                        install(firm_location, util_location);
-                        dismissAllowingStateLoss();
-                    }
+                    attemptInstall(true);
                     return false;
                 }
             });
             positiveButton.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    String firm_location = firmView.getText().toString();
-                    String util_location = utilView.getText().toString();
-                    firm_location = getDirectory(firm_location);
-                    util_location = getDirectory(util_location);
-
-                    if(check(firm_location, util_location, false)){
-                        shell.run("strings " + firm_location + "fw_bcmdhd.bin | " + busybox + " grep \"FWID:\"; echo ENDOFSTRINGS");
-                        String result = getLastLine(shell.getShell_out(), "ENDOFSTRINGS");
-                        result = result.substring(0, 4);
-
-                        if(result.equals("4339")){
-                            install(firm_location, util_location);
-                            dismissAllowingStateLoss();
-                        }else{
-                            Snackbar.make(v, R.string.fw_not_compatible, Snackbar.LENGTH_LONG).show();
-                            if(debug) Log.d("HIJACKER/InstFirmware", "Firmware verification is: " + result);
-                        }
-                    }
+                    attemptInstall(false);
                 }
             });
             neutralButton.setOnClickListener(new View.OnClickListener() {

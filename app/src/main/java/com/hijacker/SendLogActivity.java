@@ -36,8 +36,10 @@ import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.text.method.ScrollingMovementMethod;
 import android.util.Log;
+import android.view.KeyEvent;
 import android.view.View;
 import android.view.Window;
+import android.view.inputmethod.EditorInfo;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.ProgressBar;
@@ -66,7 +68,7 @@ import static com.hijacker.MainActivity.versionName;
 public class SendLogActivity extends AppCompatActivity{
     static String busybox;
     String stackTrace, user_email = null;
-    EditText user_email_et, extra_et;
+    EditText userEmailView, extraView;
     File report;
     Process shell;
     PrintWriter shell_in;
@@ -79,8 +81,19 @@ public class SendLogActivity extends AppCompatActivity{
         requestWindowFeature(Window.FEATURE_NO_TITLE);
         setFinishOnTouchOutside(false);
         setContentView(R.layout.activity_send_log);
-        user_email_et = (EditText)findViewById(R.id.email_et);
-        extra_et = (EditText)findViewById(R.id.extra_et);
+        userEmailView = (EditText)findViewById(R.id.email_et);
+        extraView = (EditText)findViewById(R.id.extra_et);
+
+        userEmailView.setOnEditorActionListener(new TextView.OnEditorActionListener(){
+            @Override
+            public boolean onEditorAction(TextView v, int actionId, KeyEvent event){
+                if(actionId == EditorInfo.IME_ACTION_NEXT){
+                    extraView.requestFocus();
+                    return true;
+                }
+                return false;
+            }
+        });
 
         busybox = getFilesDir().getAbsolutePath() + "/bin/busybox";
         stackTrace = getIntent().getStringExtra("exception");
@@ -124,7 +137,7 @@ public class SendLogActivity extends AppCompatActivity{
 
         deviceID = pref.getLong("deviceID", -1);
 
-        user_email_et.setText(pref.getString("user_email", ""));
+        userEmailView.setText(pref.getString("user_email", ""));
 
         report = new File(Environment.getExternalStorageDirectory() + "/report.txt");
         createReport(report, getFilesDir().getAbsolutePath(), stackTrace, shell);
@@ -149,7 +162,7 @@ public class SendLogActivity extends AppCompatActivity{
         intent.putExtra(Intent.EXTRA_SUBJECT, "Hijacker bug report");
         Uri attachment = FileProvider.getUriForFile(this, BuildConfig.APPLICATION_ID + ".provider", report);
         intent.putExtra(Intent.EXTRA_STREAM, attachment);
-        intent.putExtra(Intent.EXTRA_TEXT, extra_et.getText().toString());
+        intent.putExtra(Intent.EXTRA_TEXT, extraView.getText().toString());
         startActivity(intent);
     }
     public void onSend(final View v){
@@ -158,7 +171,7 @@ public class SendLogActivity extends AppCompatActivity{
             Snackbar.make(getCurrentFocus(), "Report was not created", Snackbar.LENGTH_LONG).show();
             return;
         }
-        user_email = user_email_et.getText().toString();
+        user_email = userEmailView.getText().toString();
         pref_edit.putString("user_email", user_email);
         pref_edit.commit();
 
@@ -212,7 +225,7 @@ public class SendLogActivity extends AppCompatActivity{
                     BufferedReader fileReader = new BufferedReader(new FileReader(report));
 
                     socketIn.print("User email: " + user_email + '\n');
-                    socketIn.print("Extra details: " + extra_et.getText().toString());
+                    socketIn.print("Extra details: " + extraView.getText().toString());
                     socketIn.flush();
                     String buffer = fileReader.readLine();
                     while(buffer!=null){

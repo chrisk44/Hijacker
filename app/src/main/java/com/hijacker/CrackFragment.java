@@ -23,9 +23,11 @@ import android.os.Environment;
 import android.support.design.widget.Snackbar;
 import android.text.method.ScrollingMovementMethod;
 import android.util.Log;
+import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.inputmethod.EditorInfo;
 import android.widget.Button;
 import android.widget.CompoundButton;
 import android.widget.EditText;
@@ -72,6 +74,17 @@ public class CrackFragment extends Fragment{
 
         capfileView = (EditText)fragmentView.findViewById(R.id.capfile);
         wordlistView = (EditText)fragmentView.findViewById(R.id.wordlist);
+
+        capfileView.setOnEditorActionListener(new TextView.OnEditorActionListener(){
+            @Override
+            public boolean onEditorAction(TextView v, int actionId, KeyEvent event){
+                if(actionId == EditorInfo.IME_ACTION_NEXT){
+                    wordlistView.requestFocus();
+                    return true;
+                }
+                return false;
+            }
+        });
 
         final RadioGroup wep_rg = (RadioGroup)fragmentView.findViewById(R.id.wep_rg);
         for (int i = 0; i < wep_rg.getChildCount(); i++) {

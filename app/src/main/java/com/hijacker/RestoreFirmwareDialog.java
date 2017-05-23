@@ -27,10 +27,13 @@ import android.os.Bundle;
 import android.support.design.widget.Snackbar;
 import android.support.v7.app.AlertDialog;
 import android.util.Log;
+import android.view.KeyEvent;
 import android.view.View;
+import android.view.inputmethod.EditorInfo;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ProgressBar;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import java.io.File;
@@ -53,6 +56,17 @@ public class RestoreFirmwareDialog extends DialogFragment {
         dialogView = getActivity().getLayoutInflater().inflate(R.layout.restore_firmware, null);
 
         firmView = (EditText)dialogView.findViewById(R.id.firm_location);
+        firmView.setOnEditorActionListener(new TextView.OnEditorActionListener(){
+            @Override
+            public boolean onEditorAction(TextView v, int actionId, KeyEvent event){
+                if(actionId == EditorInfo.IME_ACTION_DONE){
+                    attemptRestore();
+                    dismissAllowingStateLoss();
+                    return true;
+                }
+                return false;
+            }
+        });
 
         dialogView.findViewById(R.id.firm_fe_btn).setOnClickListener(new View.OnClickListener(){
             @Override
@@ -99,35 +113,7 @@ public class RestoreFirmwareDialog extends DialogFragment {
             positiveButton.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    firmView.setError(null);
-                    String firm_location = firmView.getText().toString();
-                    if(firm_location.equals("")){
-                        firmView.setError(getString(R.string.field_required));
-                        firmView.requestFocus();
-                        return;
-                    }
-                    firm_location = getDirectory(firm_location);
-
-                    File firm = new File(firm_location);
-                    if(!firm.exists()){
-                        firmView.setError(getString(R.string.dir_notfound));
-                        firmView.requestFocus();
-                    }else if(!(new File(firm_location + "fw_bcmdhd.bin").exists())){
-                        firmView.setError(getString(R.string.firm_notfound));
-                        firmView.requestFocus();
-                    }else{
-                        if(debug) Log.d("HIJACKER/RestoreFirm", "Restoring firmware in " + firm_location);
-                        WifiManager wifiManager = (WifiManager) getActivity().getApplicationContext().getSystemService(Context.WIFI_SERVICE);
-                        wifiManager.setWifiEnabled(false);
-
-                        shell.run(busybox + " mount -o rw,remount,rw /system");
-                        shell.run("cp " + firm_backup_file + " " + firm_location + "fw_bcmdhd.bin");
-                        shell.run(busybox + " mount -o ro,remount,ro /system");
-
-                        Toast.makeText(getActivity(), R.string.restored, Toast.LENGTH_SHORT).show();
-                        wifiManager.setWifiEnabled(true);
-                        dismissAllowingStateLoss();
-                    }
+                    attemptRestore();
                 }
             });
             neutralButton.setOnClickListener(new View.OnClickListener() {
@@ -160,5 +146,39 @@ public class RestoreFirmwareDialog extends DialogFragment {
     @Override
     public void show(FragmentManager fragmentManager, String tag){
         if(!background) super.show(fragmentManager, tag);
+    }
+    void attemptRestore(){
+        firmView.setError(null);
+        String firm_location = firmView.getText().toString();
+        if(firm_location.equals("")){
+            firmView.setError(getString(R.string.field_required));
+            firmView.requestFocus();
+            return;
+        }
+        firm_location = getDirectory(firm_location);
+
+        File firm = new File(firm_location);
+        if(!firm.exists()){
+            firmView.setError(getString(R.string.dir_notfound));
+            firmView.requestFocus();
+            return;
+        }
+        if(!(new File(firm_location + "fw_bcmdhd.bin").exists())){
+            firmView.setError(getString(R.string.firm_notfound));
+            firmView.requestFocus();
+            return;
+        }
+
+        if(debug) Log.d("HIJACKER/RestoreFirm", "Restoring firmware in " + firm_location);
+        WifiManager wifiManager = (WifiManager) getActivity().getApplicationContext().getSystemService(Context.WIFI_SERVICE);
+        wifiManager.setWifiEnabled(false);
+
+        shell.run(busybox + " mount -o rw,remount,rw /system");
+        shell.run("cp " + firm_backup_file + " " + firm_location + "fw_bcmdhd.bin");
+        shell.run(busybox + " mount -o ro,remount,ro /system");
+
+        Toast.makeText(getActivity(), R.string.restored, Toast.LENGTH_SHORT).show();
+        wifiManager.setWifiEnabled(true);
+        dismissAllowingStateLoss();
     }
 }

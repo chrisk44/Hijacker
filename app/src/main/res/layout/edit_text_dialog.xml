@@ -10,5 +10,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:ems="10"
-        android:inputType="text"/>
+        android:imeOptions="actionDone"
+        android:inputType="text"
+        android:singleLine="true"/>
 </LinearLayout>

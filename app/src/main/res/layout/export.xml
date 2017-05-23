@@ -22,8 +22,10 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:hint="@string/output_file_title"
+                android:imeOptions="actionDone"
                 android:inputType="text"
-                android:maxLines="1"/>
+                android:maxLines="1"
+                android:singleLine="true"/>
 
         </android.support.design.widget.TextInputLayout>
 

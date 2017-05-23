@@ -27,10 +27,13 @@ import android.support.design.widget.Snackbar;
 import android.support.v7.app.AlertDialog;
 import android.util.Log;
 import android.view.HapticFeedbackConstants;
+import android.view.KeyEvent;
 import android.view.View;
+import android.view.inputmethod.EditorInfo;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.RadioGroup;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import java.io.File;
@@ -49,6 +52,16 @@ public class ExportDialog extends DialogFragment{
         dialogView = getActivity().getLayoutInflater().inflate(R.layout.export, null);
 
         filenameView = (EditText)dialogView.findViewById(R.id.output_file);
+        filenameView.setOnEditorActionListener(new TextView.OnEditorActionListener(){
+            @Override
+            public boolean onEditorAction(TextView v, int actionId, KeyEvent event){
+                if(actionId == EditorInfo.IME_ACTION_DONE){
+                    attemptExport(false);
+                    return true;
+                }
+                return false;
+            }
+        });
         dialogView.findViewById(R.id.export_fe_btn).setOnClickListener(new View.OnClickListener(){
             @Override
             public void onClick(View v){
@@ -59,6 +72,7 @@ public class ExportDialog extends DialogFragment{
                     @Override
                     public void run(){
                         filenameView.setText(dialog.result.getAbsolutePath() + "/output.txt");
+                        filenameView.setError(null);
                     }
                 });
                 dialog.show(getFragmentManager(), "FileExplorerDialog");
@@ -85,37 +99,38 @@ public class ExportDialog extends DialogFragment{
             positiveButton.setOnLongClickListener(new View.OnLongClickListener(){
                 @Override
                 public boolean onLongClick(View v){
-                    filenameView.setError(null);
-                    String filename = filenameView.getText().toString();
                     v.performHapticFeedback(HapticFeedbackConstants.LONG_PRESS);
-                    if(filename.equals("")){
-                        filenameView.setError(getString(R.string.field_required));
-                        filenameView.requestFocus();
-                        return false;
-                    }
-                    export(new File(filename));
+                    attemptExport(true);
                     return false;
                 }
             });
             positiveButton.setOnClickListener(new View.OnClickListener(){
                 @Override
                 public void onClick(View v){
-                    filenameView.setError(null);
-                    String filename = filenameView.getText().toString();
-                    if(filename.equals("")){
-                        filenameView.setError(getString(R.string.field_required));
-                        filenameView.requestFocus();
-                        return;
-                    }
-                    File out_file = new File(filename);
-
-                    if(out_file.exists()){
-                        Snackbar.make(dialogView, R.string.output_file_exists, Snackbar.LENGTH_LONG).show();
-                    }else{
-                        export(out_file);
-                    }
+                    attemptExport(false);
                 }
             });
+        }
+    }
+    void attemptExport(boolean override){
+        filenameView.setError(null);
+        String filename = filenameView.getText().toString();
+        if(filename.equals("")){
+            filenameView.setError(getString(R.string.field_required));
+            filenameView.requestFocus();
+            return;
+        }
+        if(override){
+            export(new File(filename));
+        }else{
+            File out_file = new File(filename);
+
+            if(out_file.exists()){
+                filenameView.setError(getString(R.string.output_file_exists));
+                filenameView.requestFocus();
+            }else{
+                export(out_file);
+            }
         }
     }
     void export(File out_file){
