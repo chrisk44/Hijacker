@@ -709,6 +709,11 @@ public class MainActivity extends AppCompatActivity{
                 }
             }
 
+            //Delete old report, it's not needed if no exception is thrown up to this point
+            publishProgress(getString(R.string.deleting_bug_report));
+            File report = new File(Environment.getExternalStorageDirectory() + "/report.txt");
+            if(report.exists()) report.delete();
+
             return true;
         }
         @Override
@@ -728,8 +733,8 @@ public class MainActivity extends AppCompatActivity{
             if(!success) return;
             loadingDialog.setText(getString(R.string.starting_hijacker));
 
+            watchdogTask = new WatchdogTask(MainActivity.this);
             if(watchdog){
-                watchdogTask = new WatchdogTask(MainActivity.this);
                 watchdogTask.execute();
             }
 
