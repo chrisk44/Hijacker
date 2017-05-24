@@ -55,7 +55,7 @@ public class CopySampleDialog extends DialogFragment {
                         copy(aircrack_dir + " " + cap_dir + "/wpa.cap-01.cap", getView());
                         break;
                     case 1:
-                        copy(prefix + " " + airodump_dir + " --update 1 --channel 2 --bssid 00:11:22:33:44:55 " + iface, getView());
+                        copy(prefix + " " + airodump_dir + " " + iface, getView());
                         break;
                     case 2:
                         copy(prefix + " " + aireplay_dir + " --ignore-negative-one --deauth 0 -a 00:11:22:33:44:55 -c 01:23:45:67:89:0a " + iface, getView());

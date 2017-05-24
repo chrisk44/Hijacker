@@ -44,7 +44,7 @@ import static com.hijacker.Shell.getFreeShell;
 class RootFile{
     static Shell shell;
     static BufferedReader out;
-    private int length = -1;
+    private long length = -1;
     private String absolutePath = null, parentPath = null, name = null;
     private boolean exists = false, isFile = false, isDirectory = false, isUnknownType = false;
     RootFile(String path) throws IllegalArgumentException{
@@ -95,7 +95,9 @@ class RootFile{
             this.isUnknownType = true;
         }
 
-        this.length = Integer.parseInt(temp[4]);
+        try{
+            this.length = Long.parseLong(temp[4]);
+        }catch(NumberFormatException ignored){}
     }
     String getAbsolutePath(){ return absolutePath; }
     String getName(){ return name; }
@@ -107,7 +109,7 @@ class RootFile{
     boolean canRead(){ return true; }           //We are root
     boolean canWrite(){ return true; }          //We are root
     boolean canExecute(){ return true; }        //We are root
-    int length(){ return length; }
+    long length(){ return length; }
     void createNewFile(){
         if(!exists()){
             if(absolutePath==null || name==null) throw new IllegalStateException("path or name is null");
@@ -188,16 +190,18 @@ class RootFile{
                 }
                 //Separate by ' ' to get the name
                 String temp[] = buffer.split(" ");
-                //Reconstruct the full_name (it may contain spaces, so it's many arguments)
-                String full_name = "";
-                for(int i=8;i<temp.length;i++){
-                    full_name += temp[i] + ' ';
-                }
-                if(full_name.charAt(full_name.length()-1)==' '){
-                    full_name = full_name.substring(0, full_name.length()-1);
-                }
-                if(!full_name.contains(" -> ")){
-                    result.add(new RootFile(absolutePath + (absolutePath.length()==1 ? "" : '/') + full_name));
+                if(temp.length>8){
+                    //Reconstruct the full_name (it may contain spaces, so it's many arguments)
+                    String full_name = "";
+                    for(int i = 8; i<temp.length; i++){
+                        full_name += temp[i] + ' ';
+                    }
+                    if(full_name.charAt(full_name.length() - 1)==' '){
+                        full_name = full_name.substring(0, full_name.length() - 1);
+                    }
+                    if(!full_name.contains(" -> ")){
+                        result.add(new RootFile(absolutePath + (absolutePath.length()==1 ? "" : '/') + full_name));
+                    }
                 }
 
                 buffer = out2.readLine();
@@ -205,19 +209,11 @@ class RootFile{
 
         }catch(IOException e){
             Log.e("HIJACKER/RootFile", e.toString());
-            return null;
-        }finally{
-            shell2.done();
+            result = null;
         }
+        shell2.done();
 
         return result;
-    }
-    void write(String str){
-        //Appends string str to the file
-        if(!this.isFile()) throw new IllegalStateException("This is not a file");
-        if(!this.exists()) throw new IllegalStateException("File doesn't exist");
-
-        shell.run(busybox + " echo \"" + str + "\" >> " + this.absolutePath);
     }
     static void init(){
         shell = getFreeShell();

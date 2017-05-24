@@ -41,7 +41,7 @@ import static com.hijacker.MainActivity.reaver_dir;
 
 class CustomAction{
     static final int TYPE_AP=0, TYPE_ST=1;
-    static List<CustomAction> cmds = new ArrayList<>();
+    static final List<CustomAction> cmds = new ArrayList<>();
     private String title, start_cmd, stop_cmd, process_name;
     private int type;
     private boolean requires_clients=false, requires_connected=false, has_process_name=false;
@@ -69,8 +69,7 @@ class CustomAction{
     void setStopCmd(String stop_cmd){ this.stop_cmd = stop_cmd; }
     void setRequiresClients(boolean requires_clients){ this.requires_clients = requires_clients; }
     void setRequiresConnected(boolean requires_connected){ this.requires_connected = requires_connected; }
-    void run(){
-        Shell shell = CustomActionFragment.shell;
+    void run(Shell shell){
         shell.run("export IFACE=\"" + iface + '\"');
         shell.run("export PREFIX=\"" + prefix + '\"');
         shell.run("export AIRODUMP_DIR=\"" + airodump_dir + '\"');
@@ -103,10 +102,7 @@ class CustomAction{
             }
             try{
                 Thread.sleep(100);  //Make sure that the processes have been killed
-            }catch(InterruptedException ignored){
-            }finally{
-                shell.done();
-            }
+            }catch(InterruptedException ignored){}
         }
         shell.done();
     }
@@ -144,7 +140,7 @@ class CustomAction{
         }
         File actions[] = folder.listFiles();
         if(actions!=null){
-            if(debug) Log.d("HIJACKER/CustomAction", "Reading files...");
+            if(debug) Log.d("HIJACKER/CustomAction", "Reading custom actions...");
             FileReader reader0;
             BufferedReader reader;
             for(File file : actions){
@@ -158,8 +154,6 @@ class CustomAction{
                     boolean requirement = Boolean.parseBoolean(reader.readLine());
                     String process_name = reader.readLine();
                     if(process_name==null) process_name = "";   //For files that were created before process_name was implemented
-                    if(debug) Log.d("HIJACKER/CustomAction", "Read from file " + file.getName() + ": " + title + ", " +
-                            start_cmd + ", " + stop_cmd + ", " + Integer.toString(type) + ", " + Boolean.toString(requirement) + ", " + process_name);
                     CustomAction action = new CustomAction(title, start_cmd, stop_cmd, process_name, type);
                     if(type==TYPE_AP){
                         action.setRequiresClients(requirement);

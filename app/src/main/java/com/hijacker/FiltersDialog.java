@@ -24,7 +24,9 @@ import android.content.DialogInterface;
 import android.os.Bundle;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.widget.PopupMenu;
+import android.view.KeyEvent;
 import android.view.View;
+import android.view.inputmethod.EditorInfo;
 import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.EditText;
@@ -50,42 +52,59 @@ import static com.hijacker.MainActivity.wep;
 import static com.hijacker.MainActivity.wpa;
 
 public class FiltersDialog extends DialogFragment {
+    String sort_texts[];
     View view;
+    EditText manufView;
+    TextView pwrTv;
+    Button sortSelectBtn;
+    CheckBox apCb, stCb, stNaCb, wpaCb, wepCb, opnCb, sortReverseCb;
+    CheckBox[] channelCb = new CheckBox[15];
+    SeekBar seek;
     int temp_sort;
     @Override
-    public Dialog onCreateDialog(Bundle savedInstanceState) {
+    public Dialog onCreateDialog(Bundle savedInstanceState){
         AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
         view = getActivity().getLayoutInflater().inflate(R.layout.filters, null);
 
-        ((CheckBox)view.findViewById(R.id.ap_cb)).setChecked(show_ap);
-        ((CheckBox)view.findViewById(R.id.st_cb)).setChecked(show_st);
-        ((CheckBox)view.findViewById(R.id.st_na_cb)).setChecked(show_na_st);
-        ((CheckBox)view.findViewById(R.id.cb_all)).setChecked(show_ch[0]);
-        ((CheckBox)view.findViewById(R.id.cb_1)).setChecked(show_ch[1]);
-        ((CheckBox)view.findViewById(R.id.cb_2)).setChecked(show_ch[2]);
-        ((CheckBox)view.findViewById(R.id.cb_3)).setChecked(show_ch[3]);
-        ((CheckBox)view.findViewById(R.id.cb_4)).setChecked(show_ch[4]);
-        ((CheckBox)view.findViewById(R.id.cb_5)).setChecked(show_ch[5]);
-        ((CheckBox)view.findViewById(R.id.cb_6)).setChecked(show_ch[6]);
-        ((CheckBox)view.findViewById(R.id.cb_7)).setChecked(show_ch[7]);
-        ((CheckBox)view.findViewById(R.id.cb_8)).setChecked(show_ch[8]);
-        ((CheckBox)view.findViewById(R.id.cb_9)).setChecked(show_ch[9]);
-        ((CheckBox)view.findViewById(R.id.cb_10)).setChecked(show_ch[10]);
-        ((CheckBox)view.findViewById(R.id.cb_11)).setChecked(show_ch[11]);
-        ((CheckBox)view.findViewById(R.id.cb_12)).setChecked(show_ch[12]);
-        ((CheckBox)view.findViewById(R.id.cb_13)).setChecked(show_ch[13]);
-        ((CheckBox)view.findViewById(R.id.cb_14)).setChecked(show_ch[14]);
+        sort_texts = new String[]{
+                getString(R.string.sort_nosort),
+                getString(R.string.sort_essid),
+                getString(R.string.sort_beacons_frames),
+                getString(R.string.sort_data_frames),
+                getString(R.string.sort_pwr)
+        };
 
-        ((CheckBox)view.findViewById(R.id.cb_wpa)).setChecked(wpa);
-        ((CheckBox)view.findViewById(R.id.cb_wep)).setChecked(wep);
-        ((CheckBox)view.findViewById(R.id.cb_opn)).setChecked(opn);
+        apCb = (CheckBox)view.findViewById(R.id.ap_cb);
+        stCb = (CheckBox)view.findViewById(R.id.st_cb);
+        stNaCb = (CheckBox)view.findViewById(R.id.st_na_cb);
+        channelCb[0] = (CheckBox)view.findViewById(R.id.cb_all);
+        channelCb[1] = (CheckBox)view.findViewById(R.id.cb_1);
+        channelCb[2] = (CheckBox)view.findViewById(R.id.cb_2);
+        channelCb[3] = (CheckBox)view.findViewById(R.id.cb_3);
+        channelCb[4] = (CheckBox)view.findViewById(R.id.cb_4);
+        channelCb[5] = (CheckBox)view.findViewById(R.id.cb_5);
+        channelCb[6] = (CheckBox)view.findViewById(R.id.cb_6);
+        channelCb[7] = (CheckBox)view.findViewById(R.id.cb_7);
+        channelCb[8] = (CheckBox)view.findViewById(R.id.cb_8);
+        channelCb[9] = (CheckBox)view.findViewById(R.id.cb_9);
+        channelCb[10] = (CheckBox)view.findViewById(R.id.cb_10);
+        channelCb[11] = (CheckBox)view.findViewById(R.id.cb_11);
+        channelCb[12] = (CheckBox)view.findViewById(R.id.cb_12);
+        channelCb[13] = (CheckBox)view.findViewById(R.id.cb_13);
+        channelCb[14] = (CheckBox)view.findViewById(R.id.cb_14);
+        wpaCb = (CheckBox)view.findViewById(R.id.cb_wpa);
+        wepCb = (CheckBox)view.findViewById(R.id.cb_wep);
+        opnCb = (CheckBox)view.findViewById(R.id.cb_opn);
+        seek = (SeekBar)view.findViewById(R.id.seekBar);
+        manufView = (EditText)view.findViewById(R.id.manuf_filter_et);
+        sortSelectBtn = (Button)view.findViewById(R.id.select_sort);
+        sortReverseCb = (CheckBox)view.findViewById(R.id.sort_reverse);
+        pwrTv = (TextView)view.findViewById(R.id.pwr);
 
-        SeekBar seek = (SeekBar)view.findViewById(R.id.seekBar);
-        seek.setProgress(pwr_filter);
         seek.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
             @Override
             public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
-                ((TextView)view.findViewById(R.id.pwr)).setText("-" + progress);
+                pwrTv.setText("-" + progress);
             }
             @Override
             public void onStartTrackingTouch(SeekBar seekBar) {}
@@ -93,42 +112,24 @@ public class FiltersDialog extends DialogFragment {
             public void onStopTrackingTouch(SeekBar seekBar) {}
         });
 
-        ((TextView)view.findViewById(R.id.pwr)).setText("-" + pwr_filter);
-
-        ((EditText)view.findViewById(R.id.manuf_filter_et)).setText(manuf_filter);
-
-        final Button select_sort = (Button)view.findViewById(R.id.select_sort);
-        final String sort_texts[] = {
-                getString(R.string.sort_nosort),
-                getString(R.string.sort_essid),
-                getString(R.string.sort_beacons_frames),
-                getString(R.string.sort_data_frames),
-                getString(R.string.sort_pwr)
-        };
-        select_sort.setOnClickListener(new View.OnClickListener(){
+        manufView.setOnEditorActionListener(new TextView.OnEditorActionListener(){
             @Override
-            public void onClick(View v){
-                PopupMenu popup = new PopupMenu(getActivity(), v);
-
-                popup.getMenuInflater().inflate(R.menu.popup_menu, popup.getMenu());
-                popup.getMenu().add(0, SORT_NOSORT, 0, sort_texts[SORT_NOSORT]);
-                popup.getMenu().add(0, SORT_ESSID, 1, sort_texts[SORT_ESSID]);
-                popup.getMenu().add(0, SORT_BEACONS_FRAMES, 2, sort_texts[SORT_BEACONS_FRAMES]);
-                popup.getMenu().add(0, SORT_DATA_FRAMES, 3, sort_texts[SORT_DATA_FRAMES]);
-                popup.getMenu().add(0, SORT_PWR, 4, sort_texts[SORT_PWR]);
-                popup.setOnMenuItemClickListener(new PopupMenu.OnMenuItemClickListener() {
-                    public boolean onMenuItemClick(android.view.MenuItem item) {
-                        FiltersDialog.this.temp_sort = item.getItemId();
-                        select_sort.setText(sort_texts[FiltersDialog.this.temp_sort]);
-                        return true;
-                    }
-                });
-                popup.show();
+            public boolean onEditorAction(TextView v, int actionId, KeyEvent event){
+                if(actionId == EditorInfo.IME_ACTION_DONE){
+                    apply();
+                    dismissAllowingStateLoss();
+                    return true;
+                }
+                return false;
             }
         });
-        temp_sort = sort;
-        select_sort.setText(sort_texts[sort]);
-        ((CheckBox)view.findViewById(R.id.sort_reverse)).setChecked(sort_reverse);
+
+        sortSelectBtn.setOnClickListener(new View.OnClickListener(){
+            @Override
+            public void onClick(View v){
+                showSortingPopup(v);
+            }
+        });
 
         builder.setView(view);
         builder.setTitle(R.string.filters);
@@ -141,37 +142,7 @@ public class FiltersDialog extends DialogFragment {
         builder.setPositiveButton(R.string.apply, new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int which) {
-                show_ap = ((CheckBox)view.findViewById(R.id.ap_cb)).isChecked();
-                show_st = ((CheckBox)view.findViewById(R.id.st_cb)).isChecked();
-                show_na_st =  ((CheckBox)view.findViewById(R.id.st_na_cb)).isChecked();
-                show_ch[0] =  ((CheckBox)view.findViewById(R.id.cb_all)).isChecked();
-                show_ch[1] =  ((CheckBox)view.findViewById(R.id.cb_1)).isChecked();
-                show_ch[2] =  ((CheckBox)view.findViewById(R.id.cb_2)).isChecked();
-                show_ch[3] =  ((CheckBox)view.findViewById(R.id.cb_3)).isChecked();
-                show_ch[4] =  ((CheckBox)view.findViewById(R.id.cb_4)).isChecked();
-                show_ch[5] =  ((CheckBox)view.findViewById(R.id.cb_5)).isChecked();
-                show_ch[6] =  ((CheckBox)view.findViewById(R.id.cb_6)).isChecked();
-                show_ch[7] =  ((CheckBox)view.findViewById(R.id.cb_7)).isChecked();
-                show_ch[8] =  ((CheckBox)view.findViewById(R.id.cb_8)).isChecked();
-                show_ch[9] =  ((CheckBox)view.findViewById(R.id.cb_9)).isChecked();
-                show_ch[10] = ((CheckBox)view.findViewById(R.id.cb_10)).isChecked();
-                show_ch[11] = ((CheckBox)view.findViewById(R.id.cb_11)).isChecked();
-                show_ch[12] = ((CheckBox)view.findViewById(R.id.cb_12)).isChecked();
-                show_ch[13] = ((CheckBox)view.findViewById(R.id.cb_13)).isChecked();
-                show_ch[14] = ((CheckBox)view.findViewById(R.id.cb_14)).isChecked();
-
-                wpa = ((CheckBox)view.findViewById(R.id.cb_wpa)).isChecked();
-                wep = ((CheckBox)view.findViewById(R.id.cb_wep)).isChecked();
-                opn = ((CheckBox)view.findViewById(R.id.cb_opn)).isChecked();
-
-                pwr_filter = ((SeekBar)view.findViewById(R.id.seekBar)).getProgress();
-
-                sort = FiltersDialog.this.temp_sort;
-                sort_reverse = ((CheckBox)view.findViewById(R.id.sort_reverse)).isChecked();
-
-                manuf_filter = ((EditText)view.findViewById(R.id.manuf_filter_et)).getText().toString();
-
-                Tile.filter();
+                apply();
             }
         });
 
@@ -180,5 +151,64 @@ public class FiltersDialog extends DialogFragment {
     @Override
     public void show(FragmentManager fragmentManager, String tag){
         if(!background) super.show(fragmentManager, tag);
+    }
+    @Override
+    public void onStart(){
+        super.onStart();
+
+        apCb.setChecked(show_ap);
+        stCb.setChecked(show_st);
+        stNaCb.setChecked(show_na_st);
+        for(int i=0;i<channelCb.length;i++){
+            channelCb[i].setChecked(show_ch[i]);
+        }
+        wpaCb.setChecked(wpa);
+        wepCb.setChecked(wep);
+        opnCb.setChecked(opn);
+        seek.setProgress(pwr_filter);
+        pwrTv.setText("-" + pwr_filter);
+        manufView.setText(manuf_filter);
+        sortSelectBtn.setText(sort_texts[sort]);
+        sortReverseCb.setChecked(sort_reverse);
+        temp_sort = sort;
+    }
+    void apply(){
+        show_ap = apCb.isChecked();
+        show_st = stCb.isChecked();
+        show_na_st =  stNaCb.isChecked();
+        for(int i=0;i<channelCb.length;i++){
+            show_ch[i] = channelCb[i].isChecked();
+        }
+
+        wpa = wpaCb.isChecked();
+        wep = wepCb.isChecked();
+        opn = opnCb.isChecked();
+
+        pwr_filter = seek.getProgress();
+
+        sort = temp_sort;
+        sort_reverse = sortReverseCb.isChecked();
+
+        manuf_filter = manufView.getText().toString().replace("\n", "");
+
+        Tile.filter();
+    }
+    void showSortingPopup(View v){
+        PopupMenu popup = new PopupMenu(getActivity(), v);
+
+        popup.getMenuInflater().inflate(R.menu.popup_menu, popup.getMenu());
+        popup.getMenu().add(0, SORT_NOSORT, 0, sort_texts[SORT_NOSORT]);
+        popup.getMenu().add(0, SORT_ESSID, 1, sort_texts[SORT_ESSID]);
+        popup.getMenu().add(0, SORT_BEACONS_FRAMES, 2, sort_texts[SORT_BEACONS_FRAMES]);
+        popup.getMenu().add(0, SORT_DATA_FRAMES, 3, sort_texts[SORT_DATA_FRAMES]);
+        popup.getMenu().add(0, SORT_PWR, 4, sort_texts[SORT_PWR]);
+        popup.setOnMenuItemClickListener(new PopupMenu.OnMenuItemClickListener() {
+            public boolean onMenuItemClick(android.view.MenuItem item) {
+                temp_sort = item.getItemId();
+                sortSelectBtn.setText(sort_texts[temp_sort]);
+                return true;
+            }
+        });
+        popup.show();
     }
 }

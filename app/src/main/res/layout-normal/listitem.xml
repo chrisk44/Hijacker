@@ -30,7 +30,7 @@
             android:orientation="horizontal">
 
             <TextView
-                android:id="@+id/top_left"
+                android:id="@+id/upperLeft"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_gravity="center_vertical"
@@ -41,7 +41,7 @@
                 android:textSize="17sp"/>
 
             <TextView
-                android:id="@+id/top_right"
+                android:id="@+id/upperRight"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_gravity="center_vertical"
@@ -61,7 +61,7 @@
             android:orientation="horizontal">
 
             <TextView
-                android:id="@+id/bottom_left"
+                android:id="@+id/lowerLeft"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_gravity="center_vertical"
@@ -71,7 +71,7 @@
                 android:textSize="13sp"/>
 
             <TextView
-                android:id="@+id/bottom_right"
+                android:id="@+id/lowerRight"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_gravity="center_vertical"

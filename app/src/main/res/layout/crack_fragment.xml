@@ -6,66 +6,64 @@
               android:focusable="true"
               android:focusableInTouchMode="true"
               android:padding="5dp">
-    <TextView
-        android:text="@string/path_to_cap"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:labelFor="@+id/capfile"
-        android:textColor="?android:attr/textColorPrimary"
-        android:textSize="18sp"/>
 
     <LinearLayout
-        android:orientation="horizontal"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content">
-
-        <EditText
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:inputType="text"
-            android:ems="10"
-            android:id="@+id/capfile"
-            android:layout_gravity="center_vertical"
-            android:layout_weight="1"/>
-
-        <Button
-        style="?android:attr/buttonBarButtonStyle"
-        android:text="..."
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_gravity="center_vertical"
-        android:id="@+id/cap_fe_btn"/>
-    </LinearLayout>
-
-    <TextView
-        android:text="@string/path_to_wordlist"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:labelFor="@+id/wordlist"
-        android:textColor="?android:attr/textColorPrimary"
-        android:textSize="18sp"/>
+        android:orientation="horizontal">
 
-    <LinearLayout
-        android:orientation="horizontal"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content">
-
-        <EditText
+        <android.support.design.widget.TextInputLayout
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:inputType="text"
-            android:ems="10"
-            android:id="@+id/wordlist"
-            android:layout_gravity="center_vertical"
-            android:layout_weight="1"/>
+            android:layout_weight="1">
+
+            <EditText
+                android:id="@+id/capfile"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:hint="@string/path_to_cap"
+                android:imeOptions="actionNext"
+                android:inputType="text"
+                android:maxLines="1"/>
+
+        </android.support.design.widget.TextInputLayout>
 
         <Button
+            android:id="@+id/cap_fe_btn"
             style="?android:attr/buttonBarButtonStyle"
-            android:text="..."
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="center_vertical"
-            android:id="@+id/wordlist_fe_btn"/>
+            android:text="..."/>
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal">
+
+        <android.support.design.widget.TextInputLayout
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1">
+
+            <EditText
+                android:id="@+id/wordlist"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:hint="@string/path_to_wordlist"
+                android:inputType="text"
+                android:maxLines="1"/>
+
+        </android.support.design.widget.TextInputLayout>
+
+        <Button
+            android:id="@+id/wordlist_fe_btn"
+            style="?android:attr/buttonBarButtonStyle"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_vertical"
+            android:text="..."/>
     </LinearLayout>
 
     <RadioGroup

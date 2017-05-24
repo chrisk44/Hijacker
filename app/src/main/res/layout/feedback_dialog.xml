@@ -27,29 +27,20 @@
         android:paddingEnd="10dp"
         android:paddingStart="10dp">
 
-        <LinearLayout
+        <android.support.design.widget.TextInputLayout
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="horizontal">
-
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="match_parent"
-                android:gravity="center_vertical"
-                android:labelFor="@+id/email_et"
-                android:text="E-mail"
-                android:textColor="?android:attr/textColorPrimary"
-                android:textSize="18sp"/>
+            android:layout_height="wrap_content">
 
             <EditText
                 android:id="@+id/email_et"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:ems="10"
-                android:hint="@string/optional"
+                android:hint="@string/email_optional"
+                android:imeOptions="actionNext"
                 android:inputType="textEmailAddress"
-                android:paddingStart="10dp"/>
-        </LinearLayout>
+                android:maxLines="1"/>
+
+        </android.support.design.widget.TextInputLayout>
 
         <CheckBox
             android:id="@+id/include_report"

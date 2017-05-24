@@ -23,6 +23,7 @@ import android.content.SharedPreferences;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
+import android.os.Looper;
 import android.preference.Preference;
 import android.preference.PreferenceFragment;
 import java.io.File;
@@ -36,8 +37,6 @@ import static com.hijacker.MainActivity.pref_edit;
 import static com.hijacker.MainActivity.refreshDrawer;
 import static com.hijacker.MainActivity.versionName;
 import static com.hijacker.MainActivity.watchdog;
-import static com.hijacker.MainActivity.watchdog_runnable;
-import static com.hijacker.MainActivity.watchdog_thread;
 import static com.hijacker.MainActivity.currentFragment;
 import static com.hijacker.MainActivity.load;
 
@@ -158,7 +157,13 @@ public class SettingsFragment extends PreferenceFragment {
             @Override
             public boolean onPreferenceChange(Preference preference, Object newValue){
                 if((boolean)newValue){
-                    checkForUpdate(SettingsFragment.this.getActivity(), true);
+                    new Thread(new Runnable(){
+                        @Override
+                        public void run(){
+                            Looper.prepare();
+                            checkForUpdate(SettingsFragment.this.getActivity(), true);
+                        }
+                    }).start();
                 }
                 return true;
             }
@@ -194,11 +199,15 @@ public class SettingsFragment extends PreferenceFragment {
             @Override
             public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key) {
                 load();
-                if(watchdog && !watchdog_thread.isAlive()){
-                    watchdog_thread = new Thread(watchdog_runnable);
-                    watchdog_thread.start();
+                boolean running = ((MainActivity)getActivity()).watchdogTask.isRunning();
+                if(watchdog && !running){
+                    //Turned off
+                    ((MainActivity)getActivity()).watchdogTask = new WatchdogTask(getActivity());
+                    ((MainActivity)getActivity()).watchdogTask.execute();
+                }else if(!watchdog && running){
+                    //Turned on
+                    ((MainActivity)getActivity()).watchdogTask.cancel(true);
                 }
-                if(!watchdog && watchdog_thread.isAlive()) watchdog_thread.interrupt();
             }
         };
         getPreferenceManager().getSharedPreferences().registerOnSharedPreferenceChangeListener(listener);

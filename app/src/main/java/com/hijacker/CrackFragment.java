@@ -20,14 +20,14 @@ package com.hijacker;
 import android.app.Fragment;
 import android.os.Bundle;
 import android.os.Environment;
-import android.os.Handler;
-import android.os.Message;
 import android.support.design.widget.Snackbar;
 import android.text.method.ScrollingMovementMethod;
 import android.util.Log;
+import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.inputmethod.EditorInfo;
 import android.widget.Button;
 import android.widget.CompoundButton;
 import android.widget.EditText;
@@ -51,13 +51,14 @@ import static com.hijacker.MainActivity.getLastLine;
 import static com.hijacker.MainActivity.path;
 import static com.hijacker.MainActivity.progress;
 import static com.hijacker.MainActivity.refreshDrawer;
+import static com.hijacker.MainActivity.runInHandler;
 import static com.hijacker.MainActivity.stop;
 
 public class CrackFragment extends Fragment{
     static final int WPA=2, WEP=1;
     View fragmentView;
     TextView console;
-    EditText cap_et, wordlist_et;
+    EditText capfileView, wordlistView;
     Button button;
     static int mode;
     static Thread thread;
@@ -71,8 +72,19 @@ public class CrackFragment extends Fragment{
         console.setText("");
         console.setMovementMethod(new ScrollingMovementMethod());
 
-        cap_et = (EditText)fragmentView.findViewById(R.id.capfile);
-        wordlist_et = (EditText)fragmentView.findViewById(R.id.wordlist);
+        capfileView = (EditText)fragmentView.findViewById(R.id.capfile);
+        wordlistView = (EditText)fragmentView.findViewById(R.id.wordlist);
+
+        capfileView.setOnEditorActionListener(new TextView.OnEditorActionListener(){
+            @Override
+            public boolean onEditorAction(TextView v, int actionId, KeyEvent event){
+                if(actionId == EditorInfo.IME_ACTION_NEXT){
+                    wordlistView.requestFocus();
+                    return true;
+                }
+                return false;
+            }
+        });
 
         final RadioGroup wep_rg = (RadioGroup)fragmentView.findViewById(R.id.wep_rg);
         for (int i = 0; i < wep_rg.getChildCount(); i++) {
@@ -116,7 +128,28 @@ public class CrackFragment extends Fragment{
                     }
                 }catch(IOException | InterruptedException e){ Log.e("HIJACKER/Exception", "Caught Exception in CrackFragment: " + e.toString()); }
 
-                stop.obtainMessage().sendToTarget();
+                runInHandler(new Runnable(){
+                    @Override
+                    public void run(){
+                        button.setText(R.string.start);
+                        cont = false;
+                        progress.setIndeterminate(false);
+                        stop(PROCESS_AIRCRACK);
+                        if(new File(path + "/aircrack-out.txt").exists()){
+                            Shell shell = Shell.getFreeShell();     //Using root shell because "new File(path + "/aircrack-out.txt");" throws FileNotFoundException (permission denied)
+                            BufferedReader out = shell.getShell_out();
+                            shell.run("cat " + path + "/aircrack-out.txt; echo ");              //No newline at the end of the file, readLine will hang
+                            try{
+                                console.append("Key found: " + out.readLine() + '\n');
+                            }catch(IOException ignored){}
+                            shell.run("rm " + path + "/aircrack-out.txt");
+                            shell.done();
+                        }else{
+                            console.append("Key not found\n");
+                            if(mode==WEP) console.append("Try with different wep bit selection or more IVs\n");
+                        }
+                    }
+                });
             }
         };
         thread = new Thread(runnable);
@@ -134,14 +167,19 @@ public class CrackFragment extends Fragment{
         button.setOnClickListener(new View.OnClickListener(){
             @Override
             public void onClick(View view){
-                capfile = cap_et.getText().toString();
-                wordlist = wordlist_et.getText().toString();
+                capfileView.setError(null);
+                wordlistView.setError(null);
+                capfile = capfileView.getText().toString();
+                wordlist = wordlistView.getText().toString();
+
                 if(!capfile.startsWith("/")){
-                    Snackbar.make(fragmentView, getString(R.string.capfile_invalid), Snackbar.LENGTH_LONG).show();
+                    capfileView.setError(getString(R.string.capfile_invalid));
+                    capfileView.requestFocus();
                     return;
                 }
                 if(!wordlist.startsWith("/")){
-                    Snackbar.make(fragmentView, getString(R.string.wordlist_invalid), Snackbar.LENGTH_LONG).show();
+                    wordlistView.setError(getString(R.string.wordlist_invalid));
+                    wordlistView.requestFocus();
                     return;
                 }
                 RootFile cap = new RootFile(capfile);
@@ -149,9 +187,11 @@ public class CrackFragment extends Fragment{
                 if(thread.isAlive()){
                     cont = false;
                 }else if(!cap.exists() || !cap.isFile()){
-                    Snackbar.make(fragmentView, getString(R.string.cap_notfound), Snackbar.LENGTH_LONG).show();
+                    capfileView.setError(getString(R.string.cap_notfound));
+                    capfileView.requestFocus();
                 }else if(!word.exists() || !word.isFile()){
-                    Snackbar.make(fragmentView, getString(R.string.wordlist_notfound), Snackbar.LENGTH_LONG).show();
+                    wordlistView.setError(getString(R.string.wordlist_notfound));
+                    wordlistView.requestFocus();
                 }else{
                     RadioGroup temp = (RadioGroup)fragmentView.findViewById(R.id.radio_group);
                     if(temp.getCheckedRadioButtonId()==-1){
@@ -190,7 +230,8 @@ public class CrackFragment extends Fragment{
                 dialog.setOnSelect(new Runnable(){
                     @Override
                     public void run(){
-                        cap_et.setText(dialog.result.getAbsolutePath());
+                        capfileView.setText(dialog.result.getAbsolutePath());
+                        capfileView.setError(null);
                     }
                 });
                 dialog.show(getFragmentManager(), "FileExplorerDialog");
@@ -205,7 +246,8 @@ public class CrackFragment extends Fragment{
                 dialog.setOnSelect(new Runnable(){
                     @Override
                     public void run(){
-                        wordlist_et.setText(dialog.result.getAbsolutePath());
+                        wordlistView.setText(dialog.result.getAbsolutePath());
+                        wordlistView.setError(null);
                     }
                 });
                 dialog.show(getFragmentManager(), "FileExplorerDialog");
@@ -214,27 +256,6 @@ public class CrackFragment extends Fragment{
 
         return fragmentView;
     }
-    public Handler stop = new Handler(){
-        public void handleMessage(Message msg){
-            button.setText(R.string.start);
-            cont = false;
-            progress.setIndeterminate(false);
-            stop(PROCESS_AIRCRACK);
-            if(new File(path + "/aircrack-out.txt").exists()){
-                Shell shell = Shell.getFreeShell();     //Using root shell because "new File(path + "/aircrack-out.txt");" throws FileNotFoundException (permission denied)
-                BufferedReader out = shell.getShell_out();
-                shell.run("cat " + path + "/aircrack-out.txt; echo ");              //No newline at the end of the file, readLine will hang
-                try{
-                    console.append("Key found: " + out.readLine() + '\n');
-                }catch(IOException ignored){}
-                shell.run("rm " + path + "/aircrack-out.txt");
-                shell.done();
-            }else{
-                console.append("Key not found\n");
-                if(mode==WEP) console.append("Try with different wep bit selection or more IVs\n");
-            }
-        }
-    };
     @Override
     public void onResume() {
         super.onResume();
@@ -258,7 +279,7 @@ public class CrackFragment extends Fragment{
     public void onPause(){
         super.onPause();
         console_text = console.getText().toString();
-        capfile_text = cap_et.getText().toString();
-        wordlist_text = wordlist_et.getText().toString();
+        capfile_text = capfileView.getText().toString();
+        wordlist_text = wordlistView.getText().toString();
     }
 }

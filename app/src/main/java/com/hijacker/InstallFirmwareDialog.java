@@ -29,11 +29,14 @@ import android.support.v4.view.GravityCompat;
 import android.support.v7.app.AlertDialog;
 import android.util.Log;
 import android.view.HapticFeedbackConstants;
+import android.view.KeyEvent;
 import android.view.View;
+import android.view.inputmethod.EditorInfo;
 import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.EditText;
 import android.widget.ProgressBar;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import java.io.File;
@@ -52,27 +55,47 @@ import static com.hijacker.MainActivity.background;
 import static com.hijacker.MainActivity.getPIDs;
 import static com.hijacker.MainActivity.init;
 import static com.hijacker.MainActivity.mDrawerLayout;
-import static com.hijacker.MainActivity.main;
 import static com.hijacker.MainActivity.path;
 import static com.hijacker.MainActivity.stop;
 
 public class InstallFirmwareDialog extends DialogFragment {
     View dialogView;
     Shell shell;
-    EditText firm_edittext, util_edittext;
+    EditText firmView, utilView;
     CheckBox backup_cb;
     @Override
     public Dialog onCreateDialog(Bundle savedInstanceState) {
         AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
         dialogView = getActivity().getLayoutInflater().inflate(R.layout.install_firmware, null);
 
-        firm_edittext = (EditText) dialogView.findViewById(R.id.firm_location);
-        util_edittext = (EditText) dialogView.findViewById(R.id.util_location);
+        firmView = (EditText) dialogView.findViewById(R.id.firm_location);
+        utilView = (EditText) dialogView.findViewById(R.id.util_location);
         backup_cb = (CheckBox) dialogView.findViewById(R.id.backup);
+
+        firmView.setOnEditorActionListener(new TextView.OnEditorActionListener(){
+            @Override
+            public boolean onEditorAction(TextView v, int actionId, KeyEvent event){
+                if(actionId == EditorInfo.IME_ACTION_NEXT){
+                    utilView.requestFocus();
+                    return true;
+                }
+                return false;
+            }
+        });
+        utilView.setOnEditorActionListener(new TextView.OnEditorActionListener(){
+            @Override
+            public boolean onEditorAction(TextView v, int actionId, KeyEvent event){
+                if(actionId == EditorInfo.IME_ACTION_DONE){
+                    attemptInstall(false);
+                    return true;
+                }
+                return false;
+            }
+        });
 
         //Adjust directories
         if(!(new File("/su").exists())){
-            util_edittext.setText("/system/xbin");
+            utilView.setText("/system/xbin");
         }
         backup_cb.setChecked(!(new File(firm_backup_file).exists()));
 
@@ -84,7 +107,7 @@ public class InstallFirmwareDialog extends DialogFragment {
                 dialog.setOnSelect(new Runnable(){
                     @Override
                     public void run(){
-                        firm_edittext.setText(dialog.result.getAbsolutePath());
+                        firmView.setText(dialog.result.getAbsolutePath());
                     }
                 });
                 dialog.show(getFragmentManager(), "FileExplorerDialog");
@@ -98,7 +121,7 @@ public class InstallFirmwareDialog extends DialogFragment {
                 dialog.setOnSelect(new Runnable(){
                     @Override
                     public void run(){
-                        util_edittext.setText(dialog.result.getAbsolutePath());
+                        utilView.setText(dialog.result.getAbsolutePath());
                     }
                 });
                 dialog.show(getFragmentManager(), "FileExplorerDialog");
@@ -123,6 +146,33 @@ public class InstallFirmwareDialog extends DialogFragment {
         });
         return builder.create();
     }
+    void attemptInstall(boolean override){
+        String firm_location = firmView.getText().toString();
+        String util_location = utilView.getText().toString();
+        firm_location = getDirectory(firm_location);
+        util_location = getDirectory(util_location);
+
+        if(override){
+            if(check(firm_location, util_location, true)){
+                install(firm_location, util_location);
+                dismissAllowingStateLoss();
+            }
+        }else{
+            if(check(firm_location, util_location, false)){
+                shell.run("strings " + firm_location + "fw_bcmdhd.bin | " + busybox + " grep \"FWID:\"; echo ENDOFSTRINGS");
+                String result = getLastLine(shell.getShell_out(), "ENDOFSTRINGS");
+                result = result.substring(0, 4);
+
+                if(result.equals("4339")){
+                    install(firm_location, util_location);
+                    dismissAllowingStateLoss();
+                }else{
+                    Snackbar.make(dialogView, R.string.fw_not_compatible, Snackbar.LENGTH_LONG).show();
+                    if(debug) Log.d("HIJACKER/InstFirmware", "Firmware verification is: " + result);
+                }
+            }
+        }
+    }
     @Override
     public void onStart() {
         super.onStart();
@@ -135,39 +185,14 @@ public class InstallFirmwareDialog extends DialogFragment {
                 @Override
                 public boolean onLongClick(View v){
                     v.performHapticFeedback(HapticFeedbackConstants.LONG_PRESS);
-                    String firm_location = firm_edittext.getText().toString();
-                    String util_location = util_edittext.getText().toString();
-                    firm_location = getDirectory(firm_location);
-                    util_location = getDirectory(util_location);
-
-                    if(check(firm_location, util_location, true)){
-                        install(firm_location, util_location);
-                        dismissAllowingStateLoss();
-                    }
+                    attemptInstall(true);
                     return false;
                 }
             });
             positiveButton.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    String firm_location = firm_edittext.getText().toString();
-                    String util_location = util_edittext.getText().toString();
-                    firm_location = getDirectory(firm_location);
-                    util_location = getDirectory(util_location);
-
-                    if(check(firm_location, util_location, false)){
-                        shell.run("strings " + firm_location + "fw_bcmdhd.bin | " + busybox + " grep \"FWID:\"; echo ENDOFSTRINGS");
-                        String result = getLastLine(shell.getShell_out(), "ENDOFSTRINGS");
-                        result = result.substring(0, 4);
-
-                        if(result.equals("4339")){
-                            install(firm_location, util_location);
-                            dismissAllowingStateLoss();
-                        }else{
-                            Snackbar.make(v, R.string.fw_not_compatible, Snackbar.LENGTH_LONG).show();
-                            if(debug) Log.d("HIJACKER/InstFirmware", "Firmware verification is: " + result);
-                        }
-                    }
+                    attemptInstall(false);
                 }
             });
             neutralButton.setOnClickListener(new View.OnClickListener() {
@@ -183,7 +208,7 @@ public class InstallFirmwareDialog extends DialogFragment {
                         Snackbar.make(v, R.string.firm_notfound_bcm, Snackbar.LENGTH_LONG).show();
                     }else{
                         lastline = lastline.substring(0, lastline.length()-14);
-                        firm_edittext.setText(lastline);
+                        firmView.setText(lastline);
                     }
 
                     progress.setIndeterminate(false);
@@ -199,7 +224,7 @@ public class InstallFirmwareDialog extends DialogFragment {
         if(init){
             init = false;
             mDrawerLayout.openDrawer(GravityCompat.START);
-            main();
+            ((MainActivity)getActivity()).main();
         }
     }
     @Override
@@ -241,24 +266,31 @@ public class InstallFirmwareDialog extends DialogFragment {
         if(start_airodump) Airodump.startClean();
     }
     boolean check(String firm_location, String util_location, boolean override){
+        firmView.setError(null);
+        utilView.setError(null);
         if(firm_location.equals("")){
-            Snackbar.make(dialogView, getString(R.string.firm_location_empty), Snackbar.LENGTH_SHORT).show();
+            firmView.setError(getString(R.string.field_required));
+            firmView.requestFocus();
             return false;
         }
         if(util_location.equals("")){
-            Snackbar.make(dialogView, getString(R.string.util_location_empty), Snackbar.LENGTH_SHORT).show();
+            utilView.setError(getString(R.string.field_required));
+            utilView.requestFocus();
             return false;
         }
         File firm = new File(firm_location);
         File util = new File(util_location);
         if(!firm.exists()){
-            Snackbar.make(dialogView, R.string.dir_notfound_firm, Snackbar.LENGTH_SHORT).show();
+            firmView.setError(getString(R.string.dir_notfound));
+            firmView.requestFocus();
             return false;
         }else if(!(new File(firm_location + "fw_bcmdhd.bin").exists())){
-            Snackbar.make(dialogView, R.string.firm_notfound, Snackbar.LENGTH_SHORT).show();
+            firmView.setError(getString(R.string.firm_notfound));
+            firmView.requestFocus();
             return false;
         }else if(!util.exists()){
-            Snackbar.make(dialogView, R.string.dir_notfound_util, Snackbar.LENGTH_SHORT).show();
+            utilView.setError(getString(R.string.dir_notfound));
+            utilView.requestFocus();
             return false;
         }else if(!override && (util_location.contains("system") || firm_location.contains("system"))){
             Snackbar.make(dialogView, R.string.path_contains_system, Snackbar.LENGTH_LONG).show();

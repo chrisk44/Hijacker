@@ -30,8 +30,9 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.ArrayList;
-import java.util.List;
+import java.util.HashMap;
 
+import static com.hijacker.AP.getAPByMac;
 import static com.hijacker.MainActivity.PROCESS_AIREPLAY;
 import static com.hijacker.MainActivity.SORT_BEACONS_FRAMES;
 import static com.hijacker.MainActivity.SORT_DATA_FRAMES;
@@ -41,12 +42,10 @@ import static com.hijacker.MainActivity.aireplay_dir;
 import static com.hijacker.MainActivity.aliases;
 import static com.hijacker.MainActivity.aliases_file;
 import static com.hijacker.MainActivity.aliases_in;
-import static com.hijacker.MainActivity.completed;
 import static com.hijacker.MainActivity.copy;
 import static com.hijacker.MainActivity.data_path;
 import static com.hijacker.MainActivity.debug;
 import static com.hijacker.MainActivity.getFixed;
-import static com.hijacker.MainActivity.getManuf;
 import static com.hijacker.MainActivity.iface;
 import static com.hijacker.MainActivity.prefix;
 import static com.hijacker.MainActivity.runInHandler;
@@ -55,26 +54,25 @@ import static com.hijacker.MainActivity.startAireplay;
 import static com.hijacker.MainActivity.stop;
 import static com.hijacker.MainActivity.toSort;
 
-class ST {
-    static List<ST> STs = new ArrayList<>();
-    static List<ST> marked = new ArrayList<>();
+class ST extends Device{
+    static final HashMap<String, ST> STsHM = new HashMap<>();
+    static final ArrayList<ST> STs = new ArrayList<>();
+    static final ArrayList<ST> marked = new ArrayList<>();
     static String paired, not_connected;
-    static int connected=0;
-    int pwr, id;
+    static int connected=0;     //Stations that are connected to an AP
+    int id;
     private int frames, lost, total_frames=0, total_lost=0;
-    long lastseen = 0;
-    boolean isMarked = false;
-    Tile tile;
     AP connectedTo = null;
-    String mac, bssid, manuf, probes, alias;
+    String bssid, probes;
     ST(String mac, String bssid, int pwr, int lost, int frames, String probes){
-        this.mac = mac;
+        super(mac);
         this.id = STs.size();
-        this.manuf = getManuf(this.mac);
-        this.alias = aliases.get(this.mac);
         this.update(bssid, pwr, lost, frames, probes);
+
+        upperRight = this.manuf;
+
         STs.add(this);
-        if(sort!=SORT_NOSORT) toSort = true;
+        STsHM.put(this.mac, this);
     }
     void disconnect(){
         if(Airodump.getChannel() != connectedTo.ch){
@@ -93,7 +91,7 @@ class ST {
             if(!connectedTo.mac.equals(bssid)){
                 //Connected to a different network
                 connectedTo.removeClient(this);
-                connectedTo = AP.getAPByMac(bssid);
+                connectedTo = getAPByMac(bssid);
                 if(connectedTo==null){
                     //Now not connected
                     connected--;
@@ -109,7 +107,7 @@ class ST {
             }
         }else if(bssid!=null){
             //Now connected somewhere
-            connectedTo = AP.getAPByMac(bssid);
+            connectedTo = getAPByMac(bssid);
             if(connectedTo!=null){
                 //Now connected to known AP
                 connected++;
@@ -150,27 +148,23 @@ class ST {
         this.pwr = pwr;
         this.probes = probes.equals("") ? "No probes" : probes.replace(",", ", ");
 
-        final String a, b, c;
-        a = this.mac + (this.alias==null ? "" : " (" + alias + ')');
+        upperLeft = this.mac + (this.alias==null ? "" : " (" + alias + ')');
         if(connectedTo!=null){
-            b = paired + connectedTo.mac + " (" + connectedTo.essid + ")";
-        }else b = not_connected;
-        c = "PWR: " + this.pwr + " | Frames: " + this.getFrames();
+            lowerLeft = paired + connectedTo.mac + " (" + connectedTo.essid + ")";
+        }else lowerLeft = not_connected;
+        lowerRight = "PWR: " + this.pwr + " | Frames: " + this.getFrames();
         runInHandler(new Runnable(){
             @Override
             public void run(){
-                if(tile!=null) tile.update(a, b, c, ST.this.manuf);
-                else tile = new Tile(AP.APs.size() + id, a, b, c, ST.this.manuf, ST.this);
-                if(tile.st==null) tile = null;
-                completed = true;
+                if(tile!=null) tile.update();
+                else tile = new Tile(AP.APs.size() + id, ST.this);
+
+                if(toSort) Tile.sort();
             }
         });
     }
-    void showInfo(FragmentManager fragmentManager){
-        STDialog dialog = new STDialog();
-        dialog.info_st = this;
-        dialog.show(fragmentManager, "STDialog");
-    }
+    public int getFrames(){ return total_frames + frames; }
+    public int getLost(){ return total_lost + lost; }
     void mark(){
         if(!marked.contains(this)){
             marked.add(this);
@@ -185,8 +179,29 @@ class ST {
         this.isMarked = false;
         Tile.filter();
     }
+
+    static void clear(){
+        STsHM.clear();
+        STs.clear();
+        marked.clear();
+        connected = 0;
+    }
+    static void saveAll(){
+        for(ST st : STs){
+            st.saveData();
+        }
+    }
+    static ST getSTByMac(String mac){
+        return STsHM.get(mac);
+    }
+
+    void showInfo(FragmentManager fragmentManager){
+        STDialog dialog = new STDialog();
+        dialog.info_st = this;
+        dialog.show(fragmentManager, "STDialog");
+    }
     public String toString(){
-        return this.mac + (this.alias==null ? "" : " (" + this.alias + ')') + ((this.bssid==null) ? "" : " (" + AP.getAPByMac(this.bssid).essid + ')');
+        return this.mac + (this.alias==null ? "" : " (" + this.alias + ')') + ((this.bssid==null) ? "" : " (" + getAPByMac(this.bssid).essid + ')');
     }
     public String getExported(){
         //MAC                BSSID               PWR  Frames    Lost  Manufacturer - Probes
@@ -200,20 +215,12 @@ class ST {
 
         return str;
     }
-    public int getFrames(){ return total_frames + frames; }
-    public int getLost(){ return total_lost + lost; }
     public void saveData(){
         total_frames += frames;
         total_lost += lost;
         frames = 0;
         lost = 0;
     }
-    public static void saveAll(){
-        for(int i=0;i<ST.STs.size();i++){
-            ST.STs.get(i).saveData();
-        }
-    }
-
     PopupMenu getPopupMenu(final Activity activity, final View v){
         PopupMenu popup = new PopupMenu(activity, v);
         popup.getMenuInflater().inflate(R.menu.popup_menu, popup.getMenu());
@@ -317,18 +324,5 @@ class ST {
             }
         });
         return popup;
-    }
-    static ST getSTByMac(String mac){
-        for(int i=STs.size()-1;i>=0;i--){
-            if(mac.equals(STs.get(i).mac)){
-                return STs.get(i);
-            }
-        }
-        return null;
-    }
-    static void clear(){
-        STs.clear();
-        marked.clear();
-        connected = 0;
     }
 }

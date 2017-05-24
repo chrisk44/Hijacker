@@ -52,22 +52,21 @@ import static com.hijacker.MainActivity.load;
 import static com.hijacker.MainActivity.runInHandler;
 import static com.hijacker.MainActivity.status;
 import static com.hijacker.MainActivity.stop;
-import static com.hijacker.MainActivity.watchdog;
-import static com.hijacker.MainActivity.watchdog_runnable;
-import static com.hijacker.MainActivity.watchdog_thread;
 import static com.hijacker.Shell.runOne;
 
 public class TestDialog extends DialogFragment {
     static final int TEST_WAIT = 500;
-    boolean test_wait;
     View dialogView;
     TextView test_cur_cmd;
     ProgressBar test_progress;
     Thread thread;
-    Runnable runnable = new Runnable(){
+    final Runnable runnable = new Runnable(){
         @Override
         public void run(){
-            watchdog_thread.interrupt();
+            boolean restartWatchdog = ((MainActivity)getActivity()).watchdogTask.isRunning();
+            if(restartWatchdog){
+                ((MainActivity)getActivity()).watchdogTask.cancel(true);
+            }
             final boolean results[] = {false, false, false, false, false};
             final String cmdMonMode = enable_monMode;
             final String cmdAirodump = "su -c " + prefix + " " + airodump_dir + " " + iface;
@@ -99,7 +98,6 @@ public class TestDialog extends DialogFragment {
                 });
 
                 //Airodump
-                test_wait = true;
                 Log.d("HIJACKER/test_thread", cmdAirodump);
                 Runtime.getRuntime().exec(cmdAirodump);
                 Thread.sleep(TEST_WAIT);
@@ -218,9 +216,10 @@ public class TestDialog extends DialogFragment {
                 stop(PROCESS_AIREPLAY);
                 stop(PROCESS_MDK);
                 stop(PROCESS_REAVER);
-                if(watchdog){
-                    watchdog_thread = new Thread(watchdog_runnable);
-                    watchdog_thread.start();
+                if(restartWatchdog){
+                    //Restart the watchdog
+                    ((MainActivity)getActivity()).watchdogTask = new WatchdogTask(getActivity());
+                    ((MainActivity)getActivity()).watchdogTask.execute();
                 }
             }
         }

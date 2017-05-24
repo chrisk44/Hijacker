@@ -23,14 +23,16 @@ import android.app.FragmentManager;
 import android.content.DialogInterface;
 import android.os.Bundle;
 import android.os.Environment;
-import android.support.design.widget.Snackbar;
 import android.support.v7.app.AlertDialog;
 import android.util.Log;
 import android.view.HapticFeedbackConstants;
+import android.view.KeyEvent;
 import android.view.View;
+import android.view.inputmethod.EditorInfo;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.RadioGroup;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import java.io.File;
@@ -42,13 +44,23 @@ import static com.hijacker.MainActivity.background;
 
 public class ExportDialog extends DialogFragment{
     View dialogView;
-    EditText output_file;
+    EditText filenameView;
     @Override
     public Dialog onCreateDialog(Bundle savedInstanceState) {
         AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
         dialogView = getActivity().getLayoutInflater().inflate(R.layout.export, null);
 
-        output_file = (EditText)dialogView.findViewById(R.id.output_file);
+        filenameView = (EditText)dialogView.findViewById(R.id.output_file);
+        filenameView.setOnEditorActionListener(new TextView.OnEditorActionListener(){
+            @Override
+            public boolean onEditorAction(TextView v, int actionId, KeyEvent event){
+                if(actionId == EditorInfo.IME_ACTION_DONE){
+                    attemptExport(false);
+                    return true;
+                }
+                return false;
+            }
+        });
         dialogView.findViewById(R.id.export_fe_btn).setOnClickListener(new View.OnClickListener(){
             @Override
             public void onClick(View v){
@@ -58,7 +70,8 @@ public class ExportDialog extends DialogFragment{
                 dialog.setOnSelect(new Runnable(){
                     @Override
                     public void run(){
-                        output_file.setText(dialog.result.getAbsolutePath() + "/output.txt");
+                        filenameView.setText(dialog.result.getAbsolutePath() + "/output.txt");
+                        filenameView.setError(null);
                     }
                 });
                 dialog.show(getFragmentManager(), "FileExplorerDialog");
@@ -86,37 +99,45 @@ public class ExportDialog extends DialogFragment{
                 @Override
                 public boolean onLongClick(View v){
                     v.performHapticFeedback(HapticFeedbackConstants.LONG_PRESS);
-                    if(output_file.getText().toString().equals("")){
-                        Snackbar.make(dialogView, getString(R.string.filename_empty), Snackbar.LENGTH_SHORT).show();
-                        return false;
-                    }
-                    export(new File(output_file.getText().toString()));
+                    attemptExport(true);
                     return false;
                 }
             });
             positiveButton.setOnClickListener(new View.OnClickListener(){
                 @Override
                 public void onClick(View v){
-                    if(output_file.getText().toString().equals("")){
-                        Snackbar.make(dialogView, getString(R.string.filename_empty), Snackbar.LENGTH_SHORT).show();
-                        return;
-                    }
-                    File out_file = new File(output_file.getText().toString());
-
-                    if(out_file.exists()){
-                        Snackbar.make(dialogView, R.string.output_file_exists, Snackbar.LENGTH_LONG).show();
-                    }else{
-                        export(out_file);
-                    }
+                    attemptExport(false);
                 }
             });
+        }
+    }
+    void attemptExport(boolean override){
+        filenameView.setError(null);
+        String filename = filenameView.getText().toString();
+        if(filename.equals("")){
+            filenameView.setError(getString(R.string.field_required));
+            filenameView.requestFocus();
+            return;
+        }
+        if(override){
+            export(new File(filename));
+        }else{
+            File out_file = new File(filename);
+
+            if(out_file.exists()){
+                filenameView.setError(getString(R.string.output_file_exists));
+                filenameView.requestFocus();
+            }else{
+                export(out_file);
+            }
         }
     }
     void export(File out_file){
         try{
             out_file.createNewFile();
             if(!out_file.canWrite()){
-                Snackbar.make(dialogView, R.string.output_file_cant_write, Snackbar.LENGTH_SHORT).show();
+                filenameView.setError(getString(R.string.output_file_cant_write));
+                filenameView.requestFocus();
                 return;
             }
             FileWriter out = new FileWriter(out_file);
@@ -126,23 +147,16 @@ public class ExportDialog extends DialogFragment{
             if(((RadioGroup) dialogView.findViewById(R.id.radio_group)).getCheckedRadioButtonId()==R.id.all_rb){
                 //export all
                 out.write(ap_str + '\n');
-                for(int i=0;i<AP.APs.size();i++){
-                    out.write(AP.APs.get(i).getExported() + '\n');
-                }
-                out.write('\n' + st_str + '\n');
-                for(int i=0;i<ST.STs.size();i++){
-                    out.write(ST.STs.get(i).getExported() + '\n');
+                for(int i=0;i<Tile.i;i++){
+                    out.write(Tile.allTiles.get(i).device.getExported() + '\n');
+                    if(i==AP.APs.size()-1) out.write('\n' + st_str + '\n');
                 }
             }else{
                 //export visible
                 out.write(ap_str + '\n');
-                int i;
-                for(i=0;i<Tile.i;i++){
-                    out.write(Tile.tiles.get(i).ap.getExported() + '\n');
-                }
-                out.write('\n' + st_str + '\n');
-                for(;i<Tile.tiles.size();i++){
-                    out.write(Tile.tiles.get(i).st.getExported() + '\n');
+                for(int i=0;i<Tile.i;i++){
+                    out.write(Tile.tiles.get(i).device.getExported() + '\n');
+                    if(i==AP.APs.size()-1) out.write('\n' + st_str + '\n');
                 }
             }
             out.close();
@@ -150,7 +164,8 @@ public class ExportDialog extends DialogFragment{
             Toast.makeText(getActivity(), R.string.output_file_exported, Toast.LENGTH_SHORT).show();
         }catch(IOException e){
             Log.e("HIJACKER/ExportDialog", "Exception: " + e.toString());
-            Snackbar.make(dialogView, getString(R.string.file_not_created), Snackbar.LENGTH_SHORT).show();
+            filenameView.setError(getString(R.string.file_not_created));
+            filenameView.requestFocus();
         }
     }
     @Override

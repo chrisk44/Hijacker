@@ -27,17 +27,19 @@ import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
-import android.os.Handler;
 import android.os.Looper;
 import android.support.design.widget.Snackbar;
 import android.support.v4.content.FileProvider;
 import android.util.Log;
+import android.view.KeyEvent;
 import android.view.View;
+import android.view.inputmethod.EditorInfo;
 import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.CompoundButton;
 import android.widget.EditText;
 import android.widget.ProgressBar;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import java.io.BufferedReader;
@@ -67,20 +69,32 @@ import static com.hijacker.MainActivity.versionCode;
 import static com.hijacker.MainActivity.versionName;
 
 public class FeedbackDialog extends DialogFragment{
-    EditText email_et, feedback_et;
+    View dialogView;
+    EditText emailView, feedbackView;
     ProgressBar progress;
     CheckBox include_report;
     File report;
     @Override
     public Dialog onCreateDialog(Bundle savedInstanceState) {
         AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
-        View view = getActivity().getLayoutInflater().inflate(R.layout.feedback_dialog, null);
-        email_et = (EditText)view.findViewById(R.id.email_et);
-        include_report = (CheckBox)view.findViewById(R.id.include_report);
-        feedback_et = (EditText)view.findViewById(R.id.feedback_et);
-        progress = (ProgressBar)view.findViewById(R.id.progress);
+        dialogView = getActivity().getLayoutInflater().inflate(R.layout.feedback_dialog, null);
 
-        email_et.setText(pref.getString("user_email", ""));
+        emailView = (EditText)dialogView.findViewById(R.id.email_et);
+        include_report = (CheckBox)dialogView.findViewById(R.id.include_report);
+        feedbackView = (EditText)dialogView.findViewById(R.id.feedback_et);
+        progress = (ProgressBar)dialogView.findViewById(R.id.progress);
+
+        emailView.setText(pref.getString("user_email", ""));
+        emailView.setOnEditorActionListener(new TextView.OnEditorActionListener(){
+            @Override
+            public boolean onEditorAction(TextView v, int actionId, KeyEvent event){
+                if(actionId == EditorInfo.IME_ACTION_NEXT){
+                    feedbackView.requestFocus();
+                    return true;
+                }
+                return false;
+            }
+        });
 
         report = null;
         include_report.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener(){
@@ -108,7 +122,7 @@ public class FeedbackDialog extends DialogFragment{
             }
         });
 
-        builder.setView(view);
+        builder.setView(dialogView);
         builder.setTitle(getString(R.string.feedback));
         builder.setPositiveButton(R.string.send, new DialogInterface.OnClickListener(){
             @Override
@@ -129,7 +143,7 @@ public class FeedbackDialog extends DialogFragment{
                     Uri attachment = FileProvider.getUriForFile(FeedbackDialog.this.getActivity().getApplicationContext(), BuildConfig.APPLICATION_ID + ".provider", report);
                     intent.putExtra(Intent.EXTRA_STREAM, attachment);
                 }
-                intent.putExtra(Intent.EXTRA_TEXT, feedback_et.getText().toString());
+                intent.putExtra(Intent.EXTRA_TEXT, feedbackView.getText().toString());
                 startActivity(intent);
             }
         });
@@ -148,124 +162,127 @@ public class FeedbackDialog extends DialogFragment{
             positiveButton.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(final View v) {
-                    if(!internetAvailable(FeedbackDialog.this.getActivity())){
-                        Log.d("HIJACKER/SendLog", "No internet connection");
-                        Snackbar.make(v, getString(R.string.no_internet), Snackbar.LENGTH_SHORT).show();
-                        return;
-                    }
-
-                    final String feedback = feedback_et.getText().toString();
-                    if(feedback.equals("")){
-                        Snackbar.make(v, getString(R.string.feedback_empty), Snackbar.LENGTH_SHORT).show();
-                        return;
-                    }
-                    final String email = email_et.getText().toString();
-                    if(!email.equals("")){
-                        pref_edit.putString("user_email", email);
-                        pref_edit.commit();
-                    }
-
-                    progress.setIndeterminate(true);
-
-                    new Thread(new Runnable(){
-                        @Override
-                        public void run(){
-                            Looper.prepare();
-                            FeedbackDialog.this.setCancelable(false);
-                            Runnable runnable = new Runnable(){
-                                @Override
-                                public void run(){
-                                    progress.setIndeterminate(false);
-                                }
-                            };
-                            Socket socket = connect();
-                            if(socket==null){
-                                handler.post(runnable);
-                                Snackbar.make(v, getString(R.string.server_error), Snackbar.LENGTH_SHORT).show();
-                                return;
-                            }
-
-                            try{
-                                PrintWriter in = new PrintWriter(socket.getOutputStream());
-                                BufferedReader out = new BufferedReader(new InputStreamReader(socket.getInputStream()));
-
-                                in.print(REQ_FEEDBACK + '\n');
-                                in.flush();
-
-                                String buffer;
-                                buffer = out.readLine();
-                                if(buffer!=null){
-                                    if(!buffer.equals(ANS_POSITIVE)){
-                                        handler.post(runnable);
-                                        Snackbar.make(v, getString(R.string.server_denied), Snackbar.LENGTH_SHORT).show();
-                                        return;
-                                    }
-                                }else{
-                                    handler.post(runnable);
-                                    Snackbar.make(v, getString(R.string.connection_closed), Snackbar.LENGTH_SHORT).show();
-                                    return;
-                                }
-
-                                in.print("Hijacker feedback - " + new Date().toString() + "\n");
-                                in.print("User email: " + email + '\n');
-                                in.print("App version: " + versionName + " (" + versionCode + ")\n");
-                                in.print("Android version: " +  Build.VERSION.SDK_INT + '\n');
-                                in.print("Device model: " + deviceModel + '\n');
-                                in.print("\nFeedback:\n");
-                                in.print(feedback + '\n');
-                                in.print("EOF\n");
-                                in.flush();
-
-                                if(report!=null && include_report.isChecked()){
-                                    in.print(REQ_REPORT + '\n');
-                                    in.flush();
-
-                                    buffer = out.readLine();
-                                    if(buffer!=null){
-                                        if(!buffer.equals(ANS_POSITIVE)){
-                                            Snackbar.make(v, getString(R.string.server_denied), Toast.LENGTH_SHORT).show();
-                                            handler.post(runnable);
-                                            return;
-                                        }
-                                    }else{
-                                        Snackbar.make(v, getString(R.string.connection_closed), Toast.LENGTH_SHORT).show();
-                                        handler.post(runnable);
-                                        return;
-                                    }
-
-                                    BufferedReader fileReader = new BufferedReader(new FileReader(report));
-
-                                    in.print("User email: " + email + '\n');
-                                    in.flush();
-                                    buffer = fileReader.readLine();
-                                    while(buffer!=null){
-                                        in.print(buffer + '\n');
-                                        in.flush();
-                                        buffer = fileReader.readLine();
-                                    }
-                                    in.print("EOF\n");
-                                    in.flush();
-                                }
-                                in.print(REQ_EXIT + '\n');
-                                in.flush();
-
-                                in.close();
-                                out.close();
-                                socket.close();
-                                dismissAllowingStateLoss();
-                            }catch(IOException e){
-                                Log.e("HIJACKER/FeedbackOnSend", e.toString());
-                                Snackbar.make(v, getString(R.string.unknown_error), Snackbar.LENGTH_SHORT).show();
-                            }finally{
-                                handler.post(runnable);
-                                FeedbackDialog.this.setCancelable(true);
-                            }
-                        }
-                    }).start();
-
+                    attemptSend();
                 }
             });
         }
     }
-    static Handler handler = new Handler();
+    void attemptSend(){
+        feedbackView.setError(null);
+        if(!internetAvailable(FeedbackDialog.this.getActivity())){
+            Log.d("HIJACKER/SendLog", "No internet connection");
+            Snackbar.make(dialogView, getString(R.string.no_internet), Snackbar.LENGTH_SHORT).show();
+            return;
+        }
+
+        final String feedback = feedbackView.getText().toString();
+        if(feedback.equals("")){
+            feedbackView.setError(getString(R.string.field_required));
+            feedbackView.requestFocus();
+            return;
+        }
+        final String email = emailView.getText().toString();
+        if(!email.equals("")){
+            pref_edit.putString("user_email", email);
+            pref_edit.commit();
+        }
+
+        progress.setIndeterminate(true);
+
+        new Thread(new Runnable(){
+            @Override
+            public void run(){
+                Looper.prepare();
+                FeedbackDialog.this.setCancelable(false);
+                Runnable runnable = new Runnable(){
+                    @Override
+                    public void run(){
+                        progress.setIndeterminate(false);
+                    }
+                };
+                Socket socket = connect();
+                if(socket==null){
+                    runInHandler(runnable);
+                    Snackbar.make(dialogView, getString(R.string.server_error), Snackbar.LENGTH_SHORT).show();
+                    return;
+                }
+
+                try{
+                    PrintWriter in = new PrintWriter(socket.getOutputStream());
+                    BufferedReader out = new BufferedReader(new InputStreamReader(socket.getInputStream()));
+
+                    in.print(REQ_FEEDBACK + '\n');
+                    in.flush();
+
+                    String buffer;
+                    buffer = out.readLine();
+                    if(buffer!=null){
+                        if(!buffer.equals(ANS_POSITIVE)){
+                            runInHandler(runnable);
+                            Snackbar.make(dialogView, getString(R.string.server_denied), Snackbar.LENGTH_SHORT).show();
+                            return;
+                        }
+                    }else{
+                        runInHandler(runnable);
+                        Snackbar.make(dialogView, getString(R.string.connection_closed), Snackbar.LENGTH_SHORT).show();
+                        return;
+                    }
+
+                    in.print("Hijacker feedback - " + new Date().toString() + "\n");
+                    in.print("User email: " + email + '\n');
+                    in.print("App version: " + versionName + " (" + versionCode + ")\n");
+                    in.print("Android version: " +  Build.VERSION.SDK_INT + '\n');
+                    in.print("Device model: " + deviceModel + '\n');
+                    in.print("\nFeedback:\n");
+                    in.print(feedback + '\n');
+                    in.print("EOF\n");
+                    in.flush();
+
+                    if(report!=null && include_report.isChecked()){
+                        in.print(REQ_REPORT + '\n');
+                        in.flush();
+
+                        buffer = out.readLine();
+                        if(buffer!=null){
+                            if(!buffer.equals(ANS_POSITIVE)){
+                                Snackbar.make(dialogView, getString(R.string.server_denied), Toast.LENGTH_SHORT).show();
+                                runInHandler(runnable);
+                                return;
+                            }
+                        }else{
+                            Snackbar.make(dialogView, getString(R.string.connection_closed), Toast.LENGTH_SHORT).show();
+                            runInHandler(runnable);
+                            return;
+                        }
+
+                        BufferedReader fileReader = new BufferedReader(new FileReader(report));
+
+                        in.print("User email: " + email + '\n');
+                        in.flush();
+                        buffer = fileReader.readLine();
+                        while(buffer!=null){
+                            in.print(buffer + '\n');
+                            in.flush();
+                            buffer = fileReader.readLine();
+                        }
+                        in.print("EOF\n");
+                        in.flush();
+                    }
+                    in.print(REQ_EXIT + '\n');
+                    in.flush();
+
+                    in.close();
+                    out.close();
+                    socket.close();
+                    dismissAllowingStateLoss();
+                }catch(IOException e){
+                    Log.e("HIJACKER/FeedbackOnSend", e.toString());
+                    Snackbar.make(dialogView, getString(R.string.unknown_error), Snackbar.LENGTH_SHORT).show();
+                }finally{
+                    runInHandler(runnable);
+                    FeedbackDialog.this.setCancelable(true);
+                }
+            }
+        }).start();
+    }
 }

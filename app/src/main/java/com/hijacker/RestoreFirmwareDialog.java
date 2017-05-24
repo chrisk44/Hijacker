@@ -27,10 +27,13 @@ import android.os.Bundle;
 import android.support.design.widget.Snackbar;
 import android.support.v7.app.AlertDialog;
 import android.util.Log;
+import android.view.KeyEvent;
 import android.view.View;
+import android.view.inputmethod.EditorInfo;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ProgressBar;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import java.io.File;
@@ -45,14 +48,25 @@ import static com.hijacker.MainActivity.getLastLine;
 public class RestoreFirmwareDialog extends DialogFragment {
     View dialogView;
     Shell shell;
-    EditText firm_et;
+    EditText firmView;
     @Override
     public Dialog onCreateDialog(Bundle savedInstanceState) {
         shell = Shell.getFreeShell();
         AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
         dialogView = getActivity().getLayoutInflater().inflate(R.layout.restore_firmware, null);
 
-        firm_et = (EditText)dialogView.findViewById(R.id.firm_location);
+        firmView = (EditText)dialogView.findViewById(R.id.firm_location);
+        firmView.setOnEditorActionListener(new TextView.OnEditorActionListener(){
+            @Override
+            public boolean onEditorAction(TextView v, int actionId, KeyEvent event){
+                if(actionId == EditorInfo.IME_ACTION_DONE){
+                    attemptRestore();
+                    dismissAllowingStateLoss();
+                    return true;
+                }
+                return false;
+            }
+        });
 
         dialogView.findViewById(R.id.firm_fe_btn).setOnClickListener(new View.OnClickListener(){
             @Override
@@ -62,7 +76,8 @@ public class RestoreFirmwareDialog extends DialogFragment {
                 dialog.setOnSelect(new Runnable(){
                     @Override
                     public void run(){
-                        firm_et.setText(dialog.result.getAbsolutePath());
+                        firmView.setText(dialog.result.getAbsolutePath());
+                        firmView.setError(null);
                     }
                 });
                 dialog.show(getFragmentManager(), "FileExplorerDialog");
@@ -98,27 +113,7 @@ public class RestoreFirmwareDialog extends DialogFragment {
             positiveButton.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    String firm_location = firm_et.getText().toString();
-                    firm_location = getDirectory(firm_location);
-
-                    File firm = new File(firm_location);
-                    if(!firm.exists()){
-                        Snackbar.make(dialogView, R.string.dir_notfound_firm, Snackbar.LENGTH_SHORT).show();
-                    }else if(!(new File(firm_location + "fw_bcmdhd.bin").exists())){
-                        Snackbar.make(dialogView, R.string.firm_notfound, Snackbar.LENGTH_SHORT).show();
-                    }else{
-                        if(debug) Log.d("HIJACKER/RestoreFirm", "Restoring firmware in " + firm_location);
-                        WifiManager wifiManager = (WifiManager) getActivity().getApplicationContext().getSystemService(Context.WIFI_SERVICE);
-                        wifiManager.setWifiEnabled(false);
-
-                        shell.run(busybox + " mount -o rw,remount,rw /system");
-                        shell.run("cp " + firm_backup_file + " " + firm_location + "fw_bcmdhd.bin");
-                        shell.run(busybox + " mount -o ro,remount,ro /system");
-
-                        Toast.makeText(getActivity(), R.string.restored, Toast.LENGTH_SHORT).show();
-                        wifiManager.setWifiEnabled(true);
-                        dismissAllowingStateLoss();
-                    }
+                    attemptRestore();
                 }
             });
             neutralButton.setOnClickListener(new View.OnClickListener() {
@@ -133,7 +128,8 @@ public class RestoreFirmwareDialog extends DialogFragment {
                         Snackbar.make(dialogView, R.string.firm_notfound_bcm, Snackbar.LENGTH_LONG).show();
                     }else{
                         lastline = lastline.substring(0, lastline.length()-14);
-                        firm_et.setText(lastline);
+                        firmView.setText(lastline);
+                        firmView.setError(null);
                     }
                     progress.setIndeterminate(false);
 
@@ -150,5 +146,39 @@ public class RestoreFirmwareDialog extends DialogFragment {
     @Override
     public void show(FragmentManager fragmentManager, String tag){
         if(!background) super.show(fragmentManager, tag);
+    }
+    void attemptRestore(){
+        firmView.setError(null);
+        String firm_location = firmView.getText().toString();
+        if(firm_location.equals("")){
+            firmView.setError(getString(R.string.field_required));
+            firmView.requestFocus();
+            return;
+        }
+        firm_location = getDirectory(firm_location);
+
+        File firm = new File(firm_location);
+        if(!firm.exists()){
+            firmView.setError(getString(R.string.dir_notfound));
+            firmView.requestFocus();
+            return;
+        }
+        if(!(new File(firm_location + "fw_bcmdhd.bin").exists())){
+            firmView.setError(getString(R.string.firm_notfound));
+            firmView.requestFocus();
+            return;
+        }
+
+        if(debug) Log.d("HIJACKER/RestoreFirm", "Restoring firmware in " + firm_location);
+        WifiManager wifiManager = (WifiManager) getActivity().getApplicationContext().getSystemService(Context.WIFI_SERVICE);
+        wifiManager.setWifiEnabled(false);
+
+        shell.run(busybox + " mount -o rw,remount,rw /system");
+        shell.run("cp " + firm_backup_file + " " + firm_location + "fw_bcmdhd.bin");
+        shell.run(busybox + " mount -o ro,remount,ro /system");
+
+        Toast.makeText(getActivity(), R.string.restored, Toast.LENGTH_SHORT).show();
+        wifiManager.setWifiEnabled(true);
+        dismissAllowingStateLoss();
     }
 }

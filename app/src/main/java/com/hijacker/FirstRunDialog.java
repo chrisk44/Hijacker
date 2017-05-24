@@ -28,7 +28,6 @@ import android.support.v7.app.AlertDialog;
 import static com.hijacker.MainActivity.arch;
 import static com.hijacker.MainActivity.mDrawerLayout;
 import static com.hijacker.MainActivity.mFragmentManager;
-import static com.hijacker.MainActivity.main;
 import static com.hijacker.MainActivity.background;
 
 public class FirstRunDialog extends DialogFragment {
@@ -56,7 +55,7 @@ public class FirstRunDialog extends DialogFragment {
                 //return
                 dismissAllowingStateLoss();
                 mDrawerLayout.openDrawer(GravityCompat.START);
-                main();
+                ((MainActivity)getActivity()).main();
             }
         });
         builder.setNeutralButton(R.string.exit, new DialogInterface.OnClickListener() {

@@ -4,6 +4,8 @@
     android:orientation="vertical"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
+    android:focusable="true"
+    android:focusableInTouchMode="true"
     android:padding="10dp"
     android:id="@+id/filterll1">
 
@@ -262,28 +264,19 @@
 
     </LinearLayout>
 
-    <LinearLayout
+    <android.support.design.widget.TextInputLayout
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="horizontal">
-
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="match_parent"
-            android:gravity="center_vertical"
-            android:labelFor="@+id/manuf_filter_et"
-            android:text="@string/manuf_filter"
-            android:textColor="?android:attr/textColorPrimary"
-            android:focusable="true"
-            android:focusableInTouchMode="true"
-            android:textSize="18sp"/>
+        android:layout_height="wrap_content">
 
         <EditText
             android:id="@+id/manuf_filter_et"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:ems="10"
-            android:paddingStart="10dp"/>
-    </LinearLayout>
+            android:hint="@string/manuf_filter"
+            android:imeOptions="actionDone"
+            android:inputType="text|textFilter"
+            android:maxLines="1"/>
+
+    </android.support.design.widget.TextInputLayout>
 
 </LinearLayout>

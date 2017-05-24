@@ -32,7 +32,7 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.ArrayList;
-import java.util.List;
+import java.util.HashMap;
 
 import static com.hijacker.IsolatedFragment.is_ap;
 import static com.hijacker.MainActivity.MDK_ADOS;
@@ -50,12 +50,10 @@ import static com.hijacker.MainActivity.aliases;
 import static com.hijacker.MainActivity.aliases_file;
 import static com.hijacker.MainActivity.aliases_in;
 import static com.hijacker.MainActivity.cap_dir;
-import static com.hijacker.MainActivity.completed;
 import static com.hijacker.MainActivity.copy;
 import static com.hijacker.MainActivity.data_path;
 import static com.hijacker.MainActivity.debug;
 import static com.hijacker.MainActivity.getFixed;
-import static com.hijacker.MainActivity.getManuf;
 import static com.hijacker.MainActivity.iface;
 import static com.hijacker.MainActivity.isolate;
 import static com.hijacker.MainActivity.mFragmentManager;
@@ -73,29 +71,29 @@ import static com.hijacker.MainActivity.toSort;
 import static com.hijacker.MainActivity.wpa_runnable;
 import static com.hijacker.MainActivity.wpa_thread;
 
-class AP {
+class AP extends Device{
     static final int WPA=0, WPA2=1, WEP=2, OPN=3, UNKNOWN=4;
     static int wpa=0, wpa2=0, wep=0, opn=0, hidden=0;
-    static List<AP> APs = new ArrayList<>();
-    static List<AP> marked = new ArrayList<>();
-    static List<AP> currentTargetDeauth = new ArrayList<>();
-    boolean isHidden = false, isMarked = false;
-    int pwr, ch, id, sec=UNKNOWN;
+    static final HashMap<String, AP> APsHM = new HashMap<>();
+    static final ArrayList<AP> APs = new ArrayList<>();
+    static final ArrayList<AP> marked = new ArrayList<>();
+    static final ArrayList<AP> currentTargetDeauth = new ArrayList<>();
+    boolean isHidden = false;
+    int ch, id, sec=UNKNOWN;
     private int beacons, data, ivs, total_beacons=0, total_data=0, total_ivs=0;
-    long lastseen = 0;
-    String essid, mac, enc, cipher, auth, manuf, alias;
-    List<ST> clients = new ArrayList<>();
-    Tile tile;
+    String essid, enc, cipher, auth;
+    final ArrayList<ST> clients = new ArrayList<>();
     AP(String essid, String mac, String enc, String cipher, String auth,
        int pwr, int beacons, int data, int ivs, int ch) {
-        this.mac = mac;
+        super(mac);
         id = APs.size();
-        this.manuf = getManuf(this.mac);
-        this.alias = aliases.get(this.mac);
         this.update(essid, enc, cipher, auth, pwr, beacons, data, ivs, ch);
 
+        upperRight = this.manuf;
+        lowerLeft = this.mac;
+
         APs.add(this);
-        if(sort!=SORT_NOSORT) toSort = true;
+        APsHM.put(this.mac, this);
     }
 
     void addClient(ST client){
@@ -152,7 +150,8 @@ class AP {
         this.cipher = cipher;
         this.auth = auth;
         this.pwr = pwr;
-        this.ch = ch==-1 ? 0 : ch;      //for hidden networks
+        if(ch==-1 || ch>14) this.ch = 0;
+        else this.ch = ch;      //for hidden networks
 
         if(sec==UNKNOWN){
             switch(this.enc){
@@ -174,25 +173,17 @@ class AP {
                     break;
             }
         }
-        final String a, c;
-        a = this.essid + (this.alias==null ? "" : " (" + alias + ')');
-        c = "PWR: " + this.pwr + " | SEC: " + this.enc + " | CH: " + this.ch + " | B:" + this.getBeacons() + " | D:" + this.getData();
+        upperLeft = this.essid + (this.alias==null ? "" : " (" + alias + ')');
+        lowerRight = "PWR: " + this.pwr + " | SEC: " + this.enc + " | CH: " + this.ch + " | B:" + this.getBeacons() + " | D:" + this.getData();
         runInHandler(new Runnable(){
             @Override
             public void run(){
-                if(tile!=null) tile.update(a, AP.this.mac, c, AP.this.manuf);
-                else tile = new Tile(id, a, AP.this.mac, c, AP.this.manuf, AP.this);
-                if(tile.ap==null) tile = null;
-                completed = true;
+                if(tile!=null) tile.update();
+                else tile = new Tile(id, AP.this);
+
+                if(toSort) Tile.sort();
             }
         });
-    }
-    static AP getAPByMac(String mac){
-        if(mac==null) return null;
-        for(int i=0;i<AP.APs.size();i++){
-            if(mac.equals(APs.get(i).mac)) return APs.get(i);
-        }
-        return null;
     }
     void removeClient(ST st){
         for(int i=clients.size()-1;i>=0;i--){
@@ -236,11 +227,6 @@ class AP {
         fragmentManager.executePendingTransactions();      //Wait for everything to be set up
         ReaverFragment.start_button.performClick();             //Click start to run reaver
     }
-    void showInfo(FragmentManager fragmentManager){
-        APDialog dialog = new APDialog();
-        dialog.info_ap = this;
-        dialog.show(fragmentManager, "APDialog");
-    }
     void disconnectAll(){
         if(Airodump.getChannel() != this.ch){
             if(debug) Log.d("HIJACKER/AP", "Starting airodump for channel " + this.ch);
@@ -259,24 +245,39 @@ class AP {
             startAireplay(this.mac);
         }
     }
-    void mark(){
-        if(!marked.contains(this)){
-            marked.add(this);
-        }
-        this.isMarked = true;
-        Tile.filter();
+
+    int getBeacons(){ return total_beacons + beacons; }
+    int getData(){ return total_data + data; }
+    int getIvs(){ return total_ivs + ivs; }
+
+    static void clear(){
+        APsHM.clear();
+        APs.clear();
+        marked.clear();
+        wpa = 0;
+        wpa2 = 0;
+        wep = 0;
+        opn = 0;
+        hidden = 0;
     }
-    void unmark(){
-        if(marked.contains(this)){
-            marked.remove(this);
+    static void saveAll(){
+        for(AP ap : APs){
+            ap.saveData();
         }
-        this.isMarked = false;
-        Tile.filter();
+    }
+    static AP getAPByMac(String mac){
+        return APsHM.get(mac);
+    }
+
+    void showInfo(FragmentManager fragmentManager){
+        APDialog dialog = new APDialog();
+        dialog.info_ap = this;
+        dialog.show(fragmentManager, "APDialog");
     }
     public String toString(){
         return this.essid + (this.alias==null ? "" : " (" + this.alias + ')') + " (" + this.mac + ')';
     }
-    public String getExported(){
+    String getExported(){
         //MAC                 PWR  CH  Beacons    Data      #s   ENC  AUTH  CIPHER  Hidden  ESSID - Manufacturer
         //00:11:22:33:44:55  -100  13   123456  123456  123456  WPA2  TKIP    CCMP     Yes  ExampleESSID - ExampleManufacturer
         String str = mac;
@@ -293,10 +294,7 @@ class AP {
 
         return str;
     }
-    public int getBeacons(){ return total_beacons + beacons; }
-    public int getData(){ return total_data + data; }
-    public int getIvs(){ return total_ivs + ivs; }
-    public void saveData(){
+    void saveData(){
         total_beacons += beacons;
         total_data += data;
         total_ivs += ivs;
@@ -304,12 +302,20 @@ class AP {
         data = 0;
         ivs = 0;
     }
-    public static void saveAll(){
-        for(int i=0;i<AP.APs.size();i++){
-            AP.APs.get(i).saveData();
+    void mark(){
+        if(!marked.contains(this)){
+            marked.add(this);
         }
+        this.isMarked = true;
+        Tile.filter();
     }
-
+    void unmark(){
+        if(marked.contains(this)){
+            marked.remove(this);
+        }
+        this.isMarked = false;
+        Tile.filter();
+    }
     PopupMenu getPopupMenu(final Activity activity, final View v){
         PopupMenu popup = new PopupMenu(activity, v);
         popup.getMenuInflater().inflate(R.menu.popup_menu, popup.getMenu());
@@ -481,15 +487,5 @@ class AP {
             }
         });
         return popup;
-    }
-
-    static void clear(){
-        APs.clear();
-        marked.clear();
-        wpa = 0;
-        wpa2 = 0;
-        wep = 0;
-        opn = 0;
-        hidden = 0;
     }
 }
