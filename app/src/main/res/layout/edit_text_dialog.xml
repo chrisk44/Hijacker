@@ -12,5 +12,5 @@
         android:ems="10"
         android:imeOptions="actionDone"
         android:inputType="text"
-        android:singleLine="true"/>
+        android:maxLines="1"/>
 </LinearLayout>

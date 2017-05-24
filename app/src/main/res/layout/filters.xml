@@ -275,8 +275,7 @@
             android:hint="@string/manuf_filter"
             android:imeOptions="actionDone"
             android:inputType="text|textFilter"
-            android:maxLines="1"
-            android:singleLine="true"/>
+            android:maxLines="1"/>
 
     </android.support.design.widget.TextInputLayout>
 

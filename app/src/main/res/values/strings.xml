@@ -107,9 +107,6 @@
     <string name="agree">I agree</string>
     <string name="not_agree">I don\'t agree</string>
 
-    <!-- EditTextDialog -->
-    <string name="field_empty">Text field is empty</string>
-
     <!-- ExitDialog -->
     <string name="exit_dialog_title">Exit?</string>
     <string name="exit_dialog_message">Airodump, aireplay and mdk will stop. Are you sure?</string>
@@ -122,13 +119,11 @@
     <string name="output_file_exists">File already exists. Long click to overwrite.</string>
     <string name="output_file_cant_write">Can\'t write to that file</string>
     <string name="output_file_exported">Exported</string>
-    <string name="filename_empty">Filename is empty</string>
     <string name="file_not_created">File could not be created</string>
 
     <!-- FeedbackDialog -->
     <string name="feedback">Feedback</string>
     <string name="include_report">Include a report</string>
-    <string name="feedback_empty">Feedback field cannot be empty</string>
     <string name="send_email">Send email</string>
 
     <!-- FileExplorerDialog -->
@@ -172,8 +167,6 @@
     <string name="create_backup">Create Backup</string>
     <string name="fw_not_compatible">Your device does not seem to be compatible with Nexmon (BCM4339). Long click to override.</string>
     <string name="path_contains_system">Modifying the system partition can brick some devices. Long click to override.</string>
-    <string name="firm_location_empty">Firmware location is empty</string>
-    <string name="util_location_empty">Utility location is emtpy</string>
     <string name="field_required">This field is required</string>
 
     <!-- IsolatedFragment (xml) -->
@@ -184,8 +177,6 @@
 
     <!-- Main -->
     <string name="cap_notfound">cap file not found</string>
-    <string name="app_dir_notfound1">App file directory doesn\'t exist: </string>
-    <string name="app_dir_notfound2">. Reinstall the app.</string>
     <string name="disconnect_started">Disconnect All started</string>
     <string name="watchdog_message">This could be caused by improper installation of the tools, WiFi card not in monitor mode or improperly installed/configured.</string>
     <string name="airodump_still_running">Airodump is still running!</string>
@@ -221,7 +212,6 @@
     <string name="loading_aliases">Loading aliases…</string>
     <string name="init_notifications">Initializing notifications…</string>
     <string name="loading_strings">Loading strings…</string>
-    <string name="init_drawer">Initializing drawer…</string>
     <string name="loading_custom_actions">Loading custom actions…</string>
     <string name="setting_up_tools">Setting up tools…</string>
     <string name="init_rootFile">Initializing RootFile…</string>
@@ -238,7 +228,6 @@
     <!-- MDKFragment -->
     <string name="bf_title">Beacon Flooding</string>
     <string name="ados_title">Authentication DoS</string>
-    <string name="ssid_file">SSID file</string>
     <string name="managed">Managed</string>
     <string name="ad_hoc">Ad-hoc</string>
     <string name="select_enc">Select at least one encryption</string>
@@ -268,8 +257,6 @@
     <string name="pin_delay">PIN delay</string>
     <string name="locked_delay">Locked Delay</string>
     <string name="custom_chroot_cmd_illegal">The custom command can\'t contain the character \'</string>
-    <string name="pin_delay_empty">Pin delay cannot be empty</string>
-    <string name="locked_delay_empty">Locked delay cannot be empty</string>
 
     <!-- RestoreFirmwareDialog -->
     <string name="restore">Restore</string>
@@ -283,7 +270,9 @@
     <string name="use_email">Use email</string>
     <string name="extra">Extra</string>
     <string name="email_optional">Email (optional)</string>
-    <string name="extra_optional">Extra (optional)</string>
+    <string name="cant_create_report">Can\'t create report (external storage write access denied)</string>
+    <string name="report_not_created">Report was not created</string>
+    <string name="no_internet_permission">No internet access permission</string>
 
     <!-- ST -->
     <string name="paired">Paired:</string>

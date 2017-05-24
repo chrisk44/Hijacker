@@ -43,7 +43,6 @@ import static com.hijacker.MainActivity.rootView;
 import static com.hijacker.MainActivity.runInHandler;
 import static com.hijacker.MainActivity.menu;
 import static com.hijacker.MainActivity.stopWPA;
-import static com.hijacker.MainActivity.toSort;
 import static com.hijacker.ST.getSTByMac;
 import static com.hijacker.Shell.getFreeShell;
 import static com.hijacker.Shell.runOne;

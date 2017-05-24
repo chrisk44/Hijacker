@@ -1242,8 +1242,9 @@ public class MainActivity extends AppCompatActivity{
             super(MainActivity.this, R.layout.listitem);
         }
 
+        @NonNull
         @Override
-        public View getView(int position, View convertView, ViewGroup parent){
+        public View getView(int position, View convertView, @NonNull ViewGroup parent){
             // get a view to work with
             View itemview = convertView;
             if(itemview==null){
@@ -1288,8 +1289,9 @@ public class MainActivity extends AppCompatActivity{
             super(MainActivity.this, R.layout.listitem);
         }
 
+        @NonNull
         @Override
-        public View getView(int position, View convertView, ViewGroup parent){
+        public View getView(int position, View convertView, @NonNull ViewGroup parent){
             // get a view to work with
             View itemview = convertView;
             if(itemview==null){
@@ -1332,8 +1334,9 @@ public class MainActivity extends AppCompatActivity{
             super(MainActivity.this, R.layout.explorer_item);
         }
 
+        @NonNull
         @Override
-        public View getView(int position, View convertView, ViewGroup parent){
+        public View getView(int position, View convertView, @NonNull ViewGroup parent){
             // get a view to work with
             View itemview = convertView;
             if(itemview==null){
@@ -1581,8 +1584,10 @@ public class MainActivity extends AppCompatActivity{
 
                 try{
                     deviceID = Long.parseLong(out.readLine());
-                    pref_edit.putLong("deviceID", deviceID);
-                    pref_edit.commit();
+                    if(pref_edit!=null){
+                        pref_edit.putLong("deviceID", deviceID);
+                        pref_edit.commit();
+                    }
                     if(debug) Log.d("HIJACKER/connect", "New deviceID is " + deviceID);
                 }catch(NumberFormatException ignored){
                     if(debug) Log.d("HIJACKER/connect", "deviceID caused NumberFormatException, still -1");
@@ -1617,7 +1622,7 @@ public class MainActivity extends AppCompatActivity{
         if(socket==null){
             if(showMessages){
                 runInHandler(runnable);
-                Snackbar.make(activity.getCurrentFocus(), activity.getString(R.string.server_error), Snackbar.LENGTH_SHORT).show();
+                Snackbar.make(rootView, activity.getString(R.string.server_error), Snackbar.LENGTH_SHORT).show();
             }
             return;
         }
@@ -1651,11 +1656,11 @@ public class MainActivity extends AppCompatActivity{
                     }
                 });
             }else{
-                if(showMessages) Snackbar.make(activity.getCurrentFocus(), activity.getString(R.string.already_on_latest), Snackbar.LENGTH_SHORT).show();
+                if(showMessages) Snackbar.make(rootView, activity.getString(R.string.already_on_latest), Snackbar.LENGTH_SHORT).show();
             }
         }catch(IOException | NumberFormatException e){
             Log.e("HIJACKER/update", e.toString());
-            if(showMessages) Snackbar.make(activity.getCurrentFocus(), activity.getString(R.string.unknown_error), Snackbar.LENGTH_SHORT).show();
+            if(showMessages) Snackbar.make(rootView, activity.getString(R.string.unknown_error), Snackbar.LENGTH_SHORT).show();
         }finally{
             if(showMessages) runInHandler(runnable);
         }

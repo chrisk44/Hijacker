@@ -37,7 +37,6 @@ import static com.hijacker.MainActivity.SORT_NOSORT;
 import static com.hijacker.MainActivity.SORT_PWR;
 import static com.hijacker.MainActivity.adapter;
 import static com.hijacker.MainActivity.ap_count;
-import static com.hijacker.MainActivity.background;
 import static com.hijacker.MainActivity.debug;
 import static com.hijacker.MainActivity.manuf_filter;
 import static com.hijacker.MainActivity.notification;

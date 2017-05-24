@@ -19,12 +19,10 @@ package com.hijacker;
 
 import android.app.Dialog;
 import android.app.DialogFragment;
-import android.app.FragmentManager;
 import android.content.DialogInterface;
 import android.os.Bundle;
 import android.support.v7.app.AlertDialog;
 
-import static com.hijacker.MainActivity.background;
 import static com.hijacker.MainActivity.mFragmentManager;
 import static com.hijacker.MainActivity.pref_edit;
 

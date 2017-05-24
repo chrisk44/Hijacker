@@ -47,8 +47,7 @@
             android:hint="@string/custom_action_title"
             android:imeOptions="actionNext"
             android:inputType="text"
-            android:maxLines="1"
-            android:singleLine="true"/>
+            android:maxLines="1"/>
 
     </android.support.design.widget.TextInputLayout>
 
@@ -64,8 +63,7 @@
             android:hint="@string/start_command"
             android:imeOptions="actionNext"
             android:inputType="text"
-            android:maxLines="1"
-            android:singleLine="true"/>
+            android:maxLines="1"/>
 
     </android.support.design.widget.TextInputLayout>
 
@@ -81,8 +79,7 @@
             android:hint="@string/stop_command"
             android:imeOptions="actionNext"
             android:inputType="text"
-            android:maxLines="1"
-            android:singleLine="true"/>
+            android:maxLines="1"/>
 
     </android.support.design.widget.TextInputLayout>
 
@@ -105,8 +102,7 @@
             android:hint="@string/process_name"
             android:imeOptions="actionDone"
             android:inputType="text"
-            android:maxLines="1"
-            android:singleLine="true"/>
+            android:maxLines="1"/>
 
     </android.support.design.widget.TextInputLayout>
 

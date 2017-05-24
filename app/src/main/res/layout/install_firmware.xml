@@ -27,7 +27,7 @@
         android:orientation="horizontal">
 
         <android.support.design.widget.TextInputLayout
-            android:layout_width="wrap_content"
+            android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1">
 
@@ -39,7 +39,6 @@
                 android:imeOptions="actionNext"
                 android:inputType="text"
                 android:maxLines="1"
-                android:singleLine="true"
                 android:text="@string/firm_location_default"/>
 
         </android.support.design.widget.TextInputLayout>
@@ -59,7 +58,7 @@
         android:orientation="horizontal">
 
         <android.support.design.widget.TextInputLayout
-            android:layout_width="wrap_content"
+            android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1">
 
@@ -71,7 +70,6 @@
                 android:imeOptions="actionDone"
                 android:inputType="text"
                 android:maxLines="1"
-                android:singleLine="true"
                 android:text="@string/util_location_default"/>
 
         </android.support.design.widget.TextInputLayout>

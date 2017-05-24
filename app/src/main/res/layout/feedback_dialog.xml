@@ -38,8 +38,7 @@
                 android:hint="@string/email_optional"
                 android:imeOptions="actionNext"
                 android:inputType="textEmailAddress"
-                android:maxLines="1"
-                android:singleLine="true"/>
+                android:maxLines="1"/>
 
         </android.support.design.widget.TextInputLayout>
 
