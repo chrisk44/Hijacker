@@ -40,15 +40,15 @@ Root is also necessary, as these tools need root to work.
 
 ### Screenshots
 
-![Airodump View](screenshots/airodump_view.png)
-![Cap Crack View](screenshots/cap_crack_view.png)
-![Custom Action View](screenshots/custom_action_view.png)
-![MDK View](screenshots/mdk_view.png)
-![Reaver View](screenshots/reaver_view.png)
-![Filters](screenshots/filters.png)
-![Notification](screenshots/notification.png)
-![Settings - Page 1](screenshots/settings1.png)
-![Settings - Page 2](screenshots/settings2.png)
+<img alt="Airodump View" src="screenshots/airodump_view.png" width="350">
+<img alt="Cap Crack View" src="screenshots/cap_crack_view.png" width="350">
+<img alt="Custom Action View" src="screenshots/custom_action_view.png" width="350">
+<img alt="MDK View" src="screenshots/mdk_view.png" width="350">
+<img alt="Reaver View" src="screenshots/reaver_view.png" width="350">
+<img alt="Filters" src="screenshots/filters.png" width="350">
+<img alt="Notification" src="screenshots/notification.png" width="350">
+<img alt="Settings - Page 1" src="screenshots/settings1.png" width="350">
+<img alt="Settings - Page 2" src="screenshots/settings2.png" width="350">
 
 ## Installation
 Make sure:
