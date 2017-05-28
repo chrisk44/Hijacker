@@ -42,6 +42,8 @@ import java.io.InputStreamReader;
 import java.io.PrintWriter;
 
 import static android.widget.Toast.LENGTH_SHORT;
+import static com.hijacker.AP.OPN;
+import static com.hijacker.AP.UNKNOWN;
 import static com.hijacker.MainActivity.CHROOT_BIN_MISSING;
 import static com.hijacker.MainActivity.CHROOT_DIR_MISSING;
 import static com.hijacker.MainActivity.CHROOT_FOUND;
@@ -70,7 +72,7 @@ import static com.hijacker.MainActivity.stop;
 public class ReaverFragment extends Fragment{
     View fragmentView;
     static Button start_button, select_button;
-    TextView console;
+    TextView consoleView;
     EditText pinDelayView, lockedDelayView;
     CheckBox pixie_dust_cb, ignored_locked_cb, eap_fail_cb, small_dh_cb;
     static ReaverTask task;
@@ -82,7 +84,7 @@ public class ReaverFragment extends Fragment{
         fragmentView = inflater.inflate(R.layout.reaver_fragment, container, false);
         setRetainInstance(true);
 
-        console = (TextView)fragmentView.findViewById(R.id.console);
+        consoleView = (TextView)fragmentView.findViewById(R.id.console);
         pinDelayView = (EditText)fragmentView.findViewById(R.id.pin_delay);
         lockedDelayView = (EditText)fragmentView.findViewById(R.id.locked_delay);
         pixie_dust_cb = (CheckBox)fragmentView.findViewById(R.id.pixie_dust);
@@ -105,7 +107,7 @@ public class ReaverFragment extends Fragment{
 
         task = new ReaverTask();
 
-        console.setMovementMethod(new ScrollingMovementMethod());
+        consoleView.setMovementMethod(new ScrollingMovementMethod());
 
         int chroot_check = checkChroot();
         if(chroot_check!=CHROOT_FOUND){
@@ -124,6 +126,9 @@ public class ReaverFragment extends Fragment{
                 int i = 0;
                 for(AP ap : AP.APs){
                     popup.getMenu().add(0, i, i, ap.toString());
+                    if(ap.sec==UNKNOWN  || ap.sec==OPN){
+                        popup.getMenu().getItem(i).setEnabled(false);
+                    }
                     i++;
                 }
                 popup.getMenu().add(1, i, i, "Custom");
@@ -192,7 +197,7 @@ public class ReaverFragment extends Fragment{
             }
 
             task = new ReaverTask();
-            task.execute();
+            task.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
         }
     }
     static boolean isRunning(){
@@ -211,7 +216,7 @@ public class ReaverFragment extends Fragment{
         super.onResume();
         currentFragment = FRAGMENT_REAVER;
         refreshDrawer();
-        console.setText(console_text);
+        consoleView.setText(console_text);
         pinDelayView.setText(pin_delay);
         lockedDelayView.setText(locked_delay);
         pixie_dust_cb.setChecked(pixie_dust);
@@ -229,7 +234,7 @@ public class ReaverFragment extends Fragment{
     @Override
     public void onPause(){
         super.onPause();
-        console_text = console.getText().toString();
+        console_text = consoleView.getText().toString();
         pin_delay = pinDelayView.getText().toString();
         locked_delay = lockedDelayView.getText().toString();
         pixie_dust = pixie_dust_cb.isChecked();
@@ -290,6 +295,7 @@ public class ReaverFragment extends Fragment{
         }
         @Override
         protected Boolean doInBackground(Void... params){
+            last_action = System.currentTimeMillis();
             stop(PROCESS_AIRODUMP);            //Can't have channels changing from anywhere else
             try{
                 BufferedReader out;
@@ -323,7 +329,6 @@ public class ReaverFragment extends Fragment{
                     Process dc = Runtime.getRuntime().exec(cmd);
                     out = new BufferedReader(new InputStreamReader(dc.getInputStream()));
                 }
-                last_action = System.currentTimeMillis();
                 if(debug) Log.d("HIJACKER/ReaverFragment", cmd);
 
                 String buffer;
@@ -340,7 +345,7 @@ public class ReaverFragment extends Fragment{
         @Override
         protected void onProgressUpdate(String... text){
             if(currentFragment==FRAGMENT_REAVER && !background){
-                console.append(text[0] + '\n');
+                consoleView.append(text[0] + '\n');
             }else{
                 console_text += text[0] + '\n';
             }

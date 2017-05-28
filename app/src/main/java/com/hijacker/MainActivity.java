@@ -207,8 +207,7 @@ public class MainActivity extends AppCompatActivity{
         //Google AppIndex
         client = new GoogleApiClient.Builder(MainActivity.this).addApi(AppIndex.API).build();
 
-        //fullSetup();
-        new SetupTask().execute();
+        new SetupTask().executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
     }
     private class SetupTask extends AsyncTask<Void, String, Boolean>{
         LoadingDialog loadingDialog;
@@ -735,7 +734,7 @@ public class MainActivity extends AppCompatActivity{
 
             watchdogTask = new WatchdogTask(MainActivity.this);
             if(watchdog){
-                watchdogTask.execute();
+                watchdogTask.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
             }
 
             //Load default fragment (airodump)
@@ -979,7 +978,7 @@ public class MainActivity extends AppCompatActivity{
                 runOne(busybox + " kill $(" + busybox + " pidof mdk3)");
                 break;
             case PROCESS_AIRCRACK:
-                CrackFragment.cont = false;
+                CrackFragment.stopCracking();
                 runOne(busybox + " kill $(" + busybox + " pidof aircrack-ng)");
                 break;
             case PROCESS_REAVER:
@@ -1417,8 +1416,8 @@ public class MainActivity extends AppCompatActivity{
                 if(bf) str += " | MDK3 Beacon Flooding...";
                 if(ados) str += " | MDK3 Authentication DoS...";
                 if(ReaverFragment.isRunning()) str += " | Reaver running...";
-                if(CrackFragment.cont) str += " | Cracking .cap file...";
-                if(CustomActionFragment.cont) str += " | Running action " + CustomActionFragment.selected_action.getTitle() + "...";
+                if(CrackFragment.isRunning()) str += " | Cracking .cap file...";
+                if(CustomActionFragment.isRunning()) str += " | Running action " + CustomActionFragment.selectedAction.getTitle() + "...";
 
                 notif.setContentText(str);
             }else notif.setContentText(null);
@@ -1450,7 +1449,7 @@ public class MainActivity extends AppCompatActivity{
         if(bf || ados) state += 4;
         toolbar.setOverflowIcon(overflow[state]);
 
-        if(!(ReaverFragment.isRunning() || CrackFragment.cont || wpa_thread.isAlive())){
+        if(!(ReaverFragment.isRunning() || CrackFragment.isRunning() || wpa_thread.isAlive())){
             progress.setIndeterminate(false);
             progress.setProgress(deauthWait);
         }

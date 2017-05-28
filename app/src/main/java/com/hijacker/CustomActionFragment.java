@@ -20,6 +20,7 @@ package com.hijacker;
 import android.annotation.SuppressLint;
 import android.app.Fragment;
 import android.app.FragmentTransaction;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.text.method.ScrollingMovementMethod;
 import android.util.Log;
@@ -32,274 +33,278 @@ import android.widget.TextView;
 
 import java.io.BufferedReader;
 import java.io.IOException;
+import java.util.ArrayList;
 
 import static com.hijacker.CustomAction.TYPE_AP;
 import static com.hijacker.CustomAction.TYPE_ST;
 import static com.hijacker.CustomAction.cmds;
 import static com.hijacker.MainActivity.FRAGMENT_CUSTOM;
 import static com.hijacker.MainActivity.background;
+import static com.hijacker.MainActivity.busybox;
 import static com.hijacker.MainActivity.currentFragment;
 import static com.hijacker.MainActivity.debug;
+import static com.hijacker.MainActivity.getPIDs;
 import static com.hijacker.MainActivity.mFragmentManager;
 import static com.hijacker.MainActivity.progress;
 import static com.hijacker.MainActivity.refreshDrawer;
-import static com.hijacker.MainActivity.runInHandler;
+import static com.hijacker.Shell.runOne;
 
 public class CustomActionFragment extends Fragment{
-    static CustomAction selected_action=null;
-    static AP ap=null;
-    static ST st=null;
-    Shell shell = null;
-    static Thread thread;
-    static Runnable runnable;
-    static boolean cont=false;
-    Button start_button, select_target, select_action;
-    TextView console;
+    static CustomActionTask task;
+    static CustomAction selectedAction = null;
+    static Device targetDevice;
     static String console_text = null;
+
+    View fragmentView;
+    Button startBtn, targetBtn, actionBtn;
+    TextView consoleView;
     @SuppressLint("SetTextI18n")
     @Override
     public View onCreateView(LayoutInflater inflater, final ViewGroup container, Bundle savedInstanceState){
-        View v = inflater.inflate(R.layout.custom_action_fragment, container, false);
+        setRetainInstance(true);
+        fragmentView = inflater.inflate(R.layout.custom_action_fragment, container, false);
 
-        runnable = new Runnable(){
-            @Override
-            public void run(){
-                if(debug) Log.d("HIJACKER/CustomCMDFrag", "thread running");
-                BufferedReader out = shell.getShell_out();
-                try{
-                    cont = true;
-                    String end = "ENDOFCUSTOM";
-                    String buffer = out.readLine();
-                    while(!end.equals(buffer) && cont){
-                        if(currentFragment==FRAGMENT_CUSTOM && !background){
-                            final String temp = buffer;
-                            runInHandler(new Runnable(){
-                                @Override
-                                public void run(){
-                                    console.append(temp + '\n');
-                                }
-                            });
-                        }else{
-                            console_text += buffer + '\n';
-                        }
-                        buffer = out.readLine();
-                    }
-                    runInHandler(stopRunnable);
-                    if(debug) Log.d("HIJACKER/CustomCMDFrag", "thread done");
-                }catch(IOException ignored){}
-            }
-        };
-        thread = new Thread(runnable);
+        consoleView = (TextView)fragmentView.findViewById(R.id.console);
+        startBtn = (Button)fragmentView.findViewById(R.id.start_button);
+        targetBtn = (Button)fragmentView.findViewById(R.id.select_target);
+        actionBtn = (Button)fragmentView.findViewById(R.id.select_action);
 
-        console = (TextView)v.findViewById(R.id.console);
-        console.setMovementMethod(new ScrollingMovementMethod());
-        start_button = (Button)v.findViewById(R.id.start_button);
-        select_target = (Button)v.findViewById(R.id.select_target);
-        select_action = (Button)v.findViewById(R.id.select_action);
+        task = new CustomActionTask();
 
-        select_action.setOnClickListener(new View.OnClickListener(){
+        consoleView.setMovementMethod(new ScrollingMovementMethod());
+
+        actionBtn.setOnClickListener(new View.OnClickListener(){
             @Override
             public void onClick(View view){
-                PopupMenu popup = new PopupMenu(getActivity(), view);
-                popup.getMenuInflater().inflate(R.menu.popup_menu, popup.getMenu());
-
-                //add(groupId, itemId, order, title)
-                int i;
-                for(i=0;i<cmds.size();i++){
-                    popup.getMenu().add(cmds.get(i).getType(), i, i, cmds.get(i).getTitle());
-                }
-                popup.getMenu().add(-1, 0, i+1, getString(R.string.manage_actions));
-
-                popup.setOnMenuItemClickListener(new PopupMenu.OnMenuItemClickListener() {
-                    public boolean onMenuItemClick(android.view.MenuItem item){
-                        if(item.getGroupId()==-1){
-                            //Open actions manager
-                            FragmentTransaction ft = mFragmentManager.beginTransaction();
-                            ft.replace(R.id.fragment1, new CustomActionManagerFragment());
-                            ft.setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN);
-                            ft.addToBackStack(null);
-                            ft.commitAllowingStateLoss();
-                        }else{
-                            int prev_type = -1;
-                            if(selected_action!=null){
-                                prev_type = selected_action.getType();
-                            }
-                            selected_action = cmds.get(item.getItemId());
-                            select_action.setText(selected_action.getTitle());
-                            if(prev_type==-1){
-                                ap = null;
-                                st = null;
-                            }else{
-                                if(selected_action.getType()==TYPE_AP && prev_type==TYPE_ST){
-                                    st = null;
-                                }else if(selected_action.getType()==TYPE_ST && prev_type==TYPE_AP){
-                                    ap = null;
-                                }
-                            }
-                            select_target.setEnabled(true);
-                            select_target.setText(R.string.select_target);
-                            start_button.setEnabled(false);
-                            setTarget();
-                            runInHandler(stopRunnable);
-                        }
-                        return true;
-                    }
-                });
-                popup.show();
+                showActionSelector();
             }
         });
-
-        select_target.setOnClickListener(new View.OnClickListener(){
+        targetBtn.setOnClickListener(new View.OnClickListener(){
             @Override
             public void onClick(View view){
-                PopupMenu popup = new PopupMenu(getActivity(), view);
-                popup.getMenuInflater().inflate(R.menu.popup_menu, popup.getMenu());
-
-                //add(groupId, itemId, order, title)
-                int i;
-                if(selected_action.getType()==TYPE_AP){
-                    i = 0;
-                    for(AP ap : AP.APs){
-                        popup.getMenu().add(TYPE_AP, i, i, ap.toString());
-                        if(selected_action.requiresClients() && ap.clients.size()==0){
-                            popup.getMenu().findItem(i).setEnabled(false);
-                        }
-                        i++;
-                    }
+                showTargetSelector();
+            }
+        });
+        startBtn.setOnClickListener(new View.OnClickListener(){
+            @Override
+            public void onClick(View view){
+                if(isRunning()){
+                    //Stop
+                    startBtn.setEnabled(false);
+                    task.cancel(true);
                 }else{
-                    i = 0;
-                    for(ST st : ST.STs){
-                        popup.getMenu().add(TYPE_ST, i, i, st.toString());
-                        if(selected_action.requiresConnected() && st.bssid==null){
-                            popup.getMenu().findItem(i).setEnabled(false);
-                        }
-                        i++;
-                    }
-                }
-
-                popup.setOnMenuItemClickListener(new PopupMenu.OnMenuItemClickListener(){
-                    public boolean onMenuItemClick(android.view.MenuItem item){
-                        switch(item.getGroupId()){
-                            case TYPE_AP:
-                                //ap
-                                ap = AP.APs.get(item.getItemId());
-                                st = null;
-                                break;
-                            case TYPE_ST:
-                                //st
-                                st = ST.STs.get(item.getItemId());
-                                ap = null;
-                                break;
-                        }
-                        select_target.setText(item.getTitle());
-                        runInHandler(stopRunnable);
-                        start_button.setEnabled(true);
-                        return true;
-                    }
-                });
-                if(popup.getMenu().size()>0) popup.show();
-
-            }
-        });
-
-        start_button.setOnClickListener(new View.OnClickListener(){
-            @Override
-            public void onClick(View view){
-                if(!thread.isAlive()){
-                    //not started
-                    shell = Shell.getFreeShell();
-                    console.append("Running: " + selected_action.getStartCmd() + '\n');
-                    if(debug) Log.d("HIJACKER/CustomCMDFrag", "Running: " + selected_action.getStartCmd());
-                    selected_action.run(shell);
-                    start_button.setText(R.string.stop);
-                    progress.setIndeterminate(true);
-                }else{
-                    //started
-                    start_button.setEnabled(false);
-                    new Thread(new Runnable(){
-                        @Override
-                        public void run(){
-                            if(selected_action.hasProcessName()){
-                                runInHandler(new Runnable(){
-                                    @Override
-                                    public void run(){
-                                        console.append("Killing process named " + selected_action.getProcessName() + '\n');
-                                    }
-                                });
-                                if(debug) Log.d("HIJACKER/CustomCMDFrag", "Killing process named " + selected_action.getProcessName());
-                            }
-                            if(debug) Log.d("HIJACKER/CustomCMDFrag", "Running: " + selected_action.getStopCmd());
-                            cont = false;
-                            if(selected_action.hasStopCmd()){
-                                runInHandler(new Runnable(){
-                                    @Override
-                                    public void run(){
-                                        console.append("Running: " + selected_action.getStopCmd() + '\n');
-                                    }
-                                });
-                            }
-                            selected_action.stop();
-                            runInHandler(stopRunnable);
-                        }
-                    }).start();
+                    task = new CustomActionTask();
+                    task.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
                 }
             }
         });
 
-        return v;
+        return fragmentView;
     }
     @Override
     public void onResume(){
         super.onResume();
         currentFragment = FRAGMENT_CUSTOM;
-        console.setText(console_text);
-        if(selected_action!=null){
-            select_action.setText(selected_action.getTitle());
-            select_target.setEnabled(true);
-            setTarget();
-        }
-        start_button.setText(thread.isAlive() ? R.string.stop : R.string.start);
         refreshDrawer();
+
+        //Update view
+        consoleView.setText(console_text);
+        if(selectedAction!=null){
+            actionBtn.setText(selectedAction.getTitle());
+            targetBtn.setEnabled(true);
+            if(targetDevice!=null){
+                targetBtn.setText(targetDevice.toString());
+                startBtn.setEnabled(true);
+            }
+        }
+        startBtn.setText(isRunning() ? R.string.stop : R.string.start);
     }
     @Override
     public void onPause(){
         super.onPause();
-        console_text = console.getText().toString();
+        console_text = consoleView.getText().toString();
     }
-    void setTarget(){
-        if(ap!=null){
-            start_button.setEnabled(true);
-            select_target.setText(ap.toString());
-            return;
-        }
-        if(st!=null){
-            start_button.setEnabled(true);
-            select_target.setText(st.toString());
-            return;
-        }
-        if(selected_action.getType()==TYPE_AP && !AP.marked.isEmpty()){
-            start_button.setEnabled(true);
-
-            ap = AP.marked.get(AP.marked.size()-1);
-            select_target.setText(ap.toString());
-
-        }else if(selected_action.getType()==TYPE_ST && !ST.marked.isEmpty()){
-            start_button.setEnabled(true);
-
-            st = ST.marked.get(ST.marked.size()-1);
-            select_target.setText(st.toString());
-        }
+    static boolean isRunning(){
+        if(task==null) return false;
+        return task.getStatus()==AsyncTask.Status.RUNNING;
     }
 
-    Runnable stopRunnable = new Runnable(){
+    void showActionSelector(){
+        PopupMenu popup = new PopupMenu(getActivity(), actionBtn);
+        popup.getMenuInflater().inflate(R.menu.popup_menu, popup.getMenu());
+
+        //add(groupId, itemId, order, title)
+        int i;
+        for(i=0;i<cmds.size();i++){
+            popup.getMenu().add(cmds.get(i).getType(), i, i, cmds.get(i).getTitle());
+        }
+        popup.getMenu().add(-1, 0, i+1, getString(R.string.manage_actions));
+
+        popup.setOnMenuItemClickListener(new PopupMenu.OnMenuItemClickListener() {
+            public boolean onMenuItemClick(android.view.MenuItem item){
+                if(item.getGroupId()==-1){
+                    //Open actions manager
+                    FragmentTransaction ft = mFragmentManager.beginTransaction();
+                    ft.replace(R.id.fragment1, new CustomActionManagerFragment());
+                    ft.setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN);
+                    ft.addToBackStack(null);
+                    ft.commitAllowingStateLoss();
+                }else{
+                    onActionSelected(cmds.get(item.getItemId()));
+                }
+                return true;
+            }
+        });
+        popup.show();
+    }
+    void showTargetSelector(){
+        PopupMenu popup = new PopupMenu(getActivity(), targetBtn);
+        popup.getMenuInflater().inflate(R.menu.popup_menu, popup.getMenu());
+
+        //add(groupId, itemId, order, title)
+        int i;
+        if(selectedAction.getType()==TYPE_AP){
+            i = 0;
+            for(AP ap : AP.APs){
+                popup.getMenu().add(TYPE_AP, i, i, ap.toString());
+                if(selectedAction.requiresClients() && ap.clients.size()==0){
+                    popup.getMenu().findItem(i).setEnabled(false);
+                }
+                i++;
+            }
+        }else{
+            i = 0;
+            for(ST st : ST.STs){
+                popup.getMenu().add(TYPE_ST, i, i, st.toString());
+                if(selectedAction.requiresConnected() && st.bssid==null){
+                    popup.getMenu().findItem(i).setEnabled(false);
+                }
+                i++;
+            }
+        }
+
+        popup.setOnMenuItemClickListener(new PopupMenu.OnMenuItemClickListener(){
+            public boolean onMenuItemClick(android.view.MenuItem item){
+                switch(item.getGroupId()){
+                    case TYPE_AP:
+                        //ap
+                        onTargetSelected(AP.APs.get(item.getItemId()));
+                        break;
+                    case TYPE_ST:
+                        //st
+                        onTargetSelected(ST.STs.get(item.getItemId()));
+                        break;
+                }
+                return true;
+            }
+        });
+        if(popup.getMenu().size()>0) popup.show();
+    }
+
+    void onActionSelected(CustomAction newAction){
+        targetBtn.setEnabled(true);
+
+        if(selectedAction!=null){
+            if(newAction.getType()!=selectedAction.getType()){
+                //Different types
+                targetDevice = null;
+                targetBtn.setText(getString(R.string.select_target));
+
+                startBtn.setEnabled(false);
+            }
+        }
+
+        selectedAction = newAction;
+        actionBtn.setText(selectedAction.getTitle());
+    }
+    void onTargetSelected(Device newDevice){
+        targetDevice = newDevice;
+
+        targetBtn.setText(targetDevice.toString());
+        startBtn.setEnabled(true);
+    }
+
+    class CustomActionTask extends AsyncTask<Void, String, Boolean>{
+        Shell shell;
         @Override
-        public void run(){
-            start_button.setEnabled(true);
-            start_button.setText(R.string.start);
-            cont = false;
-            progress.setIndeterminate(false);
-            if(shell!=null) shell.done();
-            shell = null;
+        protected void onPreExecute(){
+            actionBtn.setEnabled(false);
+            targetBtn.setEnabled(false);
+            startBtn.setText(R.string.stop);
+            progress.setIndeterminate(true);
+
+            consoleView.append("Running: " + selectedAction.getStartCmd() + '\n');
+            if(debug) Log.d("HIJACKER/CustomCMDFrag", "Running: " + selectedAction.getStartCmd());
         }
-    };
+        @Override
+        protected Boolean doInBackground(Void... params){
+            shell = Shell.getFreeShell();
+
+            //Start the action
+            selectedAction.run(shell, targetDevice);
+
+            //Read output until it's finished or cancelled
+            BufferedReader out = shell.getShell_out();
+            try{
+                String end = "ENDOFCUSTOM";
+                String buffer = out.readLine();
+                while(!end.equals(buffer) && !isCancelled()){
+                    if(currentFragment==FRAGMENT_CUSTOM && !background){
+                        publishProgress(buffer + '\n');
+                    }else{
+                        console_text += buffer + '\n';
+                    }
+                    buffer = out.readLine();
+                }
+                if(debug) Log.d("HIJACKER/CustomCMDFrag", "thread done");
+            }catch(IOException ignored){
+                return false;
+            }
+
+            if(isCancelled()){
+                if(selectedAction.hasProcessName()){
+                    if(debug) Log.d("HIJACKER/CustomCMDFrag", "Killing process named " + selectedAction.getProcessName());
+                    publishProgress("Killing process named " + selectedAction.getProcessName() + '\n');
+
+                    ArrayList<Integer> list = getPIDs(selectedAction.getProcessName());
+                    for(int i=0;i<list.size();i++){
+                        runOne(busybox + " kill " + list.get(i));
+                    }
+                }
+
+                if(selectedAction.hasStopCmd()){
+                    if(debug) Log.d("HIJACKER/CustomCMDFrag", "Running: " + selectedAction.getStopCmd());
+                    publishProgress("Running: " + selectedAction.getStopCmd() + '\n');
+
+                    runOne(selectedAction.getStopCmd());
+                }
+                publishProgress("Interrupted\n");
+            }else{
+                publishProgress("Done\n");
+            }
+
+            if(shell!=null) shell.done();
+
+            return true;
+        }
+        @Override
+        protected void onProgressUpdate(String... str){
+            consoleView.append(str[0]);
+        }
+        @Override
+        protected void onPostExecute(final Boolean success){
+            done();
+        }
+        @Override
+        protected void onCancelled(){
+            done();
+        }
+        void done(){
+            actionBtn.setEnabled(true);
+            targetBtn.setEnabled(true);
+            startBtn.setEnabled(true);
+            startBtn.setText(R.string.start);
+            progress.setIndeterminate(false);
+        }
+    }
 }

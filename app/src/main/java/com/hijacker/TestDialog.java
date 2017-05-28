@@ -40,6 +40,7 @@ import static com.hijacker.MainActivity.PROCESS_MDK;
 import static com.hijacker.MainActivity.PROCESS_REAVER;
 import static com.hijacker.MainActivity.checkChroot;
 import static com.hijacker.MainActivity.iface;
+import static com.hijacker.MainActivity.last_action;
 import static com.hijacker.MainActivity.notif_on;
 import static com.hijacker.MainActivity.prefix;
 import static com.hijacker.MainActivity.airodump_dir;
@@ -63,10 +64,6 @@ public class TestDialog extends DialogFragment {
     final Runnable runnable = new Runnable(){
         @Override
         public void run(){
-            boolean restartWatchdog = ((MainActivity)getActivity()).watchdogTask.isRunning();
-            if(restartWatchdog){
-                ((MainActivity)getActivity()).watchdogTask.cancel(true);
-            }
             final boolean results[] = {false, false, false, false, false};
             final String cmdMonMode = enable_monMode;
             final String cmdAirodump = "su -c " + prefix + " " + airodump_dir + " " + iface;
@@ -78,6 +75,7 @@ public class TestDialog extends DialogFragment {
                 stop(PROCESS_AIREPLAY);
                 stop(PROCESS_MDK);
                 stop(PROCESS_REAVER);
+                last_action = System.currentTimeMillis() + 10000;       //Make watchdog wait until the test is over
 
                 //Enable monitor mode
                 runInHandler(new Runnable(){
@@ -105,6 +103,7 @@ public class TestDialog extends DialogFragment {
                 if(getPIDs(PROCESS_AIRODUMP).size()==0) thread.interrupt();
                 else{
                     stop(PROCESS_AIRODUMP);
+                    last_action = System.currentTimeMillis() + 10000;
                     results[0] = true;
                 }
                 runInHandler(new Runnable(){
@@ -126,6 +125,7 @@ public class TestDialog extends DialogFragment {
                 if(getPIDs(PROCESS_AIREPLAY).size()==0) results[1] = false;
                 else{
                     stop(PROCESS_AIREPLAY);
+                    last_action = System.currentTimeMillis() + 10000;
                     results[1] = true;
                 }
                 runInHandler(new Runnable(){
@@ -147,6 +147,7 @@ public class TestDialog extends DialogFragment {
                 if(getPIDs(PROCESS_MDK).size()==0) results[2] = false;
                 else{
                     stop(PROCESS_MDK);
+                    last_action = System.currentTimeMillis() + 10000;
                     results[2] = true;
                 }
                 runInHandler(new Runnable(){
@@ -168,6 +169,7 @@ public class TestDialog extends DialogFragment {
                 if(getPIDs(PROCESS_REAVER).size()==0) results[3] = false;
                 else{
                     stop(PROCESS_REAVER);
+                    last_action = System.currentTimeMillis() + 10000;
                     results[3] = true;
                 }
                 runInHandler(new Runnable(){
@@ -216,11 +218,6 @@ public class TestDialog extends DialogFragment {
                 stop(PROCESS_AIREPLAY);
                 stop(PROCESS_MDK);
                 stop(PROCESS_REAVER);
-                if(restartWatchdog){
-                    //Restart the watchdog
-                    ((MainActivity)getActivity()).watchdogTask = new WatchdogTask(getActivity());
-                    ((MainActivity)getActivity()).watchdogTask.execute();
-                }
             }
         }
     };

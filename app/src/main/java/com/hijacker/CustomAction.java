@@ -17,6 +17,7 @@ package com.hijacker;
     along with this program.  If not, see <http://www.gnu.org/licenses/>
  */
 
+import android.support.annotation.NonNull;
 import android.util.Log;
 
 import java.io.BufferedReader;
@@ -38,6 +39,7 @@ import static com.hijacker.MainActivity.iface;
 import static com.hijacker.MainActivity.mdk3_dir;
 import static com.hijacker.MainActivity.prefix;
 import static com.hijacker.MainActivity.reaver_dir;
+import static com.hijacker.Shell.runOne;
 
 class CustomAction{
     static final int TYPE_AP=0, TYPE_ST=1;
@@ -69,7 +71,8 @@ class CustomAction{
     void setStopCmd(String stop_cmd){ this.stop_cmd = stop_cmd; }
     void setRequiresClients(boolean requires_clients){ this.requires_clients = requires_clients; }
     void setRequiresConnected(boolean requires_connected){ this.requires_connected = requires_connected; }
-    void run(Shell shell){
+
+    void run(Shell shell, @NonNull Device dev){
         shell.run("export IFACE=\"" + iface + '\"');
         shell.run("export PREFIX=\"" + prefix + '\"');
         shell.run("export AIRODUMP_DIR=\"" + airodump_dir + '\"');
@@ -77,34 +80,20 @@ class CustomAction{
         shell.run("export MDK3_DIR=\"" + mdk3_dir + '\"');
         shell.run("export REAVER_DIR=\"" + reaver_dir + '\"');
         if(type==TYPE_AP){
-            shell.run("export MAC=\"" + CustomActionFragment.ap.mac + '\"');
-            shell.run("export ESSID=\"" + CustomActionFragment.ap.essid + '\"');
-            shell.run("export ENC=\"" + CustomActionFragment.ap.enc + '\"');
-            shell.run("export CIPHER=\"" + CustomActionFragment.ap.cipher + '\"');
-            shell.run("export AUTH=\"" + CustomActionFragment.ap.auth + '\"');
-            shell.run("export CH=\"" + CustomActionFragment.ap.ch + '\"');
+            AP ap = (AP)dev;
+            shell.run("export MAC=\"" + ap + '\"');
+            shell.run("export ESSID=\"" + ap.essid + '\"');
+            shell.run("export ENC=\"" + ap.enc + '\"');
+            shell.run("export CIPHER=\"" + ap.cipher + '\"');
+            shell.run("export AUTH=\"" + ap.auth + '\"');
+            shell.run("export CH=\"" + ap.ch + '\"');
         }else{
-            shell.run("export MAC=\"" + CustomActionFragment.st.mac + '\"');
-            shell.run("export BSSID=\"" + CustomActionFragment.st.bssid + '\"');
+            ST st = (ST)dev;
+            shell.run("export MAC=\"" + st.mac + '\"');
+            shell.run("export BSSID=\"" + st.bssid + '\"');
         }
         shell.run(start_cmd);
         shell.run("echo ENDOFCUSTOM");
-        CustomActionFragment.thread = new Thread(CustomActionFragment.runnable);
-        CustomActionFragment.thread.start();
-    }
-    void stop(){
-        Shell shell = Shell.getFreeShell();     //Can't use the CustomActionFragment.shell as it is used by the action
-        shell.run(stop_cmd);
-        if(has_process_name){
-            ArrayList<Integer> list = getPIDs(process_name);
-            for(int i=0;i<list.size();i++){
-                shell.run(busybox + " kill " + list.get(i));
-            }
-            try{
-                Thread.sleep(100);  //Make sure that the processes have been killed
-            }catch(InterruptedException ignored){}
-        }
-        shell.done();
     }
     static void save(){
         //Save current cmds list to permanent storage

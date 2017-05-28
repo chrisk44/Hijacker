@@ -131,14 +131,14 @@ public class SendLogActivity extends AppCompatActivity{
 
         deviceID = pref.getLong("deviceID", -1);
 
-        new SetupTask().execute();
+        new SetupTask().executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
     }
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String permissions[], @NonNull int[] grantResults){
         boolean writeGranted = grantResults.length>0 && grantResults[0]==PackageManager.PERMISSION_GRANTED;
         internetGranted = grantResults.length>0 && grantResults[1]==PackageManager.PERMISSION_GRANTED;
         if(writeGranted){
-            new ReportTask().execute();
+            new ReportTask().executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
         }else{
             progressBar.setVisibility(View.GONE);
             console.setText(getString(R.string.cant_create_report));
@@ -302,7 +302,7 @@ public class SendLogActivity extends AppCompatActivity{
         pref_edit.putString("user_email", user_email);
         pref_edit.commit();
 
-        new SendReportTask().execute();
+        new SendReportTask().executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
     }
     public void onRestart(View v){
         Intent intent = new Intent(this, MainActivity.class);

@@ -21,6 +21,7 @@ import android.app.FragmentTransaction;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.net.Uri;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Environment;
 import android.os.Looper;
@@ -203,7 +204,7 @@ public class SettingsFragment extends PreferenceFragment {
                 if(watchdog && !running){
                     //Turned off
                     ((MainActivity)getActivity()).watchdogTask = new WatchdogTask(getActivity());
-                    ((MainActivity)getActivity()).watchdogTask.execute();
+                    ((MainActivity)getActivity()).watchdogTask.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
                 }else if(!watchdog && running){
                     //Turned on
                     ((MainActivity)getActivity()).watchdogTask.cancel(true);

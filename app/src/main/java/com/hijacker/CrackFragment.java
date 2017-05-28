@@ -18,6 +18,7 @@ package com.hijacker;
  */
 
 import android.app.Fragment;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Environment;
 import android.support.design.widget.Snackbar;
@@ -59,21 +60,28 @@ public class CrackFragment extends Fragment{
     View fragmentView;
     TextView console;
     EditText capfileView, wordlistView;
-    Button button;
-    static int mode;
-    static Thread thread;
-    static Runnable runnable;
-    static boolean cont=false;
+    RadioGroup wepRG, securityRG;
+    RadioButton wepRB, wpaRB;
+    Button startBtn, capFeBtn, wordlistFeBtn;
+    static CrackTask task;
     static String capfile, wordlist, console_text, capfile_text=null, wordlist_text=null;
     @Override
     public View onCreateView(LayoutInflater inflater, final ViewGroup container, Bundle savedInstanceState){
         fragmentView = inflater.inflate(R.layout.crack_fragment, container, false);
-        console = (TextView)fragmentView.findViewById(R.id.console);
-        console.setText("");
-        console.setMovementMethod(new ScrollingMovementMethod());
 
+        console = (TextView)fragmentView.findViewById(R.id.console);
         capfileView = (EditText)fragmentView.findViewById(R.id.capfile);
         wordlistView = (EditText)fragmentView.findViewById(R.id.wordlist);
+        capFeBtn = (Button)fragmentView.findViewById(R.id.cap_fe_btn);
+        wordlistFeBtn = (Button)fragmentView.findViewById(R.id.wordlist_fe_btn);
+        wepRG = (RadioGroup)fragmentView.findViewById(R.id.wep_rg);
+        securityRG = (RadioGroup)fragmentView.findViewById(R.id.radio_group);
+        wepRB = (RadioButton)fragmentView.findViewById(R.id.wep_rb);
+        wpaRB = (RadioButton)fragmentView.findViewById(R.id.wpa_rb);
+        startBtn = (Button)fragmentView.findViewById(R.id.start);
+
+        console.setText("");
+        console.setMovementMethod(new ScrollingMovementMethod());
 
         capfileView.setOnEditorActionListener(new TextView.OnEditorActionListener(){
             @Override
@@ -86,142 +94,33 @@ public class CrackFragment extends Fragment{
             }
         });
 
-        final RadioGroup wep_rg = (RadioGroup)fragmentView.findViewById(R.id.wep_rg);
-        for (int i = 0; i < wep_rg.getChildCount(); i++) {
+        for (int i = 0; i < wepRG.getChildCount(); i++) {
             //Disable all the WEP options
-            wep_rg.getChildAt(i).setEnabled(false);
+            wepRG.getChildAt(i).setEnabled(false);
         }
 
-        runnable = new Runnable(){
-            @Override
-            public void run(){
-                if(debug) Log.d("HIJACKER/CrackFragment", "in thread");
-                try{
-                    String cmd = "su -c " + aircrack_dir + " " + capfile + " -l " + path + "/aircrack-out.txt -a " + mode;
-                    if(wordlist!=null) cmd += " -w " + wordlist;
-                    if(mode==WEP){
-                        cmd += " -n ";
-                        switch(wep_rg.getCheckedRadioButtonId()){
-                            case R.id.wep_64:
-                                cmd += "64";
-                                break;
-                            case R.id.wep_128:
-                                cmd += "128";
-                                break;
-                            case R.id.wep_152:
-                                cmd += "152";
-                                break;
-                            case R.id.wep_256:
-                                cmd += "256";
-                                break;
-                            case R.id.wep_512:
-                                cmd += "512";
-                                break;
-                        }
-                    }
-                    if(debug) Log.d("HIJACKER/CrackFragment", cmd);
-                    Process dc = Runtime.getRuntime().exec(cmd);
-                    BufferedReader out = new BufferedReader(new InputStreamReader(dc.getInputStream()));
-                    cont = true;
-                    while(cont && out.readLine()!=null){
-                        Thread.sleep(100);
-                    }
-                }catch(IOException | InterruptedException e){ Log.e("HIJACKER/Exception", "Caught Exception in CrackFragment: " + e.toString()); }
+        task = new CrackTask();
 
-                runInHandler(new Runnable(){
-                    @Override
-                    public void run(){
-                        button.setText(R.string.start);
-                        cont = false;
-                        progress.setIndeterminate(false);
-                        stop(PROCESS_AIRCRACK);
-                        if(new File(path + "/aircrack-out.txt").exists()){
-                            Shell shell = Shell.getFreeShell();     //Using root shell because "new File(path + "/aircrack-out.txt");" throws FileNotFoundException (permission denied)
-                            BufferedReader out = shell.getShell_out();
-                            shell.run("cat " + path + "/aircrack-out.txt; echo ");              //No newline at the end of the file, readLine will hang
-                            try{
-                                console.append("Key found: " + out.readLine() + '\n');
-                            }catch(IOException ignored){}
-                            shell.run("rm " + path + "/aircrack-out.txt");
-                            shell.done();
-                        }else{
-                            console.append("Key not found\n");
-                            if(mode==WEP) console.append("Try with different wep bit selection or more IVs\n");
-                        }
-                    }
-                });
-            }
-        };
-        thread = new Thread(runnable);
-
-        ((RadioButton)fragmentView.findViewById(R.id.wep_rb)).setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener(){
+        wepRB.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener(){
             @Override
             public void onCheckedChanged(CompoundButton compoundButton, boolean b){
-                for (int i = 0; i < wep_rg.getChildCount(); i++) {
+                for (int i = 0; i < wepRG.getChildCount(); i++) {
                     //If wep is now checked, enable the wep options, otherwise disable them
-                    wep_rg.getChildAt(i).setEnabled(b);
+                    wepRG.getChildAt(i).setEnabled(b);
                 }
             }
         });
-        button = (Button)fragmentView.findViewById(R.id.start);
-        button.setOnClickListener(new View.OnClickListener(){
+        startBtn.setOnClickListener(new View.OnClickListener(){
             @Override
             public void onClick(View view){
-                capfileView.setError(null);
-                wordlistView.setError(null);
-                capfile = capfileView.getText().toString();
-                wordlist = wordlistView.getText().toString();
-
-                if(!capfile.startsWith("/")){
-                    capfileView.setError(getString(R.string.capfile_invalid));
-                    capfileView.requestFocus();
-                    return;
-                }
-                if(!wordlist.startsWith("/")){
-                    wordlistView.setError(getString(R.string.wordlist_invalid));
-                    wordlistView.requestFocus();
-                    return;
-                }
-                RootFile cap = new RootFile(capfile);
-                RootFile word = new RootFile(wordlist);
-                if(thread.isAlive()){
-                    cont = false;
-                }else if(!cap.exists() || !cap.isFile()){
-                    capfileView.setError(getString(R.string.cap_notfound));
-                    capfileView.requestFocus();
-                }else if(!word.exists() || !word.isFile()){
-                    wordlistView.setError(getString(R.string.wordlist_notfound));
-                    wordlistView.requestFocus();
+                if(!isRunning()){
+                    attemptStart();
                 }else{
-                    RadioGroup temp = (RadioGroup)fragmentView.findViewById(R.id.radio_group);
-                    if(temp.getCheckedRadioButtonId()==-1){
-                        //Mode not selected
-                        Snackbar.make(fragmentView, getString(R.string.select_wpa_wep), Snackbar.LENGTH_SHORT).show();
-                    }else if(temp.getCheckedRadioButtonId()==R.id.wep_rb &&
-                            ((RadioGroup)fragmentView.findViewById(R.id.wep_rg)).getCheckedRadioButtonId()==-1){
-                        //If wep is selected, we need to have a wep bit length selection
-                        Snackbar.make(fragmentView, getString(R.string.select_wep_bits), Snackbar.LENGTH_SHORT).show();
-                    }else{
-                        switch(temp.getCheckedRadioButtonId()){
-                            case R.id.wpa_rb:
-                                //WPA
-                                mode = WPA;
-                                break;
-                            case R.id.wep_rb:
-                                //WEP
-                                mode = WEP;
-                                break;
-                        }
-                        button.setText(R.string.stop);
-                        console.append("\nRunning...\n");
-                        progress.setIndeterminate(true);
-                        thread = new Thread(runnable);
-                        thread.start();
-                    }
+                    task.cancel(true);
                 }
             }
         });
-        fragmentView.findViewById(R.id.cap_fe_btn).setOnClickListener(new View.OnClickListener(){
+        capFeBtn.setOnClickListener(new View.OnClickListener(){
             @Override
             public void onClick(View v){
                 final FileExplorerDialog dialog = new FileExplorerDialog();
@@ -237,7 +136,7 @@ public class CrackFragment extends Fragment{
                 dialog.show(getFragmentManager(), "FileExplorerDialog");
             }
         });
-        fragmentView.findViewById(R.id.wordlist_fe_btn).setOnClickListener(new View.OnClickListener(){
+        wordlistFeBtn.setOnClickListener(new View.OnClickListener(){
             @Override
             public void onClick(View v){
                 final FileExplorerDialog dialog = new FileExplorerDialog();
@@ -261,17 +160,17 @@ public class CrackFragment extends Fragment{
         super.onResume();
         currentFragment = FRAGMENT_CRACK;
         if(capfile_text!=null){
-            ((EditText)fragmentView.findViewById(R.id.capfile)).setText(capfile_text);
+            capfileView.setText(capfile_text);
         }else{
             Shell shell = Shell.getFreeShell();
             shell.run(busybox + " ls -1 " + cap_dir + "/handshake-*.cap; echo ENDOFLS");
             capfile = getLastLine(shell.getShell_out(), "ENDOFLS");
             if(!capfile.equals("ENDOFLS") && capfile.charAt(0)!='l'){
-                ((EditText)fragmentView.findViewById(R.id.capfile)).setText(capfile);
+                capfileView.setText(capfile);
             }
             shell.done();
         }
-        if(wordlist_text!=null) ((EditText)fragmentView.findViewById(R.id.wordlist)).setText(wordlist_text);
+        if(wordlist_text!=null) wordlistView.setText(wordlist_text);
         console.setText(console_text);
         refreshDrawer();
     }
@@ -282,4 +181,154 @@ public class CrackFragment extends Fragment{
         capfile_text = capfileView.getText().toString();
         wordlist_text = wordlistView.getText().toString();
     }
+    static boolean isRunning(){
+        if(task==null) return false;
+        return task.getStatus()==AsyncTask.Status.RUNNING;
+    }
+    static void stopCracking(){
+        //Does NOT completely stop the cracking process, only the app's task
+        //MainActivity.stop(PROCESS_AIRCRACK) should be also called
+        if(task!=null){
+            task.cancel(true);
+        }
+    }
+    void attemptStart(){
+        capfileView.setError(null);
+        wordlistView.setError(null);
+        capfile = capfileView.getText().toString();
+        wordlist = wordlistView.getText().toString();
+
+        if(!capfile.startsWith("/")){
+            capfileView.setError(getString(R.string.capfile_invalid));
+            capfileView.requestFocus();
+            return;
+        }
+        if(!wordlist.startsWith("/")){
+            wordlistView.setError(getString(R.string.wordlist_invalid));
+            wordlistView.requestFocus();
+            return;
+        }
+        RootFile cap = new RootFile(capfile);
+        RootFile word = new RootFile(wordlist);
+        if(!cap.exists() || !cap.isFile()){
+            capfileView.setError(getString(R.string.cap_notfound));
+            capfileView.requestFocus();
+            return;
+        }
+        if(!word.exists() || !word.isFile()){
+            wordlistView.setError(getString(R.string.wordlist_notfound));
+            wordlistView.requestFocus();
+            return;
+        }
+
+        switch(securityRG.getCheckedRadioButtonId()){
+            case -1:
+                //Mode not selected
+                Snackbar.make(fragmentView, getString(R.string.select_wpa_wep), Snackbar.LENGTH_SHORT).show();
+                return;
+            case R.id.wep_rb:
+                if(wepRG.getCheckedRadioButtonId()==-1){
+                    //WEP is selected but we need to have a wep bit length selection
+                    Snackbar.make(fragmentView, getString(R.string.select_wep_bits), Snackbar.LENGTH_SHORT).show();
+                    return;
+                }
+        }
+
+        task = new CrackTask();
+        task.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
+    }
+    class CrackTask extends AsyncTask<Void, String, Boolean>{
+        int mode;
+        String cmd, key;
+        @Override
+        protected void onPreExecute(){
+            progress.setIndeterminate(true);
+            startBtn.setText(R.string.stop);
+            console.append("\nRunning...\n");
+
+            switch(securityRG.getCheckedRadioButtonId()){
+                case R.id.wpa_rb:
+                    //WPA
+                    mode = WPA;
+                    break;
+                case R.id.wep_rb:
+                    //WEP
+                    mode = WEP;
+                    break;
+            }
+            //Create command
+            cmd = "su -c " + aircrack_dir + " " + capfile + " -l " + path + "/aircrack-out.txt -a " + mode;
+            if(wordlist!=null) cmd += " -w " + wordlist;
+            if(mode==WEP){
+                cmd += " -n ";
+                switch(wepRG.getCheckedRadioButtonId()){
+                    case R.id.wep_64:
+                        cmd += "64";
+                        break;
+                    case R.id.wep_128:
+                        cmd += "128";
+                        break;
+                    case R.id.wep_152:
+                        cmd += "152";
+                        break;
+                    case R.id.wep_256:
+                        cmd += "256";
+                        break;
+                    case R.id.wep_512:
+                        cmd += "512";
+                        break;
+                }
+            }
+            if(debug) Log.d("HIJACKER/CrackTask", cmd);
+        }
+        @Override
+        protected Boolean doInBackground(Void... params){
+            try{
+                //Run aircrack and wait to either finish or be cancelled
+                Process dc = Runtime.getRuntime().exec(cmd);
+                BufferedReader out = new BufferedReader(new InputStreamReader(dc.getInputStream()));
+                while(!isCancelled() && out.readLine()!=null){
+                    Thread.sleep(100);
+                }
+            }catch(IOException | InterruptedException e){
+                Log.e("HIJACKER/CrackTask", e.toString());
+                return false;
+            }
+
+            if(new File(path + "/aircrack-out.txt").exists()){
+                Shell shell = Shell.getFreeShell();     //Using root shell because "new File(path + "/aircrack-out.txt");" throws FileNotFoundException (permission denied)
+                BufferedReader out = shell.getShell_out();
+                shell.run("cat " + path + "/aircrack-out.txt; echo ");              //No newline at the end of the file, readLine will hang
+                try{
+                    key = out.readLine();
+                }catch(IOException ignored){}
+                shell.run("rm " + path + "/aircrack-out.txt");
+                shell.done();
+                return true;
+            }
+
+            return false;
+        }
+        @Override
+        protected void onPostExecute(final Boolean success){
+            done();
+            if(success){
+                console.append("Key found: " + key + '\n');
+            }else{
+                console.append("Key not found\n");
+                if(mode==WEP) console.append("Try with different wep bit selection or more IVs\n");
+            }
+        }
+        @Override
+        protected void onCancelled(){
+            done();
+            console.append("Interrupted\n");
+            stop(PROCESS_AIRCRACK);
+        }
+        void done(){
+            startBtn.setText(R.string.start);
+            progress.setIndeterminate(false);
+        }
+    }
 }
+
