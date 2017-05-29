@@ -38,7 +38,17 @@ Root is also necessary, as these tools need root to work.
 * Export all the gathered information to a file
 * Add an alias to a device (by MAC) for easier identification
 
-[Screenshots](https://github.com/chrisk44/Hijacker/tree/master/screenshots)
+### Screenshots
+
+<img alt="Airodump View" src="screenshots/airodump_view.png" width="350">
+<img alt="Cap Crack View" src="screenshots/cap_crack_view.png" width="350">
+<img alt="Custom Action View" src="screenshots/custom_action_view.png" width="350">
+<img alt="MDK View" src="screenshots/mdk_view.png" width="350">
+<img alt="Reaver View" src="screenshots/reaver_view.png" width="350">
+<img alt="Filters" src="screenshots/filters.png" width="350">
+<img alt="Notification" src="screenshots/notification.png" width="350">
+<img alt="Settings - Page 1" src="screenshots/settings1.png" width="350">
+<img alt="Settings - Page 2" src="screenshots/settings2.png" width="350">
 
 ## Installation
 Make sure:
