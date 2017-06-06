@@ -1,6 +1,6 @@
 # Hijacker
 
-Hijacker is a Graphical User Interface for the Aircrack-ng suite, MDK3 and Reaver. It offers a simple and easy UI to use these tools without typing commands in a console and copy&pasting MAC addresses.
+Hijacker is a Graphical User Interface for the penetration testing tools Aircrack-ng, Airodump-ng, MDK3 and Reaver. It offers a simple and easy UI to use these tools without typing commands in a console and copy&pasting MAC addresses.
 
 This application requires an ARM android device with a wireless adapter that supports **Monitor Mode**. A few android devices do, but none of them natively. This means that you will need a custom firmware. Nexus 5 and any other device that uses the BCM4339 chipset (MSM8974, such as Xperia Z2, LG G2 etc) will work with [Nexmon](https://github.com/seemoo-lab/nexmon) (it also supports some other chipsets). Devices that use BCM4330 can use [bcmon](http://bcmon.blogspot.gr/).
 An alternative would be to use an external adapter that supports monitor mode in Android with an OTG cable.
