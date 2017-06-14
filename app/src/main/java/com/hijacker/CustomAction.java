@@ -31,15 +31,12 @@ import java.util.List;
 import static com.hijacker.MainActivity.actions_path;
 import static com.hijacker.MainActivity.aireplay_dir;
 import static com.hijacker.MainActivity.airodump_dir;
-import static com.hijacker.MainActivity.busybox;
 import static com.hijacker.MainActivity.debug;
 import static com.hijacker.MainActivity.mFragmentManager;
-import static com.hijacker.MainActivity.getPIDs;
 import static com.hijacker.MainActivity.iface;
 import static com.hijacker.MainActivity.mdk3_dir;
 import static com.hijacker.MainActivity.prefix;
 import static com.hijacker.MainActivity.reaver_dir;
-import static com.hijacker.Shell.runOne;
 
 class CustomAction{
     static final int TYPE_AP=0, TYPE_ST=1;
@@ -130,12 +127,9 @@ class CustomAction{
         File actions[] = folder.listFiles();
         if(actions!=null){
             if(debug) Log.d("HIJACKER/CustomAction", "Reading custom actions...");
-            FileReader reader0;
-            BufferedReader reader;
             for(File file : actions){
                 try{
-                    reader0 = new FileReader(file);
-                    reader = new BufferedReader(reader0);
+                    BufferedReader reader = new BufferedReader(new FileReader(file));
                     String title = reader.readLine();
                     String start_cmd = reader.readLine();
                     String stop_cmd = reader.readLine();
@@ -150,7 +144,6 @@ class CustomAction{
                         action.setRequiresConnected(requirement);
                     }
                     reader.close();
-                    reader0.close();
                 }catch(IOException e){
                     Log.e("HIJACKER/CustomAction", "In load(): " + e.toString());
                 }

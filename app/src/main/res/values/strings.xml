@@ -23,13 +23,7 @@
     <string name="clear">Clear</string>
     <string name="settings">Settings</string>
     <string name="select">Select</string>
-    <string name="send">Send</string>
     <string name="download">Download</string>
-    <!-- Server Connection -->
-    <string name="no_internet">No internet connection</string>
-    <string name="server_error">An error occurred while connecting to server</string>
-    <string name="server_denied">Server denied the request</string>
-    <string name="connection_closed">Connection closed unexpectedly</string>
     <string name="unknown_error">An unknown error occurred</string>
 
     <!-- APDialog (xml) -->
@@ -124,7 +118,7 @@
     <!-- FeedbackDialog -->
     <string name="feedback">Feedback</string>
     <string name="include_report">Include a report</string>
-    <string name="send_email">Send email</string>
+    <string name="send_email">Send via email</string>
 
     <!-- FileExplorerDialog -->
     <string name="folder_name">Folder name</string>
@@ -237,7 +231,6 @@
     <string name="custom_ap_title">Custom AP</string>
     <string name="mac_address">MAC Address</string>
     <string name="ssid_file_optional">SSID file (optional)</string>
-    <string name="optional">(Optional)</string>
 
     <!-- MyListFragment -->
     <string name="set_alias">Set alias</string>
@@ -265,14 +258,10 @@
     <!-- SendLogActivity -->
     <string name="unexpected_error_title">Unexpected Error</string>
     <string name="unexpected_error_message">An unexpected error has occurred. A bug report has been generated in your external storage directory.</string>
-    <string name="send_report">Send report</string>
     <string name="restart_hijacker">Restart</string>
-    <string name="use_email">Use email</string>
-    <string name="extra">Extra</string>
-    <string name="email_optional">Email (optional)</string>
     <string name="cant_create_report">Can\'t create report (external storage write access denied)</string>
     <string name="report_not_created">Report was not created</string>
-    <string name="no_internet_permission">No internet access permission</string>
+    <string name="prompt_additional_details">Add some details about the error, such as what exactly you where doing when the app crashed.</string>
 
     <!-- ST -->
     <string name="paired">Paired:</string>
@@ -372,7 +361,7 @@
     <string name="mm2_sum">Command to disable monitor mode (leave blank if none)</string>
     <string name="mm2_desc">Command to disable monitor mode specific to your interface. Will be run AS ROOT when the app is being killed.</string>
 
-    <string name="enable_on_airodump_title">Enable on Airodump</string>
+    <string name="enable_on_airodump_title">Enable on Airodump start</string>
     <string name="enable_on_airodump_sum">Run the "Enable Monitor Mode" command when starting airodump</string>
 
     <!-- Tools -->

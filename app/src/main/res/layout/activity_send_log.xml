@@ -1,7 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout
+<RelativeLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/activity_send_log"
     android:layout_width="match_parent"
@@ -10,8 +9,7 @@
     android:paddingLeft="@dimen/activity_horizontal_margin"
     android:paddingRight="@dimen/activity_horizontal_margin"
     android:paddingTop="@dimen/activity_vertical_margin"
-    tools:context="com.hijacker.SendLogActivity"
-    android:orientation="vertical">
+    tools:context="com.hijacker.SendLogActivity">
 
     <TextView
         android:text="@string/unexpected_error_title"
@@ -23,60 +21,19 @@
         android:paddingBottom="10dp"/>
 
     <TextView
-        android:text="@string/unexpected_error_message"
+        android:id="@+id/textView2"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:id="@+id/textView2"/>
-
-    <android.support.design.widget.TextInputLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content">
-
-        <EditText
-            android:id="@+id/email_et"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:hint="@string/email_optional"
-            android:imeOptions="actionNext"
-            android:inputType="textEmailAddress"
-            android:maxLines="1"/>
-
-    </android.support.design.widget.TextInputLayout>
-
-    <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:gravity="center_vertical"
-        android:hint="@string/optional"
-        android:labelFor="@+id/extra_et"
-        android:text="@string/extra"
-        android:textColor="?android:attr/textColorPrimary"
-        android:textSize="18sp"/>
-
-    <EditText
-        android:id="@+id/extra_et"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginBottom="8dp"
-        android:ems="10"
-        android:inputType="textMultiLine"
-        android:lines="2"
-        android:maxLines="2"/>
-
-    <ProgressBar
-        android:id="@+id/reportProgressBar"
-        style="?android:attr/progressBarStyle"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:background="@color/colorPrimary"
-        android:padding="5dp"
-        android:visibility="visible"/>
+        android:layout_below="@+id/textView"
+        android:text="@string/unexpected_error_message" />
 
     <TextView
         android:id="@+id/console"
         android:layout_width="match_parent"
         android:layout_height="0dp"
-        android:layout_weight="1"
+        android:layout_above="@+id/sendEmailBtn"
+        android:layout_below="@+id/textView2"
+        android:layout_marginTop="8dp"
         android:background="@color/colorPrimary"
         android:nestedScrollingEnabled="true"
         android:padding="3dp"
@@ -86,62 +43,36 @@
         android:scrollbarAlwaysDrawVerticalTrack="true"
         android:scrollbars="vertical"
         android:textColor="?android:attr/textColorPrimary"
-        android:textSize="10sp"/>
+        android:textSize="10sp" />
 
-    <LinearLayout
-        android:orientation="horizontal"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content">
+    <ProgressBar
+        android:id="@+id/reportProgressBar"
+        style="?android:attr/progressBarStyle"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_centerInParent="true"
+        android:padding="5dp"
+        android:visibility="visible" />
 
-        <Button
-            style="?android:attr/buttonBarButtonStyle"
-            android:text="@string/restart_hijacker"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:id="@+id/restart"
-            android:onClick="onRestart"/>
+    <Button
+        android:id="@+id/restart"
+        style="?android:attr/buttonBarButtonStyle"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:layout_alignParentStart="true"
+        android:onClick="onRestart"
+        android:text="@string/restart_hijacker" />
 
-        <Button
-            android:id="@+id/sendEmailBtn"
-            style="?android:attr/buttonBarButtonStyle"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:enabled="false"
-            android:onClick="onUseEmail"
-            android:text="@string/use_email"/>
+    <Button
+        android:id="@+id/sendEmailBtn"
+        style="?android:attr/buttonBarButtonStyle"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:layout_alignParentEnd="true"
+        android:enabled="false"
+        android:onClick="onUseEmail"
+        android:text="@string/send_email" />
 
-        <FrameLayout
-            android:id="@+id/send_frame"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent">
-
-            <ProgressBar
-                android:id="@+id/progress"
-                style="?android:attr/progressBarStyle"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:indeterminate="true"
-                android:visibility="gone"/>
-
-            <ImageView
-                android:id="@+id/completed"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:padding="5dp"
-                android:visibility="gone"
-                app:srcCompat="@drawable/done_drawable"/>
-
-            <Button
-                android:id="@+id/sendBtn"
-                style="?android:attr/buttonBarButtonStyle"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:enabled="false"
-                android:onClick="onSend"
-                android:text="@string/send_report"
-                android:visibility="visible"/>
-        </FrameLayout>
-
-    </LinearLayout>
-
-</LinearLayout>
+</RelativeLayout>

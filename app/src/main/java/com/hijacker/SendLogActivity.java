@@ -20,15 +20,12 @@ package com.hijacker;
 
 import android.Manifest;
 import android.content.Intent;
-import android.content.SharedPreferences;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Environment;
-import android.os.Handler;
-import android.preference.PreferenceManager;
 import android.support.annotation.NonNull;
 import android.support.design.widget.Snackbar;
 import android.support.v4.app.ActivityCompat;
@@ -37,11 +34,8 @@ import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.text.method.ScrollingMovementMethod;
 import android.util.Log;
-import android.view.KeyEvent;
 import android.view.View;
 import android.view.Window;
-import android.view.inputmethod.EditorInfo;
-import android.widget.EditText;
 import android.widget.TextView;
 
 import java.io.BufferedReader;
@@ -50,35 +44,24 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
-import java.net.Socket;
 import java.util.ArrayList;
 
-import static com.hijacker.MainActivity.ANS_POSITIVE;
-import static com.hijacker.MainActivity.REQ_EXIT;
-import static com.hijacker.MainActivity.REQ_REPORT;
-import static com.hijacker.MainActivity.connect;
 import static com.hijacker.MainActivity.createReport;
-import static com.hijacker.MainActivity.deviceID;
 import static com.hijacker.MainActivity.deviceModel;
-import static com.hijacker.MainActivity.internetAvailable;
 import static com.hijacker.MainActivity.versionCode;
 import static com.hijacker.MainActivity.versionName;
 
 public class SendLogActivity extends AppCompatActivity{
     static String busybox;
     View rootView;
-    View sendProgress, sendCompleted, sendBtn, sendEmailBtn, progressBar;
+    View sendEmailBtn, progressBar;
     TextView console;
-    EditText userEmailView, extraView;
 
     File report;
-    String stackTrace, user_email = null;
-    boolean internetGranted = false;
+    String stackTrace;
     Process shell;
     PrintWriter shell_in;
     BufferedReader shell_out;
-    SharedPreferences pref;
-    SharedPreferences.Editor pref_edit;
     @Override
     protected void onCreate(Bundle savedInstanceState){
         super.onCreate(savedInstanceState);
@@ -87,33 +70,13 @@ public class SendLogActivity extends AppCompatActivity{
         setContentView(R.layout.activity_send_log);
 
         rootView = findViewById(R.id.activity_send_log);
-        userEmailView = (EditText)findViewById(R.id.email_et);
-        extraView = (EditText)findViewById(R.id.extra_et);
         progressBar = findViewById(R.id.reportProgressBar);
         console = (TextView)findViewById(R.id.console);
-        sendProgress = findViewById(R.id.progress);
-        sendCompleted = findViewById(R.id.completed);
-        sendBtn = findViewById(R.id.sendBtn);
         sendEmailBtn = findViewById(R.id.sendEmailBtn);
-
-        userEmailView.setOnEditorActionListener(new TextView.OnEditorActionListener(){
-            @Override
-            public boolean onEditorAction(TextView v, int actionId, KeyEvent event){
-                if(actionId == EditorInfo.IME_ACTION_NEXT){
-                    extraView.requestFocus();
-                    return true;
-                }
-                return false;
-            }
-        });
 
         busybox = getFilesDir().getAbsolutePath() + "/bin/busybox";
         stackTrace = getIntent().getStringExtra("exception");
         Log.e("HIJACKER/SendLog", stackTrace);
-
-        pref = PreferenceManager.getDefaultSharedPreferences(SendLogActivity.this);
-        pref_edit = pref.edit();
-        userEmailView.setText(pref.getString("user_email", ""));
 
         //Load device info
         PackageManager manager = getPackageManager();
@@ -129,14 +92,11 @@ public class SendLogActivity extends AppCompatActivity{
         if(!deviceModel.startsWith(Build.MANUFACTURER)) deviceModel = Build.MANUFACTURER + " " + deviceModel;
         deviceModel = deviceModel.replace(" ", "_");
 
-        deviceID = pref.getLong("deviceID", -1);
-
         new SetupTask().executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
     }
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String permissions[], @NonNull int[] grantResults){
         boolean writeGranted = grantResults.length>0 && grantResults[0]==PackageManager.PERMISSION_GRANTED;
-        internetGranted = grantResults.length>0 && grantResults[1]==PackageManager.PERMISSION_GRANTED;
         if(writeGranted){
             new ReportTask().executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
         }else{
@@ -193,97 +153,9 @@ public class SendLogActivity extends AppCompatActivity{
                     if(i==limit) console.append("...");
                 }catch(IOException ignored){}
 
-                sendBtn.setEnabled(true);
                 sendEmailBtn.setEnabled(true);
             }else{
                 console.setText(getString(R.string.report_not_created));
-            }
-        }
-    }
-    private class SendReportTask extends AsyncTask<Void, String, Boolean>{
-        String extraDetails;
-        @Override
-        protected void onPreExecute(){
-            sendBtn.setVisibility(View.GONE);
-            sendProgress.setVisibility(View.VISIBLE);
-
-            extraDetails = extraView.getText().toString();
-        }
-        @Override
-        protected Boolean doInBackground(Void... params){
-            if(!report.exists()){
-                Log.d("HIJACKER/SendReportTask", "report doesn't exist");
-                publishProgress(getString(R.string.report_not_created));
-                return false;
-            }
-            if(!internetGranted){
-                Log.d("HIJACKER/SendReportTask", "No internet permission");
-                publishProgress(getString(R.string.no_internet_permission));
-                return false;
-            }
-            if(!internetAvailable(SendLogActivity.this)){
-                Log.d("HIJACKER/SendReportTask", "No internet connection");
-                publishProgress(getString(R.string.no_internet));
-                return false;
-            }
-
-            Socket socket = connect();
-            if(socket==null){
-                publishProgress(getString(R.string.server_error));
-                return false;
-            }
-            try{
-                BufferedReader socketOut = new BufferedReader(new InputStreamReader(socket.getInputStream()));
-                PrintWriter socketIn = new PrintWriter(socket.getOutputStream());
-                socketIn.print(REQ_REPORT + '\n');
-                socketIn.flush();
-
-                String temp = socketOut.readLine();
-                if(temp!=null){
-                    if(!temp.equals(ANS_POSITIVE)){
-                        publishProgress(getString(R.string.server_denied));
-                        return false;
-                    }
-                }else{
-                    publishProgress(getString(R.string.connection_closed));
-                    return false;
-                }
-
-                BufferedReader fileReader = new BufferedReader(new FileReader(report));
-
-                socketIn.print("User email: " + user_email + '\n');
-                socketIn.print("Extra details: " + extraDetails);
-                socketIn.flush();
-                String buffer = fileReader.readLine();
-                while(buffer!=null){
-                    socketIn.print(buffer + '\n');
-                    socketIn.flush();
-                    buffer = fileReader.readLine();
-                }
-                socketIn.print("EOF\n");
-                socketIn.print(REQ_EXIT + '\n');
-                socketIn.flush();
-
-                socketIn.close();
-                socketOut.close();
-                socket.close();
-            }catch(IOException e){
-                Log.e("HIJACKER/SendReportTask", e.toString());
-                publishProgress(getString(R.string.unknown_error));
-            }
-            return true;
-        }
-        @Override
-        protected void onProgressUpdate(String... message){
-            Snackbar.make(rootView, message[0], Snackbar.LENGTH_SHORT).show();
-        }
-        @Override
-        protected void onPostExecute(final Boolean success){
-            sendProgress.setVisibility(View.GONE);
-            if(success){
-                sendCompleted.setVisibility(View.VISIBLE);
-            }else{
-                sendBtn.setVisibility(View.VISIBLE);
             }
         }
     }
@@ -294,15 +166,8 @@ public class SendLogActivity extends AppCompatActivity{
         intent.putExtra(Intent.EXTRA_SUBJECT, "Hijacker bug report");
         Uri attachment = FileProvider.getUriForFile(this, BuildConfig.APPLICATION_ID + ".provider", report);
         intent.putExtra(Intent.EXTRA_STREAM, attachment);
-        intent.putExtra(Intent.EXTRA_TEXT, extraView.getText().toString());
+        intent.putExtra(Intent.EXTRA_TEXT, getString(R.string.prompt_additional_details));
         startActivity(intent);
-    }
-    public void onSend(View v){
-        user_email = userEmailView.getText().toString();
-        pref_edit.putString("user_email", user_email);
-        pref_edit.commit();
-
-        new SendReportTask().executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
     }
     public void onRestart(View v){
         Intent intent = new Intent(this, MainActivity.class);
@@ -352,5 +217,4 @@ public class SendLogActivity extends AppCompatActivity{
             }
         }
     }
-    static Handler handler = new Handler();
 }

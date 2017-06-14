@@ -27,21 +27,6 @@
         android:paddingEnd="10dp"
         android:paddingStart="10dp">
 
-        <android.support.design.widget.TextInputLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content">
-
-            <EditText
-                android:id="@+id/email_et"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:hint="@string/email_optional"
-                android:imeOptions="actionNext"
-                android:inputType="textEmailAddress"
-                android:maxLines="1"/>
-
-        </android.support.design.widget.TextInputLayout>
-
         <CheckBox
             android:id="@+id/include_report"
             android:layout_width="match_parent"

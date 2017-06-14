@@ -52,7 +52,6 @@ import static com.hijacker.MainActivity.getLastLine;
 import static com.hijacker.MainActivity.path;
 import static com.hijacker.MainActivity.progress;
 import static com.hijacker.MainActivity.refreshDrawer;
-import static com.hijacker.MainActivity.runInHandler;
 import static com.hijacker.MainActivity.stop;
 
 public class CrackFragment extends Fragment{
