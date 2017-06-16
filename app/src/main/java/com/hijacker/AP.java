@@ -35,9 +35,9 @@ import java.util.ArrayList;
 import java.util.HashMap;
 
 import static com.hijacker.IsolatedFragment.is_ap;
-import static com.hijacker.MainActivity.MDK_ADOS;
 import static com.hijacker.MainActivity.PROCESS_AIREPLAY;
 import static com.hijacker.MainActivity.PROCESS_AIRODUMP;
+import static com.hijacker.MainActivity.PROCESS_MDK_DOS;
 import static com.hijacker.MainActivity.SORT_BEACONS_FRAMES;
 import static com.hijacker.MainActivity.SORT_DATA_FRAMES;
 import static com.hijacker.MainActivity.SORT_ESSID;
@@ -63,7 +63,6 @@ import static com.hijacker.MainActivity.runInHandler;
 import static com.hijacker.MainActivity.sort;
 import static com.hijacker.MainActivity.startAireplay;
 import static com.hijacker.MainActivity.startAireplayWEP;
-import static com.hijacker.MainActivity.startMdk;
 import static com.hijacker.MainActivity.stop;
 import static com.hijacker.MainActivity.stopWPA;
 import static com.hijacker.MainActivity.target_deauth;
@@ -402,7 +401,15 @@ class AP extends Device{
                                         break;
                                     case 3:
                                         //DoS
-                                        startMdk(MDK_ADOS, AP.this.mac);
+                                        stop(PROCESS_MDK_DOS);
+                                        MDKFragment.ados_ap = AP.this;
+                                        FragmentTransaction ft = mFragmentManager.beginTransaction();
+                                        ft.replace(R.id.fragment1, new MDKFragment());
+                                        ft.setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN);
+                                        ft.addToBackStack(null);
+                                        ft.commitAllowingStateLoss();
+                                        mFragmentManager.executePendingTransactions();
+                                        MDKFragment.ados_switch.setChecked(true);
                                         break;
                                     case 4:
                                         //Crack

@@ -22,7 +22,8 @@ import android.content.Context;
 import android.content.Intent;
 
 import static com.hijacker.MainActivity.PROCESS_AIREPLAY;
-import static com.hijacker.MainActivity.PROCESS_MDK;
+import static com.hijacker.MainActivity.PROCESS_MDK_BF;
+import static com.hijacker.MainActivity.PROCESS_MDK_DOS;
 import static com.hijacker.MainActivity.PROCESS_REAVER;
 import static com.hijacker.MainActivity.stop;
 
@@ -30,7 +31,8 @@ public class StopReceiver extends BroadcastReceiver {
     @Override
     public void onReceive(Context context, Intent intent) {
         stop(PROCESS_AIREPLAY);
-        stop(PROCESS_MDK);
+        stop(PROCESS_MDK_BF);
+        stop(PROCESS_MDK_DOS);
         stop(PROCESS_REAVER);
     }
 }

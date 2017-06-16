@@ -36,16 +36,17 @@ import static com.hijacker.MainActivity.CHROOT_DIR_MISSING;
 import static com.hijacker.MainActivity.CHROOT_FOUND;
 import static com.hijacker.MainActivity.PROCESS_AIREPLAY;
 import static com.hijacker.MainActivity.PROCESS_AIRODUMP;
-import static com.hijacker.MainActivity.PROCESS_MDK;
+import static com.hijacker.MainActivity.PROCESS_MDK_BF;
+import static com.hijacker.MainActivity.PROCESS_MDK_DOS;
 import static com.hijacker.MainActivity.PROCESS_REAVER;
 import static com.hijacker.MainActivity.checkChroot;
 import static com.hijacker.MainActivity.iface;
 import static com.hijacker.MainActivity.last_action;
+import static com.hijacker.MainActivity.mdk3bf_dir;
 import static com.hijacker.MainActivity.notif_on;
 import static com.hijacker.MainActivity.prefix;
 import static com.hijacker.MainActivity.airodump_dir;
 import static com.hijacker.MainActivity.aireplay_dir;
-import static com.hijacker.MainActivity.mdk3_dir;
 import static com.hijacker.MainActivity.reaver_dir;
 import static com.hijacker.MainActivity.enable_monMode;
 import static com.hijacker.MainActivity.getPIDs;
@@ -68,12 +69,13 @@ public class TestDialog extends DialogFragment {
             final String cmdMonMode = enable_monMode;
             final String cmdAirodump = "su -c " + prefix + " " + airodump_dir + " " + iface;
             final String cmdAireplay = "su -c " + prefix + " " + aireplay_dir + " --deauth 0 -a 11:22:33:44:55:66 " + iface;
-            final String cmdMdk = "su -c " + prefix + " " + mdk3_dir + " " + iface + " b -m";
+            final String cmdMdk = "su -c " + prefix + " " + mdk3bf_dir + " " + iface + " b -m";
             final String cmdReaver = "su -c " + prefix + " " + reaver_dir + " -i " + iface + " -b 00:11:22:33:44:55 -c 2";
             try{
                 stop(PROCESS_AIRODUMP);
                 stop(PROCESS_AIREPLAY);
-                stop(PROCESS_MDK);
+                stop(PROCESS_MDK_BF);
+                stop(PROCESS_MDK_DOS);
                 stop(PROCESS_REAVER);
                 last_action = System.currentTimeMillis() + 10000;       //Make watchdog wait until the test is over
 
@@ -144,9 +146,9 @@ public class TestDialog extends DialogFragment {
                 Runtime.getRuntime().exec(cmdMdk);
                 Thread.sleep(TEST_WAIT);
 
-                if(getPIDs(PROCESS_MDK).size()==0) results[2] = false;
+                if(getPIDs(PROCESS_MDK_BF).size()==0) results[2] = false;
                 else{
-                    stop(PROCESS_MDK);
+                    stop(PROCESS_MDK_BF);
                     last_action = System.currentTimeMillis() + 10000;
                     results[2] = true;
                 }
@@ -216,7 +218,7 @@ public class TestDialog extends DialogFragment {
             }finally{
                 stop(PROCESS_AIRODUMP);
                 stop(PROCESS_AIREPLAY);
-                stop(PROCESS_MDK);
+                stop(PROCESS_MDK_BF);
                 stop(PROCESS_REAVER);
             }
         }

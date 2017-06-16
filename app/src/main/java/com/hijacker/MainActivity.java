@@ -90,9 +90,7 @@ import static com.hijacker.CustomAction.TYPE_ST;
 import static com.hijacker.Device.trimMac;
 import static com.hijacker.IsolatedFragment.is_ap;
 import static com.hijacker.MDKFragment.ados;
-import static com.hijacker.MDKFragment.ados_pid;
 import static com.hijacker.MDKFragment.bf;
-import static com.hijacker.MDKFragment.bf_pid;
 import static com.hijacker.Shell.getFreeShell;
 import static com.hijacker.Shell.runOne;
 
@@ -102,8 +100,7 @@ public class MainActivity extends AppCompatActivity{
     static final int AIREPLAY_DEAUTH = 1, AIREPLAY_WEP = 2;
     static final int FRAGMENT_AIRODUMP = 0, FRAGMENT_MDK = 1, FRAGMENT_CRACK = 2,
             FRAGMENT_REAVER = 3, FRAGMENT_CUSTOM=4, FRAGMENT_SETTINGS = 5;                     //These need to correspond to the items in the drawer
-    static final int PROCESS_AIRODUMP=0, PROCESS_AIREPLAY=1, PROCESS_MDK=2, PROCESS_AIRCRACK=3, PROCESS_REAVER=4;
-    static final int MDK_BF=0, MDK_ADOS=1;
+    static final int PROCESS_AIRODUMP=0, PROCESS_AIREPLAY=1, PROCESS_MDK_BF=2, PROCESS_MDK_DOS=3, PROCESS_AIRCRACK=4, PROCESS_REAVER=5;
     static final int SORT_NOSORT = 0, SORT_ESSID = 1, SORT_BEACONS_FRAMES = 2, SORT_DATA_FRAMES = 3, SORT_PWR = 4;
     static final int CHROOT_FOUND = 0, CHROOT_BIN_MISSING = 1, CHROOT_DIR_MISSING = 2, CHROOT_BOTH_MISSING = 3;
     //State variables
@@ -155,7 +152,7 @@ public class MainActivity extends AppCompatActivity{
     static ActionBar actionBar;
     static String bootkali_init_bin = "bootkali_init";
     //Preferences - Defaults are in strings.xml
-    static String iface, prefix, airodump_dir, aireplay_dir, aircrack_dir, mdk3_dir, reaver_dir, cap_dir, chroot_dir,
+    static String iface, prefix, airodump_dir, aireplay_dir, aircrack_dir, mdk3bf_dir, mdk3dos_dir, reaver_dir, cap_dir, chroot_dir,
             enable_monMode, disable_monMode, custom_chroot_cmd;
     static int deauthWait;
     static boolean show_notif, show_details, airOnStartup, debug, delete_extra,
@@ -411,6 +408,8 @@ public class MainActivity extends AppCompatActivity{
                     extract("wpaclean", tools_location, true);
                     extract("libfakeioctl.so", lib_location, true);
 
+                    runOne("cd " + path + "/bin; mv mdk3 mdk3bf; cp mdk3bf mdk3dos");
+
                     if(info!=null){
                         pref_edit.putInt("tools_version", info.versionCode);
                         pref_edit.apply();
@@ -422,7 +421,8 @@ public class MainActivity extends AppCompatActivity{
                 airodump_dir = path + "/bin/airodump-ng";
                 aireplay_dir = path + "/bin/aireplay-ng";
                 aircrack_dir = path + "/bin/aircrack-ng";
-                mdk3_dir = path + "/bin/mdk3";
+                mdk3bf_dir = path + "/bin/mdk3bf";
+                mdk3dos_dir = path + "/bin/mdk3dos";
                 reaver_dir = path + "/bin/reaver";
             }else{
                 Log.e("HIJACKER/onCreate", "Device not armv7l or aarch64, can't install tools");
@@ -433,7 +433,8 @@ public class MainActivity extends AppCompatActivity{
                 airodump_dir = "airodump-ng";
                 aireplay_dir = "aireplay-ng";
                 aircrack_dir = "aircrack-ng";
-                mdk3_dir = "mdk3";
+                mdk3bf_dir = "mdk3";
+                mdk3dos_dir = "mdk3";
                 reaver_dir = "reaver";
             }
 
@@ -790,7 +791,8 @@ public class MainActivity extends AppCompatActivity{
 
         stop(PROCESS_AIRODUMP);
         stop(PROCESS_AIREPLAY);
-        stop(PROCESS_MDK);
+        stop(PROCESS_MDK_BF);
+        stop(PROCESS_MDK_DOS);
         stop(PROCESS_AIRCRACK);
         stop(PROCESS_REAVER);
         if(airOnStartup) Airodump.startClean();
@@ -830,52 +832,35 @@ public class MainActivity extends AppCompatActivity{
         //_startAireplay("--caffe-latte -b " + ap.mac);     //don't know where
     }
 
-    public static void startMdk(int mode, String str){
-        ArrayList<Integer> ps_before = getPIDs(PROCESS_MDK);
-        switch(mode){
-            case MDK_BF:
-                //beacon flood mode
-                try{
-                    String cmd = "su -c " + prefix + " " + mdk3_dir + " " + iface + " b -m ";
-                    if(str!=null) cmd += str;
-                    if(debug) Log.d("HIJACKER/MDK3", cmd);
-                    Runtime.getRuntime().exec(cmd);
-                    last_action = System.currentTimeMillis();
-                    Thread.sleep(500);
-                }catch(IOException | InterruptedException e){ Log.e("HIJACKER/Exception", "Caught Exception in startMdk(MDK_BF) start block: " + e.toString()); }
-                bf = true;
-                break;
-            case MDK_ADOS:
-                //Authentication DoS mode
-                try{
-                    String cmd = "su -c " + prefix + " " + mdk3_dir + " " + iface + " a -m";
-                    cmd += str==null ? "" : " -i " + str;
-                    if(debug) Log.d("HIJACKER/MDK3", cmd);
-                    Runtime.getRuntime().exec(cmd);
-                    last_action = System.currentTimeMillis();
-                    Thread.sleep(500);
-                }catch(IOException | InterruptedException e){ Log.e("HIJACKER/Exception", "Caught Exception in startMdk(MDK_ADOS) start block: " + e.toString()); }
-                ados = true;
-                break;
-        }
-        ArrayList<Integer> ps_after = getPIDs(PROCESS_MDK);
-        int pid=0;
-        if(ps_before.size()!=ps_after.size()){
-            for(int i=0;i<ps_before.size();i++){
-                if(!ps_before.get(i).equals(ps_after.get(i))){
-                    pid = ps_after.get(i);
-                }
+    //There are 2 mdk3 binaries with different names, so the app can stop each one separately
+    public static void startBeaconFlooding(String str){
+        try{
+            String cmd = "su -c " + prefix + " " + mdk3bf_dir + " " + iface + " b -m ";
+            if(str!=null) cmd += str;
+            if(debug) Log.d("HIJACKER/MDK3", cmd);
+            Runtime.getRuntime().exec(cmd);
+        }catch(IOException e){ Log.e("HIJACKER/startBF", e.toString()); }
+        last_action = System.currentTimeMillis();
+        bf = true;
+
+        runInHandler(new Runnable(){
+            @Override
+            public void run(){
+                refreshState();
+                notification();
             }
-            if(pid==0) pid = ps_after.get(ps_after.size()-1);
-        }
-        switch(mode){
-            case MDK_BF:
-                bf_pid = pid;
-                break;
-            case MDK_ADOS:
-                ados_pid = pid;
-                break;
-        }
+        });
+    }
+    public static void startAdos(String str){
+        try{
+            String cmd = "su -c " + prefix + " " + mdk3dos_dir + " " + iface + " a -m";
+            cmd += str==null ? "" : " -i " + str;
+            if(debug) Log.d("HIJACKER/MDK3", cmd);
+            Runtime.getRuntime().exec(cmd);
+        }catch(IOException e){ Log.e("HIJACKER/startAdos", e.toString()); }
+        last_action = System.currentTimeMillis();
+        ados = true;
+
         runInHandler(new Runnable(){
             @Override
             public void run(){
@@ -919,8 +904,10 @@ public class MainActivity extends AppCompatActivity{
                 return getPIDs("airodump-ng");
             case PROCESS_AIREPLAY:
                 return getPIDs("aireplay-ng");
-            case PROCESS_MDK:
-                return getPIDs("mdk3");
+            case PROCESS_MDK_BF:
+                return getPIDs("mdk3bf");
+            case PROCESS_MDK_DOS:
+                return getPIDs("mdk3dos");
             case PROCESS_AIRCRACK:
                 return getPIDs("aircrack-ng");
             case PROCESS_REAVER:
@@ -931,7 +918,6 @@ public class MainActivity extends AppCompatActivity{
             }
     }
     public static void stop(int pr){
-        //0 for airodump-ng, 1 for aireplay-ng, 2 for mdk, 3 for aircrack, 4 for reaver, everything else is considered pid and we kill it
         if(debug) Log.d("HIJACKER/stop", "stop(" + pr + ") called");
         last_action = System.currentTimeMillis();
         switch(pr){
@@ -954,20 +940,31 @@ public class MainActivity extends AppCompatActivity{
                 AP.currentTargetDeauth.clear();
                 aireplay_running = 0;
                 break;
-            case PROCESS_MDK:
+            case PROCESS_MDK_BF:
                 if(currentFragment==FRAGMENT_MDK){
                     runInHandler(new Runnable(){
                         @Override
                         public void run(){
                             MDKFragment.bf_switch.setChecked(false);
+                        }
+                    });
+                }
+
+                bf = false;
+                runOne(busybox + " kill $(" + busybox + " pidof mdk3bf)");
+                break;
+            case PROCESS_MDK_DOS:
+                if(currentFragment==FRAGMENT_MDK){
+                    runInHandler(new Runnable(){
+                        @Override
+                        public void run(){
                             MDKFragment.ados_switch.setChecked(false);
                         }
                     });
                 }
+
                 ados = false;
-                bf = false;
-                runOne(busybox + " kill $(" + busybox + " pidof mdk3)");
-                break;
+                runOne(busybox + " kill $(" + busybox + " pidof mdk3dos)");
             case PROCESS_AIRCRACK:
                 CrackFragment.stopCracking();
                 runOne(busybox + " kill $(" + busybox + " pidof aircrack-ng)");
@@ -1114,7 +1111,8 @@ public class MainActivity extends AppCompatActivity{
         watchdogTask.cancel(true);
         stop(PROCESS_AIRODUMP);
         stop(PROCESS_AIREPLAY);
-        stop(PROCESS_MDK);
+        stop(PROCESS_MDK_BF);
+        stop(PROCESS_MDK_DOS);
         stop(PROCESS_AIRCRACK);
         stop(PROCESS_REAVER);
         runOne(disable_monMode);
@@ -1378,11 +1376,11 @@ public class MainActivity extends AppCompatActivity{
         //Clicked dos with isolated ap
         if(ados){
             ((TextView)v).setText(R.string.dos);
-            stop(ados_pid);
+            stop(PROCESS_MDK_DOS);
             ados = false;
         }else{
             ((TextView)v).setText(R.string.stop);
-            startMdk(MDK_ADOS, is_ap.mac);
+            startAdos(is_ap.mac);
         }
     }
     public void onCopy(View v){

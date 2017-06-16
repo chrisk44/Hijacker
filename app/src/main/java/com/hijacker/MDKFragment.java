@@ -21,7 +21,6 @@ import android.app.Fragment;
 import android.os.Bundle;
 import android.os.Environment;
 import android.support.design.widget.Snackbar;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -33,14 +32,14 @@ import android.widget.PopupMenu;
 import android.widget.Switch;
 
 import static com.hijacker.MainActivity.FRAGMENT_MDK;
-import static com.hijacker.MainActivity.MDK_ADOS;
-import static com.hijacker.MainActivity.MDK_BF;
+import static com.hijacker.MainActivity.PROCESS_MDK_BF;
+import static com.hijacker.MainActivity.PROCESS_MDK_DOS;
 import static com.hijacker.MainActivity.currentFragment;
-import static com.hijacker.MainActivity.debug;
 import static com.hijacker.MainActivity.mFragmentManager;
 import static com.hijacker.MainActivity.refreshDrawer;
 import static com.hijacker.MainActivity.runInHandler;
-import static com.hijacker.MainActivity.startMdk;
+import static com.hijacker.MainActivity.startAdos;
+import static com.hijacker.MainActivity.startBeaconFlooding;
 import static com.hijacker.MainActivity.stop;
 
 public class MDKFragment extends Fragment{
@@ -53,7 +52,6 @@ public class MDKFragment extends Fragment{
     static String custom_mac=null, ssid_file=null;
     static boolean managed=true, adhoc=true, opn=true, wep=true, tkip=true, aes=true;
     static boolean bf=false, ados=false;
-    static int bf_pid, ados_pid;
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState){
         setRetainInstance(true);
@@ -90,122 +88,19 @@ public class MDKFragment extends Fragment{
         bf_switch.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener(){
             @Override
             public void onCheckedChanged(CompoundButton compoundButton, boolean b){
-                //Beacon Flooding
-                if(b){
-                    ssidView.setError(null);
-                    String ssid_file = ssidView.getText().toString();
-                    managed = managed_cb.isChecked();
-                    adhoc = adhoc_cb.isChecked();
-                    opn = opn_cb.isChecked();
-                    wep = wep_cb.isChecked();
-                    tkip = tkip_cb.isChecked();
-                    aes = aes_cb.isChecked();
-                    String args = "";
-                    if(!managed && !adhoc){
-                        Snackbar.make(fragmentView, getString(R.string.select_type), Snackbar.LENGTH_LONG).show();
-                        bf_switch.setChecked(false);
-                        return;
-                    }
-                    if(!(managed && adhoc)){
-                        if(managed) args += " -t 0";
-                        if(adhoc) args += " -t 1";
-                    }
-                    if(!(opn || wep || tkip || aes)){
-                        Snackbar.make(fragmentView, getString(R.string.select_enc), Snackbar.LENGTH_LONG).show();
-                        bf_switch.setChecked(false);
-                        return;
-                    }
-                    if(!(ssid_file.equals("") || ssid_file.startsWith("/"))){
-                        ssidView.setError(getString(R.string.filename_invalid));
-                        ssidView.requestFocus();
-                        bf_switch.setChecked(false);
-                        return;
-                    }
-                    args += " -w ";
-                    if(opn) args += 'n';
-                    if(wep) args += 'w';
-                    if(tkip) args += 't';
-                    if(aes) args += 'a';
-                    if(!ssid_file.equals("")){
-                        RootFile ssidRootFile = new RootFile(ssid_file);
-                        if(!ssidRootFile.isFile()){
-                            ssidView.setError(getString(R.string.not_file_or_exists));
-                            ssidView.requestFocus();
-                            bf_switch.setChecked(false);
-                            return;
-                        }else{
-                            args += " -f " + ssid_file;
-                        }
-                    }
-                    startMdk(MDK_BF, args);
-                    if(debug) Log.d("HIJACKER/MDKFragment", "bf_pid is " + bf_pid);
-                }else{
-                    bf = false;
-                    stop(bf_pid);
-                }
+                onBfSwitch(b);
             }
         });
         ados_switch.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener(){
             @Override
             public void onCheckedChanged(CompoundButton compoundButton, boolean b){
-                //Authentication DoS
-                if(b){
-                    startMdk(MDK_ADOS, ados_ap==null ? custom_mac : ados_ap.mac);
-                    if(debug) Log.d("HIJACKER/MDKFragment", "ados_pid is " + ados_pid);
-                }else{
-                    ados = false;
-                    stop(ados_pid);
-                }
+                onDosSwitch(b);
             }
         });
         select_button.setOnClickListener(new View.OnClickListener(){
             @Override
             public void onClick(View view){
-                PopupMenu popup = new PopupMenu(getActivity(), view);
-
-                popup.getMenuInflater().inflate(R.menu.popup_menu, popup.getMenu());
-                int i = 0;
-                for(AP ap : AP.APs){
-                    popup.getMenu().add(0, i, i, ap.toString());
-                    i++;
-                }
-                popup.getMenu().add(1, i, i, "Custom");
-                popup.setOnMenuItemClickListener(new PopupMenu.OnMenuItemClickListener() {
-                    public boolean onMenuItemClick(android.view.MenuItem item) {
-                        //ItemId = i in for()
-                        if(item.getGroupId()==0){
-                            custom_mac=null;
-                            AP temp = AP.APs.get(item.getItemId());
-                            if(ados_ap!=temp){
-                                ados_ap = temp;
-                                runInHandler(new Runnable(){
-                                    @Override
-                                    public void run(){
-                                        ados_switch.setChecked(false);
-                                        stop(ados_pid);
-                                    }
-                                });
-                            }
-                            select_button.setText(ados_ap.toString());
-                        }else{
-                            //Clcked custom
-                            final EditTextDialog dialog = new EditTextDialog();
-                            dialog.setTitle(getString(R.string.custom_ap_title));
-                            dialog.setHint(getString(R.string.mac_address));
-                            dialog.setRunnable(new Runnable(){
-                                @Override
-                                public void run(){
-                                    ados_ap = null;
-                                    custom_mac = dialog.result;
-                                    select_button.setText(dialog.result);
-                                }
-                            });
-                            dialog.show(mFragmentManager, "EditTextDialog");
-                        }
-                        return true;
-                    }
-                });
-                popup.show();
+                onSelectClick(view);
             }
         });
 
@@ -256,6 +151,115 @@ public class MDKFragment extends Fragment{
         wep = wep_cb.isChecked();
         tkip = tkip_cb.isChecked();
         aes = aes_cb.isChecked();
+    }
+
+    void onSelectClick(View view){
+        PopupMenu popup = new PopupMenu(getActivity(), view);
+
+        popup.getMenuInflater().inflate(R.menu.popup_menu, popup.getMenu());
+        int i = 0;
+        for(AP ap : AP.APs){
+            popup.getMenu().add(0, i, i, ap.toString());
+            i++;
+        }
+        popup.getMenu().add(1, i, i, "Custom");
+        popup.setOnMenuItemClickListener(new PopupMenu.OnMenuItemClickListener() {
+            public boolean onMenuItemClick(android.view.MenuItem item) {
+                //ItemId = i in for()
+                if(item.getGroupId()==0){
+                    custom_mac=null;
+                    AP temp = AP.APs.get(item.getItemId());
+                    if(ados_ap!=temp){
+                        ados_ap = temp;
+                        runInHandler(new Runnable(){
+                            @Override
+                            public void run(){
+                                ados_switch.setChecked(false);
+                                stop(PROCESS_MDK_DOS);
+                            }
+                        });
+                    }
+                    select_button.setText(ados_ap.toString());
+                }else{
+                    //Clcked custom
+                    final EditTextDialog dialog = new EditTextDialog();
+                    dialog.setTitle(getString(R.string.custom_ap_title));
+                    dialog.setHint(getString(R.string.mac_address));
+                    dialog.setRunnable(new Runnable(){
+                        @Override
+                        public void run(){
+                            ados_ap = null;
+                            custom_mac = dialog.result;
+                            select_button.setText(dialog.result);
+                        }
+                    });
+                    dialog.show(mFragmentManager, "EditTextDialog");
+                }
+                return true;
+            }
+        });
+        popup.show();
+    }
+    void onBfSwitch(boolean b){
+        if(b){
+            ssidView.setError(null);
+            String ssid_file = ssidView.getText().toString();
+            managed = managed_cb.isChecked();
+            adhoc = adhoc_cb.isChecked();
+            opn = opn_cb.isChecked();
+            wep = wep_cb.isChecked();
+            tkip = tkip_cb.isChecked();
+            aes = aes_cb.isChecked();
+            String args = "";
+            if(!managed && !adhoc){
+                Snackbar.make(fragmentView, getString(R.string.select_type), Snackbar.LENGTH_LONG).show();
+                bf_switch.setChecked(false);
+                return;
+            }
+            if(!(managed && adhoc)){
+                if(managed) args += " -t 0";
+                if(adhoc) args += " -t 1";
+            }
+            if(!(opn || wep || tkip || aes)){
+                Snackbar.make(fragmentView, getString(R.string.select_enc), Snackbar.LENGTH_LONG).show();
+                bf_switch.setChecked(false);
+                return;
+            }
+            if(!(ssid_file.equals("") || ssid_file.startsWith("/"))){
+                ssidView.setError(getString(R.string.filename_invalid));
+                ssidView.requestFocus();
+                bf_switch.setChecked(false);
+                return;
+            }
+            args += " -w ";
+            if(opn) args += 'n';
+            if(wep) args += 'w';
+            if(tkip) args += 't';
+            if(aes) args += 'a';
+            if(!ssid_file.equals("")){
+                RootFile ssidRootFile = new RootFile(ssid_file);
+                if(!ssidRootFile.isFile()){
+                    ssidView.setError(getString(R.string.not_file_or_exists));
+                    ssidView.requestFocus();
+                    bf_switch.setChecked(false);
+                    return;
+                }else{
+                    args += " -f " + ssid_file;
+                }
+            }
+            startBeaconFlooding(args);
+        }else{
+            bf = false;
+            stop(PROCESS_MDK_BF);
+        }
+    }
+    void onDosSwitch(boolean b){
+        if(b){
+            startAdos(ados_ap==null ? custom_mac : ados_ap.mac);
+        }else{
+            ados = false;
+            stop(PROCESS_MDK_DOS);
+        }
     }
 }
 

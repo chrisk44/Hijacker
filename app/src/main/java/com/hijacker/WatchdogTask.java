@@ -27,7 +27,8 @@ import static com.hijacker.MDKFragment.ados;
 import static com.hijacker.MDKFragment.bf;
 import static com.hijacker.MainActivity.PROCESS_AIREPLAY;
 import static com.hijacker.MainActivity.PROCESS_AIRODUMP;
-import static com.hijacker.MainActivity.PROCESS_MDK;
+import static com.hijacker.MainActivity.PROCESS_MDK_BF;
+import static com.hijacker.MainActivity.PROCESS_MDK_DOS;
 import static com.hijacker.MainActivity.PROCESS_REAVER;
 import static com.hijacker.MainActivity.aireplay_running;
 import static com.hijacker.MainActivity.background;
@@ -82,18 +83,32 @@ class WatchdogTask extends AsyncTask<Void, String, Boolean>{
                         publishProgress(con.getString(R.string.aireplay_still_running));
                     }
                 }
+
                 if(isCancelled()) return false;
-                list = getPIDs(PROCESS_MDK);
-                if((bf || ados) && list.size()==0){         //mdk not running
+                list = getPIDs(PROCESS_MDK_BF);
+                if(bf && list.size()==0){         //mdkbf not running
                     publishProgress(con.getString(R.string.mdk_not_running));
-                    stop(PROCESS_MDK);
-                }else if(!(bf || ados) && list.size()>0){   //mdk still running
-                    if(debug) Log.d("HIJACKER/watchdog", "MDK is still running. Trying to kill it...");
-                    stop(PROCESS_MDK);
-                    if(getPIDs(PROCESS_MDK).size()>0){
+                    stop(PROCESS_MDK_BF);
+                }else if(!bf && list.size()>0){   //mdkbf still running
+                    if(debug) Log.d("HIJACKER/watchdog", "MDK_BF is still running. Trying to kill it...");
+                    stop(PROCESS_MDK_BF);
+                    if(getPIDs(PROCESS_MDK_BF).size()>0){
                         publishProgress(con.getString(R.string.mdk_still_running));
                     }
                 }
+                if(isCancelled()) return false;
+                list = getPIDs(PROCESS_MDK_DOS);
+                if(ados && list.size()==0){         //mdkdos not running
+                    publishProgress(con.getString(R.string.mdk_not_running));
+                    stop(PROCESS_MDK_DOS);
+                }else if(!ados && list.size()>0){   //mdkdos still running
+                    if(debug) Log.d("HIJACKER/watchdog", "MDK_DOS is still running. Trying to kill it...");
+                    stop(PROCESS_MDK_DOS);
+                    if(getPIDs(PROCESS_MDK_DOS).size()>0){
+                        publishProgress(con.getString(R.string.mdk_still_running));
+                    }
+                }
+
                 if(isCancelled()) return false;
                 list = getPIDs(PROCESS_REAVER);
                 if(ReaverFragment.isRunning() && list.size()==0){         //reaver not running

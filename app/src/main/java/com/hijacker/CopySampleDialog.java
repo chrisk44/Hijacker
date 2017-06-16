@@ -31,8 +31,8 @@ import static com.hijacker.MainActivity.cap_dir;
 import static com.hijacker.MainActivity.chroot_dir;
 import static com.hijacker.MainActivity.copy;
 import static com.hijacker.MainActivity.iface;
-import static com.hijacker.MainActivity.mdk3_dir;
 import static com.hijacker.MainActivity.background;
+import static com.hijacker.MainActivity.mdk3bf_dir;
 import static com.hijacker.MainActivity.prefix;
 import static com.hijacker.MainActivity.reaver_dir;
 import static com.hijacker.ReaverFragment.get_chroot_env;
@@ -61,7 +61,7 @@ public class CopySampleDialog extends DialogFragment {
                         copy(prefix + " " + aireplay_dir + " --ignore-negative-one --deauth 0 -a 00:11:22:33:44:55 -c 01:23:45:67:89:0a " + iface, getView());
                         break;
                     case 3:
-                        copy(prefix + " " + mdk3_dir + " " + iface + " b -m", getView());
+                        copy(prefix + " " + mdk3bf_dir + " " + iface + " b -m", getView());
                         break;
                     case 4:
                         copy(prefix + " " + reaver_dir + " -i " + iface + " -vv -b 00:11:22:33:44:55 --channel 6 -L -E -S", getView());

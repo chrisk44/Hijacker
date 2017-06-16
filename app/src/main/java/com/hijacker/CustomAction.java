@@ -34,7 +34,7 @@ import static com.hijacker.MainActivity.airodump_dir;
 import static com.hijacker.MainActivity.debug;
 import static com.hijacker.MainActivity.mFragmentManager;
 import static com.hijacker.MainActivity.iface;
-import static com.hijacker.MainActivity.mdk3_dir;
+import static com.hijacker.MainActivity.mdk3bf_dir;
 import static com.hijacker.MainActivity.prefix;
 import static com.hijacker.MainActivity.reaver_dir;
 
@@ -74,7 +74,7 @@ class CustomAction{
         shell.run("export PREFIX=\"" + prefix + '\"');
         shell.run("export AIRODUMP_DIR=\"" + airodump_dir + '\"');
         shell.run("export AIREPLAY_DIR=\"" + aireplay_dir + '\"');
-        shell.run("export MDK3_DIR=\"" + mdk3_dir + '\"');
+        shell.run("export MDK3_DIR=\"" + mdk3bf_dir + '\"');
         shell.run("export REAVER_DIR=\"" + reaver_dir + '\"');
         if(type==TYPE_AP){
             AP ap = (AP)dev;
