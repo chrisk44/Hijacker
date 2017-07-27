@@ -78,7 +78,7 @@ class CustomAction{
         shell.run("export REAVER_DIR=\"" + reaver_dir + '\"');
         if(type==TYPE_AP){
             AP ap = (AP)dev;
-            shell.run("export MAC=\"" + ap + '\"');
+            shell.run("export MAC=\"" + ap.mac + '\"');
             shell.run("export ESSID=\"" + ap.essid + '\"');
             shell.run("export ENC=\"" + ap.enc + '\"');
             shell.run("export CIPHER=\"" + ap.cipher + '\"');
