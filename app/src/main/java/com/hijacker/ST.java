@@ -267,7 +267,7 @@ class ST extends Device{
                         //Set alias
                         final EditTextDialog dialog = new EditTextDialog();
                         dialog.setTitle(activity.getString(R.string.set_alias));
-                        dialog.setAllowEmpty(false);
+                        dialog.setAllowEmpty(true);
                         dialog.setDefaultText(ST.this.alias);
                         dialog.setRunnable(new Runnable(){
                             @Override
