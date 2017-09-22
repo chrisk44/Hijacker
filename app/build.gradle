@@ -1,13 +1,13 @@
 apply plugin: 'com.android.application'
 android {
     compileSdkVersion 25
-    buildToolsVersion "25.0.3"
+    buildToolsVersion "26.0.1"
     defaultConfig {
         applicationId "com.hijacker"
         minSdkVersion 21
         targetSdkVersion 25
         versionCode 19
-        versionName "v1.3-stable.2"
+        versionName "v1.3-stable.3"
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
         externalNativeBuild {
             cmake {

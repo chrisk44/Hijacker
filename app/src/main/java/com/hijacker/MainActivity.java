@@ -351,7 +351,7 @@ public class MainActivity extends AppCompatActivity{
             handshake_notif.setContentIntent(click_intent);
             handshake_notif.setVibrate(new long[]{500, 500});
 
-            //Load strings for when they cannot be retrieved with getString or R.string...
+            //Load strings for when they cannot be retrieved with getString or R.string
             publishProgress(getString(R.string.loading_strings));
             ST.not_connected = getString(R.string.not_connected);
             ST.paired = getString(R.string.paired) + ' ';
