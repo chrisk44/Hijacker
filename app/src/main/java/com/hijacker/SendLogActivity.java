@@ -130,28 +130,32 @@ public class SendLogActivity extends AppCompatActivity{
         }
     }
     private class ReportTask extends AsyncTask<Void, String, Boolean>{
+        String bugReport = "";
         @Override
         protected Boolean doInBackground(Void... params){
             report = new File(Environment.getExternalStorageDirectory() + "/report.txt");
-            return createReport(report, getFilesDir().getAbsolutePath(), stackTrace, shell);
+            boolean result = createReport(report, getFilesDir().getAbsolutePath(), stackTrace, shell);
+            if(result){
+                try{
+                    BufferedReader br = new BufferedReader(new FileReader(report));
+                    String buffer;
+                    while((buffer = br.readLine())!=null){
+                        bugReport += buffer + '\n';
+                    }
+                }catch(IOException ignored){
+                    return false;
+                }
+            }
+            return result;
         }
         @Override
         protected void onPostExecute(final Boolean success){
             progressBar.setVisibility(View.GONE);
 
             if(success){
-                //Show snippet of report
-                try{
-                    BufferedReader br = new BufferedReader(new FileReader(report));
-                    console.setMovementMethod(ScrollingMovementMethod.getInstance());
-                    int i = 0, limit = 100;
-                    String buffer;
-                    while((buffer = br.readLine())!=null && i<limit){
-                        console.append(buffer + '\n');
-                        i++;
-                    }
-                    if(i==limit) console.append("...");
-                }catch(IOException ignored){}
+                //Show bug report
+                console.setMovementMethod(ScrollingMovementMethod.getInstance());
+                console.setText(bugReport);
 
                 sendEmailBtn.setEnabled(true);
             }else{

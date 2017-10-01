@@ -144,7 +144,7 @@ class CustomAction{
                         action.setRequiresConnected(requirement);
                     }
                     reader.close();
-                }catch(IOException e){
+                }catch(Exception e){
                     Log.e("HIJACKER/CustomAction", "In load(): " + e.toString());
                 }
             }

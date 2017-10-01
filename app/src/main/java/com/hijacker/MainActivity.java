@@ -1052,12 +1052,12 @@ public class MainActivity extends AppCompatActivity{
                     }
                     aliases_out.close();
                 }catch(IOException e){
-                    Log.e("HIJACKER/loadAliases", e.toString());
+                    Log.e("HIJACKER/loadAliases1", e.toString());
                 }
             }
             aliases_in = new FileWriter(aliases_file, true);
-        }catch(IOException e){
-            Log.e("HIJACKER/loadAliases", e.toString());
+        }catch(Exception e){
+            Log.e("HIJACKER/loadAliases2", e.toString());
             aliases_in = null;
         }
     }
@@ -1177,6 +1177,10 @@ public class MainActivity extends AppCompatActivity{
                 loadAliases();
             }
         }
+    }
+    @Override
+    protected void onSaveInstanceState(Bundle outState){
+        //No call for super(), avoid IllegalStateException on FragmentManagerImpl.checkStateLoss.
     }
 
     // See https://g.co/AppIndexing/AndroidStudio for more information.
@@ -1621,6 +1625,7 @@ public class MainActivity extends AppCompatActivity{
             if(stackTrace!=null) writer.write("\nStack trace:\n" + stackTrace + '\n');
 
             String cmd = "echo pref_file--------------------------------------; cat /data/data/com.hijacker/shared_prefs/com.hijacker_preferences.xml;";
+            cmd += " echo aliases file-----------------------------------; " + busybox_tmp + " cat " + Environment.getExternalStorageDirectory() + "/Hijacker/aliases.txt;";
             cmd += " echo app directory----------------------------------; " + busybox_tmp + " ls -lR " + filesDir + ';';
             cmd += " echo fw_bcmdhd--------------------------------------; strings /vendor/firmware/fw_bcmdhd.bin | grep \"FWID:\";";
             cmd += " echo ps---------------------------------------------; ps | " + busybox_tmp + " grep -e air -e mdk -e reaver;";
