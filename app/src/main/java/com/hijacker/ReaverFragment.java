@@ -74,10 +74,10 @@ public class ReaverFragment extends Fragment{
     static Button start_button, select_button;
     TextView consoleView;
     EditText pinDelayView, lockedDelayView;
-    CheckBox pixie_dust_cb, ignored_locked_cb, eap_fail_cb, small_dh_cb;
+    CheckBox pixie_dust_cb, ignored_locked_cb, eap_fail_cb, small_dh_cb, no_nack_cb;
     static ReaverTask task;
     static String console_text = null, pin_delay="1", locked_delay="60", custom_mac=null;       //delays are always used as strings
-    static boolean pixie_dust, ignore_locked, eap_fail, small_dh;
+    static boolean pixie_dust, ignore_locked, eap_fail, small_dh, no_nack;
     static AP ap=null;
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState){
@@ -91,6 +91,7 @@ public class ReaverFragment extends Fragment{
         ignored_locked_cb = (CheckBox)fragmentView.findViewById(R.id.ignore_locked);
         eap_fail_cb = (CheckBox)fragmentView.findViewById(R.id.eap_fail);
         small_dh_cb = (CheckBox)fragmentView.findViewById(R.id.small_dh);
+        no_nack_cb = (CheckBox)fragmentView.findViewById(R.id.no_nack);
         select_button = (Button)fragmentView.findViewById(R.id.select_ap);
         start_button = (Button)fragmentView.findViewById(R.id.start_button);
 
@@ -223,6 +224,7 @@ public class ReaverFragment extends Fragment{
         ignored_locked_cb.setChecked(ignore_locked);
         eap_fail_cb.setChecked(eap_fail);
         small_dh_cb.setChecked(small_dh);
+        no_nack_cb.setChecked(no_nack);
         if(custom_mac!=null) select_button.setText(custom_mac);
         else if(ap!=null) select_button.setText(ap.toString());
         else if(!AP.marked.isEmpty()){
@@ -241,6 +243,7 @@ public class ReaverFragment extends Fragment{
         ignore_locked = ignored_locked_cb.isChecked();
         eap_fail = eap_fail_cb.isChecked();
         small_dh = small_dh_cb.isChecked();
+        no_nack = no_nack_cb.isChecked();
     }
     static String get_chroot_env(final Activity activity){
         // add strings here , they will be in the kali env
@@ -280,7 +283,7 @@ public class ReaverFragment extends Fragment{
     }
     class ReaverTask extends AsyncTask<Void, String, Boolean>{
         String pinDelay, lockedDelay;
-        boolean ignoreLocked, eapFail, smallDH, pixieDust;
+        boolean ignoreLocked, eapFail, smallDH, pixieDust, noNack;
         @Override
         protected void onPreExecute(){
             pinDelay = pinDelayView.getText().toString();
@@ -289,6 +292,7 @@ public class ReaverFragment extends Fragment{
             eapFail = eap_fail_cb.isChecked();
             smallDH = small_dh_cb.isChecked();
             pixieDust = pixie_dust_cb.isChecked();
+            noNack = no_nack_cb.isChecked();
 
             start_button.setText(R.string.stop);
             progress.setIndeterminate(true);
@@ -306,6 +310,7 @@ public class ReaverFragment extends Fragment{
                 if(ignoreLocked) args += " -L";
                 if(eapFail) args += " -E";
                 if(smallDH) args += " -S";
+                if(noNack) args += " -N";
                 String cmd;
                 if(pixieDust){
                     publishProgress(getString(R.string.chroot_warning));

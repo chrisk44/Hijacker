@@ -72,6 +72,12 @@
         android:layout_height="wrap_content"
         android:id="@+id/small_dh"/>
 
+    <CheckBox
+        android:text="@string/no_nack"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:id="@+id/no_nack"/>
+
     <TextView
         android:layout_width="match_parent"
         android:layout_height="0dp"
@@ -89,10 +95,10 @@
         android:fontFamily="serif-monospace"/>
 
     <Button
-    style="?android:attr/buttonBarButtonStyle"
-    android:text="@string/start"
-    android:layout_width="match_parent"
-    android:layout_height="wrap_content"
-    android:id="@+id/start_button"/>
+        style="?android:attr/buttonBarButtonStyle"
+        android:text="@string/start"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:id="@+id/start_button"/>
 
 </LinearLayout>

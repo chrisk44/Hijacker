@@ -1548,12 +1548,6 @@ public class MainActivity extends AppCompatActivity{
     }
     static void checkForUpdate(final Activity activity, final boolean showMessages){
         //Can be called from any thread, blocks until the job is finished
-        Runnable runnable = new Runnable(){
-            @Override
-            public void run(){
-                progress.setIndeterminate(false);
-            }
-        };
         if(showMessages){
             runInHandler(new Runnable(){
                 @Override
@@ -1593,7 +1587,12 @@ public class MainActivity extends AppCompatActivity{
             Log.e("HIJACKER/update", e.toString());
             if(showMessages) Snackbar.make(rootView, activity.getString(R.string.unknown_error), Snackbar.LENGTH_SHORT).show();
         }finally{
-            if(showMessages) runInHandler(runnable);
+            if(showMessages) runInHandler(new Runnable(){
+                @Override
+                public void run(){
+                    progress.setIndeterminate(false);
+                }
+            });
         }
     }
     static boolean internetAvailable(Context context){

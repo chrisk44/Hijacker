@@ -241,6 +241,7 @@
     <string name="ignore_locked">Ignore Locked State reported by the AP</string>
     <string name="eap_fail">Terminate each session with EAP FAIL</string>
     <string name="small_dh">Use small DH keys to improve crack speed</string>
+    <string name="no_nack">Don\'t send NACKs when out of order packets are received</string>
     <string name="chroot_notfound">Chroot directory not found</string>
     <string name="kali_notfound">bootkali_init not found</string>
     <string name="chroot_both_notfound">Chroot directory and bootkali_init not found</string>
