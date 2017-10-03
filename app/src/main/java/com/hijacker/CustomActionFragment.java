@@ -29,6 +29,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.PopupMenu;
+import android.widget.ScrollView;
 import android.widget.TextView;
 
 import java.io.BufferedReader;
@@ -58,6 +59,7 @@ public class CustomActionFragment extends Fragment{
     View fragmentView;
     Button startBtn, targetBtn, actionBtn;
     TextView consoleView;
+    ScrollView consoleScrollView;
     @SuppressLint("SetTextI18n")
     @Override
     public View onCreateView(LayoutInflater inflater, final ViewGroup container, Bundle savedInstanceState){
@@ -65,13 +67,12 @@ public class CustomActionFragment extends Fragment{
         fragmentView = inflater.inflate(R.layout.custom_action_fragment, container, false);
 
         consoleView = (TextView)fragmentView.findViewById(R.id.console);
+        consoleScrollView = (ScrollView)fragmentView.findViewById(R.id.console_scroll_view);
         startBtn = (Button)fragmentView.findViewById(R.id.start_button);
         targetBtn = (Button)fragmentView.findViewById(R.id.select_target);
         actionBtn = (Button)fragmentView.findViewById(R.id.select_action);
 
         task = new CustomActionTask();
-
-        consoleView.setMovementMethod(new ScrollingMovementMethod());
 
         actionBtn.setOnClickListener(new View.OnClickListener(){
             @Override
@@ -109,6 +110,12 @@ public class CustomActionFragment extends Fragment{
 
         //Update view
         consoleView.setText(console_text);
+        consoleView.post(new Runnable() {
+            @Override
+            public void run() {
+                consoleScrollView.fullScroll(View.FOCUS_DOWN);
+            }
+        });
         if(selectedAction!=null){
             actionBtn.setText(selectedAction.getTitle());
             targetBtn.setEnabled(true);
@@ -234,6 +241,7 @@ public class CustomActionFragment extends Fragment{
             progress.setIndeterminate(true);
 
             consoleView.append("Running: " + selectedAction.getStartCmd() + '\n');
+            consoleScrollView.fullScroll(View.FOCUS_DOWN);
             if(debug) Log.d("HIJACKER/CustomCMDFrag", "Running: " + selectedAction.getStartCmd());
         }
         @Override
@@ -288,8 +296,13 @@ public class CustomActionFragment extends Fragment{
             return true;
         }
         @Override
-        protected void onProgressUpdate(String... str){
-            consoleView.append(str[0]);
+        protected void onProgressUpdate(String... text){
+            if(currentFragment==FRAGMENT_CUSTOM && !background){
+                consoleView.append(text[0] + '\n');
+                consoleScrollView.fullScroll(View.FOCUS_DOWN);
+            }else{
+                console_text += text[0] + '\n';
+            }
         }
         @Override
         protected void onPostExecute(final Boolean success){

@@ -33,6 +33,7 @@ import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.EditText;
 import android.widget.PopupMenu;
+import android.widget.ScrollView;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -75,6 +76,7 @@ public class ReaverFragment extends Fragment{
     TextView consoleView;
     EditText pinDelayView, lockedDelayView;
     CheckBox pixie_dust_cb, ignored_locked_cb, eap_fail_cb, small_dh_cb, no_nack_cb;
+    ScrollView consoleScrollView;
     static ReaverTask task;
     static String console_text = null, pin_delay="1", locked_delay="60", custom_mac=null;       //delays are always used as strings
     static boolean pixie_dust, ignore_locked, eap_fail, small_dh, no_nack;
@@ -85,6 +87,7 @@ public class ReaverFragment extends Fragment{
         setRetainInstance(true);
 
         consoleView = (TextView)fragmentView.findViewById(R.id.console);
+        consoleScrollView = (ScrollView)fragmentView.findViewById(R.id.console_scroll_view);
         pinDelayView = (EditText)fragmentView.findViewById(R.id.pin_delay);
         lockedDelayView = (EditText)fragmentView.findViewById(R.id.locked_delay);
         pixie_dust_cb = (CheckBox)fragmentView.findViewById(R.id.pixie_dust);
@@ -107,8 +110,6 @@ public class ReaverFragment extends Fragment{
         });
 
         task = new ReaverTask();
-
-        consoleView.setMovementMethod(new ScrollingMovementMethod());
 
         int chroot_check = checkChroot();
         if(chroot_check!=CHROOT_FOUND){
@@ -218,6 +219,12 @@ public class ReaverFragment extends Fragment{
         currentFragment = FRAGMENT_REAVER;
         refreshDrawer();
         consoleView.setText(console_text);
+        consoleView.post(new Runnable() {
+            @Override
+            public void run() {
+                consoleScrollView.fullScroll(View.FOCUS_DOWN);
+            }
+        });
         pinDelayView.setText(pin_delay);
         lockedDelayView.setText(locked_delay);
         pixie_dust_cb.setChecked(pixie_dust);
@@ -351,6 +358,7 @@ public class ReaverFragment extends Fragment{
         protected void onProgressUpdate(String... text){
             if(currentFragment==FRAGMENT_REAVER && !background){
                 consoleView.append(text[0] + '\n');
+                consoleScrollView.fullScroll(View.FOCUS_DOWN);
             }else{
                 console_text += text[0] + '\n';
             }

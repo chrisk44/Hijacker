@@ -159,7 +159,6 @@ public class MainActivity extends AppCompatActivity{
             monstart, always_cap, cont_on_fail, watchdog, target_deauth, enable_on_airodump, update_on_startup;
 
     private GoogleApiClient client;
-    Runnable onResumeRunnable = null;
     WatchdogTask watchdogTask;
     @Override
     protected void onCreate(Bundle savedInstanceState){
@@ -202,6 +201,19 @@ public class MainActivity extends AppCompatActivity{
         LoadingDialog loadingDialog;
         @Override
         protected void onPreExecute(){
+            pref = PreferenceManager.getDefaultSharedPreferences(MainActivity.this);
+            if(!pref.getBoolean("disclaimerAccepted", false)){
+                //First start
+                new DisclaimerDialog().show(getFragmentManager(), "Disclaimer");
+                //Check for SuperSU
+                if(!new File("/su").exists()){
+                    ErrorDialog dialog = new ErrorDialog();
+                    dialog.setTitle(getString(R.string.su_notfound_title));
+                    dialog.setMessage(getString(R.string.su_notfound));
+                    dialog.show(getFragmentManager(), "ErrorDialog");
+                }
+            }
+
             loadingDialog = new LoadingDialog();
             loadingDialog.setInitText(getString(R.string.starting_hijacker));
             loadingDialog.show(getFragmentManager(), "LoadingDialog");
@@ -220,7 +232,6 @@ public class MainActivity extends AppCompatActivity{
             Looper.prepare();
             //Initialize managers
             publishProgress(getString(R.string.init_managers));
-            pref = PreferenceManager.getDefaultSharedPreferences(MainActivity.this);
             pref_edit = pref.edit();
             clipboard = (ClipboardManager)getSystemService(CLIPBOARD_SERVICE);
             mNotificationManager = (NotificationManager)getSystemService(Context.NOTIFICATION_SERVICE);
@@ -741,26 +752,7 @@ public class MainActivity extends AppCompatActivity{
             loadingDialog.dismissAllowingStateLoss();
 
             //Start
-            if(!pref.getBoolean("disclaimer", false)){
-                onResumeRunnable = new Runnable(){
-                    @Override
-                    public void run(){
-                        //First start
-                        new DisclaimerDialog().show(getFragmentManager(), "Disclaimer");
-                        //Check for SuperSU
-                        if(!new File("/su").exists()){
-                            ErrorDialog dialog = new ErrorDialog();
-                            dialog.setTitle(getString(R.string.su_notfound_title));
-                            dialog.setMessage(getString(R.string.su_notfound));
-                            dialog.show(getFragmentManager(), "ErrorDialog");
-                        }
-                        onResumeRunnable = null;
-                    }
-                };
-                if(!background){
-                    onResumeRunnable.run();
-                }
-            }else main();
+            if(pref.getBoolean("disclaimerAccepted", false)) main();
         }
     }
 
@@ -1128,9 +1120,6 @@ public class MainActivity extends AppCompatActivity{
         notif_on = false;
         background = false;
         if(mNotificationManager!=null) mNotificationManager.cancelAll();
-        if(onResumeRunnable!=null){
-            onResumeRunnable.run();
-        }
     }
     @Override
     protected void onStop(){

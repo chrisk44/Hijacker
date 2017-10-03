@@ -37,7 +37,7 @@ public class DisclaimerDialog extends DialogFragment {
         builder.setTitle(R.string.disclaimer_title);
         builder.setPositiveButton(R.string.agree, new DialogInterface.OnClickListener() {
             public void onClick(DialogInterface dialog, int id) {
-                pref_edit.putBoolean("disclaimer", true);
+                pref_edit.putBoolean("disclaimerAccepted", true);
                 pref_edit.commit();
                 new FirstRunDialog().show(mFragmentManager, "FirstRunDialog");
                 dismissAllowingStateLoss();

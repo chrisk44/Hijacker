@@ -34,6 +34,7 @@ import android.widget.CompoundButton;
 import android.widget.EditText;
 import android.widget.RadioButton;
 import android.widget.RadioGroup;
+import android.widget.ScrollView;
 import android.widget.TextView;
 
 import java.io.BufferedReader;
@@ -57,18 +58,20 @@ import static com.hijacker.MainActivity.stop;
 public class CrackFragment extends Fragment{
     static final int WPA=2, WEP=1;
     View fragmentView;
-    TextView console;
+    TextView consoleView;
     EditText capfileView, wordlistView;
     RadioGroup wepRG, securityRG;
     RadioButton wepRB, wpaRB;
     Button startBtn, capFeBtn, wordlistFeBtn;
+    ScrollView consoleScrollView;
     static CrackTask task;
     static String capfile, wordlist, console_text, capfile_text=null, wordlist_text=null;
     @Override
     public View onCreateView(LayoutInflater inflater, final ViewGroup container, Bundle savedInstanceState){
         fragmentView = inflater.inflate(R.layout.crack_fragment, container, false);
 
-        console = (TextView)fragmentView.findViewById(R.id.console);
+        consoleView = (TextView)fragmentView.findViewById(R.id.console);
+        consoleScrollView = (ScrollView)fragmentView.findViewById(R.id.console_scroll_view);
         capfileView = (EditText)fragmentView.findViewById(R.id.capfile);
         wordlistView = (EditText)fragmentView.findViewById(R.id.wordlist);
         capFeBtn = (Button)fragmentView.findViewById(R.id.cap_fe_btn);
@@ -79,8 +82,7 @@ public class CrackFragment extends Fragment{
         wpaRB = (RadioButton)fragmentView.findViewById(R.id.wpa_rb);
         startBtn = (Button)fragmentView.findViewById(R.id.start);
 
-        console.setText("");
-        console.setMovementMethod(new ScrollingMovementMethod());
+        consoleView.setText("");
 
         capfileView.setOnEditorActionListener(new TextView.OnEditorActionListener(){
             @Override
@@ -170,13 +172,19 @@ public class CrackFragment extends Fragment{
             shell.done();
         }
         if(wordlist_text!=null) wordlistView.setText(wordlist_text);
-        console.setText(console_text);
+        consoleView.setText(console_text);
+        consoleView.post(new Runnable() {
+            @Override
+            public void run() {
+                consoleScrollView.fullScroll(View.FOCUS_DOWN);
+            }
+        });
         refreshDrawer();
     }
     @Override
     public void onPause(){
         super.onPause();
-        console_text = console.getText().toString();
+        console_text = consoleView.getText().toString();
         capfile_text = capfileView.getText().toString();
         wordlist_text = wordlistView.getText().toString();
     }
@@ -243,7 +251,8 @@ public class CrackFragment extends Fragment{
         protected void onPreExecute(){
             progress.setIndeterminate(true);
             startBtn.setText(R.string.stop);
-            console.append("\nRunning...\n");
+            consoleView.append("\nRunning...\n");
+            consoleScrollView.fullScroll(View.FOCUS_DOWN);
 
             switch(securityRG.getCheckedRadioButtonId()){
                 case R.id.wpa_rb:
@@ -312,16 +321,18 @@ public class CrackFragment extends Fragment{
         protected void onPostExecute(final Boolean success){
             done();
             if(success){
-                console.append("Key found: " + key + '\n');
+                consoleView.append("Key found: " + key + '\n');
             }else{
-                console.append("Key not found\n");
-                if(mode==WEP) console.append("Try with different wep bit selection or more IVs\n");
+                consoleView.append("Key not found\n");
+                if(mode==WEP) consoleView.append("Try with different wep bit selection or more IVs\n");
             }
+            consoleScrollView.fullScroll(View.FOCUS_DOWN);
         }
         @Override
         protected void onCancelled(){
             done();
-            console.append("Interrupted\n");
+            consoleView.append("Interrupted\n");
+            consoleScrollView.fullScroll(View.FOCUS_DOWN);
             stop(PROCESS_AIRCRACK);
         }
         void done(){
