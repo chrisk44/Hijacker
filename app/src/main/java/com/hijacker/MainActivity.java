@@ -202,6 +202,7 @@ public class MainActivity extends AppCompatActivity{
         @Override
         protected void onPreExecute(){
             pref = PreferenceManager.getDefaultSharedPreferences(MainActivity.this);
+            pref_edit = pref.edit();
             if(!pref.getBoolean("disclaimerAccepted", false)){
                 //First start
                 new DisclaimerDialog().show(getFragmentManager(), "Disclaimer");
@@ -232,7 +233,6 @@ public class MainActivity extends AppCompatActivity{
             Looper.prepare();
             //Initialize managers
             publishProgress(getString(R.string.init_managers));
-            pref_edit = pref.edit();
             clipboard = (ClipboardManager)getSystemService(CLIPBOARD_SERVICE);
             mNotificationManager = (NotificationManager)getSystemService(Context.NOTIFICATION_SERVICE);
             mFragmentManager = getFragmentManager();

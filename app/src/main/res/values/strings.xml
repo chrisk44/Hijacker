@@ -363,7 +363,7 @@
     <string name="mm2_desc">Command to disable monitor mode specific to your interface. Will be run AS ROOT when the app is being killed.</string>
 
     <string name="enable_on_airodump_title">Enable on Airodump start</string>
-    <string name="enable_on_airodump_sum">Run the "Enable Monitor Mode" command when starting airodump</string>
+    <string name="enable_on_airodump_sum">Run the \"Enable Monitor Mode\" command when starting airodump</string>
 
     <!-- Tools -->
     <string name="tools">Tools</string>
