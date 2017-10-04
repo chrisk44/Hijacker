@@ -17,6 +17,8 @@ package com.hijacker;
     along with this program.  If not, see <http://www.gnu.org/licenses/>
  */
 
+import android.animation.Animator;
+import android.animation.ValueAnimator;
 import android.annotation.SuppressLint;
 import android.app.Fragment;
 import android.app.FragmentTransaction;
@@ -26,6 +28,7 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.animation.AccelerateDecelerateInterpolator;
 import android.widget.Button;
 import android.widget.PopupMenu;
 import android.widget.ScrollView;
@@ -56,6 +59,7 @@ public class CustomActionFragment extends Fragment{
     static String console_text = null;
 
     View fragmentView;
+    static View optionsContainer;
     Button startBtn, targetBtn, actionBtn;
     TextView consoleView;
     ScrollView consoleScrollView;
@@ -67,11 +71,12 @@ public class CustomActionFragment extends Fragment{
 
         consoleView = (TextView)fragmentView.findViewById(R.id.console);
         consoleScrollView = (ScrollView)fragmentView.findViewById(R.id.console_scroll_view);
+        optionsContainer = fragmentView.findViewById(R.id.options_container);
         startBtn = (Button)fragmentView.findViewById(R.id.start_button);
         targetBtn = (Button)fragmentView.findViewById(R.id.select_target);
         actionBtn = (Button)fragmentView.findViewById(R.id.select_action);
 
-        task = new CustomActionTask();
+        if(task==null) task = new CustomActionTask();
 
         actionBtn.setOnClickListener(new View.OnClickListener(){
             @Override
@@ -99,15 +104,7 @@ public class CustomActionFragment extends Fragment{
             }
         });
 
-        return fragmentView;
-    }
-    @Override
-    public void onResume(){
-        super.onResume();
-        currentFragment = FRAGMENT_CUSTOM;
-        refreshDrawer();
-
-        //Update view
+        //Restore view
         consoleView.setText(console_text);
         consoleView.post(new Runnable() {
             @Override
@@ -124,11 +121,33 @@ public class CustomActionFragment extends Fragment{
             }
         }
         startBtn.setText(isRunning() ? R.string.stop : R.string.start);
+
+        if(task.getStatus()==AsyncTask.Status.RUNNING){
+            ViewGroup.LayoutParams layoutParams = optionsContainer.getLayoutParams();
+            layoutParams.height = 0;
+            optionsContainer.setLayoutParams(layoutParams);
+        }
+
+        return fragmentView;
+    }
+    @Override
+    public void onResume(){
+        super.onResume();
+        currentFragment = FRAGMENT_CUSTOM;
+        refreshDrawer();
     }
     @Override
     public void onPause(){
         super.onPause();
         console_text = consoleView.getText().toString();
+    }
+    @Override
+    public void onDestroy(){
+        super.onDestroy();
+        if(task.getStatus()!= AsyncTask.Status.RUNNING){
+            //Avoid memory leak
+            optionsContainer = null;
+        }
     }
     static boolean isRunning(){
         if(task==null) return false;
@@ -232,16 +251,31 @@ public class CustomActionFragment extends Fragment{
 
     class CustomActionTask extends AsyncTask<Void, String, Boolean>{
         Shell shell;
+        int prevOptContainerHeight = -1;
         @Override
         protected void onPreExecute(){
-            actionBtn.setEnabled(false);
-            targetBtn.setEnabled(false);
             startBtn.setText(R.string.stop);
             progress.setIndeterminate(true);
 
             consoleView.append("Running: " + selectedAction.getStartCmd() + '\n');
             consoleScrollView.fullScroll(View.FOCUS_DOWN);
             if(debug) Log.d("HIJACKER/CustomCMDFrag", "Running: " + selectedAction.getStartCmd());
+
+            prevOptContainerHeight = optionsContainer.getHeight();
+
+            ValueAnimator sizeAnimator = ValueAnimator.ofInt(optionsContainer.getHeight(), 0);
+            sizeAnimator.setTarget(optionsContainer);
+            sizeAnimator.addUpdateListener(new ValueAnimator.AnimatorUpdateListener(){
+                @Override
+                public void onAnimationUpdate(ValueAnimator animation){
+                    ViewGroup.LayoutParams layoutParams = optionsContainer.getLayoutParams();
+                    layoutParams.height = (int)animation.getAnimatedValue();
+                    optionsContainer.setLayoutParams(layoutParams);
+                }
+            });
+            sizeAnimator.setInterpolator(new AccelerateDecelerateInterpolator());
+
+            sizeAnimator.start();
         }
         @Override
         protected Boolean doInBackground(Void... params){
@@ -312,11 +346,35 @@ public class CustomActionFragment extends Fragment{
             done();
         }
         void done(){
-            actionBtn.setEnabled(true);
-            targetBtn.setEnabled(true);
             startBtn.setEnabled(true);
             startBtn.setText(R.string.start);
             progress.setIndeterminate(false);
+
+            ValueAnimator sizeAnimator = ValueAnimator.ofInt(0, prevOptContainerHeight);
+            sizeAnimator.setTarget(optionsContainer);
+            sizeAnimator.addUpdateListener(new ValueAnimator.AnimatorUpdateListener(){
+                @Override
+                public void onAnimationUpdate(ValueAnimator animation){
+                    ViewGroup.LayoutParams layoutparams = optionsContainer.getLayoutParams();
+                    layoutparams.height = (int)animation.getAnimatedValue();
+                    optionsContainer.setLayoutParams(layoutparams);
+                }
+            });
+            sizeAnimator.addListener(new Animator.AnimatorListener() {
+                @Override
+                public void onAnimationStart(Animator animation) {}
+                @Override
+                public void onAnimationEnd(Animator animation) {
+                    consoleScrollView.fullScroll(View.FOCUS_DOWN);
+                }
+                @Override
+                public void onAnimationCancel(Animator animation) {}
+                @Override
+                public void onAnimationRepeat(Animator animation) {}
+            });
+            sizeAnimator.setInterpolator(new AccelerateDecelerateInterpolator());
+
+            sizeAnimator.start();
         }
     }
 }

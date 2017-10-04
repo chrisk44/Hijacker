@@ -8,123 +8,133 @@
               android:padding="5dp">
 
     <LinearLayout
+        android:id="@+id/options_container"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="horizontal">
+        android:orientation="vertical">
 
-        <android.support.design.widget.TextInputLayout
-            android:layout_width="0dp"
+        <LinearLayout
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_weight="1">
+            android:orientation="horizontal">
 
-            <EditText
-                android:id="@+id/capfile"
-                android:layout_width="match_parent"
+            <android.support.design.widget.TextInputLayout
+                android:layout_width="0dp"
                 android:layout_height="wrap_content"
-                android:hint="@string/path_to_cap"
-                android:imeOptions="actionNext"
-                android:inputType="text"
-                android:maxLines="1"/>
+                android:layout_weight="1">
 
-        </android.support.design.widget.TextInputLayout>
+                <EditText
+                    android:id="@+id/capfile"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:hint="@string/path_to_cap"
+                    android:imeOptions="actionNext"
+                    android:inputType="text"
+                    android:maxLines="1" />
 
-        <Button
-            android:id="@+id/cap_fe_btn"
-            style="?android:attr/buttonBarButtonStyle"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center_vertical"
-            android:text="..."/>
-    </LinearLayout>
+            </android.support.design.widget.TextInputLayout>
 
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="horizontal">
-
-        <android.support.design.widget.TextInputLayout
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_weight="1">
-
-            <EditText
-                android:id="@+id/wordlist"
-                android:layout_width="match_parent"
+            <Button
+                android:id="@+id/cap_fe_btn"
+                style="?android:attr/buttonBarButtonStyle"
+                android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:hint="@string/path_to_wordlist"
-                android:inputType="text"
-                android:maxLines="1"/>
+                android:layout_gravity="center_vertical"
+                android:text="..." />
+        </LinearLayout>
 
-        </android.support.design.widget.TextInputLayout>
-
-        <Button
-            android:id="@+id/wordlist_fe_btn"
-            style="?android:attr/buttonBarButtonStyle"
-            android:layout_width="wrap_content"
+        <LinearLayout
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_gravity="center_vertical"
-            android:text="..."/>
+            android:orientation="horizontal">
+
+            <android.support.design.widget.TextInputLayout
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1">
+
+                <EditText
+                    android:id="@+id/wordlist"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:hint="@string/path_to_wordlist"
+                    android:inputType="text"
+                    android:maxLines="1" />
+
+            </android.support.design.widget.TextInputLayout>
+
+            <Button
+                android:id="@+id/wordlist_fe_btn"
+                style="?android:attr/buttonBarButtonStyle"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_vertical"
+                android:text="..." />
+        </LinearLayout>
+
+        <RadioGroup
+            android:id="@+id/radio_group"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal">
+
+            <RadioButton
+                android:id="@+id/wpa_rb"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="WPA/WPA2" />
+
+            <RadioButton
+                android:id="@+id/wep_rb"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="WEP" />
+        </RadioGroup>
+
+        <RadioGroup
+            android:id="@+id/wep_rg"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal">
+
+            <RadioButton
+                android:id="@+id/wep_64"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="64" />
+
+            <RadioButton
+                android:id="@+id/wep_128"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="128" />
+
+            <RadioButton
+                android:id="@+id/wep_152"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="152" />
+
+            <RadioButton
+                android:id="@+id/wep_256"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="256" />
+
+            <RadioButton
+                android:id="@+id/wep_512"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="512" />
+        </RadioGroup>
     </LinearLayout>
-
-    <RadioGroup
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="horizontal"
-        android:id="@+id/radio_group">
-
-        <RadioButton
-            android:text="WPA/WPA2"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:id="@+id/wpa_rb"
-            android:layout_weight="1"/>
-
-        <RadioButton
-            android:text="WEP"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:id="@+id/wep_rb"
-            android:layout_weight="1"
-            />
-    </RadioGroup>
-
-    <RadioGroup
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="horizontal"
-        android:id="@+id/wep_rg">
-
-        <RadioButton
-            android:text="64"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:id="@+id/wep_64"
-            android:layout_weight="1"/>
-        <RadioButton
-            android:text="128"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:id="@+id/wep_128"
-            android:layout_weight="1"/>
-        <RadioButton
-            android:text="152"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:id="@+id/wep_152"
-            android:layout_weight="1"/>
-        <RadioButton
-            android:text="256"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:id="@+id/wep_256"
-            android:layout_weight="1"/>
-        <RadioButton
-            android:text="512"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:id="@+id/wep_512"
-            android:layout_weight="1"/>
-    </RadioGroup>
 
     <ScrollView
         android:id="@+id/console_scroll_view"

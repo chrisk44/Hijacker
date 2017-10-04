@@ -5,19 +5,27 @@
               android:layout_height="match_parent"
               android:padding="5dp">
 
-    <Button
-        style="?android:attr/buttonBarButtonStyle"
-        android:text="@string/select_action"
+    <LinearLayout
+        android:id="@+id/options_container"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:id="@+id/select_action"/>
-    <Button
-        style="?android:attr/buttonBarButtonStyle"
-        android:text="@string/select_target"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:id="@+id/select_target"
-        android:enabled="false"/>
+        android:orientation="vertical">
+
+        <Button
+            android:id="@+id/select_action"
+            style="?android:attr/buttonBarButtonStyle"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/select_action" />
+
+        <Button
+            android:id="@+id/select_target"
+            style="?android:attr/buttonBarButtonStyle"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:enabled="false"
+            android:text="@string/select_target" />
+    </LinearLayout>
 
     <ScrollView
         android:id="@+id/console_scroll_view"

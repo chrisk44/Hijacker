@@ -17,6 +17,8 @@ package com.hijacker;
     along with this program.  If not, see <http://www.gnu.org/licenses/>
  */
 
+import android.animation.Animator;
+import android.animation.ValueAnimator;
 import android.app.Fragment;
 import android.os.AsyncTask;
 import android.os.Bundle;
@@ -27,6 +29,7 @@ import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.animation.AccelerateDecelerateInterpolator;
 import android.view.inputmethod.EditorInfo;
 import android.widget.Button;
 import android.widget.CompoundButton;
@@ -57,6 +60,7 @@ import static com.hijacker.MainActivity.stop;
 public class CrackFragment extends Fragment{
     static final int WPA=2, WEP=1;
     View fragmentView;
+    static View optionsContainer;
     TextView consoleView;
     EditText capfileView, wordlistView;
     RadioGroup wepRG, securityRG;
@@ -71,6 +75,7 @@ public class CrackFragment extends Fragment{
 
         consoleView = (TextView)fragmentView.findViewById(R.id.console);
         consoleScrollView = (ScrollView)fragmentView.findViewById(R.id.console_scroll_view);
+        optionsContainer = fragmentView.findViewById(R.id.options_container);
         capfileView = (EditText)fragmentView.findViewById(R.id.capfile);
         wordlistView = (EditText)fragmentView.findViewById(R.id.wordlist);
         capFeBtn = (Button)fragmentView.findViewById(R.id.cap_fe_btn);
@@ -99,7 +104,7 @@ public class CrackFragment extends Fragment{
             wepRG.getChildAt(i).setEnabled(false);
         }
 
-        task = new CrackTask();
+        if(task==null) task = new CrackTask();
 
         wepRB.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener(){
             @Override
@@ -153,12 +158,7 @@ public class CrackFragment extends Fragment{
             }
         });
 
-        return fragmentView;
-    }
-    @Override
-    public void onResume() {
-        super.onResume();
-        currentFragment = FRAGMENT_CRACK;
+        //Restore view
         if(capfile_text!=null){
             capfileView.setText(capfile_text);
         }else{
@@ -178,6 +178,19 @@ public class CrackFragment extends Fragment{
                 consoleScrollView.fullScroll(View.FOCUS_DOWN);
             }
         });
+
+        if(task.getStatus()==AsyncTask.Status.RUNNING){
+            ViewGroup.LayoutParams layoutParams = optionsContainer.getLayoutParams();
+            layoutParams.height = 0;
+            optionsContainer.setLayoutParams(layoutParams);
+        }
+
+        return fragmentView;
+    }
+    @Override
+    public void onResume() {
+        super.onResume();
+        currentFragment = FRAGMENT_CRACK;
         refreshDrawer();
     }
     @Override
@@ -186,6 +199,14 @@ public class CrackFragment extends Fragment{
         console_text = consoleView.getText().toString();
         capfile_text = capfileView.getText().toString();
         wordlist_text = wordlistView.getText().toString();
+    }
+    @Override
+    public void onDestroy(){
+        super.onDestroy();
+        if(task.getStatus()!= AsyncTask.Status.RUNNING){
+            //Avoid memory leak
+            optionsContainer = null;
+        }
     }
     static boolean isRunning(){
         if(task==null) return false;
@@ -246,6 +267,7 @@ public class CrackFragment extends Fragment{
     class CrackTask extends AsyncTask<Void, String, Boolean>{
         int mode;
         String cmd, key;
+        int prevOptContainerHeight = -1;
         @Override
         protected void onPreExecute(){
             progress.setIndeterminate(true);
@@ -287,6 +309,22 @@ public class CrackFragment extends Fragment{
                 }
             }
             if(debug) Log.d("HIJACKER/CrackTask", cmd);
+
+            prevOptContainerHeight = optionsContainer.getHeight();
+
+            ValueAnimator sizeAnimator = ValueAnimator.ofInt(optionsContainer.getHeight(), 0);
+            sizeAnimator.setTarget(optionsContainer);
+            sizeAnimator.addUpdateListener(new ValueAnimator.AnimatorUpdateListener(){
+                @Override
+                public void onAnimationUpdate(ValueAnimator animation){
+                    ViewGroup.LayoutParams layoutParams = optionsContainer.getLayoutParams();
+                    layoutParams.height = (int)animation.getAnimatedValue();
+                    optionsContainer.setLayoutParams(layoutParams);
+                }
+            });
+            sizeAnimator.setInterpolator(new AccelerateDecelerateInterpolator());
+
+            sizeAnimator.start();
         }
         @Override
         protected Boolean doInBackground(Void... params){
@@ -337,6 +375,32 @@ public class CrackFragment extends Fragment{
         void done(){
             startBtn.setText(R.string.start);
             progress.setIndeterminate(false);
+
+            ValueAnimator sizeAnimator = ValueAnimator.ofInt(0, prevOptContainerHeight);
+            sizeAnimator.setTarget(optionsContainer);
+            sizeAnimator.addUpdateListener(new ValueAnimator.AnimatorUpdateListener(){
+                @Override
+                public void onAnimationUpdate(ValueAnimator animation){
+                    ViewGroup.LayoutParams layoutparams = optionsContainer.getLayoutParams();
+                    layoutparams.height = (int)animation.getAnimatedValue();
+                    optionsContainer.setLayoutParams(layoutparams);
+                }
+            });
+            sizeAnimator.addListener(new Animator.AnimatorListener() {
+                @Override
+                public void onAnimationStart(Animator animation) {}
+                @Override
+                public void onAnimationEnd(Animator animation) {
+                    consoleScrollView.fullScroll(View.FOCUS_DOWN);
+                }
+                @Override
+                public void onAnimationCancel(Animator animation) {}
+                @Override
+                public void onAnimationRepeat(Animator animation) {}
+            });
+            sizeAnimator.setInterpolator(new AccelerateDecelerateInterpolator());
+
+            sizeAnimator.start();
         }
     }
 }

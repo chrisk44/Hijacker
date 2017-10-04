@@ -17,6 +17,8 @@ package com.hijacker;
     along with this program.  If not, see <http://www.gnu.org/licenses/>
  */
 
+import android.animation.Animator;
+import android.animation.ValueAnimator;
 import android.app.Activity;
 import android.app.Fragment;
 import android.os.AsyncTask;
@@ -27,6 +29,7 @@ import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.animation.AccelerateDecelerateInterpolator;
 import android.view.inputmethod.EditorInfo;
 import android.widget.Button;
 import android.widget.CheckBox;
@@ -71,6 +74,7 @@ import static com.hijacker.MainActivity.stop;
 
 public class ReaverFragment extends Fragment{
     View fragmentView;
+    static View optionsContainer;
     static Button start_button, select_button;
     TextView consoleView;
     EditText pinDelayView, lockedDelayView;
@@ -87,6 +91,7 @@ public class ReaverFragment extends Fragment{
 
         consoleView = (TextView)fragmentView.findViewById(R.id.console);
         consoleScrollView = (ScrollView)fragmentView.findViewById(R.id.console_scroll_view);
+        optionsContainer = fragmentView.findViewById(R.id.options_container);
         pinDelayView = (EditText)fragmentView.findViewById(R.id.pin_delay);
         lockedDelayView = (EditText)fragmentView.findViewById(R.id.locked_delay);
         pixie_dust_cb = (CheckBox)fragmentView.findViewById(R.id.pixie_dust);
@@ -96,6 +101,8 @@ public class ReaverFragment extends Fragment{
         no_nack_cb = (CheckBox)fragmentView.findViewById(R.id.no_nack);
         select_button = (Button)fragmentView.findViewById(R.id.select_ap);
         start_button = (Button)fragmentView.findViewById(R.id.start_button);
+
+        Log.d("TESTESTESTEST", "optionsContainer is now " + optionsContainer.toString());
 
         pinDelayView.setOnEditorActionListener(new TextView.OnEditorActionListener(){
             @Override
@@ -108,7 +115,7 @@ public class ReaverFragment extends Fragment{
             }
         });
 
-        task = new ReaverTask();
+        if(task==null) task = new ReaverTask();
 
         int chroot_check = checkChroot();
         if(chroot_check!=CHROOT_FOUND){
@@ -141,7 +148,6 @@ public class ReaverFragment extends Fragment{
                             AP temp = AP.APs.get(item.getItemId());
                             if(ap!=temp){
                                 ap = temp;
-                                task.cancel(true);
                             }
                             select_button.setText(ap.toString());
                         }else{
@@ -177,6 +183,35 @@ public class ReaverFragment extends Fragment{
                 }
             }
         });
+
+        //Restore view
+        consoleView.setText(console_text);
+        consoleView.post(new Runnable() {
+            @Override
+            public void run() {
+                consoleScrollView.fullScroll(View.FOCUS_DOWN);
+            }
+        });
+        pinDelayView.setText(pin_delay);
+        lockedDelayView.setText(locked_delay);
+        pixie_dust_cb.setChecked(pixie_dust);
+        ignored_locked_cb.setChecked(ignore_locked);
+        eap_fail_cb.setChecked(eap_fail);
+        small_dh_cb.setChecked(small_dh);
+        no_nack_cb.setChecked(no_nack);
+        if(custom_mac!=null) select_button.setText(custom_mac);
+        else if(ap!=null) select_button.setText(ap.toString());
+        else if(!AP.marked.isEmpty()){
+            ap = AP.marked.get(AP.marked.size()-1);
+            select_button.setText(ap.toString());
+        }
+        start_button.setText(task.getStatus()==AsyncTask.Status.RUNNING ? R.string.stop : R.string.start);
+
+        if(task.getStatus()==AsyncTask.Status.RUNNING){
+            ViewGroup.LayoutParams layoutParams = optionsContainer.getLayoutParams();
+            layoutParams.height = 0;
+            optionsContainer.setLayoutParams(layoutParams);
+        }
         return fragmentView;
     }
     void attemptStart(){
@@ -217,27 +252,6 @@ public class ReaverFragment extends Fragment{
         super.onResume();
         currentFragment = FRAGMENT_REAVER;
         refreshDrawer();
-        consoleView.setText(console_text);
-        consoleView.post(new Runnable() {
-            @Override
-            public void run() {
-                consoleScrollView.fullScroll(View.FOCUS_DOWN);
-            }
-        });
-        pinDelayView.setText(pin_delay);
-        lockedDelayView.setText(locked_delay);
-        pixie_dust_cb.setChecked(pixie_dust);
-        ignored_locked_cb.setChecked(ignore_locked);
-        eap_fail_cb.setChecked(eap_fail);
-        small_dh_cb.setChecked(small_dh);
-        no_nack_cb.setChecked(no_nack);
-        if(custom_mac!=null) select_button.setText(custom_mac);
-        else if(ap!=null) select_button.setText(ap.toString());
-        else if(!AP.marked.isEmpty()){
-            ap = AP.marked.get(AP.marked.size()-1);
-            select_button.setText(ap.toString());
-        }
-        start_button.setText(task.getStatus()==AsyncTask.Status.RUNNING ? R.string.stop : R.string.start);
     }
     @Override
     public void onPause(){
@@ -250,6 +264,14 @@ public class ReaverFragment extends Fragment{
         eap_fail = eap_fail_cb.isChecked();
         small_dh = small_dh_cb.isChecked();
         no_nack = no_nack_cb.isChecked();
+    }
+    @Override
+    public void onDestroy(){
+        super.onDestroy();
+        if(task.getStatus()!= AsyncTask.Status.RUNNING){
+            //Avoid memory leak
+            optionsContainer = null;
+        }
     }
     static String get_chroot_env(final Activity activity){
         // add strings here , they will be in the kali env
@@ -290,6 +312,7 @@ public class ReaverFragment extends Fragment{
     class ReaverTask extends AsyncTask<Void, String, Boolean>{
         String pinDelay, lockedDelay;
         boolean ignoreLocked, eapFail, smallDH, pixieDust, noNack;
+        int prevOptContainerHeight = -1;
         @Override
         protected void onPreExecute(){
             pinDelay = pinDelayView.getText().toString();
@@ -302,6 +325,22 @@ public class ReaverFragment extends Fragment{
 
             start_button.setText(R.string.stop);
             progress.setIndeterminate(true);
+
+            prevOptContainerHeight = optionsContainer.getHeight();
+
+            ValueAnimator sizeAnimator = ValueAnimator.ofInt(optionsContainer.getHeight(), 0);
+            sizeAnimator.setTarget(optionsContainer);
+            sizeAnimator.addUpdateListener(new ValueAnimator.AnimatorUpdateListener(){
+                @Override
+                public void onAnimationUpdate(ValueAnimator animation){
+                    ViewGroup.LayoutParams layoutParams = optionsContainer.getLayoutParams();
+                    layoutParams.height = (int)animation.getAnimatedValue();
+                    optionsContainer.setLayoutParams(layoutParams);
+                }
+            });
+            sizeAnimator.setInterpolator(new AccelerateDecelerateInterpolator());
+
+            sizeAnimator.start();
         }
         @Override
         protected Boolean doInBackground(Void... params){
@@ -364,13 +403,41 @@ public class ReaverFragment extends Fragment{
         }
         @Override
         protected void onPostExecute(final Boolean success){
-            start_button.setText(R.string.start);
-            progress.setIndeterminate(false);
+            done();
         }
         @Override
         protected void onCancelled(){
+            done();
+        }
+        void done(){
             start_button.setText(R.string.start);
             progress.setIndeterminate(false);
+
+            ValueAnimator sizeAnimator = ValueAnimator.ofInt(0, prevOptContainerHeight);
+            sizeAnimator.setTarget(optionsContainer);
+            sizeAnimator.addUpdateListener(new ValueAnimator.AnimatorUpdateListener(){
+                @Override
+                public void onAnimationUpdate(ValueAnimator animation){
+                    ViewGroup.LayoutParams layoutparams = optionsContainer.getLayoutParams();
+                    layoutparams.height = (int)animation.getAnimatedValue();
+                    optionsContainer.setLayoutParams(layoutparams);
+                }
+            });
+            sizeAnimator.addListener(new Animator.AnimatorListener() {
+                @Override
+                public void onAnimationStart(Animator animation){}
+                @Override
+                public void onAnimationEnd(Animator animation){
+                    consoleScrollView.fullScroll(View.FOCUS_DOWN);
+                }
+                @Override
+                public void onAnimationCancel(Animator animation){}
+                @Override
+                public void onAnimationRepeat(Animator animation){}
+            });
+            sizeAnimator.setInterpolator(new AccelerateDecelerateInterpolator());
+
+            sizeAnimator.start();
         }
     }
 }
