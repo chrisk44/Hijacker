@@ -3,9 +3,10 @@
     <PreferenceCategory android:title="@string/general">
 
         <SwitchPreference
-            android:defaultValue="@string/airOnStartup"
-            android:key="airOnStartup"
-            android:title="@string/startup_title"/>
+            android:defaultValue="@string/show_notif"
+            android:key="show_notif"
+            android:summary="@string/notif_sum"
+            android:title="@string/notif_title" />
         <EditTextPreference
             android:defaultValue="@string/prefix"
             android:selectAllOnFocus="true"
@@ -16,6 +17,34 @@
             android:summary="@string/prefix_sum"
             android:dialogMessage="@string/prefix_desc"
             android:dialogTitle="@string/prefix_title" />
+    <SwitchPreference
+        android:defaultValue="@string/show_details"
+        android:dependency="show_notif"
+        android:key="show_details"
+        android:summary="@string/notif_details_sum"
+        android:title="@string/notif_details_title" />
+    <SwitchPreference
+        android:defaultValue="@string/watchdog"
+        android:key="watchdog"
+        android:summary="@string/watchdog_sum"
+        android:title="@string/watchdog_title" />
+    <SwitchPreference
+        android:defaultValue="@string/debug"
+        android:key="debug"
+        android:summary="@string/debug_sum"
+        android:title="@string/debug_title" />
+    </PreferenceCategory>
+
+    <PreferenceCategory android:title="Airodump">
+        <SwitchPreference
+            android:defaultValue="@string/airOnStartup"
+            android:key="airOnStartup"
+            android:title="@string/startup_title" />
+        <SwitchPreference
+            android:defaultValue="true"
+            android:key="enable_on_airodump"
+            android:summary="@string/enable_on_airodump_sum"
+            android:title="@string/enable_on_airodump_title" />
         <Preference
             android:selectAllOnFocus="true"
             android:singleLine="true"
@@ -32,37 +61,18 @@
             android:title="@string/always_cap_title"
             android:summary="@string/always_cap_sum"
             android:key="always_cap"/>
+</PreferenceCategory>
+    <PreferenceCategory android:title="Aireplay">
         <EditTextPreference
             android:defaultValue="@string/deauthWait"
+            android:dialogMessage="@string/deauthWait_desc"
+            android:dialogTitle="@string/deauthWait_title"
+            android:inputType="number"
+            android:key="deauthWait"
             android:selectAllOnFocus="true"
             android:singleLine="true"
-            android:title="@string/deauthWait_title"
-            android:key="deauthWait"
             android:summary="@string/deauthWait_sum"
-            android:inputType="number"
-            android:dialogTitle="@string/deauthWait_title"
-            android:dialogMessage="@string/deauthWait_desc" />
-        <SwitchPreference
-            android:defaultValue="@string/show_notif"
-            android:title="@string/notif_title"
-            android:key="show_notif"
-            android:summary="@string/notif_sum" />
-        <SwitchPreference
-            android:defaultValue="@string/show_details"
-            android:title="@string/notif_details_title"
-            android:key="show_details"
-            android:summary="@string/notif_details_sum"
-            android:dependency="show_notif" />
-        <SwitchPreference
-            android:defaultValue="@string/debug"
-            android:title="@string/debug_title"
-            android:key="debug"
-            android:summary="@string/debug_sum" />
-        <SwitchPreference
-            android:defaultValue="@string/watchdog"
-            android:title="@string/watchdog_title"
-            android:summary="@string/watchdog_sum"
-            android:key="watchdog"/>
+            android:title="@string/deauthWait_title" />
         <SwitchPreference
             android:defaultValue="@string/target_deauth"
             android:title="@string/target_deauth_title"
@@ -98,11 +108,6 @@
             android:title="@string/mm2_title"
             android:key="disable_monMode"
             android:defaultValue="@string/disable_monMode" />
-        <SwitchPreference
-            android:defaultValue="true"
-            android:title="@string/enable_on_airodump_title"
-            android:key="enable_on_airodump"
-            android:summary="@string/enable_on_airodump_sum"/>
     </PreferenceCategory>
     <PreferenceCategory android:title="@string/tools">
         <Preference
