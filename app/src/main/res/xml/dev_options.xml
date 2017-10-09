@@ -3,4 +3,7 @@
     <Preference
         android:key="causeNPE"
         android:title="Generate NPE" />
+    <Preference
+        android:key="testChroot"
+        android:title="Test chroot" />
 </PreferenceScreen>

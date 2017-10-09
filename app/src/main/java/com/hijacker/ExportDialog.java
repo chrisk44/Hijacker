@@ -147,16 +147,20 @@ public class ExportDialog extends DialogFragment{
             if(((RadioGroup) dialogView.findViewById(R.id.radio_group)).getCheckedRadioButtonId()==R.id.all_rb){
                 //export all
                 out.write(ap_str + '\n');
-                for(int i=0;i<Tile.i;i++){
-                    out.write(Tile.allTiles.get(i).device.getExported() + '\n');
-                    if(i==AP.APs.size()-1) out.write('\n' + st_str + '\n');
+                for(int i=0;i<AP.APs.size();i++){
+                    out.write(AP.APs.get(i).getExported() + '\n');
+                }
+                out.write('\n' + st_str + '\n');
+                for(int i=0;i<ST.STs.size();i++){
+                    out.write(ST.STs.get(i).getExported() + '\n');
                 }
             }else{
                 //export visible
                 out.write(ap_str + '\n');
-                for(int i=0;i<Tile.i;i++){
+                int i;
+                for(i=0;i<Tile.tiles.size();i++){
                     out.write(Tile.tiles.get(i).device.getExported() + '\n');
-                    if(i==AP.APs.size()-1) out.write('\n' + st_str + '\n');
+                    if(i==Tile.i-1) out.write('\n' + st_str + '\n');
                 }
             }
             out.close();
