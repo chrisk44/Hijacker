@@ -142,12 +142,12 @@ public class CustomActionFragment extends Fragment{
         console_text = consoleView.getText().toString();
     }
     @Override
-    public void onDestroy(){
-        super.onDestroy();
+    public void onStop(){
         if(task.getStatus()!= AsyncTask.Status.RUNNING){
             //Avoid memory leak
             optionsContainer = null;
         }
+        super.onStop();
     }
     static boolean isRunning(){
         if(task==null) return false;

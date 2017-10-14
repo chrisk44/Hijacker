@@ -47,6 +47,7 @@ import java.io.InputStreamReader;
 import static com.hijacker.MainActivity.FRAGMENT_CRACK;
 import static com.hijacker.MainActivity.PROCESS_AIRCRACK;
 import static com.hijacker.MainActivity.aircrack_dir;
+import static com.hijacker.MainActivity.background;
 import static com.hijacker.MainActivity.busybox;
 import static com.hijacker.MainActivity.cap_dir;
 import static com.hijacker.MainActivity.currentFragment;
@@ -201,12 +202,12 @@ public class CrackFragment extends Fragment{
         wordlist_text = wordlistView.getText().toString();
     }
     @Override
-    public void onDestroy(){
-        super.onDestroy();
+    public void onStop(){
         if(task.getStatus()!= AsyncTask.Status.RUNNING){
             //Avoid memory leak
             optionsContainer = null;
         }
+        super.onStop();
     }
     static boolean isRunning(){
         if(task==null) return false;
@@ -357,13 +358,19 @@ public class CrackFragment extends Fragment{
         @Override
         protected void onPostExecute(final Boolean success){
             done();
+            String str;
             if(success){
-                consoleView.append("Key found: " + key + '\n');
+                str = "Key found: " + key + '\n';
             }else{
-                consoleView.append("Key not found\n");
-                if(mode==WEP) consoleView.append("Try with different wep bit selection or more IVs\n");
+                str = "Key not found\n";
+                if(mode==WEP) str += "Try with different wep bit selection or more IVs\n";
             }
-            consoleScrollView.fullScroll(View.FOCUS_DOWN);
+            if(currentFragment==FRAGMENT_CRACK && !background){
+                consoleScrollView.fullScroll(View.FOCUS_DOWN);
+                consoleView.append(str);
+            }else{
+                console_text += str;
+            }
         }
         @Override
         protected void onCancelled(){

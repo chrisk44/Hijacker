@@ -266,12 +266,12 @@ public class ReaverFragment extends Fragment{
         no_nack = no_nack_cb.isChecked();
     }
     @Override
-    public void onDestroy(){
-        super.onDestroy();
+    public void onStop(){
         if(task.getStatus()!= AsyncTask.Status.RUNNING){
             //Avoid memory leak
             optionsContainer = null;
         }
+        super.onStop();
     }
     static String get_chroot_env(final Activity activity){
         // add strings here , they will be in the kali env
