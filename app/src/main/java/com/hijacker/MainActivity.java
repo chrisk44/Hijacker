@@ -1547,7 +1547,7 @@ public class MainActivity extends AppCompatActivity{
         }
 
         try{
-            String url = "http://students.ceid.upatras.gr/~ckyriak/version.txt";
+            String url = "https://raw.githubusercontent.com/chrisk44/HijackerVersionCheck/master/version.txt";
             HttpURLConnection connection = (HttpURLConnection) (new URL(url).openConnection());
 
             BufferedReader out = new BufferedReader(new InputStreamReader(connection.getInputStream(), "iso-8859-1"), 8);
