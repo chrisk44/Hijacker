@@ -71,7 +71,6 @@ public class CustomActionFragment extends Fragment{
 
         consoleView = (TextView)fragmentView.findViewById(R.id.console);
         consoleScrollView = (ScrollView)fragmentView.findViewById(R.id.console_scroll_view);
-        optionsContainer = fragmentView.findViewById(R.id.options_container);
         startBtn = (Button)fragmentView.findViewById(R.id.start_button);
         targetBtn = (Button)fragmentView.findViewById(R.id.select_target);
         actionBtn = (Button)fragmentView.findViewById(R.id.select_action);
@@ -122,12 +121,6 @@ public class CustomActionFragment extends Fragment{
         }
         startBtn.setText(isRunning() ? R.string.stop : R.string.start);
 
-        if(task.getStatus()==AsyncTask.Status.RUNNING){
-            ViewGroup.LayoutParams layoutParams = optionsContainer.getLayoutParams();
-            layoutParams.height = 0;
-            optionsContainer.setLayoutParams(layoutParams);
-        }
-
         return fragmentView;
     }
     @Override
@@ -140,6 +133,16 @@ public class CustomActionFragment extends Fragment{
     public void onPause(){
         super.onPause();
         console_text = consoleView.getText().toString();
+    }
+    @Override
+    public void onStart(){
+        super.onStart();
+        optionsContainer = fragmentView.findViewById(R.id.options_container);
+        if(task.getStatus()==AsyncTask.Status.RUNNING){
+            ViewGroup.LayoutParams layoutParams = optionsContainer.getLayoutParams();
+            layoutParams.height = 0;
+            optionsContainer.setLayoutParams(layoutParams);
+        }
     }
     @Override
     public void onStop(){

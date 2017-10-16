@@ -76,7 +76,6 @@ public class CrackFragment extends Fragment{
 
         consoleView = (TextView)fragmentView.findViewById(R.id.console);
         consoleScrollView = (ScrollView)fragmentView.findViewById(R.id.console_scroll_view);
-        optionsContainer = fragmentView.findViewById(R.id.options_container);
         capfileView = (EditText)fragmentView.findViewById(R.id.capfile);
         wordlistView = (EditText)fragmentView.findViewById(R.id.wordlist);
         capFeBtn = (Button)fragmentView.findViewById(R.id.cap_fe_btn);
@@ -180,12 +179,6 @@ public class CrackFragment extends Fragment{
             }
         });
 
-        if(task.getStatus()==AsyncTask.Status.RUNNING){
-            ViewGroup.LayoutParams layoutParams = optionsContainer.getLayoutParams();
-            layoutParams.height = 0;
-            optionsContainer.setLayoutParams(layoutParams);
-        }
-
         return fragmentView;
     }
     @Override
@@ -200,6 +193,16 @@ public class CrackFragment extends Fragment{
         console_text = consoleView.getText().toString();
         capfile_text = capfileView.getText().toString();
         wordlist_text = wordlistView.getText().toString();
+    }
+    @Override
+    public void onStart(){
+        super.onStart();
+        optionsContainer = fragmentView.findViewById(R.id.options_container);
+        if(task.getStatus()==AsyncTask.Status.RUNNING){
+            ViewGroup.LayoutParams layoutParams = optionsContainer.getLayoutParams();
+            layoutParams.height = 0;
+            optionsContainer.setLayoutParams(layoutParams);
+        }
     }
     @Override
     public void onStop(){

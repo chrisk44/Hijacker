@@ -46,84 +46,47 @@ class WatchdogTask extends AsyncTask<Void, String, Boolean>{
     WatchdogTask(Context context){
         this.con = context;
     }
+    void sleep() throws InterruptedException{
+        while(System.currentTimeMillis()-last_action < 1000){
+            if(debug) Log.d("HIJACKER/watchdog", "Watchdog waiting for 1 sec...");
+            Thread.sleep(PAUSE_TIME);
+        }
+    }
+    void check(int process, boolean running, String stillRunning, String notRunning) throws InterruptedException{
+        sleep();
+        if(isCancelled()) throw new InterruptedException();
+
+        List<Integer> list = getPIDs(process);
+        if(running && list.size()==0){
+            //process not running
+            publishProgress(notRunning);
+            stop(process);
+        }else if(!running && list.size()>0){
+            //process still running
+            stop(process);      //Try to stop it
+            if(getPIDs(process).size()>0){
+                //Didn't work
+                publishProgress(stillRunning);
+            }
+        }
+    }
     @Override
     protected Boolean doInBackground(Void... params){
         try{
             while(!isCancelled()){
-                Thread.sleep(SLEEP_TIME);
-                if(isCancelled()) return false;
-                while(System.currentTimeMillis()-last_action < 1000){
-                    if(debug) Log.d("HIJACKER/watchdog", "Watchdog waiting for 1 sec...");
-                    Thread.sleep(PAUSE_TIME);
-                    if(isCancelled()) return false;
-                }
                 if(debug) Log.d("HIJACKER/watchdog", "Watchdog watching...");
-                List<Integer> list;
-                if(isCancelled()) return false;
-                list = getPIDs(PROCESS_AIRODUMP);
-                if(Airodump.isRunning() && list.size()==0){          //airodump not running
-                    publishProgress(con.getString(R.string.airodump_not_running));
-                    stop(PROCESS_AIRODUMP);
-                }else if(!Airodump.isRunning() && list.size()>0){     //airodump still running
-                    if(debug) Log.d("HIJACKER/watchdog", "Airodump is still running. Trying to kill it...");
-                    stop(PROCESS_AIRODUMP);
-                    if(getPIDs(PROCESS_AIRODUMP).size()>0){
-                        publishProgress(con.getString(R.string.airodump_still_running));
-                    }
-                }
-                if(isCancelled()) return false;
-                list = getPIDs(PROCESS_AIREPLAY);
-                if(aireplay_running!=0 && list.size()==0){      //aireplay not running
-                    publishProgress(con.getString(R.string.aireplay_not_running));
-                    stop(PROCESS_AIREPLAY);
-                }else if(aireplay_running==0 && list.size()>0){ //aireplay still running
-                    if(debug) Log.d("HIJACKER/watchdog", "Aireplay is still running. Trying to kill it...");
-                    stop(PROCESS_AIREPLAY);
-                    if(getPIDs(PROCESS_AIREPLAY).size()>0){
-                        publishProgress(con.getString(R.string.aireplay_still_running));
-                    }
-                }
 
-                if(isCancelled()) return false;
-                list = getPIDs(PROCESS_MDK_BF);
-                if(bf && list.size()==0){         //mdkbf not running
-                    publishProgress(con.getString(R.string.mdk_not_running));
-                    stop(PROCESS_MDK_BF);
-                }else if(!bf && list.size()>0){   //mdkbf still running
-                    if(debug) Log.d("HIJACKER/watchdog", "MDK_BF is still running. Trying to kill it...");
-                    stop(PROCESS_MDK_BF);
-                    if(getPIDs(PROCESS_MDK_BF).size()>0){
-                        publishProgress(con.getString(R.string.mdk_still_running));
-                    }
-                }
-                if(isCancelled()) return false;
-                list = getPIDs(PROCESS_MDK_DOS);
-                if(ados && list.size()==0){         //mdkdos not running
-                    publishProgress(con.getString(R.string.mdk_not_running));
-                    stop(PROCESS_MDK_DOS);
-                }else if(!ados && list.size()>0){   //mdkdos still running
-                    if(debug) Log.d("HIJACKER/watchdog", "MDK_DOS is still running. Trying to kill it...");
-                    stop(PROCESS_MDK_DOS);
-                    if(getPIDs(PROCESS_MDK_DOS).size()>0){
-                        publishProgress(con.getString(R.string.mdk_still_running));
-                    }
-                }
+                check(PROCESS_AIRODUMP, Airodump.isRunning(), con.getString(R.string.airodump_still_running), con.getString(R.string.airodump_not_running));
+                check(PROCESS_AIREPLAY, aireplay_running!=0, con.getString(R.string.aireplay_still_running), con.getString(R.string.aireplay_not_running));
+                check(PROCESS_MDK_BF, bf, con.getString(R.string.mdk_still_running), con.getString(R.string.mdk_not_running));
+                check(PROCESS_MDK_DOS, ados, con.getString(R.string.mdk_still_running), con.getString(R.string.mdk_not_running));
+                //Can't check Reaver, it normally stops on its own, no way to know if there is a problem
 
-                if(isCancelled()) return false;
-                list = getPIDs(PROCESS_REAVER);
-                if(ReaverFragment.isRunning() && list.size()==0){         //reaver not running
-                    publishProgress(con.getString(R.string.reaver_not_running));
-                    stop(PROCESS_REAVER);
-                }else if(!ReaverFragment.isRunning() && list.size()>0){   //reaver still running
-                    if(debug) Log.d("HIJACKER/watchdog", "Reaver is still running. Trying to kill it...");
-                    stop(PROCESS_REAVER);
-                    if(getPIDs(PROCESS_REAVER).size()>0){
-                        publishProgress(con.getString(R.string.reaver_still_running));
-                    }
-                }
+                Thread.sleep(SLEEP_TIME);
             }
+
         }catch(InterruptedException e){
-            Log.e("HIJACKER/watchdog", "Exception: " + e.toString());
+            Log.d("HIJACKER/watchdog", "Watchdog interrupted");
         }
 
         return true;

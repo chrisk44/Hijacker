@@ -179,8 +179,6 @@
     <string name="aireplay_not_running">Aireplay is not running!</string>
     <string name="mdk_still_running">MDK3 is still running!</string>
     <string name="mdk_not_running">MDK3 is not running!</string>
-    <string name="reaver_still_running">Reaver is still running!</string>
-    <string name="reaver_not_running">Reaver is not running</string>
     <string name="su_notfound_title">SuperSU not found!</string>
     <string name="su_notfound">You might be rooted, but at the moment, this application requires SuperSU to function properly.
         You can continue if you believe that your root solution will work. Please don\'t report bugs.</string>

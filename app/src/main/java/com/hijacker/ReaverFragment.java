@@ -91,7 +91,6 @@ public class ReaverFragment extends Fragment{
 
         consoleView = (TextView)fragmentView.findViewById(R.id.console);
         consoleScrollView = (ScrollView)fragmentView.findViewById(R.id.console_scroll_view);
-        optionsContainer = fragmentView.findViewById(R.id.options_container);
         pinDelayView = (EditText)fragmentView.findViewById(R.id.pin_delay);
         lockedDelayView = (EditText)fragmentView.findViewById(R.id.locked_delay);
         pixie_dust_cb = (CheckBox)fragmentView.findViewById(R.id.pixie_dust);
@@ -101,8 +100,6 @@ public class ReaverFragment extends Fragment{
         no_nack_cb = (CheckBox)fragmentView.findViewById(R.id.no_nack);
         select_button = (Button)fragmentView.findViewById(R.id.select_ap);
         start_button = (Button)fragmentView.findViewById(R.id.start_button);
-
-        Log.d("TESTESTESTEST", "optionsContainer is now " + optionsContainer.toString());
 
         pinDelayView.setOnEditorActionListener(new TextView.OnEditorActionListener(){
             @Override
@@ -207,11 +204,6 @@ public class ReaverFragment extends Fragment{
         }
         start_button.setText(task.getStatus()==AsyncTask.Status.RUNNING ? R.string.stop : R.string.start);
 
-        if(task.getStatus()==AsyncTask.Status.RUNNING){
-            ViewGroup.LayoutParams layoutParams = optionsContainer.getLayoutParams();
-            layoutParams.height = 0;
-            optionsContainer.setLayoutParams(layoutParams);
-        }
         return fragmentView;
     }
     void attemptStart(){
@@ -264,6 +256,16 @@ public class ReaverFragment extends Fragment{
         eap_fail = eap_fail_cb.isChecked();
         small_dh = small_dh_cb.isChecked();
         no_nack = no_nack_cb.isChecked();
+    }
+    @Override
+    public void onStart(){
+        super.onStart();
+        optionsContainer = fragmentView.findViewById(R.id.options_container);
+        if(task.getStatus()==AsyncTask.Status.RUNNING){
+            ViewGroup.LayoutParams layoutParams = optionsContainer.getLayoutParams();
+            layoutParams.height = 0;
+            optionsContainer.setLayoutParams(layoutParams);
+        }
     }
     @Override
     public void onStop(){
