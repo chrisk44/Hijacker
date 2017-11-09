@@ -582,6 +582,7 @@ public class MainActivity extends AppCompatActivity{
                 }
             };
             wpa_thread = new Thread(wpa_runnable);
+            watchdogTask = new WatchdogTask(MainActivity.this);
 
             //Start threads
             publishProgress(getString(R.string.starting_threads));
@@ -607,7 +608,7 @@ public class MainActivity extends AppCompatActivity{
             publishProgress(getString(R.string.starting_pers_service));
             startService(new Intent(MainActivity.this, PersistenceService.class));
 
-            //Load manufacturer AVL tree
+            //Load manufacturer HashMap
             publishProgress(getString(R.string.loading_manuf_db));
             manufHashMap = new HashMap<>();
             File db = new File(manufDBFile);
@@ -650,7 +651,7 @@ public class MainActivity extends AppCompatActivity{
                     manufHashMap = null;
                 }
             }else{
-                //Load database on the AVL
+                //Load database on the HashMap
                 try{
                     //Database format:
                     //01B256;Manufacturer co.\n
@@ -736,7 +737,6 @@ public class MainActivity extends AppCompatActivity{
             if(!success) return;
             loadingDialog.setText(getString(R.string.starting_hijacker));
 
-            watchdogTask = new WatchdogTask(MainActivity.this);
             if(watchdog){
                 watchdogTask.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
             }
@@ -1551,6 +1551,8 @@ public class MainActivity extends AppCompatActivity{
         try{
             String url = "https://raw.githubusercontent.com/chrisk44/HijackerVersionCheck/master/version.txt";
             HttpURLConnection connection = (HttpURLConnection) (new URL(url).openConnection());
+            connection.setConnectTimeout(5000);
+            connection.setReadTimeout(5000);
 
             BufferedReader out = new BufferedReader(new InputStreamReader(connection.getInputStream(), "iso-8859-1"), 8);
 
