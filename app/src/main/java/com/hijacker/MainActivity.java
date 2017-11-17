@@ -1182,7 +1182,7 @@ public class MainActivity extends AppCompatActivity{
         AppIndex.AppIndexApi.start(client, getIndexApiAction());
     }
     public Action getIndexApiAction(){
-        Thing object = new Thing.Builder().setName("AirodumpGUI")
+        Thing object = new Thing.Builder().setName("Hijacker")
                 .setUrl(Uri.parse("https://github.com/chrisk44/Hijacker")).build();
         return new Action.Builder(Action.TYPE_VIEW).setObject(object).setActionStatus(Action.STATUS_TYPE_COMPLETED).build();
     }

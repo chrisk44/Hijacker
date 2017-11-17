@@ -146,10 +146,13 @@ public class CustomActionFragment extends Fragment{
     }
     @Override
     public void onStop(){
-        if(task.getStatus()!= AsyncTask.Status.RUNNING){
-            //Avoid memory leak
-            optionsContainer = null;
+        if(task!=null){
+            if(task.sizeAnimator!=null){
+                task.sizeAnimator.cancel();
+            }
         }
+        //Avoid memory leak
+        optionsContainer = null;
         super.onStop();
     }
     static boolean isRunning(){
@@ -255,6 +258,7 @@ public class CustomActionFragment extends Fragment{
     class CustomActionTask extends AsyncTask<Void, String, Boolean>{
         Shell shell;
         int prevOptContainerHeight = -1;
+        ValueAnimator sizeAnimator;
         @Override
         protected void onPreExecute(){
             startBtn.setText(R.string.stop);
@@ -266,7 +270,7 @@ public class CustomActionFragment extends Fragment{
 
             prevOptContainerHeight = optionsContainer.getHeight();
 
-            ValueAnimator sizeAnimator = ValueAnimator.ofInt(optionsContainer.getHeight(), 0);
+            sizeAnimator = ValueAnimator.ofInt(optionsContainer.getHeight(), 0);
             sizeAnimator.setTarget(optionsContainer);
             sizeAnimator.addUpdateListener(new ValueAnimator.AnimatorUpdateListener(){
                 @Override
@@ -278,7 +282,9 @@ public class CustomActionFragment extends Fragment{
             });
             sizeAnimator.setInterpolator(new AccelerateDecelerateInterpolator());
 
-            sizeAnimator.start();
+            if(optionsContainer!=null) {
+                sizeAnimator.start();
+            }
         }
         @Override
         protected Boolean doInBackground(Void... params){
@@ -353,7 +359,7 @@ public class CustomActionFragment extends Fragment{
             startBtn.setText(R.string.start);
             progress.setIndeterminate(false);
 
-            ValueAnimator sizeAnimator = ValueAnimator.ofInt(0, prevOptContainerHeight);
+            sizeAnimator = ValueAnimator.ofInt(0, prevOptContainerHeight);
             sizeAnimator.setTarget(optionsContainer);
             sizeAnimator.addUpdateListener(new ValueAnimator.AnimatorUpdateListener(){
                 @Override
@@ -377,7 +383,9 @@ public class CustomActionFragment extends Fragment{
             });
             sizeAnimator.setInterpolator(new AccelerateDecelerateInterpolator());
 
-            sizeAnimator.start();
+            if(optionsContainer!=null) {
+                sizeAnimator.start();
+            }
         }
     }
 }

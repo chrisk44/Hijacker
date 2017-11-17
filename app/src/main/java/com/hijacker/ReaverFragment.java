@@ -269,10 +269,13 @@ public class ReaverFragment extends Fragment{
     }
     @Override
     public void onStop(){
-        if(task.getStatus()!= AsyncTask.Status.RUNNING){
-            //Avoid memory leak
-            optionsContainer = null;
+        if(task!=null){
+            if(task.sizeAnimator!=null){
+                task.sizeAnimator.cancel();
+            }
         }
+        //Avoid memory leak
+        optionsContainer = null;
         super.onStop();
     }
     static String get_chroot_env(final Activity activity){
@@ -315,6 +318,7 @@ public class ReaverFragment extends Fragment{
         String pinDelay, lockedDelay;
         boolean ignoreLocked, eapFail, smallDH, pixieDust, noNack;
         int prevOptContainerHeight = -1;
+        ValueAnimator sizeAnimator;
         @Override
         protected void onPreExecute(){
             pinDelay = pinDelayView.getText().toString();
@@ -330,7 +334,7 @@ public class ReaverFragment extends Fragment{
 
             prevOptContainerHeight = optionsContainer.getHeight();
 
-            ValueAnimator sizeAnimator = ValueAnimator.ofInt(optionsContainer.getHeight(), 0);
+            sizeAnimator = ValueAnimator.ofInt(optionsContainer.getHeight(), 0);
             sizeAnimator.setTarget(optionsContainer);
             sizeAnimator.addUpdateListener(new ValueAnimator.AnimatorUpdateListener(){
                 @Override
@@ -342,7 +346,9 @@ public class ReaverFragment extends Fragment{
             });
             sizeAnimator.setInterpolator(new AccelerateDecelerateInterpolator());
 
-            sizeAnimator.start();
+            if(optionsContainer!=null) {
+                sizeAnimator.start();
+            }
         }
         @Override
         protected Boolean doInBackground(Void... params){
@@ -415,7 +421,7 @@ public class ReaverFragment extends Fragment{
             start_button.setText(R.string.start);
             progress.setIndeterminate(false);
 
-            ValueAnimator sizeAnimator = ValueAnimator.ofInt(0, prevOptContainerHeight);
+            sizeAnimator = ValueAnimator.ofInt(0, prevOptContainerHeight);
             sizeAnimator.setTarget(optionsContainer);
             sizeAnimator.addUpdateListener(new ValueAnimator.AnimatorUpdateListener(){
                 @Override
@@ -439,7 +445,9 @@ public class ReaverFragment extends Fragment{
             });
             sizeAnimator.setInterpolator(new AccelerateDecelerateInterpolator());
 
-            sizeAnimator.start();
+            if(optionsContainer!=null) {
+                sizeAnimator.start();
+            }
         }
     }
 }

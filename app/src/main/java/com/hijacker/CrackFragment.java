@@ -206,10 +206,13 @@ public class CrackFragment extends Fragment{
     }
     @Override
     public void onStop(){
-        if(task.getStatus()!= AsyncTask.Status.RUNNING){
-            //Avoid memory leak
-            optionsContainer = null;
+        if(task!=null){
+            if(task.sizeAnimator!=null){
+                task.sizeAnimator.cancel();
+            }
         }
+        //Avoid memory leak
+        optionsContainer = null;
         super.onStop();
     }
     static boolean isRunning(){
@@ -272,6 +275,7 @@ public class CrackFragment extends Fragment{
         int mode;
         String cmd, key;
         int prevOptContainerHeight = -1;
+        ValueAnimator sizeAnimator;
         @Override
         protected void onPreExecute(){
             progress.setIndeterminate(true);
@@ -316,7 +320,7 @@ public class CrackFragment extends Fragment{
 
             prevOptContainerHeight = optionsContainer.getHeight();
 
-            ValueAnimator sizeAnimator = ValueAnimator.ofInt(optionsContainer.getHeight(), 0);
+            sizeAnimator = ValueAnimator.ofInt(optionsContainer.getHeight(), 0);
             sizeAnimator.setTarget(optionsContainer);
             sizeAnimator.addUpdateListener(new ValueAnimator.AnimatorUpdateListener(){
                 @Override
@@ -328,7 +332,9 @@ public class CrackFragment extends Fragment{
             });
             sizeAnimator.setInterpolator(new AccelerateDecelerateInterpolator());
 
-            sizeAnimator.start();
+            if(optionsContainer!=null) {
+                sizeAnimator.start();
+            }
         }
         @Override
         protected Boolean doInBackground(Void... params){
@@ -386,7 +392,7 @@ public class CrackFragment extends Fragment{
             startBtn.setText(R.string.start);
             progress.setIndeterminate(false);
 
-            ValueAnimator sizeAnimator = ValueAnimator.ofInt(0, prevOptContainerHeight);
+            sizeAnimator = ValueAnimator.ofInt(0, prevOptContainerHeight);
             sizeAnimator.setTarget(optionsContainer);
             sizeAnimator.addUpdateListener(new ValueAnimator.AnimatorUpdateListener(){
                 @Override
@@ -410,7 +416,9 @@ public class CrackFragment extends Fragment{
             });
             sizeAnimator.setInterpolator(new AccelerateDecelerateInterpolator());
 
-            sizeAnimator.start();
+            if(optionsContainer!=null) {
+                sizeAnimator.start();
+            }
         }
     }
 }
