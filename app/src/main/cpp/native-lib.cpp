@@ -1,5 +1,5 @@
 #include <jni.h>
-#include <string>
+#include <string.h>
 #include <stdlib.h>
 #include <android/log.h>
 
