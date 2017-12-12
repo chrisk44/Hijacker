@@ -21,36 +21,47 @@
         android:progress="1"
         android:progressDrawable="@drawable/progress_horizontal_holo_blue_dark"/>
 
-    <LinearLayout
+    <TableLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="horizontal">
+        android:padding="5dp"
+        android:shrinkColumns="1">
 
-        <android.support.design.widget.TextInputLayout
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_weight="1">
+        <TableRow
+            android:layout_width="match_parent"
+            android:layout_height="match_parent">
 
-            <EditText
-                android:id="@+id/firm_location"
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:paddingEnd="5dp"
+                android:text="@string/firmware_location" />
+
+            <TextView
+                android:id="@+id/firmware_location"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:hint="@string/firm_location_text"
-                android:imeOptions="actionNext"
-                android:inputType="text"
-                android:maxLines="1"
-                android:text="@string/firm_location_default"/>
+                android:textColor="@android:color/white" />
+        </TableRow>
 
-        </android.support.design.widget.TextInputLayout>
+        <TableRow
+            android:layout_width="match_parent"
+            android:layout_height="match_parent">
 
-        <Button
-            android:id="@+id/firm_fe_btn"
-            style="?android:attr/buttonBarButtonStyle"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center_vertical"
-            android:text="..."/>
-    </LinearLayout>
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:paddingEnd="5dp"
+                android:text="@string/device_chipset" />
+
+            <TextView
+                android:id="@+id/device_chipset"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:textColor="@android:color/white" />
+        </TableRow>
+
+    </TableLayout>
 
     <LinearLayout
         android:layout_width="match_parent"

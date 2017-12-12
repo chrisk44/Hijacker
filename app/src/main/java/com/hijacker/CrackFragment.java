@@ -74,17 +74,17 @@ public class CrackFragment extends Fragment{
     public View onCreateView(LayoutInflater inflater, final ViewGroup container, Bundle savedInstanceState){
         fragmentView = inflater.inflate(R.layout.crack_fragment, container, false);
 
-        consoleView = (TextView)fragmentView.findViewById(R.id.console);
-        consoleScrollView = (ScrollView)fragmentView.findViewById(R.id.console_scroll_view);
-        capfileView = (EditText)fragmentView.findViewById(R.id.capfile);
-        wordlistView = (EditText)fragmentView.findViewById(R.id.wordlist);
-        capFeBtn = (Button)fragmentView.findViewById(R.id.cap_fe_btn);
-        wordlistFeBtn = (Button)fragmentView.findViewById(R.id.wordlist_fe_btn);
-        wepRG = (RadioGroup)fragmentView.findViewById(R.id.wep_rg);
-        securityRG = (RadioGroup)fragmentView.findViewById(R.id.radio_group);
-        wepRB = (RadioButton)fragmentView.findViewById(R.id.wep_rb);
-        wpaRB = (RadioButton)fragmentView.findViewById(R.id.wpa_rb);
-        startBtn = (Button)fragmentView.findViewById(R.id.start);
+        consoleView = fragmentView.findViewById(R.id.console);
+        consoleScrollView = fragmentView.findViewById(R.id.console_scroll_view);
+        capfileView = fragmentView.findViewById(R.id.capfile);
+        wordlistView = fragmentView.findViewById(R.id.wordlist);
+        capFeBtn = fragmentView.findViewById(R.id.cap_fe_btn);
+        wordlistFeBtn = fragmentView.findViewById(R.id.wordlist_fe_btn);
+        wepRG = fragmentView.findViewById(R.id.wep_rg);
+        securityRG = fragmentView.findViewById(R.id.radio_group);
+        wepRB = fragmentView.findViewById(R.id.wep_rb);
+        wpaRB = fragmentView.findViewById(R.id.wpa_rb);
+        startBtn = fragmentView.findViewById(R.id.start);
 
         consoleView.setText("");
 

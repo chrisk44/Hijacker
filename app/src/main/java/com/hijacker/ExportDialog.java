@@ -50,7 +50,7 @@ public class ExportDialog extends DialogFragment{
         AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
         dialogView = getActivity().getLayoutInflater().inflate(R.layout.export, null);
 
-        filenameView = (EditText)dialogView.findViewById(R.id.output_file);
+        filenameView = dialogView.findViewById(R.id.output_file);
         filenameView.setOnEditorActionListener(new TextView.OnEditorActionListener(){
             @Override
             public boolean onEditorAction(TextView v, int actionId, KeyEvent event){

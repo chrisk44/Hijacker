@@ -5,12 +5,11 @@
     <string name="stop_aireplay">Stop Aireplay</string>
 
     <!-- Generic text -->
-    <string name="incorrect_arch">Available only on armv7l, this is</string>
+    <string name="incorrect_arch">Available only on armv7l and aarch64, this is</string>
     <string name="close">Close</string>
     <string name="cancel">Cancel</string>
     <string name="back">Back</string>
     <string name="install">Install</string>
-    <string name="find_firmware">Find Firmware</string>
     <string name="yes">Yes</string>
     <string name="no">No</string>
     <string name="error">Error</string>
@@ -152,16 +151,19 @@
     <string name="install_firmware">Install Nexmon</string>
 
     <!-- InstallFirmwareDialog -->
+    <string name="firmware_location">Firmware Location:</string>
+    <string name="device_chipset">Device Chipset:</string>
+    <string name="firmware_not_found">Firmware (fw_bcmdhd.bin) not found</string>
     <string name="dir_notfound">Directory doesn\'t exist</string>
-    <string name="firm_notfound">There is no fw_bcmdhd.bin in here</string>
     <string name="backup_exists">A backup already exists</string>
     <string name="backup_created">Backup created</string>
     <string name="installed_firm_util">Installed firmware and utility</string>
-    <string name="firm_notfound_bcm">Firmware not found. Are you sure you have BCM4339?</string>
     <string name="create_backup">Create Backup</string>
-    <string name="fw_not_compatible">Your device does not seem to be compatible with Nexmon (BCM4339). Long click to override.</string>
-    <string name="path_contains_system">Modifying the system partition can brick some devices. Long click to override.</string>
+    <string name="fw_not_compatible">Your device does not seem to be compatible with Nexmon (BCM4339 or BCM4358). Long click to override.</string>
+    <string name="error_extracting_files">There was an error while extracting the files</string>
     <string name="field_required">This field is required</string>
+    <string name="restore">Restore</string>
+    <string name="restored">Backup restored</string>
 
     <!-- IsolatedFragment (xml) -->
     <string name="crack">Crack</string>
@@ -205,6 +207,7 @@
     <string name="init_notifications">Initializing notifications…</string>
     <string name="loading_strings">Loading strings…</string>
     <string name="loading_custom_actions">Loading custom actions…</string>
+    <string name="detecting_device_chipset">Detecting device chipset…</string>
     <string name="setting_up_tools">Setting up tools…</string>
     <string name="init_rootFile">Initializing RootFile…</string>
     <string name="init_threads">Initializing threads…</string>
@@ -249,10 +252,6 @@
     <string name="pin_delay">PIN delay</string>
     <string name="locked_delay">Locked Delay</string>
     <string name="custom_chroot_cmd_illegal">The custom command can\'t contain the character \'</string>
-
-    <!-- RestoreFirmwareDialog -->
-    <string name="restore">Restore</string>
-    <string name="restored">Backup restored</string>
 
     <!-- SendLogActivity -->
     <string name="unexpected_error_title">Unexpected Error</string>
@@ -368,10 +367,8 @@
     <string name="install_nexmon_title">Install Nexmon</string>
     <string name="install_nexmon_sum">Install the Nexmon driver and its management utility</string>
         <!-- xml -->
-        <string name="firm_location_text">Firmware Location</string>
-        <string name="util_location_text">Management Utility Location</string>
-        <string name="firm_location_default">/vendor/firmware</string>
-        <string name="util_location_default">/su/xbin</string>
+    <string name="util_location_text">Management Utility Location</string>
+    <string name="util_location_default">/su/xbin</string>
 
     <string name="test_title">Test tools</string>
     <string name="test_sum">Run all the tools to make sure that the settings are correct. Any running tasks will be stopped.</string>
@@ -399,7 +396,6 @@
 
     <!-- Other -->
     <string name="other">Other</string>
-    <string name="restore_firmware">Restore firmware</string>
     <string name="reset_title">Reset Preferences</string>
     <string name="send_feedback_title">Send feedback</string>
     <string name="update_on_startup">Check for updates on startup</string>

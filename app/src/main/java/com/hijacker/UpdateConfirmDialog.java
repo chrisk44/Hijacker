@@ -56,7 +56,7 @@ public class UpdateConfirmDialog extends DialogFragment{
                 request.setDestinationInExternalPublicDir(Environment.DIRECTORY_DOWNLOADS, filename);
 
                 DownloadManager manager = (DownloadManager) UpdateConfirmDialog.this.getActivity().getSystemService(Context.DOWNLOAD_SERVICE);
-                manager.enqueue(request);
+                if(manager!=null) manager.enqueue(request);
                 dismissAllowingStateLoss();
             }
         });

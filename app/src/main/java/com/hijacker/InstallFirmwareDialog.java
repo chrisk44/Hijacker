@@ -23,12 +23,12 @@ import android.app.FragmentManager;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.net.wifi.WifiManager;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.design.widget.Snackbar;
 import android.support.v4.view.GravityCompat;
 import android.support.v7.app.AlertDialog;
 import android.util.Log;
-import android.view.HapticFeedbackConstants;
 import android.view.KeyEvent;
 import android.view.View;
 import android.view.inputmethod.EditorInfo;
@@ -48,11 +48,10 @@ import static com.hijacker.MainActivity.BUFFER_SIZE;
 import static com.hijacker.MainActivity.PROCESS_AIRODUMP;
 import static com.hijacker.MainActivity.busybox;
 import static com.hijacker.MainActivity.debug;
+import static com.hijacker.MainActivity.devChipset;
 import static com.hijacker.MainActivity.firm_backup_file;
-import static com.hijacker.MainActivity.getDirectory;
 import static com.hijacker.MainActivity.getLastLine;
 import static com.hijacker.MainActivity.background;
-import static com.hijacker.MainActivity.getPIDs;
 import static com.hijacker.MainActivity.init;
 import static com.hijacker.MainActivity.mDrawerLayout;
 import static com.hijacker.MainActivity.path;
@@ -61,32 +60,29 @@ import static com.hijacker.MainActivity.stop;
 public class InstallFirmwareDialog extends DialogFragment {
     View dialogView;
     Shell shell;
-    EditText firmView, utilView;
+    Button positiveButton, neutralButton;
+    ProgressBar progressBar;
+    TextView firmwareView, devChipsetView;
+    EditText utilView;
     CheckBox backup_cb;
     @Override
     public Dialog onCreateDialog(Bundle savedInstanceState) {
         AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
         dialogView = getActivity().getLayoutInflater().inflate(R.layout.install_firmware, null);
 
-        firmView = (EditText) dialogView.findViewById(R.id.firm_location);
-        utilView = (EditText) dialogView.findViewById(R.id.util_location);
-        backup_cb = (CheckBox) dialogView.findViewById(R.id.backup);
+        progressBar = dialogView.findViewById(R.id.install_firm_progress);
+        firmwareView = dialogView.findViewById(R.id.firmware_location);
+        devChipsetView = dialogView.findViewById(R.id.device_chipset);
+        utilView = dialogView.findViewById(R.id.util_location);
+        backup_cb = dialogView.findViewById(R.id.backup);
 
-        firmView.setOnEditorActionListener(new TextView.OnEditorActionListener(){
-            @Override
-            public boolean onEditorAction(TextView v, int actionId, KeyEvent event){
-                if(actionId == EditorInfo.IME_ACTION_NEXT){
-                    utilView.requestFocus();
-                    return true;
-                }
-                return false;
-            }
-        });
+        devChipsetView.setText(devChipset);
+
         utilView.setOnEditorActionListener(new TextView.OnEditorActionListener(){
             @Override
             public boolean onEditorAction(TextView v, int actionId, KeyEvent event){
                 if(actionId == EditorInfo.IME_ACTION_DONE){
-                    attemptInstall(false);
+                    attemptInstall();
                     return true;
                 }
                 return false;
@@ -99,20 +95,6 @@ public class InstallFirmwareDialog extends DialogFragment {
         }
         backup_cb.setChecked(!(new File(firm_backup_file).exists()));
 
-        dialogView.findViewById(R.id.firm_fe_btn).setOnClickListener(new View.OnClickListener(){
-            @Override
-            public void onClick(View v){
-                final FileExplorerDialog dialog = new FileExplorerDialog();
-                dialog.setToSelect(FileExplorerDialog.SELECT_DIR);
-                dialog.setOnSelect(new Runnable(){
-                    @Override
-                    public void run(){
-                        firmView.setText(dialog.result.getAbsolutePath());
-                    }
-                });
-                dialog.show(getFragmentManager(), "FileExplorerDialog");
-            }
-        });
         dialogView.findViewById(R.id.util_fe_btn).setOnClickListener(new View.OnClickListener(){
             @Override
             public void onClick(View v){
@@ -128,8 +110,6 @@ public class InstallFirmwareDialog extends DialogFragment {
             }
         });
 
-        shell = Shell.getFreeShell();
-
         builder.setView(dialogView);
         builder.setTitle(R.string.install_nexmon_title);
         builder.setNegativeButton(R.string.cancel, new DialogInterface.OnClickListener() {
@@ -140,87 +120,44 @@ public class InstallFirmwareDialog extends DialogFragment {
             @Override
             public void onClick(DialogInterface dialog, int which) {}
         });
-        builder.setNeutralButton(R.string.find_firmware, new DialogInterface.OnClickListener(){
+        builder.setNeutralButton(R.string.restore, new DialogInterface.OnClickListener() {
             @Override
-            public void onClick(DialogInterface dialogInterface, int i){}
+            public void onClick(DialogInterface dialog, int which) {}
         });
         return builder.create();
     }
-    void attemptInstall(boolean override){
-        String firm_location = firmView.getText().toString();
-        String util_location = utilView.getText().toString();
-        firm_location = getDirectory(firm_location);
-        util_location = getDirectory(util_location);
 
-        if(override){
-            if(check(firm_location, util_location, true)){
-                install(firm_location, util_location);
-                dismissAllowingStateLoss();
-            }
-        }else{
-            if(check(firm_location, util_location, false)){
-                shell.run("strings " + firm_location + "fw_bcmdhd.bin | " + busybox + " grep \"FWID:\"; echo ENDOFSTRINGS");
-                String result = getLastLine(shell.getShell_out(), "ENDOFSTRINGS");
-                result = result.substring(0, 4);
-
-                if(result.equals("4339")){
-                    install(firm_location, util_location);
-                    dismissAllowingStateLoss();
-                }else{
-                    Snackbar.make(dialogView, R.string.fw_not_compatible, Snackbar.LENGTH_LONG).show();
-                    if(debug) Log.d("HIJACKER/InstFirmware", "Firmware verification is: " + result);
-                }
-            }
-        }
-    }
     @Override
     public void onStart() {
         super.onStart();
         //Override positiveButton action to dismiss the fragment only when the directories exist, not on error
         AlertDialog d = (AlertDialog)getDialog();
         if(d != null) {
-            final Button positiveButton = d.getButton(Dialog.BUTTON_POSITIVE);
-            Button neutralButton = d.getButton(Dialog.BUTTON_NEUTRAL);
-            positiveButton.setOnLongClickListener(new View.OnLongClickListener(){
-                @Override
-                public boolean onLongClick(View v){
-                    v.performHapticFeedback(HapticFeedbackConstants.LONG_PRESS);
-                    attemptInstall(true);
-                    return false;
-                }
-            });
+            positiveButton = d.getButton(Dialog.BUTTON_POSITIVE);
+            positiveButton.setEnabled(false);
             positiveButton.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    attemptInstall(false);
+                    attemptInstall();
                 }
             });
+
+            neutralButton = d.getButton(Dialog.BUTTON_NEUTRAL);
+            neutralButton.setEnabled(false);
             neutralButton.setOnClickListener(new View.OnClickListener() {
                 @Override
-                public void onClick(View v) {
-                    positiveButton.setActivated(false);
-                    ProgressBar progress = (ProgressBar)dialogView.findViewById(R.id.install_firm_progress);
-                    progress.setIndeterminate(true);
-                    shell.run(busybox + " find /system/ -type f -name \"fw_bcmdhd.bin\"; echo ENDOFFIND");
-
-                    String lastline = getLastLine(shell.getShell_out(), "ENDOFFIND");
-                    if(lastline.equals("ENDOFFIND")){
-                        Snackbar.make(v, R.string.firm_notfound_bcm, Snackbar.LENGTH_LONG).show();
-                    }else{
-                        lastline = lastline.substring(0, lastline.length()-14);
-                        firmView.setText(lastline);
-                    }
-
-                    progress.setIndeterminate(false);
-                    positiveButton.setActivated(true);
+                public void onClick(View view) {
+                    attemptRestore();
                 }
             });
+
+            new FindFirmwareTask().executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
         }
     }
     @Override
     public void onDismiss(final DialogInterface dialog) {
         super.onDismiss(dialog);
-        shell.done();
+        if(shell!=null) shell.done();
         if(init){
             init = false;
             mDrawerLayout.openDrawer(GravityCompat.START);
@@ -231,20 +168,46 @@ public class InstallFirmwareDialog extends DialogFragment {
     public void show(FragmentManager fragmentManager, String tag){
         if(!background) super.show(fragmentManager, tag);
     }
+
+    void attemptInstall(){
+        String firm_location = firmwareView.getText().toString();
+        String util_location = utilView.getText().toString();
+
+        utilView.setError(null);
+        if(util_location.equals("")){
+            utilView.setError(getString(R.string.field_required));
+            utilView.requestFocus();
+            return;
+        }
+        File util = new File(util_location);
+        if(!util.exists()){
+            utilView.setError(getString(R.string.dir_notfound));
+            utilView.requestFocus();
+            return;
+        }
+
+        install(firm_location, util_location);
+    }
+    void attemptRestore(){
+        String firm_location = firmwareView.getText().toString();
+        restore(firm_location);
+    }
+
     void install(String firm_location, String util_location){
         boolean start_airodump = false;
-        if(getPIDs(PROCESS_AIRODUMP).size()>0){
+        if(Airodump.isRunning()){
             start_airodump = true;
             stop(PROCESS_AIRODUMP);
         }
+
         WifiManager wifiManager = (WifiManager) getActivity().getApplicationContext().getSystemService(Context.WIFI_SERVICE);
-        wifiManager.setWifiEnabled(false);
+        if(wifiManager!=null) wifiManager.setWifiEnabled(false);
         if(debug) Log.d("HIJACKER/InstFirmware", "Backing up firmware from " + firm_location);
         if(backup_cb.isChecked()){
             if(new File(firm_backup_file).exists()){
                 Toast.makeText(getActivity(), R.string.backup_exists, Toast.LENGTH_SHORT).show();
             }else{
-                shell.run("cp -n " + firm_location + "fw_bcmdhd.bin " + firm_backup_file);
+                shell.run("cp -n " + firm_location + " " + firm_backup_file);
                 Toast.makeText(getActivity(), R.string.backup_created, Toast.LENGTH_SHORT).show();
             }
         }
@@ -256,51 +219,47 @@ public class InstallFirmwareDialog extends DialogFragment {
             Log.d("HIJACKER/InstFirmware", "Installing utility in " + util_location);
         }
         shell.run(busybox + " mount -o rw,remount,rw /system");
-        extract("fw_bcmdhd.bin", firm_location);
-        extract("nexutil", util_location);
+
+        String fw_filename;
+        if(devChipset.startsWith("4339")) {
+            fw_filename = "fw_bcmdhd_4339.bin";
+        }else if(devChipset.startsWith("4358")){
+            fw_filename = "fw_bcmdhd_4358.bin";
+        }else{
+            Log.e("HIJACKER/InstFirmware", "devChipset is " + devChipset + ", shouldn't be here");
+            return;
+        }
+        if(!extract(fw_filename, firm_location)){
+            Snackbar.make(dialogView, R.string.error_extracting_files, Snackbar.LENGTH_LONG).show();
+        }
+        if(!extract("nexutil", util_location + "/nexutil")){
+            Snackbar.make(dialogView, R.string.error_extracting_files, Snackbar.LENGTH_LONG).show();
+        }
         shell.run(busybox + " mount -o ro,remount,ro /system");
 
         Toast.makeText(getActivity(), R.string.installed_firm_util, Toast.LENGTH_SHORT).show();
-        wifiManager.setWifiEnabled(true);
+        if(wifiManager!=null) wifiManager.setWifiEnabled(true);
 
         if(start_airodump) Airodump.startClean();
+
+        dismissAllowingStateLoss();
     }
-    boolean check(String firm_location, String util_location, boolean override){
-        firmView.setError(null);
-        utilView.setError(null);
-        if(firm_location.equals("")){
-            firmView.setError(getString(R.string.field_required));
-            firmView.requestFocus();
-            return false;
-        }
-        if(util_location.equals("")){
-            utilView.setError(getString(R.string.field_required));
-            utilView.requestFocus();
-            return false;
-        }
-        File firm = new File(firm_location);
-        File util = new File(util_location);
-        if(!firm.exists()){
-            firmView.setError(getString(R.string.dir_notfound));
-            firmView.requestFocus();
-            return false;
-        }else if(!(new File(firm_location + "fw_bcmdhd.bin").exists())){
-            firmView.setError(getString(R.string.firm_notfound));
-            firmView.requestFocus();
-            return false;
-        }else if(!util.exists()){
-            utilView.setError(getString(R.string.dir_notfound));
-            utilView.requestFocus();
-            return false;
-        }else if(!override && (util_location.contains("system") || firm_location.contains("system"))){
-            Snackbar.make(dialogView, R.string.path_contains_system, Snackbar.LENGTH_LONG).show();
-            return false;
-        }
-        return true;
+    void restore(String firm_location){
+        if(debug) Log.d("HIJACKER/InstFirm", "Restoring firmware in " + firm_location);
+        WifiManager wifiManager = (WifiManager) getActivity().getApplicationContext().getSystemService(Context.WIFI_SERVICE);
+        if(wifiManager!=null) wifiManager.setWifiEnabled(false);
+
+        shell.run(busybox + " mount -o rw,remount,rw /system");
+        shell.run("cp " + firm_backup_file + " " + firm_location);
+        shell.run(busybox + " mount -o ro,remount,ro /system");
+
+        Toast.makeText(getActivity(), R.string.restored, Toast.LENGTH_SHORT).show();
+        if(wifiManager!=null) wifiManager.setWifiEnabled(true);
+        dismissAllowingStateLoss();
     }
-    void extract(String filename, String dest){
+
+    boolean extract(String filename, String dest){
         File f = new File(path, filename);      //no permissions to write at dest so extract at local directory and then move to target
-        dest = dest + filename;
         if(!f.exists()){
             try{
                 InputStream in = getResources().getAssets().open(filename);
@@ -316,6 +275,49 @@ public class InstallFirmwareDialog extends DialogFragment {
                 shell.run("chmod 755 " + dest);
             }catch(IOException e){
                 Log.e("HIJACKER/FileProvider", "Exception copying from assets", e);
+                return false;
+            }
+        }
+        return true;
+    }
+
+    class FindFirmwareTask extends AsyncTask<Void, String, String>{
+        @Override
+        protected void onPreExecute() {
+            progressBar.setIndeterminate(true);
+        }
+        @Override
+        protected String doInBackground(Void... voids){
+            shell = Shell.getFreeShell();
+            shell.run(busybox + " find /system/ -type f -name \"fw_bcmdhd.bin\"; echo ENDOFFIND");
+            String result = getLastLine(shell.getShell_out(), "ENDOFFIND");
+
+            if(result.equals("ENDOFFIND")) return null;
+            else return result;
+        }
+
+        @Override
+        protected void onPostExecute(final String result){
+            progressBar.setIndeterminate(false);
+
+            if(result==null){
+                //Firmware not found
+                firmwareView.setText(getString(R.string.firmware_not_found));
+            }else {
+                //Firmware is at 'result' (absolute path)
+                firmwareView.setText(result);
+
+                //Enable 'install' button only if we have a firmware to install (BCM4339 or BCM4358)
+                if(devChipset.startsWith("4339") || devChipset.startsWith("4358")) {
+                    positiveButton.setEnabled(true);
+                }else{
+                    Snackbar.make(dialogView, R.string.fw_not_compatible, Snackbar.LENGTH_LONG).show();
+                }
+
+                //Enable 'restore' button only if we have a backup firmware to restore
+                if(new File(firm_backup_file).exists()){
+                    neutralButton.setEnabled(true);
+                }
             }
         }
     }

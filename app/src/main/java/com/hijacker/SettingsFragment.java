@@ -27,12 +27,10 @@ import android.os.Environment;
 import android.os.Looper;
 import android.preference.Preference;
 import android.preference.PreferenceFragment;
-import java.io.File;
 
 import static com.hijacker.MainActivity.FRAGMENT_SETTINGS;
 import static com.hijacker.MainActivity.arch;
 import static com.hijacker.MainActivity.checkForUpdate;
-import static com.hijacker.MainActivity.firm_backup_file;
 import static com.hijacker.MainActivity.mFragmentManager;
 import static com.hijacker.MainActivity.pref_edit;
 import static com.hijacker.MainActivity.refreshDrawer;
@@ -51,15 +49,12 @@ public class SettingsFragment extends PreferenceFragment {
         // Load the preferences from an XML resource
         addPreferencesFromResource(R.xml.preferences);
 
-        if(!arch.equals("armv7l")){
-            Preference temp;
-            String toDisable[] = {"install_nexmon", "restore_firmware"};
-            for(String option : toDisable){
-                temp = findPreference(option);
-                temp.setSummary(getString(R.string.incorrect_arch) + ' ' + arch);
-                temp.setEnabled(false);
-            }
-            if(!arch.equals("aarch64")) findPreference("prefix").setEnabled(true);
+        if(!arch.equals("armv7l") && !arch.equals("aarch64")){
+            Preference pref = findPreference("install_nexmon");
+            pref.setSummary(getString(R.string.incorrect_arch) + ' ' + arch);
+            pref.setEnabled(false);
+
+            findPreference("prefix").setEnabled(true);
         }
 
         findPreference("test_tools").setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
@@ -90,18 +85,6 @@ public class SettingsFragment extends PreferenceFragment {
                 return false;
             }
         });
-        File origFirm = new File(firm_backup_file);
-        if(!origFirm.exists()){
-            findPreference("restore_firmware").setEnabled(false);
-        }else{
-            findPreference("restore_firmware").setOnPreferenceClickListener(new Preference.OnPreferenceClickListener(){
-                @Override
-                public boolean onPreferenceClick(Preference preference){
-                    new RestoreFirmwareDialog().show(mFragmentManager, "RestoreFragmentDialog");
-                    return false;
-                }
-            });
-        }
         findPreference("send_feedback").setOnPreferenceClickListener(new Preference.OnPreferenceClickListener(){
             @Override
             public boolean onPreferenceClick(Preference preference){
