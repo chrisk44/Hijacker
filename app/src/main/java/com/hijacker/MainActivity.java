@@ -149,7 +149,7 @@ public class MainActivity extends AppCompatActivity{
     //App and device info
     static String versionName, deviceModel;
     static int versionCode;
-    static String devChipset;
+    static String devChipset = "";
     static boolean init = false;      //True on first run to swap the dialogs for initialization
     static ActionBar actionBar;
     static String bootkali_init_bin = "bootkali_init";
@@ -368,23 +368,19 @@ public class MainActivity extends AppCompatActivity{
                 //Detect device chipset
                 publishProgress(getString(R.string.detecting_device_chipset));
                 Shell shell = getFreeShell();
-                    //Get firmware path
-                shell.run(busybox + " find /system/ -type f -name \"fw_bcmdhd.bin\"; echo ENDOFFIND");
-                String firmwarePath = getLastLine(shell.getShell_out(), "ENDOFFIND");
 
+                String firmwarePath = findFirmwarePath(shell);
+                if(firmwarePath!=null){
                     //Get chipset from firmware file
-                shell.run("strings " + firmwarePath + " | " + busybox + " grep \"FWID:\"; echo ENDOFSTRINGS");
-                devChipset = getLastLine(shell.getShell_out(), "ENDOFSTRINGS");
-                int index = devChipset.indexOf('-');
-                if (index == -1) {
-                    devChipset = null;
-                } else {
-                    devChipset = devChipset.substring(0, index);
+                    shell.run("strings " + firmwarePath + " | " + busybox + " grep \"FWID:\"; echo ENDOFSTRINGS");
+                    devChipset = getLastLine(shell.getShell_out(), "ENDOFSTRINGS");
+                    int index = devChipset.indexOf('-');
+                    if(index != -1){
+                        devChipset = devChipset.substring(0, index);
+                    }
                 }
                 Log.i("HIJACKER/DetectDev", "devChipset is " + devChipset);
                 shell.done();
-            }else{
-                devChipset = null;
             }
 
             //Setup tools
@@ -448,10 +444,7 @@ public class MainActivity extends AppCompatActivity{
                 }
 
                 prefix = "LD_PRELOAD=" + path + "/lib/";
-                if(devChipset==null){
-                    //Default (error detecting firmware)
-                    prefix += "libfakeioctl.so";
-                }else if(devChipset.startsWith("4339")) {
+                if(devChipset.startsWith("4339")) {
                     //BCM4339
                     prefix += "libfakeioctl.so";
                 }else if(devChipset.startsWith("4358")){
@@ -667,7 +660,7 @@ public class MainActivity extends AppCompatActivity{
                             String mac = buffer.substring(0, 6);
                             String manuf = buffer.substring(22);
                             if(manufHashMap.get(mac)==null){
-                                //Write to file only if it was added to the AVL (it's unique)
+                                //Write to file only if it was added to the HashMap (it's unique)
                                 manufHashMap.put(mac, manuf);
                                 in.write(mac + ";" + manuf + '\n');
                             }
@@ -1667,6 +1660,51 @@ public class MainActivity extends AppCompatActivity{
             return false;
         }
         return true;
+    }
+
+    static String findFirmwarePath(Shell shell){
+        //Blocking function, don't run on main thread
+        boolean flag = false;
+        if(shell==null){
+            flag = true;
+            shell = getFreeShell();
+        }
+
+        String dirs[] = {
+                "/system",
+                "/vendor"
+        };
+        String firmware = null;
+        int i = 0;
+        while(firmware==null && i<dirs.length){
+            firmware = checkDirectoryForFirmware(shell, dirs[i]);
+            i++;
+        }
+
+        if(flag){
+            //Release the shell only if it was obtained by this function
+            shell.done();
+        }
+
+        return firmware;
+    }
+    static String checkDirectoryForFirmware(Shell shell, String directory){
+        String firmware = null;
+        shell.run(busybox + " find " + directory + " -type f -name \"fw_bcmdhd.bin\"; echo ENDOFFIND");
+        BufferedReader out = shell.getShell_out();
+        try{
+            String result = out.readLine();
+            while(result!=null){
+                if(result.equals("ENDOFFIND")) break;
+                if(!result.contains("/bac/") && !result.contains("backup")) firmware = result;
+
+                result = out.readLine();
+            }
+        }catch(IOException e){
+            e.printStackTrace();
+        }
+
+        return firmware;
     }
 
     static{

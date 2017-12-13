@@ -49,6 +49,7 @@ import static com.hijacker.MainActivity.PROCESS_AIRODUMP;
 import static com.hijacker.MainActivity.busybox;
 import static com.hijacker.MainActivity.debug;
 import static com.hijacker.MainActivity.devChipset;
+import static com.hijacker.MainActivity.findFirmwarePath;
 import static com.hijacker.MainActivity.firm_backup_file;
 import static com.hijacker.MainActivity.getLastLine;
 import static com.hijacker.MainActivity.background;
@@ -289,11 +290,8 @@ public class InstallFirmwareDialog extends DialogFragment {
         @Override
         protected String doInBackground(Void... voids){
             shell = Shell.getFreeShell();
-            shell.run(busybox + " find /system/ -type f -name \"fw_bcmdhd.bin\"; echo ENDOFFIND");
-            String result = getLastLine(shell.getShell_out(), "ENDOFFIND");
 
-            if(result.equals("ENDOFFIND")) return null;
-            else return result;
+            return findFirmwarePath(shell);
         }
 
         @Override
