@@ -29,13 +29,13 @@ import android.support.design.widget.Snackbar;
 import android.support.v4.view.GravityCompat;
 import android.support.v7.app.AlertDialog;
 import android.util.Log;
-import android.view.KeyEvent;
 import android.view.View;
-import android.view.inputmethod.EditorInfo;
+import android.widget.AdapterView;
+import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.CheckBox;
-import android.widget.EditText;
 import android.widget.ProgressBar;
+import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -51,7 +51,6 @@ import static com.hijacker.MainActivity.debug;
 import static com.hijacker.MainActivity.devChipset;
 import static com.hijacker.MainActivity.findFirmwarePath;
 import static com.hijacker.MainActivity.firm_backup_file;
-import static com.hijacker.MainActivity.getLastLine;
 import static com.hijacker.MainActivity.background;
 import static com.hijacker.MainActivity.init;
 import static com.hijacker.MainActivity.mDrawerLayout;
@@ -59,13 +58,16 @@ import static com.hijacker.MainActivity.path;
 import static com.hijacker.MainActivity.stop;
 
 public class InstallFirmwareDialog extends DialogFragment {
+    static final String DEFAULT_UTIL_INSTALL_PATH = "/su/xbin";
     View dialogView;
     Shell shell;
     Button positiveButton, neutralButton;
     ProgressBar progressBar;
     TextView firmwareView, devChipsetView;
-    EditText utilView;
+    Spinner utilSpinner;
     CheckBox backup_cb;
+
+    String selectedUtilPath = null;
     @Override
     public Dialog onCreateDialog(Bundle savedInstanceState) {
         AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
@@ -74,42 +76,10 @@ public class InstallFirmwareDialog extends DialogFragment {
         progressBar = dialogView.findViewById(R.id.install_firm_progress);
         firmwareView = dialogView.findViewById(R.id.firmware_location);
         devChipsetView = dialogView.findViewById(R.id.device_chipset);
-        utilView = dialogView.findViewById(R.id.util_location);
+        utilSpinner = dialogView.findViewById(R.id.util_spinner);
         backup_cb = dialogView.findViewById(R.id.backup);
 
         devChipsetView.setText(devChipset);
-
-        utilView.setOnEditorActionListener(new TextView.OnEditorActionListener(){
-            @Override
-            public boolean onEditorAction(TextView v, int actionId, KeyEvent event){
-                if(actionId == EditorInfo.IME_ACTION_DONE){
-                    attemptInstall();
-                    return true;
-                }
-                return false;
-            }
-        });
-
-        //Adjust directories
-        if(!(new File("/su").exists())){
-            utilView.setText("/system/xbin");
-        }
-        backup_cb.setChecked(!(new File(firm_backup_file).exists()));
-
-        dialogView.findViewById(R.id.util_fe_btn).setOnClickListener(new View.OnClickListener(){
-            @Override
-            public void onClick(View v){
-                final FileExplorerDialog dialog = new FileExplorerDialog();
-                dialog.setToSelect(FileExplorerDialog.SELECT_DIR);
-                dialog.setOnSelect(new Runnable(){
-                    @Override
-                    public void run(){
-                        utilView.setText(dialog.result.getAbsolutePath());
-                    }
-                });
-                dialog.show(getFragmentManager(), "FileExplorerDialog");
-            }
-        });
 
         builder.setView(dialogView);
         builder.setTitle(R.string.install_nexmon_title);
@@ -152,7 +122,7 @@ public class InstallFirmwareDialog extends DialogFragment {
                 }
             });
 
-            new FindFirmwareTask().executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
+            new InitTask().executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
         }
     }
     @Override
@@ -172,25 +142,14 @@ public class InstallFirmwareDialog extends DialogFragment {
 
     void attemptInstall(){
         String firm_location = firmwareView.getText().toString();
-        String util_location = utilView.getText().toString();
 
-        utilView.setError(null);
-        if(util_location.equals("")){
-            utilView.setError(getString(R.string.field_required));
-            utilView.requestFocus();
-            return;
-        }
-        File util = new File(util_location);
-        if(!util.exists()){
-            utilView.setError(getString(R.string.dir_notfound));
-            utilView.requestFocus();
-            return;
-        }
-
-        install(firm_location, util_location);
+        if(debug) Log.d("HIJACKER/InstFirm", "Installing firmware in " + firm_location + " and utility in " + selectedUtilPath);
+        install(firm_location, selectedUtilPath);
     }
     void attemptRestore(){
         String firm_location = firmwareView.getText().toString();
+
+        if(debug) Log.d("HIJACKER/InstFirm", "Restoring firmware in " + firm_location);
         restore(firm_location);
     }
 
@@ -203,7 +162,6 @@ public class InstallFirmwareDialog extends DialogFragment {
 
         WifiManager wifiManager = (WifiManager) getActivity().getApplicationContext().getSystemService(Context.WIFI_SERVICE);
         if(wifiManager!=null) wifiManager.setWifiEnabled(false);
-        if(debug) Log.d("HIJACKER/InstFirmware", "Backing up firmware from " + firm_location);
         if(backup_cb.isChecked()){
             if(new File(firm_backup_file).exists()){
                 Toast.makeText(getActivity(), R.string.backup_exists, Toast.LENGTH_SHORT).show();
@@ -215,10 +173,6 @@ public class InstallFirmwareDialog extends DialogFragment {
         shell.done();                   //clear any existing output
         shell = Shell.getFreeShell();
 
-        if(debug){
-            Log.d("HIJACKER/InstFirmware", "Installing firmware in " + firm_location);
-            Log.d("HIJACKER/InstFirmware", "Installing utility in " + util_location);
-        }
         shell.run(busybox + " mount -o rw,remount,rw /system");
 
         String fw_filename;
@@ -246,7 +200,6 @@ public class InstallFirmwareDialog extends DialogFragment {
         dismissAllowingStateLoss();
     }
     void restore(String firm_location){
-        if(debug) Log.d("HIJACKER/InstFirm", "Restoring firmware in " + firm_location);
         WifiManager wifiManager = (WifiManager) getActivity().getApplicationContext().getSystemService(Context.WIFI_SERVICE);
         if(wifiManager!=null) wifiManager.setWifiEnabled(false);
 
@@ -275,48 +228,85 @@ public class InstallFirmwareDialog extends DialogFragment {
                 shell.run("mv " + path + '/' + filename + " " + dest);
                 shell.run("chmod 755 " + dest);
             }catch(IOException e){
-                Log.e("HIJACKER/FileProvider", "Exception copying from assets", e);
+                Log.e("HIJACKER/InstFirm", "Exception copying from assets", e);
                 return false;
             }
         }
         return true;
     }
 
-    class FindFirmwareTask extends AsyncTask<Void, String, String>{
+    class InitTask extends AsyncTask<Void, Void, Void>{
+        String firmwarePath;
+        String paths[];
+        boolean backupExists;
+        int defaultIndex = 0;
         @Override
         protected void onPreExecute() {
             progressBar.setIndeterminate(true);
         }
         @Override
-        protected String doInBackground(Void... voids){
+        protected Void doInBackground(Void... voids){
             shell = Shell.getFreeShell();
 
-            return findFirmwarePath(shell);
+            //Find firmware path
+            firmwarePath = findFirmwarePath(shell);
+
+            //Find paths to install nexutil
+            paths = System.getenv("PATH").split(":");
+            for(int i=0;i<paths.length;i++){
+                if(paths[i].equals(DEFAULT_UTIL_INSTALL_PATH)){
+                    //Default option is DEFAULT_UTIL_INSTALL_PATH
+                    defaultIndex = i;
+                    selectedUtilPath = paths[i];
+                    break;
+                }
+            }
+
+            //Check for firmware backup
+            backupExists = new File(firm_backup_file).exists();
+
+            return null;
         }
 
         @Override
-        protected void onPostExecute(final String result){
-            progressBar.setIndeterminate(false);
+        protected void onPostExecute(Void result){
+            //Enable 'install' button if we have a firmware to install, have found the firmware path, and have at least one path to install the utility
+            positiveButton.setEnabled( firmwarePath!=null && paths.length>0 && (devChipset.startsWith("4339") || devChipset.startsWith("4358")) );
 
-            if(result==null){
+            //Enable 'restore' button only if we have a backup firmware to restore AND we know where to restore it
+            neutralButton.setEnabled(new File(firm_backup_file).exists() && firmwarePath!=null);
+
+            //Update firmware textview
+            if(firmwarePath==null){
                 //Firmware not found
                 firmwareView.setText(getString(R.string.firmware_not_found));
-            }else {
-                //Firmware is at 'result' (absolute path)
-                firmwareView.setText(result);
-
-                //Enable 'install' button only if we have a firmware to install (BCM4339 or BCM4358)
-                if(devChipset.startsWith("4339") || devChipset.startsWith("4358")) {
-                    positiveButton.setEnabled(true);
-                }else{
-                    Snackbar.make(dialogView, R.string.fw_not_compatible, Snackbar.LENGTH_LONG).show();
-                }
-
-                //Enable 'restore' button only if we have a backup firmware to restore
-                if(new File(firm_backup_file).exists()){
-                    neutralButton.setEnabled(true);
-                }
+            }else{
+                firmwareView.setText(firmwarePath);
             }
+
+            //Update backup checkbox
+            backup_cb.setChecked(!backupExists);
+
+            //Update paths spinner
+            if(paths.length==0){
+                //No paths found, add a default value
+                paths = new String[]{ getString(R.string.none_found) };
+                utilSpinner.setEnabled(false);
+            }
+            ArrayAdapter<String> adapter = new ArrayAdapter<>(getActivity(), android.R.layout.simple_spinner_item, paths);
+            adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+            utilSpinner.setAdapter(adapter);
+            utilSpinner.setSelection(defaultIndex);
+            utilSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+                @Override
+                public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l){
+                    selectedUtilPath = (String) adapterView.getItemAtPosition(i);
+                }
+                @Override
+                public void onNothingSelected(AdapterView<?> adapterView){}
+            });
+
+            progressBar.setIndeterminate(false);
         }
     }
 }

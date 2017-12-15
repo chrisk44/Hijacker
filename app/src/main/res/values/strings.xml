@@ -153,7 +153,9 @@
     <!-- InstallFirmwareDialog -->
     <string name="firmware_location">Firmware Location:</string>
     <string name="device_chipset">Device Chipset:</string>
+    <string name="util_location_text">Management Utility:</string>
     <string name="firmware_not_found">Firmware (fw_bcmdhd.bin) not found</string>
+    <string name="none_found">None found</string>
     <string name="dir_notfound">Directory doesn\'t exist</string>
     <string name="backup_exists">A backup already exists</string>
     <string name="backup_created">Backup created</string>
@@ -366,9 +368,6 @@
     <string name="tools">Tools</string>
     <string name="install_nexmon_title">Install Nexmon</string>
     <string name="install_nexmon_sum">Install the Nexmon driver and its management utility</string>
-        <!-- xml -->
-    <string name="util_location_text">Management Utility Location</string>
-    <string name="util_location_default">/su/xbin</string>
 
     <string name="test_title">Test tools</string>
     <string name="test_sum">Run all the tools to make sure that the settings are correct. Any running tasks will be stopped.</string>

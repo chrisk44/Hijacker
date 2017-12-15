@@ -61,38 +61,26 @@
                 android:textColor="@android:color/white" />
         </TableRow>
 
-    </TableLayout>
+        <TableRow
+            android:layout_width="match_parent"
+            android:layout_height="match_parent">
 
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="horizontal">
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_vertical"
+                android:paddingEnd="5dp"
+                android:text="@string/util_location_text" />
 
-        <android.support.design.widget.TextInputLayout
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_weight="1">
-
-            <EditText
-                android:id="@+id/util_location"
+            <Spinner
+                android:id="@+id/util_spinner"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:hint="@string/util_location_text"
-                android:imeOptions="actionDone"
-                android:inputType="text"
-                android:maxLines="1"
-                android:text="@string/util_location_default"/>
+                android:layout_weight="1" />
 
-        </android.support.design.widget.TextInputLayout>
+        </TableRow>
 
-        <Button
-            android:id="@+id/util_fe_btn"
-            style="?android:attr/buttonBarButtonStyle"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center_vertical"
-            android:text="..."/>
-    </LinearLayout>
+    </TableLayout>
 
     <CheckBox
         android:id="@+id/backup"
