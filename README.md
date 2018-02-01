@@ -5,7 +5,7 @@ Hijacker is a Graphical User Interface for the penetration testing tools Aircrac
 This application requires an ARM android device with a wireless adapter that supports **Monitor Mode**. A few android devices do, but none of them natively. This means that you will need a custom firmware. Nexus 5 and any other device that uses the BCM4339 chipset (MSM8974, such as Xperia Z2, LG G2 etc) will work with [Nexmon](https://github.com/seemoo-lab/nexmon) (it also supports some other chipsets). Devices that use BCM4330 can use [bcmon](http://bcmon.blogspot.gr/).
 An alternative would be to use an external adapter that supports monitor mode in Android with an OTG cable.
 
-The required tools are included for armv7l and aarch64 devices as of version 1.1. The Nexmon driver and management utility for BCM4339 are also included.
+The required tools are included for armv7l and aarch64 devices as of version 1.1. The Nexmon driver and management utility for BCM4339 and BCM4358 are also included.
 
 Root is also necessary, as these tools need root to work.
 
@@ -30,7 +30,7 @@ Root is also necessary, as these tools need root to work.
 * Leave the app running in the background, optionally with a notification
 * Copy commands or MAC addresses to clipboard
 * Includes the required tools, no need for manual installation
-* Includes the nexmon driver and management utility for BCM4339 devices
+* Includes the nexmon driver and management utility for BCM4339/BCM4358 devices
 * Set commands to enable and disable monitor mode automatically
 * Crack .cap files with a custom wordlist
 * Create custom actions and run them on an access point or a client easily
@@ -69,7 +69,7 @@ Keep in mind that Hijacker is just a GUI for these tools. The way it runs the to
 It is highly illegal to use this application against networks for which you don't have permission. You can use it only on YOUR network or a network that you are authorized to. Using a software that uses a network adapter in promiscuous mode may be considered illegal even without actively using it against someone, and don't think for a second it's untracable. I am not responsible for how you use this application and any damages you may cause.
 
 ### Device
-The app gives you the option to install the nexmon firmware on your device. Even though the app performs a chipset check, you have the option to override it, if you believe that your device has the BCM4339 wireless adapter. However, installing a custom firmware intended for BCM4339 on a different chipset can possibly damage your device (and I mean hardware, not something that is fixable with factory reset). I am not responsible for any damage caused to your device by this software.
+The app gives you the option to install the nexmon firmware on your device. Even though the app performs a chipset check, mistakes happen. The app currently includes the Nexmon firmware for BCM4339 and BCM4358 *only*. Installing the wrong firmware on a device may damage it (and I mean hardware, not something that is fixable with factory reset). I am not responsible for any damage caused to your device by this software.
 
 #### Consider yourself warned.
 
