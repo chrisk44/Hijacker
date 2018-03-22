@@ -1,6 +1,6 @@
 # Hijacker
 
-Hijacker is a Graphical User Interface for the penetration testing tools Aircrack-ng, Airodump-ng, MDK3 and Reaver. It offers a simple and easy UI to use these tools without typing commands in a console and copy&pasting MAC addresses.
+Hijacker is a Graphical User Interface for the penetration testing tools [Aircrack-ng, Airodump-ng](https://www.aircrack-ng.org/), [MDK3](https://tools.kali.org/wireless-attacks/mdk3) and [Reaver](https://tools.kali.org/wireless-attacks/reaver). It offers a simple and easy UI to use these tools without typing commands in a console and copy&pasting MAC addresses.
 
 This application requires an **ARM** android device with an internal wireless adapter that supports **Monitor Mode**. A few android devices do, but none of them natively. This means that you will need a custom firmware. Any device that uses the BCM4339 chipset (MSM8974, such as Nexus 5, Xperia Z1/Z2, LG G2, LG G Flex, Samsung Galaxy Note 3) will work with [Nexmon](https://github.com/seemoo-lab/nexmon) (which also supports some other chipsets). Devices that use BCM4330 can use [bcmon](http://bcmon.blogspot.gr/).
 
@@ -8,7 +8,7 @@ An alternative would be to use an external adapter that supports monitor mode in
 
 The required tools are included for **armv7l** and **aarch64** devices as of version 1.1. The Nexmon driver and management utility for BCM4339 are also included.
 
-Root is also necessary, as these tools need root to work.
+Root access is also necessary, as these tools need root to work.
 
 ## Features
 ### Information Gathering
@@ -46,20 +46,21 @@ Root is also necessary, as these tools need root to work.
 ## Installation
 Make sure:
 * you are on Android 5+
-* you are rooted (SuperSU is required, if you are on CM/LineageOS install [SuperSU](http://www.supersu.com/download))
+* you are rooted ([SuperSU](http://www.supersu.com/download) is required, if you are on CM/LineageOS install SuperSU)
 * you have a firmware to support Monitor Mode on your wireless interface
 
 #### Download the latest version [here](https://github.com/chrisk44/Hijacker/releases).
 
-When you run Hijacker for the first time, you will be asked whether you want to install the nexmon firmware or go to home screen. If you have installed your firmware or use an external adapter, you can just go to the home screen. Otherwise, click 'Install Nexmon' and follow the instructions. Keep in mind that, on some devices, changing files in /system might trigger an Android security feature and your system partition will be restored when you reboot.
-After installing the firmware you will land on the home screen and airodump will start. Make sure you have enabled your WiFi and it's in monitor mode.
+When you run Hijacker for the first time, you will be asked whether you want to install the nexmon firmware or go to home screen. If you have installed your firmware or use an external adapter, you can just go to the home screen. Otherwise, click 'Install Nexmon' and follow the instructions. After installing the firmware you will land on the home screen and airodump will start. Make sure you have enabled your WiFi and it's in monitor mode.
+
+##### Note: On some devices, changing files in `/system` might trigger an Android security feature and your system partition will be restored when you reboot.
 
 ## Troubleshooting
-This app is designed and tested for ARM devices. All the binaries included are compiled for that architecture and will not work on anything else. You can check by going to settings: if you have the option to install nexmon, then you are on the correct architecture, otherwise you will have to install all the tools manually (busybox, aircrack-ng suite, mdk3, reaver, wireless tools, libfakeioctl.so library) and set the 'Prefix' option for the tools to preload the library they need.
+This app is designed and tested for ARM devices. All the binaries included are compiled for that architecture and will not work on anything else. You can check whether your devide is compatible by going to Settings: if you have the option to install Nexmon, then you are on the correct architecture, otherwise you will have to install all the tools manually ([busybox](https://play.google.com/store/apps/details?id=stericson.busybox&hl=el), aircrack-ng suite, mdk3, reaver, [wireless tools](https://hewlettpackard.github.io/wireless-tools/Tools.html), [libfakeioctl.so](https://github.com/seemoo-lab/nexmon/tree/master/utilities/libfakeioctl) library) and set the 'Prefix' option for the tools to preload the library they need.
 
-In settings, there is an option to test the tools. If something fails, then you can click 'Copy test command' and select the tool that fails. This will copy a test command to your clipboard, which you can run in a root shell and see what's wrong. If all the tests pass and you still have a problem, feel free to open an issue here to fix it, or use the 'Send feedback' feature of the app in settings.
+In settings, there is an option to test the tools. If something fails, then you can click 'Copy test command' and select the tool that fails. This will copy a test command to your clipboard, which you can run in a root shell and see what's wrong. If all the tests pass and you still have a problem, feel free to open an issue here to fix it, or use the 'Send feedback' option in the app's settings.
 
-If the app happens to crash, a new activity will start which will generate a report in your external storage and give you the option to send it by email. The report is shown in the activity so you can see exactly what will be sent.
+If the app happens to crash, a new activity will start which will generate a bug report in your external storage and give you the option to send it by email. The report is shown in the activity so you can see exactly what will be sent.
 
 #### Do not report bugs for devices that are not supported or when you are using an outdated version.
 
