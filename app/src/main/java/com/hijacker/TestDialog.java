@@ -227,13 +227,13 @@ public class TestDialog extends DialogFragment {
         load();
         dialogView = getActivity().getLayoutInflater().inflate(R.layout.test, null);
 
-        test_progress = (ProgressBar)dialogView.findViewById(R.id.test_progress);
-        status[0] = (ImageView)dialogView.findViewById(R.id.imageView1);
-        status[1] = (ImageView)dialogView.findViewById(R.id.imageView2);
-        status[2] = (ImageView)dialogView.findViewById(R.id.imageView3);
-        status[3] = (ImageView)dialogView.findViewById(R.id.imageView4);
-        status[4] = (ImageView)dialogView.findViewById(R.id.imageView5);
-        test_cur_cmd = (TextView)dialogView.findViewById(R.id.current_cmd);
+        test_progress = dialogView.findViewById(R.id.test_progress);
+        status[0] = dialogView.findViewById(R.id.imageView1);
+        status[1] = dialogView.findViewById(R.id.imageView2);
+        status[2] = dialogView.findViewById(R.id.imageView3);
+        status[3] = dialogView.findViewById(R.id.imageView4);
+        status[4] = dialogView.findViewById(R.id.imageView5);
+        test_cur_cmd = dialogView.findViewById(R.id.current_cmd);
 
         AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
 

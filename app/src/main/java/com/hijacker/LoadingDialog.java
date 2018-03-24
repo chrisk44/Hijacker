@@ -36,7 +36,7 @@ public class LoadingDialog extends DialogFragment {
         setCancelable(false);
         AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
         dialogView = getActivity().getLayoutInflater().inflate(R.layout.loading_dialog, null);
-        loadingDescription = (TextView) dialogView.findViewById(R.id.loadingDescription);
+        loadingDescription = dialogView.findViewById(R.id.loadingDescription);
 
         if(title!=null) loadingDescription.setText(title);
 

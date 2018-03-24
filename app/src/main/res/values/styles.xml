@@ -1,13 +1,6 @@
 <resources>
 
     <!-- Base application theme. -->
-    <style name="AppTheme" parent="Theme.AppCompat.Light.NoActionBar">
-        <!-- Customize your theme here. -->
-        <item name="colorPrimary">@color/colorPrimary</item>
-        <item name="colorPrimaryDark">@color/colorPrimaryDark</item>
-        <item name="colorAccent">@android:color/holo_blue_dark</item>
-        <item name="android:windowBackground">?android:attr/colorBackground</item>
-    </style>
 
     <style name="ThemeAppCompatNoActionBarHoloBlue" parent="Theme.AppCompat.NoActionBar" >
         <item name="colorAccent">@android:color/holo_blue_dark</item>

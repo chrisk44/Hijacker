@@ -38,12 +38,12 @@ public class StatsDialog extends DialogFragment {
         View view = getActivity().getLayoutInflater().inflate(R.layout.ap_stats, null);
 
         if(wpa_count==null) {
-            wpa_count = (TextView)view.findViewById(R.id.wpa_count);
-            wpa2_count = (TextView)view.findViewById(R.id.wpa2_count);
-            wep_count = (TextView)view.findViewById(R.id.wep_count);
-            opn_count = (TextView)view.findViewById(R.id.opn_count);
-            hidden_count = (TextView)view.findViewById(R.id.hidden_count);
-            connected_count = (TextView)view.findViewById(R.id.connected_count);
+            wpa_count = view.findViewById(R.id.wpa_count);
+            wpa2_count = view.findViewById(R.id.wpa2_count);
+            wep_count = view.findViewById(R.id.wep_count);
+            opn_count = view.findViewById(R.id.opn_count);
+            hidden_count = view.findViewById(R.id.hidden_count);
+            connected_count = view.findViewById(R.id.connected_count);
         }
 
         runnable = new Runnable(){

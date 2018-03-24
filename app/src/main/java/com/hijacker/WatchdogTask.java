@@ -29,7 +29,6 @@ import static com.hijacker.MainActivity.PROCESS_AIREPLAY;
 import static com.hijacker.MainActivity.PROCESS_AIRODUMP;
 import static com.hijacker.MainActivity.PROCESS_MDK_BF;
 import static com.hijacker.MainActivity.PROCESS_MDK_DOS;
-import static com.hijacker.MainActivity.PROCESS_REAVER;
 import static com.hijacker.MainActivity.aireplay_running;
 import static com.hijacker.MainActivity.background;
 import static com.hijacker.MainActivity.debug;

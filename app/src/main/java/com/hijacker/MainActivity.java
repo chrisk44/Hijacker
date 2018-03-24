@@ -149,7 +149,8 @@ public class MainActivity extends AppCompatActivity{
     //App and device info
     static String versionName, deviceModel;
     static int versionCode;
-    static boolean init=false;      //True on first run to swap the dialogs for initialization
+    static String devChipset = "";
+    static boolean init = false;      //True on first run to swap the dialogs for initialization
     static ActionBar actionBar;
     static String bootkali_init_bin = "bootkali_init";
     //Preferences - Defaults are in strings.xml
@@ -222,11 +223,11 @@ public class MainActivity extends AppCompatActivity{
 
             //Initialize the drawer
             mPlanetTitles = getResources().getStringArray(R.array.planets_array);
-            mDrawerLayout = (DrawerLayout) findViewById(R.id.drawer_layout);
-            mDrawerList = (ListView) findViewById(R.id.left_drawer);
+            mDrawerLayout = findViewById(R.id.drawer_layout);
+            mDrawerList = findViewById(R.id.left_drawer);
             mDrawerList.setAdapter(new ArrayAdapter<>(MainActivity.this, R.layout.drawer_list_item, R.id.navDrawerTv, mPlanetTitles));
             mDrawerList.setOnItemClickListener(new DrawerItemClickListener());
-            toolbar = (Toolbar) findViewById(R.id.my_toolbar);
+            toolbar = findViewById(R.id.my_toolbar);
             toolbar.setOverflowIcon(overflow[0]);
         }
         @Override
@@ -253,12 +254,13 @@ public class MainActivity extends AppCompatActivity{
             if(!deviceModel.startsWith(Build.MANUFACTURER)) deviceModel = Build.MANUFACTURER + " " + deviceModel;
             deviceModel = deviceModel.replace(" ", "_");
             arch = System.getProperty("os.arch");
+            //devChipset is set later, busybox needs to be extracted
 
             //Find views
             publishProgress(getString(R.string.init_views));
-            ap_count = (TextView) findViewById(R.id.ap_count);
-            st_count = (TextView) findViewById(R.id.st_count);
-            progress = (ProgressBar) findViewById(R.id.progressBar);
+            ap_count = findViewById(R.id.ap_count);
+            st_count = findViewById(R.id.st_count);
+            progress = findViewById(R.id.progressBar);
             rootView = findViewById(R.id.fragment1);
             overflow[0] = getDrawable(R.drawable.overflow0);
             overflow[1] = getDrawable(R.drawable.overflow1);
@@ -306,21 +308,11 @@ public class MainActivity extends AppCompatActivity{
             manufDBFile = path + "/manuf.db";
             File data_dir = new File(data_path);
             if(!data_dir.exists()){
-                //Create directory, subdirectories and files
+                //Create directory
                 data_dir.mkdir();
 
-                //Move app files from other directories in /Hijacker
-                File firm_backup_old = new File(Environment.getExternalStorageDirectory() + "/fw_bcmdhd.orig.bin");
-                if(firm_backup_old.exists()){
-                    firm_backup_old.renameTo(new File(data_path + "/fw_bcmdhd.orig.bin"));
-                }
-
-                File actions_dir_old = new File(Environment.getExternalStorageDirectory() + "/Hijacker-actions");
-                if(actions_dir_old.exists()){
-                    actions_dir_old.renameTo(new File(actions_path));
-                }else{
-                    new File(data_dir + "/actions").mkdir();
-                }
+                //Create 'actions' directory
+                new File(actions_path).mkdir();
             }
 
             //Initialize notifications
@@ -368,6 +360,29 @@ public class MainActivity extends AppCompatActivity{
             ST.not_connected = getString(R.string.not_connected);
             ST.paired = getString(R.string.paired) + ' ';
 
+            //Extract busybox and detect chipset
+            if(arch.equals("armv7l") || arch.equals("aarch64")) {
+                extract("busybox", path + "/bin/", true);
+                busybox = path + "/bin/busybox";
+
+                //Detect device chipset
+                publishProgress(getString(R.string.detecting_device_chipset));
+                Shell shell = getFreeShell();
+
+                String firmwarePath = findFirmwarePath(shell);
+                if(firmwarePath!=null){
+                    //Get chipset from firmware file
+                    shell.run("strings " + firmwarePath + " | " + busybox + " grep \"FWID:\"; echo ENDOFSTRINGS");
+                    devChipset = getLastLine(shell.getShell_out(), "ENDOFSTRINGS");
+                    int index = devChipset.indexOf('-');
+                    if(index != -1){
+                        devChipset = devChipset.substring(0, index);
+                    }
+                }
+                Log.i("HIJACKER/DetectDev", "devChipset is " + devChipset);
+                shell.done();
+            }
+
             //Setup tools
             publishProgress(getString(R.string.setting_up_tools));
             if(arch.equals("armv7l") || arch.equals("aarch64")){
@@ -386,7 +401,7 @@ public class MainActivity extends AppCompatActivity{
                     }
                 }
                 boolean install = true;
-                if(bin.list().length==20 && lib.list().length==1 && info!=null){
+                if(bin.list().length==20 && lib.list().length==2 && info!=null){
                     if(info.versionCode==pref.getInt("tools_version", 0)){
                         if(debug) Log.d("HIJACKER/SetupTask", "Tools already installed");
                         install = false;
@@ -403,7 +418,6 @@ public class MainActivity extends AppCompatActivity{
                     extract("aireplay-ng", tools_location, true);
                     extract("airodump-ng", tools_location, true);
                     extract("besside-ng", tools_location, true);
-                    extract("busybox", tools_location, true);
                     extract("ivstools", tools_location, true);
                     extract("iw", tools_location, true);
                     extract("iwconfig", tools_location, true);
@@ -419,6 +433,7 @@ public class MainActivity extends AppCompatActivity{
                     extract("wesside-ng", tools_location, true);
                     extract("wpaclean", tools_location, true);
                     extract("libfakeioctl.so", lib_location, true);
+                    extract("libnexmon.so", lib_location, true);
 
                     runOne("cd " + path + "/bin; mv mdk3 mdk3bf; cp mdk3bf mdk3dos");
 
@@ -427,9 +442,19 @@ public class MainActivity extends AppCompatActivity{
                         pref_edit.apply();
                     }
                 }
-                busybox = path + "/bin/busybox";
 
-                prefix = "LD_PRELOAD=" + path + "/lib/libfakeioctl.so";
+                prefix = "LD_PRELOAD=" + path + "/lib/";
+                if(devChipset.startsWith("4339")) {
+                    //BCM4339
+                    prefix += "libfakeioctl.so";
+                }else if(devChipset.startsWith("4358")){
+                    //BCM4358
+                    prefix += "libnexmon.so";
+                }else{
+                    //Default (detected but not included)
+                    prefix += "libfakeioctl.so";
+                }
+
                 airodump_dir = path + "/bin/airodump-ng";
                 aireplay_dir = path + "/bin/aireplay-ng";
                 aircrack_dir = path + "/bin/aircrack-ng";
@@ -548,7 +573,7 @@ public class MainActivity extends AppCompatActivity{
                         runInHandler(new Runnable(){
                             @Override
                             public void run(){
-                                Button crack_btn = (Button) findViewById(R.id.crack);
+                                Button crack_btn = findViewById(R.id.crack);
                                 if(crack_btn!=null){
                                     //We are in IsolatedFragment
                                     crack_btn.setText(getString(R.string.crack));
@@ -635,7 +660,7 @@ public class MainActivity extends AppCompatActivity{
                             String mac = buffer.substring(0, 6);
                             String manuf = buffer.substring(22);
                             if(manufHashMap.get(mac)==null){
-                                //Write to file only if it was added to the AVL (it's unique)
+                                //Write to file only if it was added to the HashMap (it's unique)
                                 manufHashMap.put(mac, manuf);
                                 in.write(mac + ";" + manuf + '\n');
                             }
@@ -825,7 +850,7 @@ public class MainActivity extends AppCompatActivity{
         //_startAireplay("--caffe-latte -b " + ap.mac);     //don't know where
     }
 
-    //There are 2 mdk3 binaries with different names, so the app can stop each one separately
+    //There are 2 mdk3 binaries with different names, so the app can easily stop each one separately
     public static void startBeaconFlooding(String str){
         try{
             String cmd = "su -c " + prefix + " " + mdk3bf_dir + " " + iface + " b -m ";
@@ -1237,21 +1262,21 @@ public class MainActivity extends AppCompatActivity{
             // find the item to work with
             Tile current = Tile.tiles.get(position);
 
-            TextView upperLeft = (TextView) itemview.findViewById(R.id.upperLeft);
+            TextView upperLeft = itemview.findViewById(R.id.upperLeft);
             upperLeft.setText(current.device.upperLeft);
             upperLeft.setTextColor(ContextCompat.getColor(getContext(), current.device.isMarked ? R.color.colorAccent : android.R.color.white));
 
-            TextView lowerLeft = (TextView) itemview.findViewById(R.id.lowerLeft);
+            TextView lowerLeft = itemview.findViewById(R.id.lowerLeft);
             lowerLeft.setText(current.device.lowerLeft);
 
-            TextView lowerRight = (TextView) itemview.findViewById(R.id.lowerRight);
+            TextView lowerRight = itemview.findViewById(R.id.lowerRight);
             lowerRight.setText(current.device.lowerRight);
 
-            TextView upperRight = (TextView) itemview.findViewById(R.id.upperRight);
+            TextView upperRight = itemview.findViewById(R.id.upperRight);
             upperRight.setText(current.device.upperRight);
 
             //Image
-            ImageView iv = (ImageView) itemview.findViewById(R.id.iv);
+            ImageView iv = itemview.findViewById(R.id.iv);
             if(current.device instanceof AP){
                 if(((AP)current.device).isHidden) iv.setImageResource(R.drawable.ap_hidden);
                 else iv.setImageResource(R.drawable.ap2);
@@ -1284,20 +1309,20 @@ public class MainActivity extends AppCompatActivity{
             // find the item to work with
             CustomAction currentItem = CustomAction.cmds.get(position);
 
-            TextView upperLeft = (TextView) itemview.findViewById(R.id.upperLeft);
+            TextView upperLeft = itemview.findViewById(R.id.upperLeft);
             upperLeft.setText(currentItem.getTitle());
 
-            TextView lowerLeft = (TextView) itemview.findViewById(R.id.lowerLeft);
+            TextView lowerLeft = itemview.findViewById(R.id.lowerLeft);
             lowerLeft.setText(currentItem.getStartCmd());
 
-            TextView lowerRight = (TextView) itemview.findViewById(R.id.lowerRight);
+            TextView lowerRight = itemview.findViewById(R.id.lowerRight);
             lowerRight.setText("");
 
-            TextView upperRight = (TextView) itemview.findViewById(R.id.upperRight);
+            TextView upperRight = itemview.findViewById(R.id.upperRight);
             upperRight.setText("");
 
             //Image
-            ImageView iv = (ImageView) itemview.findViewById(R.id.iv);
+            ImageView iv = itemview.findViewById(R.id.iv);
             if(currentItem.getType()==TYPE_ST){
                 iv.setImageResource(R.drawable.st2);
             }else{
@@ -1329,11 +1354,11 @@ public class MainActivity extends AppCompatActivity{
             // find the item to work with
             RootFile currentItem = FileExplorerDialog.list.get(position);
 
-            TextView firstText = (TextView) itemview.findViewById(R.id.explorer_item_tv);
+            TextView firstText = itemview.findViewById(R.id.explorer_item_tv);
             firstText.setText(currentItem.getName());
 
             //Image
-            ImageView iv = (ImageView) itemview.findViewById(R.id.explorer_iv);
+            ImageView iv = itemview.findViewById(R.id.explorer_iv);
             if(currentItem.isFile()){
                 iv.setImageResource(R.drawable.file);
             }else{
@@ -1483,15 +1508,6 @@ public class MainActivity extends AppCompatActivity{
         }
         str += "ago";
         return str;
-    }
-    static String getDirectory(String str){
-        //Returns a directory that ends with /
-        if(str==null) return null;
-        if(str.length()==0) return str;
-
-        if(str.charAt(str.length()-1)=='/'){
-            return str;
-        }else return str + '/';
     }
     static String getFixed(String text, int size){
         /*Returns a string of fixed length (size) that contains spaces followed by a text
@@ -1644,6 +1660,51 @@ public class MainActivity extends AppCompatActivity{
             return false;
         }
         return true;
+    }
+
+    static String findFirmwarePath(Shell shell){
+        //Blocking function, don't run on main thread
+        boolean flag = false;
+        if(shell==null){
+            flag = true;
+            shell = getFreeShell();
+        }
+
+        String dirs[] = {
+                "/system",
+                "/vendor"
+        };
+        String firmware = null;
+        int i = 0;
+        while(firmware==null && i<dirs.length){
+            firmware = checkDirectoryForFirmware(shell, dirs[i]);
+            i++;
+        }
+
+        if(flag){
+            //Release the shell only if it was obtained by this function
+            shell.done();
+        }
+
+        return firmware;
+    }
+    static String checkDirectoryForFirmware(Shell shell, String directory){
+        String firmware = null;
+        shell.run(busybox + " find " + directory + " -type f -name \"fw_bcmdhd.bin\"; echo ENDOFFIND");
+        BufferedReader out = shell.getShell_out();
+        try{
+            String result = out.readLine();
+            while(result!=null){
+                if(result.equals("ENDOFFIND")) break;
+                if(!result.contains("/bac/") && !result.contains("backup")) firmware = result;
+
+                result = out.readLine();
+            }
+        }catch(IOException e){
+            e.printStackTrace();
+        }
+
+        return firmware;
     }
 
     static{

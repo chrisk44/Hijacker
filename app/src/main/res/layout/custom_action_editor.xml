@@ -10,8 +10,7 @@
     <TextView
         android:text="@string/custom_action_editor_message"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:id="@+id/textView3"/>
+        android:layout_height="wrap_content" />
 
     <RadioGroup
         android:layout_width="match_parent"

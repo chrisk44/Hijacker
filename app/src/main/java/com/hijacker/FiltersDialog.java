@@ -74,32 +74,32 @@ public class FiltersDialog extends DialogFragment {
                 getString(R.string.sort_pwr)
         };
 
-        apCb = (CheckBox)view.findViewById(R.id.ap_cb);
-        stCb = (CheckBox)view.findViewById(R.id.st_cb);
-        stNaCb = (CheckBox)view.findViewById(R.id.st_na_cb);
-        channelCb[0] = (CheckBox)view.findViewById(R.id.cb_all);
-        channelCb[1] = (CheckBox)view.findViewById(R.id.cb_1);
-        channelCb[2] = (CheckBox)view.findViewById(R.id.cb_2);
-        channelCb[3] = (CheckBox)view.findViewById(R.id.cb_3);
-        channelCb[4] = (CheckBox)view.findViewById(R.id.cb_4);
-        channelCb[5] = (CheckBox)view.findViewById(R.id.cb_5);
-        channelCb[6] = (CheckBox)view.findViewById(R.id.cb_6);
-        channelCb[7] = (CheckBox)view.findViewById(R.id.cb_7);
-        channelCb[8] = (CheckBox)view.findViewById(R.id.cb_8);
-        channelCb[9] = (CheckBox)view.findViewById(R.id.cb_9);
-        channelCb[10] = (CheckBox)view.findViewById(R.id.cb_10);
-        channelCb[11] = (CheckBox)view.findViewById(R.id.cb_11);
-        channelCb[12] = (CheckBox)view.findViewById(R.id.cb_12);
-        channelCb[13] = (CheckBox)view.findViewById(R.id.cb_13);
-        channelCb[14] = (CheckBox)view.findViewById(R.id.cb_14);
-        wpaCb = (CheckBox)view.findViewById(R.id.cb_wpa);
-        wepCb = (CheckBox)view.findViewById(R.id.cb_wep);
-        opnCb = (CheckBox)view.findViewById(R.id.cb_opn);
-        seek = (SeekBar)view.findViewById(R.id.seekBar);
-        manufView = (EditText)view.findViewById(R.id.manuf_filter_et);
-        sortSelectBtn = (Button)view.findViewById(R.id.select_sort);
-        sortReverseCb = (CheckBox)view.findViewById(R.id.sort_reverse);
-        pwrTv = (TextView)view.findViewById(R.id.pwr);
+        apCb = view.findViewById(R.id.ap_cb);
+        stCb = view.findViewById(R.id.st_cb);
+        stNaCb = view.findViewById(R.id.st_na_cb);
+        channelCb[0] = view.findViewById(R.id.cb_all);
+        channelCb[1] = view.findViewById(R.id.cb_1);
+        channelCb[2] = view.findViewById(R.id.cb_2);
+        channelCb[3] = view.findViewById(R.id.cb_3);
+        channelCb[4] = view.findViewById(R.id.cb_4);
+        channelCb[5] = view.findViewById(R.id.cb_5);
+        channelCb[6] = view.findViewById(R.id.cb_6);
+        channelCb[7] = view.findViewById(R.id.cb_7);
+        channelCb[8] = view.findViewById(R.id.cb_8);
+        channelCb[9] = view.findViewById(R.id.cb_9);
+        channelCb[10] = view.findViewById(R.id.cb_10);
+        channelCb[11] = view.findViewById(R.id.cb_11);
+        channelCb[12] = view.findViewById(R.id.cb_12);
+        channelCb[13] = view.findViewById(R.id.cb_13);
+        channelCb[14] = view.findViewById(R.id.cb_14);
+        wpaCb = view.findViewById(R.id.cb_wpa);
+        wepCb = view.findViewById(R.id.cb_wep);
+        opnCb = view.findViewById(R.id.cb_opn);
+        seek = view.findViewById(R.id.seekBar);
+        manufView = view.findViewById(R.id.manuf_filter_et);
+        sortSelectBtn = view.findViewById(R.id.select_sort);
+        sortReverseCb = view.findViewById(R.id.sort_reverse);
+        pwrTv = view.findViewById(R.id.pwr);
 
         seek.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
             @Override

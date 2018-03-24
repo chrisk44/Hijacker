@@ -53,15 +53,15 @@ public class FileExplorerDialog extends DialogFragment{
         AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
         View view = getActivity().getLayoutInflater().inflate(R.layout.file_explorer, null);
 
-        currentDir = (TextView)view.findViewById(R.id.currentDir);
-        backButton = (ImageButton)view.findViewById(R.id.backButton);
+        currentDir = view.findViewById(R.id.currentDir);
+        backButton = view.findViewById(R.id.backButton);
         backButton.setOnClickListener(new View.OnClickListener(){
             @Override
             public void onClick(View v){
                 goToDirectory(new RootFile(current.getParentPath()));
             }
         });
-        newFolderButton = (ImageButton)view.findViewById(R.id.newFolderButton);
+        newFolderButton = view.findViewById(R.id.newFolderButton);
         newFolderButton.setVisibility(toSelect==SELECT_DIR ? View.VISIBLE : View.INVISIBLE);
         newFolderButton.setOnClickListener(new View.OnClickListener(){
             @Override
@@ -84,7 +84,7 @@ public class FileExplorerDialog extends DialogFragment{
             }
         });
 
-        listView = (ListView)view.findViewById(R.id.explorer_listview);
+        listView = view.findViewById(R.id.explorer_listview);
         listView.setAdapter(file_explorer_adapter);
         listView.setOnItemClickListener(new AdapterView.OnItemClickListener(){
             @Override

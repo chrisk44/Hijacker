@@ -69,11 +69,11 @@ public class CustomActionFragment extends Fragment{
         setRetainInstance(true);
         fragmentView = inflater.inflate(R.layout.custom_action_fragment, container, false);
 
-        consoleView = (TextView)fragmentView.findViewById(R.id.console);
-        consoleScrollView = (ScrollView)fragmentView.findViewById(R.id.console_scroll_view);
-        startBtn = (Button)fragmentView.findViewById(R.id.start_button);
-        targetBtn = (Button)fragmentView.findViewById(R.id.select_target);
-        actionBtn = (Button)fragmentView.findViewById(R.id.select_action);
+        consoleView = fragmentView.findViewById(R.id.console);
+        consoleScrollView = fragmentView.findViewById(R.id.console_scroll_view);
+        startBtn = fragmentView.findViewById(R.id.start_button);
+        targetBtn = fragmentView.findViewById(R.id.select_target);
+        actionBtn = fragmentView.findViewById(R.id.select_action);
 
         if(task==null) task = new CustomActionTask();
 

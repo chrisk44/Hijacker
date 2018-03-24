@@ -42,7 +42,7 @@ public class EditTextDialog extends DialogFragment {
         AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
         dialogView = getActivity().getLayoutInflater().inflate(R.layout.edit_text_dialog, null);
 
-        fieldView = (EditText)dialogView.findViewById(R.id.edit_text);
+        fieldView = dialogView.findViewById(R.id.edit_text);
         fieldView.setOnEditorActionListener(new TextView.OnEditorActionListener(){
             @Override
             public boolean onEditorAction(TextView v, int actionId, KeyEvent event){

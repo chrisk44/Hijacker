@@ -65,14 +65,14 @@ public class IsolatedFragment extends Fragment{
         };
         thread = new Thread(runnable);
 
-        essid = (TextView)fragmentView.findViewById(R.id.essid);
-        manuf = (TextView)fragmentView.findViewById(R.id.manuf);
-        mac = (TextView)fragmentView.findViewById(R.id.mac);
-        sec1 = (TextView)fragmentView.findViewById(R.id.sec1);
-        numbers = (TextView)fragmentView.findViewById(R.id.numbers);
-        sec2 = (TextView)fragmentView.findViewById(R.id.sec2);
+        essid = fragmentView.findViewById(R.id.essid);
+        manuf = fragmentView.findViewById(R.id.manuf);
+        mac = fragmentView.findViewById(R.id.mac);
+        sec1 = fragmentView.findViewById(R.id.sec1);
+        numbers = fragmentView.findViewById(R.id.numbers);
+        sec2 = fragmentView.findViewById(R.id.sec2);
 
-        ListView listview = (ListView)fragmentView.findViewById(R.id.listview);
+        ListView listview = fragmentView.findViewById(R.id.listview);
         listview.setAdapter(MainActivity.adapter);
         listview.setOnItemClickListener(new AdapterView.OnItemClickListener(){
             @Override

@@ -57,16 +57,16 @@ public class MDKFragment extends Fragment{
         setRetainInstance(true);
         fragmentView = inflater.inflate(R.layout.mdk_fragment, container, false);
 
-        ssidView = (EditText)fragmentView.findViewById(R.id.ssid_file);
-        managed_cb = ((CheckBox)fragmentView.findViewById(R.id.managed));
-        adhoc_cb = ((CheckBox)fragmentView.findViewById(R.id.adhoc));
-        opn_cb = ((CheckBox)fragmentView.findViewById(R.id.opn));
-        wep_cb = ((CheckBox)fragmentView.findViewById(R.id.wep));
-        tkip_cb = ((CheckBox)fragmentView.findViewById(R.id.tkip));
-        aes_cb = ((CheckBox)fragmentView.findViewById(R.id.aes));
-        bf_switch = (Switch)fragmentView.findViewById(R.id.bf_switch);
-        ados_switch = (Switch)fragmentView.findViewById(R.id.ados_switch);
-        select_button = (Button)fragmentView.findViewById(R.id.select_ap_ados);
+        ssidView = fragmentView.findViewById(R.id.ssid_file);
+        managed_cb = fragmentView.findViewById(R.id.managed);
+        adhoc_cb = fragmentView.findViewById(R.id.adhoc);
+        opn_cb = fragmentView.findViewById(R.id.opn);
+        wep_cb = fragmentView.findViewById(R.id.wep);
+        tkip_cb = fragmentView.findViewById(R.id.tkip);
+        aes_cb = fragmentView.findViewById(R.id.aes);
+        bf_switch = fragmentView.findViewById(R.id.bf_switch);
+        ados_switch = fragmentView.findViewById(R.id.ados_switch);
+        select_button = fragmentView.findViewById(R.id.select_ap_ados);
 
         fragmentView.findViewById(R.id.ssid_file_fe_btn).setOnClickListener(new View.OnClickListener(){
             @Override

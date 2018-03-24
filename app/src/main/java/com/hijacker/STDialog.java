@@ -40,14 +40,14 @@ public class STDialog extends DialogFragment {
         View view = getActivity().getLayoutInflater().inflate(R.layout.st_info, null);
 
         if(st[0]==null) {
-            st[0] = (TextView)view.findViewById(R.id.mac_st);
-            st[1] = (TextView)view.findViewById(R.id.bssid_st);
-            st[2] = (TextView)view.findViewById(R.id.pwr_st);
-            st[3] = (TextView)view.findViewById(R.id.frames_st);
-            st[4] = (TextView)view.findViewById(R.id.lost_st);
-            st[5] = (TextView)view.findViewById(R.id.manuf_st);
-            st[6] = (TextView)view.findViewById(R.id.lastseen_st);
-            st[7] = (TextView)view.findViewById(R.id.probes_st);
+            st[0] = view.findViewById(R.id.mac_st);
+            st[1] = view.findViewById(R.id.bssid_st);
+            st[2] = view.findViewById(R.id.pwr_st);
+            st[3] = view.findViewById(R.id.frames_st);
+            st[4] = view.findViewById(R.id.lost_st);
+            st[5] = view.findViewById(R.id.manuf_st);
+            st[6] = view.findViewById(R.id.lastseen_st);
+            st[7] = view.findViewById(R.id.probes_st);
         }
 
         runnable = new Runnable(){

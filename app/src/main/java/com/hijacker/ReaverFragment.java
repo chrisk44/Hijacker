@@ -89,17 +89,17 @@ public class ReaverFragment extends Fragment{
         fragmentView = inflater.inflate(R.layout.reaver_fragment, container, false);
         setRetainInstance(true);
 
-        consoleView = (TextView)fragmentView.findViewById(R.id.console);
-        consoleScrollView = (ScrollView)fragmentView.findViewById(R.id.console_scroll_view);
-        pinDelayView = (EditText)fragmentView.findViewById(R.id.pin_delay);
-        lockedDelayView = (EditText)fragmentView.findViewById(R.id.locked_delay);
-        pixie_dust_cb = (CheckBox)fragmentView.findViewById(R.id.pixie_dust);
-        ignored_locked_cb = (CheckBox)fragmentView.findViewById(R.id.ignore_locked);
-        eap_fail_cb = (CheckBox)fragmentView.findViewById(R.id.eap_fail);
-        small_dh_cb = (CheckBox)fragmentView.findViewById(R.id.small_dh);
-        no_nack_cb = (CheckBox)fragmentView.findViewById(R.id.no_nack);
-        select_button = (Button)fragmentView.findViewById(R.id.select_ap);
-        start_button = (Button)fragmentView.findViewById(R.id.start_button);
+        consoleView = fragmentView.findViewById(R.id.console);
+        consoleScrollView = fragmentView.findViewById(R.id.console_scroll_view);
+        pinDelayView = fragmentView.findViewById(R.id.pin_delay);
+        lockedDelayView = fragmentView.findViewById(R.id.locked_delay);
+        pixie_dust_cb = fragmentView.findViewById(R.id.pixie_dust);
+        ignored_locked_cb = fragmentView.findViewById(R.id.ignore_locked);
+        eap_fail_cb = fragmentView.findViewById(R.id.eap_fail);
+        small_dh_cb = fragmentView.findViewById(R.id.small_dh);
+        no_nack_cb = fragmentView.findViewById(R.id.no_nack);
+        select_button = fragmentView.findViewById(R.id.select_ap);
+        start_button = fragmentView.findViewById(R.id.start_button);
 
         pinDelayView.setOnEditorActionListener(new TextView.OnEditorActionListener(){
             @Override

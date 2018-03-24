@@ -52,13 +52,13 @@ public class CustomActionEditorFragment extends Fragment{
     public View onCreateView(LayoutInflater inflater, final ViewGroup container, Bundle savedInstanceState){
         fragmentView = inflater.inflate(R.layout.custom_action_editor, container, false);
 
-        titleView = (EditText)fragmentView.findViewById(R.id.title);
-        startCmdView = (EditText)fragmentView.findViewById(R.id.start_cmd);
-        stopCmdView = (EditText)fragmentView.findViewById(R.id.stop_cmd);
-        processNameView = (EditText)fragmentView.findViewById(R.id.process_name);
-        requirement_cb = (CheckBox)fragmentView.findViewById(R.id.requirement);
-        has_process_name_cb = (CheckBox)fragmentView.findViewById(R.id.has_process_name);
-        save_btn = (Button)fragmentView.findViewById(R.id.save_button);
+        titleView = fragmentView.findViewById(R.id.title);
+        startCmdView = fragmentView.findViewById(R.id.start_cmd);
+        stopCmdView = fragmentView.findViewById(R.id.stop_cmd);
+        processNameView = fragmentView.findViewById(R.id.process_name);
+        requirement_cb = fragmentView.findViewById(R.id.requirement);
+        has_process_name_cb = fragmentView.findViewById(R.id.has_process_name);
+        save_btn = fragmentView.findViewById(R.id.save_button);
 
         ((RadioGroup)fragmentView.findViewById(R.id.radio_group)).setOnCheckedChangeListener(new RadioGroup.OnCheckedChangeListener(){
             @Override
