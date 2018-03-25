@@ -54,6 +54,7 @@ import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
+import android.util.SparseArray;
 import android.view.Gravity;
 import android.view.KeyEvent;
 import android.view.Menu;
@@ -126,7 +127,7 @@ public class MainActivity extends AppCompatActivity{
     static View rootView;
     static DrawerLayout mDrawerLayout;
     static NavigationView navigationView;
-    static HashMap<Integer, String> navTitlesMap = new HashMap<>();             //HashMap to map fragment IDs to their respective navigation titles
+    static SparseArray<String> navTitlesMap = new SparseArray<>();             //SparseArray to map fragment IDs to their respective navigation titles
     static Drawable overflow[] = {null, null, null, null, null, null, null, null};      //Drawables to use for overflow button icon
     static ImageView status[] = {null, null, null, null, null};                         //Icons in TestDialog, set in TestDialog class
     static int progress_int;
