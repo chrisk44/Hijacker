@@ -1,9 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
-<android.support.v4.widget.DrawerLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
+<android.support.v4.widget.DrawerLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:id="@+id/drawer_layout"
     android:layout_width="match_parent"
     android:layout_height="match_parent">
+
     <!-- The main content view -->
     <RelativeLayout
         xmlns:android="http://schemas.android.com/apk/res/android"
@@ -13,7 +14,6 @@
         android:layout_height="match_parent"
         tools:context="com.hijacker.MainActivity"
         android:animateLayoutChanges="true">
-
 
         <android.support.v7.widget.Toolbar
             android:id="@+id/my_toolbar"
@@ -89,15 +89,16 @@
             android:layout_marginTop="3dp" />
 
     </RelativeLayout>
-    <!-- The navigation drawer -->
-    <ListView android:id="@+id/left_drawer"
-              android:layout_width="240dp"
-              android:layout_height="match_parent"
-              android:layout_gravity="start"
-              android:choiceMode="singleChoice"
-              android:divider="@android:color/transparent"
-              android:dividerHeight="0dp"
-              android:background="?attr/colorPrimary"
-              android:paddingTop="200dp"
-              android:listSelector="?attr/colorAccent" />
+
+    <!-- Container for contents of drawer - use NavigationView to make configuration easier -->
+    <android.support.design.widget.NavigationView
+        android:id="@+id/nav_view"
+        android:layout_width="wrap_content"
+        android:layout_height="match_parent"
+        android:layout_gravity="start"
+        android:fitsSystemWindows="true"
+        app:headerLayout="@layout/nav_header"
+        app:itemTextColor="@color/drawer_selector"
+        app:menu="@menu/drawer_view" />
+
 </android.support.v4.widget.DrawerLayout>

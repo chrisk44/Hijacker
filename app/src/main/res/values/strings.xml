@@ -25,6 +25,17 @@
     <string name="download">Download</string>
     <string name="unknown_error">An unknown error occurred</string>
 
+    <!-- Navigation Drawer -->
+    <string name="nav_airodump">Airodump</string>
+    <string name="nav_mdk3">MDK3</string>
+    <string name="nav_reaver">Reaver</string>
+    <string name="nav_crack">Crack .cap file</string>
+    <string name="nav_custom_actions">Custom Actions</string>
+    <string name="nav_settings">Settings</string>
+
+    <!-- AP -->
+    <string name="reaver_already_running">Reaver is already running</string>
+
     <!-- APDialog (xml) -->
     <string name="mac">MAC:</string>
     <string name="channel">Channel:</string>

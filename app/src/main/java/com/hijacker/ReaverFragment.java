@@ -80,6 +80,8 @@ public class ReaverFragment extends Fragment{
     EditText pinDelayView, lockedDelayView;
     CheckBox pixie_dust_cb, ignored_locked_cb, eap_fail_cb, small_dh_cb, no_nack_cb;
     ScrollView consoleScrollView;
+    int normalContainerHeight = -1;
+    boolean autostart = false;
     static ReaverTask task;
     static String console_text = null, pin_delay="1", locked_delay="60", custom_mac=null;       //delays are always used as strings
     static boolean pixie_dust, ignore_locked, eap_fail, small_dh, no_nack;
@@ -228,6 +230,10 @@ public class ReaverFragment extends Fragment{
             task.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
         }
     }
+    ReaverFragment setAutostart(boolean autostart){
+        this.autostart = autostart;
+        return this;
+    }
     static boolean isRunning(){
         if(task==null) return false;
         return task.getStatus()==AsyncTask.Status.RUNNING;
@@ -265,6 +271,17 @@ public class ReaverFragment extends Fragment{
             ViewGroup.LayoutParams layoutParams = optionsContainer.getLayoutParams();
             layoutParams.height = 0;
             optionsContainer.setLayoutParams(layoutParams);
+        }
+
+        if(autostart){
+            optionsContainer.post(new Runnable(){
+                @Override
+                public void run(){
+                    normalContainerHeight = optionsContainer.getHeight();
+                    attemptStart();
+                }
+            });
+            autostart = false;
         }
     }
     @Override
@@ -317,7 +334,6 @@ public class ReaverFragment extends Fragment{
     class ReaverTask extends AsyncTask<Void, String, Boolean>{
         String pinDelay, lockedDelay;
         boolean ignoreLocked, eapFail, smallDH, pixieDust, noNack;
-        int prevOptContainerHeight = -1;
         ValueAnimator sizeAnimator;
         @Override
         protected void onPreExecute(){
@@ -331,8 +347,6 @@ public class ReaverFragment extends Fragment{
 
             start_button.setText(R.string.stop);
             progress.setIndeterminate(true);
-
-            prevOptContainerHeight = optionsContainer.getHeight();
 
             sizeAnimator = ValueAnimator.ofInt(optionsContainer.getHeight(), 0);
             sizeAnimator.setTarget(optionsContainer);
@@ -421,7 +435,8 @@ public class ReaverFragment extends Fragment{
             start_button.setText(R.string.start);
             progress.setIndeterminate(false);
 
-            sizeAnimator = ValueAnimator.ofInt(0, prevOptContainerHeight);
+            Log.e("TESTESTESTEST", "normalContainerHeight is " + normalContainerHeight);
+            sizeAnimator = ValueAnimator.ofInt(0, normalContainerHeight);
             sizeAnimator.setTarget(optionsContainer);
             sizeAnimator.addUpdateListener(new ValueAnimator.AnimatorUpdateListener(){
                 @Override
@@ -437,6 +452,7 @@ public class ReaverFragment extends Fragment{
                 @Override
                 public void onAnimationEnd(Animator animation){
                     consoleScrollView.fullScroll(View.FOCUS_DOWN);
+                    Log.e("TESTESTESTEST", "Animation Finished");
                 }
                 @Override
                 public void onAnimationCancel(Animator animation){}
@@ -447,6 +463,8 @@ public class ReaverFragment extends Fragment{
 
             if(optionsContainer!=null) {
                 sizeAnimator.start();
+            }else{
+                Log.e("TESTESTESTEST", "SHIT HAPPENED");
             }
         }
     }

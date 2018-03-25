@@ -17,7 +17,7 @@
         android:id="@+id/reset"
         android:icon="@drawable/clear_drawable"
         android:title="@string/clear"
-        app:showAsAction="ifRoom"/>
+        app:showAsAction="never"/>
 
     <item
         android:id="@+id/stop_aireplay"

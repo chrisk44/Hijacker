@@ -43,25 +43,26 @@ import android.os.Handler;
 import android.os.Looper;
 import android.preference.PreferenceManager;
 import android.support.annotation.NonNull;
+import android.support.design.widget.NavigationView;
 import android.support.design.widget.Snackbar;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.NotificationCompat;
 import android.support.v4.content.ContextCompat;
+import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
+import android.view.Gravity;
 import android.view.KeyEvent;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.ImageView;
-import android.widget.ListView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -99,15 +100,15 @@ public class MainActivity extends AppCompatActivity{
     static final String NETHUNTER_BOOTKALI_BASH = "/data/data/com.offsec.nethunter/files/scripts/bootkali_bash";
     static final int BUFFER_SIZE = 1048576;
     static final int AIREPLAY_DEAUTH = 1, AIREPLAY_WEP = 2;
-    static final int FRAGMENT_AIRODUMP = 0, FRAGMENT_MDK = 1, FRAGMENT_CRACK = 2,
-            FRAGMENT_REAVER = 3, FRAGMENT_CUSTOM=4, FRAGMENT_SETTINGS = 5;                     //These need to correspond to the items in the drawer
+    static final int FRAGMENT_AIRODUMP = R.id.nav_airodump, FRAGMENT_MDK = R.id.nav_mdk3, FRAGMENT_CRACK = R.id.nav_crack,
+            FRAGMENT_REAVER = R.id.nav_reaver, FRAGMENT_CUSTOM = R.id.nav_custom_actions, FRAGMENT_SETTINGS = R.id.nav_settings;
     static final int PROCESS_AIRODUMP=0, PROCESS_AIREPLAY=1, PROCESS_MDK_BF=2, PROCESS_MDK_DOS=3, PROCESS_AIRCRACK=4, PROCESS_REAVER=5;
     static final int SORT_NOSORT = 0, SORT_ESSID = 1, SORT_BEACONS_FRAMES = 2, SORT_DATA_FRAMES = 3, SORT_PWR = 4;
     static final int CHROOT_FOUND = 0, CHROOT_BIN_MISSING = 1, CHROOT_DIR_MISSING = 2, CHROOT_BOTH_MISSING = 3;
     //State variables
     static boolean wpacheckcont = false;
     static boolean notif_on = false, background = false;    //notif_on: notification should be shown, background: the app is running in the background
-    static int aireplay_running = 0, currentFragment=FRAGMENT_AIRODUMP;         //Set currentFragment in onResume of each Fragment
+    static int aireplay_running = 0, currentFragment = FRAGMENT_AIRODUMP;         //Set currentFragment in onResume of each Fragment
     //Filters
     static boolean show_ap = true, show_st = true, show_na_st = true, wpa = true, wep = true, opn = true;
     static boolean show_ch[] = {true, false, false, false, false, false, false, false, false, false, false, false, false, false, false};
@@ -123,8 +124,8 @@ public class MainActivity extends AppCompatActivity{
     static Toolbar toolbar;
     static View rootView;
     static DrawerLayout mDrawerLayout;
-    static ListView mDrawerList;
-    static String[] mPlanetTitles;
+    static NavigationView navigationView;
+    static HashMap<Integer, String> navTitlesMap = new HashMap<>();             //HashMap to map fragment IDs to their respective navigation titles
     static Drawable overflow[] = {null, null, null, null, null, null, null, null};      //Drawables to use for overflow button icon
     static ImageView status[] = {null, null, null, null, null};                         //Icons in TestDialog, set in TestDialog class
     static int progress_int;
@@ -192,7 +193,6 @@ public class MainActivity extends AppCompatActivity{
         file_explorer_adapter = new FileExplorerAdapter();
         file_explorer_adapter.setNotifyOnChange(true);
         setContentView(R.layout.activity_main);
-        setSupportActionBar((Toolbar) findViewById(R.id.my_toolbar));
 
         //Google AppIndex
         client = new GoogleApiClient.Builder(MainActivity.this).addApi(AppIndex.API).build();
@@ -222,13 +222,64 @@ public class MainActivity extends AppCompatActivity{
             loadingDialog.show(getFragmentManager(), "LoadingDialog");
 
             //Initialize the drawer
-            mPlanetTitles = getResources().getStringArray(R.array.planets_array);
             mDrawerLayout = findViewById(R.id.drawer_layout);
-            mDrawerList = findViewById(R.id.left_drawer);
-            mDrawerList.setAdapter(new ArrayAdapter<>(MainActivity.this, R.layout.drawer_list_item, R.id.navDrawerTv, mPlanetTitles));
-            mDrawerList.setOnItemClickListener(new DrawerItemClickListener());
+            navigationView = findViewById(R.id.nav_view);
+            navigationView.getMenu().getItem(0).setChecked(true);
+            navigationView.setNavigationItemSelectedListener(
+                    new NavigationView.OnNavigationItemSelectedListener() {
+                        @Override
+                        public boolean onNavigationItemSelected(MenuItem menuItem) {
+                            // set item as selected to persist highlight
+                            menuItem.setChecked(true);
+                            // close drawer when item is tapped
+                            mDrawerLayout.closeDrawers();
+
+                            if(currentFragment!=menuItem.getItemId()){
+                                FragmentTransaction ft = mFragmentManager.beginTransaction();
+                                switch(menuItem.getItemId()){
+                                    case FRAGMENT_AIRODUMP:
+                                        ft.replace(R.id.fragment1, is_ap==null ? new MyListFragment() : new IsolatedFragment());
+                                        break;
+                                    case FRAGMENT_MDK:
+                                        ft.replace(R.id.fragment1, new MDKFragment());
+                                        break;
+                                    case FRAGMENT_REAVER:
+                                        ft.replace(R.id.fragment1, new ReaverFragment());
+                                        break;
+                                    case FRAGMENT_CRACK:
+                                        ft.replace(R.id.fragment1, new CrackFragment());
+                                        break;
+                                    case FRAGMENT_CUSTOM:
+                                        ft.replace(R.id.fragment1, new CustomActionFragment());
+                                        break;
+                                    case FRAGMENT_SETTINGS:
+                                        ft.replace(R.id.fragment1, new SettingsFragment());
+                                        break;
+                                }
+                                ft.setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN);
+                                ft.addToBackStack(null);
+                                ft.commitAllowingStateLoss();
+                                mFragmentManager.executePendingTransactions();
+                            }
+
+                            actionBar.setTitle(navTitlesMap.get(currentFragment));
+
+                            return true;
+                        }
+                    });
+
+            //Initialize toolbar
             toolbar = findViewById(R.id.my_toolbar);
+            setSupportActionBar(toolbar);
             toolbar.setOverflowIcon(overflow[0]);
+
+            ActionBar actionbar = getSupportActionBar();
+            if(actionbar!=null){
+                actionbar.setDisplayHomeAsUpEnabled(true);
+                actionbar.setHomeAsUpIndicator(R.drawable.ic_menu);
+            }else{
+                Log.e("HIJACKER/SetupPreEx", "actionbar is null");
+            }
         }
         @Override
         protected Boolean doInBackground(Void... params){
@@ -253,8 +304,8 @@ public class MainActivity extends AppCompatActivity{
             deviceModel = Build.MODEL;
             if(!deviceModel.startsWith(Build.MANUFACTURER)) deviceModel = Build.MANUFACTURER + " " + deviceModel;
             deviceModel = deviceModel.replace(" ", "_");
+            //devChipset is set later because busybox needs to be extracted
             arch = System.getProperty("os.arch");
-            //devChipset is set later, busybox needs to be extracted
 
             //Find views
             publishProgress(getString(R.string.init_views));
@@ -360,32 +411,13 @@ public class MainActivity extends AppCompatActivity{
             ST.not_connected = getString(R.string.not_connected);
             ST.paired = getString(R.string.paired) + ' ';
 
-            //Extract busybox and detect chipset
-            if(arch.equals("armv7l") || arch.equals("aarch64")) {
-                extract("busybox", path + "/bin/", true);
-                busybox = path + "/bin/busybox";
-
-                //Detect device chipset
-                publishProgress(getString(R.string.detecting_device_chipset));
-                Shell shell = getFreeShell();
-
-                String firmwarePath = findFirmwarePath(shell);
-                if(firmwarePath!=null){
-                    //Get chipset from firmware file
-                    shell.run("strings " + firmwarePath + " | " + busybox + " grep \"FWID:\"; echo ENDOFSTRINGS");
-                    devChipset = getLastLine(shell.getShell_out(), "ENDOFSTRINGS");
-                    int index = devChipset.indexOf('-');
-                    if(index != -1){
-                        devChipset = devChipset.substring(0, index);
-                    }
-                }
-                Log.i("HIJACKER/DetectDev", "devChipset is " + devChipset);
-                shell.done();
-            }
-
             //Setup tools
             publishProgress(getString(R.string.setting_up_tools));
-            if(arch.equals("armv7l") || arch.equals("aarch64")){
+            if(arch.equals("armv7l") || arch.equals("aarch64")) {
+                String tools_location = path + "/bin/";
+                String lib_location = path + "/lib/";
+
+                //Create directories
                 File bin = new File(path + "/bin");
                 File lib = new File(path + "/lib");
                 if(!bin.exists()){
@@ -400,8 +432,14 @@ public class MainActivity extends AppCompatActivity{
                         return false;
                     }
                 }
+
+                //Extract busybox
+                extract("busybox", tools_location, true);
+                busybox = path + "/bin/busybox";
+
+                //Extract tools
                 boolean install = true;
-                if(bin.list().length==20 && lib.list().length==2 && info!=null){
+                if(bin.list().length==21 && lib.list().length==2 && info!=null){
                     if(info.versionCode==pref.getInt("tools_version", 0)){
                         if(debug) Log.d("HIJACKER/SetupTask", "Tools already installed");
                         install = false;
@@ -411,8 +449,6 @@ public class MainActivity extends AppCompatActivity{
                     }
                 }
                 if(install){
-                    String tools_location = path + "/bin/";
-                    String lib_location = path + "/lib/";
                     extract("airbase-ng", tools_location, true);
                     extract("aircrack-ng", tools_location, true);
                     extract("aireplay-ng", tools_location, true);
@@ -443,6 +479,24 @@ public class MainActivity extends AppCompatActivity{
                     }
                 }
 
+                //Detect device chipset
+                publishProgress(getString(R.string.detecting_device_chipset));
+                Shell shell = getFreeShell();
+
+                String firmwarePath = findFirmwarePath(shell);
+                if(firmwarePath!=null){
+                    //Get chipset from firmware file
+                    shell.run("strings " + firmwarePath + " | " + busybox + " grep \"FWID:\"; echo ENDOFSTRINGS");
+                    devChipset = getLastLine(shell.getShell_out(), "ENDOFSTRINGS");
+                    int index = devChipset.indexOf('-');
+                    if(index != -1){
+                        devChipset = devChipset.substring(0, index);
+                    }
+                }
+                Log.i("HIJACKER/DetectDev", "devChipset is " + devChipset);
+                shell.done();
+
+                //Set directories
                 prefix = "LD_PRELOAD=" + path + "/lib/";
                 if(devChipset.startsWith("4339")) {
                     //BCM4339
@@ -610,24 +664,8 @@ public class MainActivity extends AppCompatActivity{
             watchdogTask = new WatchdogTask(MainActivity.this);
 
             //Start threads
-            publishProgress(getString(R.string.starting_threads));
-            new Thread(new Runnable(){      //Thread to wait until the drawer is initialized and then highlight airodump
-                @Override
-                public void run(){
-                    //Thread to wait for the drawer to be initialized, so that the first option (airodump) can be highlighted
-                    try{
-                        while(mDrawerList.getChildAt(0)==null){
-                            Thread.sleep(100);
-                        }
-                        runInHandler(new Runnable(){
-                            @Override
-                            public void run(){
-                                refreshDrawer();
-                            }
-                        });
-                    }catch(InterruptedException ignored){}
-                }
-            }).start();
+            //publishProgress(getString(R.string.starting_threads));
+            // Nothing for now
 
             //Start background service so the app won't get killed if it goes to the background
             publishProgress(getString(R.string.starting_pers_service));
@@ -694,6 +732,14 @@ public class MainActivity extends AppCompatActivity{
                     manufHashMap = null;
                 }
             }
+
+            //Load navigation titles to HashMap
+            navTitlesMap.put(R.id.nav_airodump, getString(R.string.nav_airodump));
+            navTitlesMap.put(R.id.nav_mdk3, getString(R.string.nav_mdk3));
+            navTitlesMap.put(R.id.nav_reaver, getString(R.string.nav_reaver));
+            navTitlesMap.put(R.id.nav_crack, getString(R.string.nav_crack));
+            navTitlesMap.put(R.id.nav_custom_actions, getString(R.string.nav_custom_actions));
+            navTitlesMap.put(R.id.nav_settings, getString(R.string.nav_settings));
 
             if(ContextCompat.checkSelfPermission(MainActivity.this, Manifest.permission.READ_EXTERNAL_STORAGE)==PackageManager.PERMISSION_GRANTED){
                 //Load custom actions
@@ -1083,6 +1129,10 @@ public class MainActivity extends AppCompatActivity{
     @Override
     public boolean onOptionsItemSelected(MenuItem item){
         switch(item.getItemId()){
+            case android.R.id.home:
+                mDrawerLayout.openDrawer(GravityCompat.START);
+                return true;
+
             case R.id.reset:
                 stop(PROCESS_AIRODUMP);
                 Tile.clear();
@@ -1161,8 +1211,8 @@ public class MainActivity extends AppCompatActivity{
     @Override
     public boolean onKeyDown(int keyCode, KeyEvent event){
         if(keyCode==KeyEvent.KEYCODE_BACK){
-            if(mDrawerLayout.isDrawerOpen(mDrawerList)){
-                mDrawerLayout.closeDrawer(mDrawerList);
+            if(mDrawerLayout.isDrawerOpen(Gravity.START)){
+                mDrawerLayout.closeDrawers();
             }else if(mFragmentManager.getBackStackEntryCount()>1){
                 mFragmentManager.popBackStackImmediate();
             }else{
@@ -1212,39 +1262,6 @@ public class MainActivity extends AppCompatActivity{
         return new Action.Builder(Action.TYPE_VIEW).setObject(object).setActionStatus(Action.STATUS_TYPE_COMPLETED).build();
     }
 
-    private class DrawerItemClickListener implements ListView.OnItemClickListener {
-        @Override
-        public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-            if(currentFragment!=position){
-                FragmentTransaction ft = mFragmentManager.beginTransaction();
-                switch(position){
-                    case FRAGMENT_AIRODUMP:
-                        ft.replace(R.id.fragment1, is_ap==null ? new MyListFragment() : new IsolatedFragment());
-                        break;
-                    case FRAGMENT_MDK:
-                        ft.replace(R.id.fragment1, new MDKFragment());
-                        break;
-                    case FRAGMENT_CRACK:
-                        ft.replace(R.id.fragment1, new CrackFragment());
-                        break;
-                    case FRAGMENT_REAVER:
-                        ft.replace(R.id.fragment1, new ReaverFragment());
-                        break;
-                    case FRAGMENT_CUSTOM:
-                        ft.replace(R.id.fragment1, new CustomActionFragment());
-                        break;
-                    case FRAGMENT_SETTINGS:
-                        ft.replace(R.id.fragment1, new SettingsFragment());
-                        break;
-                }
-                ft.setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN);
-                ft.addToBackStack(null);
-                ft.commitAllowingStateLoss();
-                mFragmentManager.executePendingTransactions();
-            }
-            mDrawerLayout.closeDrawer(mDrawerList);
-        }
-    }
     class MyListAdapter extends ArrayAdapter<Tile>{
         MyListAdapter(){
             super(MainActivity.this, R.layout.listitem);
@@ -1464,13 +1481,8 @@ public class MainActivity extends AppCompatActivity{
         }
     }
     static void refreshDrawer(){
-        if(mDrawerList.getChildAt(0)!=null){        //Ensure that the Drawer is initialized
-            for(int i = 0; i<6; i++){
-                mDrawerList.getChildAt(i).setBackgroundResource(R.color.colorPrimary);
-            }
-            mDrawerList.getChildAt(currentFragment).setBackgroundResource(R.color.colorAccent);
-        }
-        actionBar.setTitle(mPlanetTitles[currentFragment]);
+        navigationView.getMenu().findItem(currentFragment).setChecked(true);
+        actionBar.setTitle(navTitlesMap.get(currentFragment));
     }
     static String getManuf(String mac){
         mac = trimMac(mac);

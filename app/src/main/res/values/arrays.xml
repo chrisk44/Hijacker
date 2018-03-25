@@ -8,13 +8,5 @@
         <item>Reaver</item>
         <item>Reaver in chroot</item>
     </array>
-    <array name="planets_array">
-        <item>Airodump</item>
-        <item>MDK3</item>
-        <item>Crack cap file</item>
-        <item>Reaver</item>
-        <item>Custom Actions</item>
-        <item>@string/settings</item>
-    </array>
 
 </resources>

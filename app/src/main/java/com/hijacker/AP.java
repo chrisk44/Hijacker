@@ -24,6 +24,7 @@ import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.PopupMenu;
+import android.widget.Toast;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -218,13 +219,14 @@ class AP extends Device{
     }
     void crackReaver(FragmentManager fragmentManager){
         ReaverFragment.ap = this;
+        //ReaverFragment newRF = new ReaverFragment().setAutostart(true);
         FragmentTransaction ft = fragmentManager.beginTransaction();
-        ft.replace(R.id.fragment1, new ReaverFragment());
+        ft.replace(R.id.fragment1, new ReaverFragment().setAutostart(true));
         ft.setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN);
         ft.addToBackStack(null);
         ft.commitAllowingStateLoss();
         fragmentManager.executePendingTransactions();      //Wait for everything to be set up
-        ReaverFragment.start_button.performClick();             //Click start to run reaver
+        //newRF.attemptStart();
     }
     void disconnectAll(){
         if(Airodump.getChannel() != this.ch){
@@ -425,7 +427,11 @@ class AP extends Device{
                                         break;
                                     case 6:
                                         //crack with reaver
-                                        AP.this.crackReaver(mFragmentManager);
+                                        if(ReaverFragment.isRunning()){
+                                            Toast.makeText(activity, activity.getString(R.string.reaver_already_running), Toast.LENGTH_SHORT).show();
+                                        }else{
+                                            AP.this.crackReaver(mFragmentManager);
+                                        }
                                         break;
                                 }
                                 return false;

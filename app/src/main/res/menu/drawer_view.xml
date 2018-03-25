@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android" >
+    <group android:checkableBehavior="single">
+        <item
+            android:id="@+id/nav_airodump"
+            android:title="@string/nav_airodump" />
+        <item
+            android:id="@+id/nav_mdk3"
+            android:title="@string/nav_mdk3" />
+        <item
+            android:id="@+id/nav_reaver"
+            android:title="@string/nav_reaver" />
+        <item
+            android:id="@+id/nav_crack"
+            android:title="@string/nav_crack" />
+        <item
+            android:id="@+id/nav_custom_actions"
+            android:title="@string/nav_custom_actions" />
+        <item
+            android:id="@+id/nav_settings"
+            android:title="@string/nav_settings" />
+    </group>
+</menu>
