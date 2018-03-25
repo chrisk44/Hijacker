@@ -100,6 +100,7 @@ public class MainActivity extends AppCompatActivity{
     static final String NETHUNTER_BOOTKALI_BASH = "/data/data/com.offsec.nethunter/files/scripts/bootkali_bash";
     static final int BUFFER_SIZE = 1048576;
     static final int AIREPLAY_DEAUTH = 1, AIREPLAY_WEP = 2;
+    static final int BAND_2 = 1, BAND_5 = 2, BAND_BOTH = 3;
     static final int FRAGMENT_AIRODUMP = R.id.nav_airodump, FRAGMENT_MDK = R.id.nav_mdk3, FRAGMENT_CRACK = R.id.nav_crack,
             FRAGMENT_REAVER = R.id.nav_reaver, FRAGMENT_CUSTOM = R.id.nav_custom_actions, FRAGMENT_SETTINGS = R.id.nav_settings;
     static final int PROCESS_AIRODUMP=0, PROCESS_AIREPLAY=1, PROCESS_MDK_BF=2, PROCESS_MDK_DOS=3, PROCESS_AIRCRACK=4, PROCESS_REAVER=5;
@@ -157,7 +158,7 @@ public class MainActivity extends AppCompatActivity{
     //Preferences - Defaults are in strings.xml
     static String iface, prefix, airodump_dir, aireplay_dir, aircrack_dir, mdk3bf_dir, mdk3dos_dir, reaver_dir, cap_dir, chroot_dir,
             enable_monMode, disable_monMode, custom_chroot_cmd;
-    static int deauthWait;
+    static int deauthWait, band;
     static boolean show_notif, show_details, airOnStartup, debug, delete_extra,
             monstart, always_cap, cont_on_fail, watchdog, target_deauth, enable_on_airodump, update_on_startup;
 
@@ -345,6 +346,7 @@ public class MainActivity extends AppCompatActivity{
             watchdog = Boolean.parseBoolean(getString(R.string.watchdog));
             target_deauth = Boolean.parseBoolean(getString(R.string.target_deauth));
             update_on_startup = Boolean.parseBoolean(getString(R.string.auto_update));
+            band = Integer.parseInt(getString(R.string.band));
 
             //Load preferences
             publishProgress(getString(R.string.loading_preferences));
@@ -1090,6 +1092,8 @@ public class MainActivity extends AppCompatActivity{
         custom_chroot_cmd = pref.getString("custom_chroot_cmd", custom_chroot_cmd);
         cont_on_fail = pref.getBoolean("cont_on_fail", cont_on_fail);
         update_on_startup = pref.getBoolean("update_on_startup", update_on_startup);
+        band = Integer.parseInt(pref.getString("band", Integer.toString(band)));
+
         progress.setMax(deauthWait);
         progress.setProgress(deauthWait);
     }

@@ -8,5 +8,15 @@
         <item>Reaver</item>
         <item>Reaver in chroot</item>
     </array>
+    <string-array name="band_choices">
+        <item>2Ghz</item>
+        <item>5Ghz</item>
+        <item>Both</item>
+    </string-array>
+    <string-array name="band_values">
+        <item>1</item>
+        <item>2</item>
+        <item>3</item>
+    </string-array>
 
 </resources>

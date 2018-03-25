@@ -320,6 +320,7 @@
     <string name="watchdog" translatable="false">true</string>
     <string name="target_deauth" translatable="false">false</string>
     <string name="auto_update" translatable="false">true</string>
+    <string name="band" translatable="false">1</string>
 
     <!-- Settings -->
 
@@ -375,6 +376,9 @@
 
     <string name="enable_on_airodump_title">Enable on Airodump start</string>
     <string name="enable_on_airodump_sum">Run the \"Enable Monitor Mode\" command when starting airodump</string>
+
+    <string name="band_title">Band</string>
+    <string name="band_sum">Frequencies that airodump will hop on</string>
 
     <!-- Tools -->
     <string name="tools">Tools</string>

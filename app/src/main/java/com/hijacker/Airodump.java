@@ -25,8 +25,12 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 
 import static com.hijacker.AP.getAPByMac;
+import static com.hijacker.MainActivity.BAND_2;
+import static com.hijacker.MainActivity.BAND_5;
+import static com.hijacker.MainActivity.BAND_BOTH;
 import static com.hijacker.MainActivity.airodump_dir;
 import static com.hijacker.MainActivity.always_cap;
+import static com.hijacker.MainActivity.band;
 import static com.hijacker.MainActivity.busybox;
 import static com.hijacker.MainActivity.cap_dir;
 import static com.hijacker.MainActivity.debug;
@@ -159,7 +163,11 @@ class Airodump{
         start();
     }
     static void start(){
-        String cmd = "su -c " + prefix + " " + airodump_dir + " --update 1 --berlin 1 ";
+        String cmd = "su -c " + prefix + " " + airodump_dir + " --update 1 --berlin 1 --band ";
+
+        if(band==BAND_5 || band==BAND_BOTH) cmd += "a";
+        if(band==BAND_2 || band==BAND_BOTH) cmd += "bg";
+        cmd += " ";
 
         if(forWPA) cmd += "-w " + cap_dir + "/handshake ";
         else if(forWEP) cmd += "--ivs -w " + cap_dir + "/wep_ivs ";

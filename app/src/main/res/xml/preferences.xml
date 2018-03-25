@@ -56,6 +56,13 @@
             android:title="@string/always_cap_title"
             android:summary="@string/always_cap_sum"
             android:key="always_cap"/>
+        <ListPreference
+            android:defaultValue="1"
+            android:entries="@array/band_choices"
+            android:entryValues="@array/band_values"
+            android:key="band"
+            android:summary="@string/band_sum"
+            android:title="@string/band_title" />
     </PreferenceCategory>
     <PreferenceCategory android:title="Aireplay">
         <EditTextPreference
