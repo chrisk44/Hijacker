@@ -165,6 +165,10 @@ public class MainActivity extends AppCompatActivity{
 
     private GoogleApiClient client;
     WatchdogTask watchdogTask;
+
+    ReaverFragment reaverFragment = new ReaverFragment();
+    CrackFragment crackFragment = new CrackFragment();
+    CustomActionFragment customActionFragment = new CustomActionFragment();
     @Override
     protected void onCreate(Bundle savedInstanceState){
         super.onCreate(savedInstanceState);
@@ -246,13 +250,13 @@ public class MainActivity extends AppCompatActivity{
                                         ft.replace(R.id.fragment1, new MDKFragment());
                                         break;
                                     case FRAGMENT_REAVER:
-                                        ft.replace(R.id.fragment1, new ReaverFragment());
+                                        ft.replace(R.id.fragment1, reaverFragment);
                                         break;
                                     case FRAGMENT_CRACK:
-                                        ft.replace(R.id.fragment1, new CrackFragment());
+                                        ft.replace(R.id.fragment1, crackFragment);
                                         break;
                                     case FRAGMENT_CUSTOM:
-                                        ft.replace(R.id.fragment1, new CustomActionFragment());
+                                        ft.replace(R.id.fragment1, customActionFragment);
                                         break;
                                     case FRAGMENT_SETTINGS:
                                         ft.replace(R.id.fragment1, new SettingsFragment());
@@ -644,7 +648,7 @@ public class MainActivity extends AppCompatActivity{
                                             public void onClick(View v){
                                                 CrackFragment.capfile_text = capfile;
                                                 FragmentTransaction ft = mFragmentManager.beginTransaction();
-                                                ft.replace(R.id.fragment1, new CrackFragment());
+                                                ft.replace(R.id.fragment1, MainActivity.this.crackFragment);
                                                 ft.setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN);
                                                 ft.addToBackStack(null);
                                                 ft.commitAllowingStateLoss();
@@ -665,10 +669,6 @@ public class MainActivity extends AppCompatActivity{
             };
             wpa_thread = new Thread(wpa_runnable);
             watchdogTask = new WatchdogTask(MainActivity.this);
-
-            //Start threads
-            //publishProgress(getString(R.string.starting_threads));
-            // Nothing for now
 
             //Start background service so the app won't get killed if it goes to the background
             publishProgress(getString(R.string.starting_pers_service));
@@ -1176,6 +1176,35 @@ public class MainActivity extends AppCompatActivity{
                 return super.onOptionsItemSelected(item);
         }
     }
+    // See https://g.co/AppIndexing/AndroidStudio for more information.
+    @Override
+    public void onStart(){
+        super.onStart();
+        client.connect();
+        AppIndex.AppIndexApi.start(client, getIndexApiAction());
+    }
+    @Override
+    protected void onResume(){
+        super.onResume();
+        notif_on = false;
+        background = false;
+        if(mNotificationManager!=null) mNotificationManager.cancelAll();
+    }
+    @Override
+    protected void onPause(){
+        super.onPause();
+        background = true;
+    }
+    @Override
+    protected void onStop(){
+        super.onStop();
+        AppIndex.AppIndexApi.end(client, getIndexApiAction());
+        client.disconnect();
+        if(show_notif){
+            notif_on = true;
+            notification();
+        }
+    }
     @Override
     protected void onDestroy(){
         notif_on = false;
@@ -1194,24 +1223,6 @@ public class MainActivity extends AppCompatActivity{
         stopService(new Intent(this, PersistenceService.class));
         super.onDestroy();
         System.exit(0);
-    }
-    @Override
-    protected void onResume(){
-        super.onResume();
-        notif_on = false;
-        background = false;
-        if(mNotificationManager!=null) mNotificationManager.cancelAll();
-    }
-    @Override
-    protected void onStop(){
-        super.onStop();
-        AppIndex.AppIndexApi.end(client, getIndexApiAction());
-        background = true;
-        if(show_notif){
-            notif_on = true;
-            notification();
-        }
-        client.disconnect();
     }
     @Override
     public boolean onKeyDown(int keyCode, KeyEvent event){
@@ -1254,13 +1265,6 @@ public class MainActivity extends AppCompatActivity{
         //No call for super(), avoid IllegalStateException on FragmentManagerImpl.checkStateLoss.
     }
 
-    // See https://g.co/AppIndexing/AndroidStudio for more information.
-    @Override
-    public void onStart(){
-        super.onStart();
-        client.connect();
-        AppIndex.AppIndexApi.start(client, getIndexApiAction());
-    }
     public Action getIndexApiAction(){
         Thing object = new Thing.Builder().setName("Hijacker")
                 .setUrl(Uri.parse("https://github.com/chrisk44/Hijacker")).build();

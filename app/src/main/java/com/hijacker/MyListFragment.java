@@ -36,7 +36,7 @@ public class MyListFragment extends ListFragment {
     @Override
     public void onListItemClick(ListView l, final View v, int position, long id){
         super.onListItemClick(l, v, position, id);
-        Tile.tiles.get(position).device.getPopupMenu(getActivity(), v).show();
+        Tile.tiles.get(position).device.getPopupMenu((MainActivity)getActivity(), v).show();
     }
     @Override
     public void onResume(){

@@ -86,7 +86,8 @@ class Tile {
         if(is_ap==null) {
             if(device instanceof AP){
                 AP ap = (AP)device;
-                this.show = show_ap && (show_ch[0] || show_ch[ap.ch]) && ap.pwr>=pwr_filter*(-1) &&
+                boolean channel = (ap.ch<0 || ap.ch>14) ? true : (show_ch[0] || show_ch[ap.ch]);    //Channel might be -1 or over 14 (5ghz) so avoid OutOfRangeException in array access
+                this.show = show_ap && channel && ap.pwr>=pwr_filter*(-1) &&
                         ((wpa && (ap.sec == WPA || ap.sec == WPA2)) || (wep && ap.sec == WEP) ||
                                 (opn && ap.sec == OPN) || ap.sec==UNKNOWN) && ap.manuf.contains(manuf_filter);
             }else{

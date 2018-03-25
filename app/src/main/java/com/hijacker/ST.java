@@ -221,7 +221,7 @@ class ST extends Device{
         frames = 0;
         lost = 0;
     }
-    PopupMenu getPopupMenu(final Activity activity, final View v){
+    PopupMenu getPopupMenu(final MainActivity activity, final View v){
         PopupMenu popup = new PopupMenu(activity, v);
         popup.getMenuInflater().inflate(R.menu.popup_menu, popup.getMenu());
 

@@ -48,6 +48,7 @@ import static com.hijacker.MainActivity.currentFragment;
 import static com.hijacker.MainActivity.debug;
 import static com.hijacker.MainActivity.getPIDs;
 import static com.hijacker.MainActivity.mFragmentManager;
+import static com.hijacker.MainActivity.notification;
 import static com.hijacker.MainActivity.progress;
 import static com.hijacker.MainActivity.refreshDrawer;
 import static com.hijacker.Shell.runOne;
@@ -56,10 +57,11 @@ public class CustomActionFragment extends Fragment{
     static CustomActionTask task;
     static CustomAction selectedAction = null;
     static Device targetDevice;
-    static String console_text = null;
+    static String console_text = "";
 
     View fragmentView;
-    static View optionsContainer;
+    int normalOptHeight = -1;
+    View optionsContainer;
     Button startBtn, targetBtn, actionBtn;
     TextView consoleView;
     ScrollView consoleScrollView;
@@ -69,6 +71,7 @@ public class CustomActionFragment extends Fragment{
         setRetainInstance(true);
         fragmentView = inflater.inflate(R.layout.custom_action_fragment, container, false);
 
+        optionsContainer = fragmentView.findViewById(R.id.options_container);
         consoleView = fragmentView.findViewById(R.id.console);
         consoleScrollView = fragmentView.findViewById(R.id.console_scroll_view);
         startBtn = fragmentView.findViewById(R.id.start_button);
@@ -103,7 +106,15 @@ public class CustomActionFragment extends Fragment{
             }
         });
 
-        //Restore view
+        return fragmentView;
+    }
+    @Override
+    public void onResume(){
+        super.onResume();
+        currentFragment = FRAGMENT_CUSTOM;
+        refreshDrawer();
+
+        //Console text is saved/restored on pause/resume
         consoleView.setText(console_text);
         consoleView.post(new Runnable() {
             @Override
@@ -111,6 +122,19 @@ public class CustomActionFragment extends Fragment{
                 consoleScrollView.fullScroll(View.FOCUS_DOWN);
             }
         });
+    }
+    @Override
+    public void onPause(){
+        super.onPause();
+
+        //Console text is saved/restored on pause/resume
+        console_text = consoleView.getText().toString();
+    }
+    @Override
+    public void onStart(){
+        super.onStart();
+
+        //Restore options
         if(selectedAction!=null){
             actionBtn.setText(selectedAction.getTitle());
             targetBtn.setEnabled(true);
@@ -121,27 +145,17 @@ public class CustomActionFragment extends Fragment{
         }
         startBtn.setText(isRunning() ? R.string.stop : R.string.start);
 
-        return fragmentView;
-    }
-    @Override
-    public void onResume(){
-        super.onResume();
-        currentFragment = FRAGMENT_CUSTOM;
-        refreshDrawer();
-    }
-    @Override
-    public void onPause(){
-        super.onPause();
-        console_text = consoleView.getText().toString();
-    }
-    @Override
-    public void onStart(){
-        super.onStart();
-        optionsContainer = fragmentView.findViewById(R.id.options_container);
+        //Restore animated views
         if(task.getStatus()==AsyncTask.Status.RUNNING){
             ViewGroup.LayoutParams layoutParams = optionsContainer.getLayoutParams();
             layoutParams.height = 0;
             optionsContainer.setLayoutParams(layoutParams);
+        }else if(normalOptHeight!=-1){
+            ViewGroup.LayoutParams params = optionsContainer.getLayoutParams();
+            params.height = normalOptHeight;
+            optionsContainer.setLayoutParams(params);
+
+            consoleScrollView.fullScroll(View.FOCUS_DOWN);
         }
     }
     @Override
@@ -151,8 +165,6 @@ public class CustomActionFragment extends Fragment{
                 task.sizeAnimator.cancel();
             }
         }
-        //Avoid memory leak
-        optionsContainer = null;
         super.onStop();
     }
     static boolean isRunning(){
@@ -257,18 +269,17 @@ public class CustomActionFragment extends Fragment{
 
     class CustomActionTask extends AsyncTask<Void, String, Boolean>{
         Shell shell;
-        int prevOptContainerHeight = -1;
         ValueAnimator sizeAnimator;
         @Override
         protected void onPreExecute(){
             startBtn.setText(R.string.stop);
             progress.setIndeterminate(true);
 
-            consoleView.append("Running: " + selectedAction.getStartCmd() + '\n');
+            publishProgress("\nRunning: " + selectedAction.getStartCmd());
             consoleScrollView.fullScroll(View.FOCUS_DOWN);
             if(debug) Log.d("HIJACKER/CustomCMDFrag", "Running: " + selectedAction.getStartCmd());
 
-            prevOptContainerHeight = optionsContainer.getHeight();
+            normalOptHeight = optionsContainer.getHeight();
 
             sizeAnimator = ValueAnimator.ofInt(optionsContainer.getHeight(), 0);
             sizeAnimator.setTarget(optionsContainer);
@@ -281,10 +292,7 @@ public class CustomActionFragment extends Fragment{
                 }
             });
             sizeAnimator.setInterpolator(new AccelerateDecelerateInterpolator());
-
-            if(optionsContainer!=null) {
-                sizeAnimator.start();
-            }
+            sizeAnimator.start();
         }
         @Override
         protected Boolean doInBackground(Void... params){
@@ -299,11 +307,7 @@ public class CustomActionFragment extends Fragment{
                 String end = "ENDOFCUSTOM";
                 String buffer = out.readLine();
                 while(!end.equals(buffer) && !isCancelled()){
-                    if(currentFragment==FRAGMENT_CUSTOM && !background){
-                        publishProgress(buffer + '\n');
-                    }else{
-                        console_text += buffer + '\n';
-                    }
+                    publishProgress(buffer);
                     buffer = out.readLine();
                 }
                 if(debug) Log.d("HIJACKER/CustomCMDFrag", "thread done");
@@ -314,7 +318,7 @@ public class CustomActionFragment extends Fragment{
             if(isCancelled()){
                 if(selectedAction.hasProcessName()){
                     if(debug) Log.d("HIJACKER/CustomCMDFrag", "Killing process named " + selectedAction.getProcessName());
-                    publishProgress("Killing process named " + selectedAction.getProcessName() + '\n');
+                    publishProgress("Killing process named " + selectedAction.getProcessName());
 
                     ArrayList<Integer> list = getPIDs(selectedAction.getProcessName());
                     for(int i=0;i<list.size();i++){
@@ -324,13 +328,13 @@ public class CustomActionFragment extends Fragment{
 
                 if(selectedAction.hasStopCmd()){
                     if(debug) Log.d("HIJACKER/CustomCMDFrag", "Running: " + selectedAction.getStopCmd());
-                    publishProgress("Running: " + selectedAction.getStopCmd() + '\n');
+                    publishProgress("Running: " + selectedAction.getStopCmd());
 
                     runOne(selectedAction.getStopCmd());
                 }
-                publishProgress("Interrupted\n");
+                publishProgress("Interrupted");
             }else{
-                publishProgress("Done\n");
+                publishProgress("Done");
             }
 
             if(shell!=null) shell.done();
@@ -339,11 +343,12 @@ public class CustomActionFragment extends Fragment{
         }
         @Override
         protected void onProgressUpdate(String... text){
+            text[0] += '\n';
             if(currentFragment==FRAGMENT_CUSTOM && !background){
-                consoleView.append(text[0] + '\n');
+                consoleView.append(text[0]);
                 consoleScrollView.fullScroll(View.FOCUS_DOWN);
             }else{
-                console_text += text[0] + '\n';
+                console_text += text[0];
             }
         }
         @Override
@@ -359,7 +364,7 @@ public class CustomActionFragment extends Fragment{
             startBtn.setText(R.string.start);
             progress.setIndeterminate(false);
 
-            sizeAnimator = ValueAnimator.ofInt(0, prevOptContainerHeight);
+            sizeAnimator = ValueAnimator.ofInt(0, normalOptHeight);
             sizeAnimator.setTarget(optionsContainer);
             sizeAnimator.addUpdateListener(new ValueAnimator.AnimatorUpdateListener(){
                 @Override
@@ -382,10 +387,9 @@ public class CustomActionFragment extends Fragment{
                 public void onAnimationRepeat(Animator animation) {}
             });
             sizeAnimator.setInterpolator(new AccelerateDecelerateInterpolator());
+            sizeAnimator.start();
 
-            if(optionsContainer!=null) {
-                sizeAnimator.start();
-            }
+            notification();
         }
     }
 }

@@ -150,8 +150,7 @@ class AP extends Device{
         this.cipher = cipher;
         this.auth = auth;
         this.pwr = pwr;
-        if(ch==-1 || ch>14) this.ch = 0;
-        else this.ch = ch;      //for hidden networks
+        this.ch = ch;
 
         if(sec==UNKNOWN){
             switch(this.enc){
@@ -217,16 +216,16 @@ class AP extends Device{
         }
         if(is_ap==null) isolate(this.mac);
     }
-    void crackReaver(FragmentManager fragmentManager){
+    void crackReaver(MainActivity activity){
+        FragmentManager fragmentManager = activity.getFragmentManager();
+
         ReaverFragment.ap = this;
-        //ReaverFragment newRF = new ReaverFragment().setAutostart(true);
         FragmentTransaction ft = fragmentManager.beginTransaction();
-        ft.replace(R.id.fragment1, new ReaverFragment().setAutostart(true));
+        ft.replace(R.id.fragment1, activity.reaverFragment.setAutostart(true));
         ft.setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN);
         ft.addToBackStack(null);
         ft.commitAllowingStateLoss();
         fragmentManager.executePendingTransactions();      //Wait for everything to be set up
-        //newRF.attemptStart();
     }
     void disconnectAll(){
         if(Airodump.getChannel() != this.ch){
@@ -317,7 +316,7 @@ class AP extends Device{
         this.isMarked = false;
         Tile.filter();
     }
-    PopupMenu getPopupMenu(final Activity activity, final View v){
+    PopupMenu getPopupMenu(final MainActivity activity, final View v){
         PopupMenu popup = new PopupMenu(activity, v);
         popup.getMenuInflater().inflate(R.menu.popup_menu, popup.getMenu());
 
@@ -430,7 +429,7 @@ class AP extends Device{
                                         if(ReaverFragment.isRunning()){
                                             Toast.makeText(activity, activity.getString(R.string.reaver_already_running), Toast.LENGTH_SHORT).show();
                                         }else{
-                                            AP.this.crackReaver(mFragmentManager);
+                                            AP.this.crackReaver(activity);
                                         }
                                         break;
                                 }

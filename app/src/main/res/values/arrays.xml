@@ -9,7 +9,7 @@
         <item>Reaver in chroot</item>
     </array>
     <string-array name="band_choices">
-        <item>2Ghz</item>
+        <item>2.4Ghz</item>
         <item>5Ghz</item>
         <item>Both</item>
     </string-array>

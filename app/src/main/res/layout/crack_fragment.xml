@@ -162,6 +162,7 @@
             style="?android:attr/buttonBarButtonStyle"
             android:layout_width="wrap_content"
             android:layout_height="match_parent"
+            android:lines="1"
             android:text="@string/speed_test" />
 
         <Button

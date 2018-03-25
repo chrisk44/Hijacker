@@ -48,7 +48,7 @@ abstract class Device{
     abstract void saveData();
     abstract void mark();
     abstract void unmark();
-    abstract PopupMenu getPopupMenu(final Activity activity, final View v);
+    abstract PopupMenu getPopupMenu(final MainActivity activity, final View v);
 
     static String trimMac(String mac){
         return mac.subSequence(0, 2).toString() + mac.subSequence(3, 5).toString() + mac.subSequence(6, 8).toString();

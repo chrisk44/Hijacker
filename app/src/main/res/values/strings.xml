@@ -139,7 +139,7 @@
     <string name="show_ap">Show Access Points</string>
     <string name="show_st">Show Stations</string>
     <string name="show_st_na">Show non-associated stations</string>
-    <string name="channels">Channels:</string>
+    <string name="channels">2.4Ghz Channels:</string>
     <string name="all">All</string>
     <string name="opn">OPN</string>
     <string name="sort">Sort:</string>
