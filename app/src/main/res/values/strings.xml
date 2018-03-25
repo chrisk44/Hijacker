@@ -59,6 +59,7 @@
     <string name="path_to_cap">.cap file</string>
     <string name="path_to_wordlist">Wordlist</string>
     <string name="start">Start</string>
+    <string name="speed_test">Speed Test</string>
     <string name="wordlist_notfound">Wordlist not found</string>
     <string name="select_wpa_wep">Please select WPA/WEP</string>
     <string name="select_wep_bits">Select how many bits the key is</string>

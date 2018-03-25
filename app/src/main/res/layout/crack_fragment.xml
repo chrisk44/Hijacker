@@ -152,11 +152,26 @@
             android:textSize="10sp" />
     </ScrollView>
 
-    <Button
-        style="?android:attr/buttonBarButtonStyle"
-        android:text="@string/start"
+    <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:id="@+id/start"/>
+        android:orientation="horizontal">
+
+        <Button
+            android:id="@+id/speed_test_btn"
+            style="?android:attr/buttonBarButtonStyle"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:text="@string/speed_test" />
+
+        <Button
+            android:id="@+id/start"
+            style="?android:attr/buttonBarButtonStyle"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="@string/start" />
+
+    </LinearLayout>
 
 </LinearLayout>

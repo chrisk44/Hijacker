@@ -18,6 +18,7 @@ package com.hijacker;
  */
 
 import android.animation.Animator;
+import android.animation.AnimatorSet;
 import android.animation.ValueAnimator;
 import android.app.Fragment;
 import android.os.AsyncTask;
@@ -62,6 +63,7 @@ public class CrackFragment extends Fragment{
     static final int WPA=2, WEP=1;
     View fragmentView;
     static View optionsContainer;
+    static Button speedTestBtn;
     TextView consoleView;
     EditText capfileView, wordlistView;
     RadioGroup wepRG, securityRG;
@@ -104,7 +106,7 @@ public class CrackFragment extends Fragment{
             wepRG.getChildAt(i).setEnabled(false);
         }
 
-        if(task==null) task = new CrackTask();
+        if(task==null) task = new CrackTask(CrackTask.JOB_CRACK);
 
         wepRB.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener(){
             @Override
@@ -198,21 +200,38 @@ public class CrackFragment extends Fragment{
     public void onStart(){
         super.onStart();
         optionsContainer = fragmentView.findViewById(R.id.options_container);
+        speedTestBtn = fragmentView.findViewById(R.id.speed_test_btn);
+
+        speedTestBtn.setOnClickListener(new View.OnClickListener(){
+            @Override
+            public void onClick(View view){
+                if(!isRunning()){
+                    startSpeedTest();
+                }else{
+                    task.cancel(true);
+                }
+            }
+        });
         if(task.getStatus()==AsyncTask.Status.RUNNING){
             ViewGroup.LayoutParams layoutParams = optionsContainer.getLayoutParams();
             layoutParams.height = 0;
             optionsContainer.setLayoutParams(layoutParams);
+
+            layoutParams = speedTestBtn.getLayoutParams();
+            layoutParams.width = 0;
+            speedTestBtn.setLayoutParams(layoutParams);
         }
     }
     @Override
     public void onStop(){
         if(task!=null){
-            if(task.sizeAnimator!=null){
-                task.sizeAnimator.cancel();
+            if(task.animator!=null){
+                task.animator.cancel();
             }
         }
         //Avoid memory leak
         optionsContainer = null;
+        speedTestBtn = null;
         super.onStop();
     }
     static boolean isRunning(){
@@ -268,61 +287,90 @@ public class CrackFragment extends Fragment{
                 }
         }
 
-        task = new CrackTask();
+        task = new CrackTask(CrackTask.JOB_CRACK);
+        task.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
+    }
+    void startSpeedTest(){
+        capfileView.setError(null);
+        wordlistView.setError(null);
+        task = new CrackTask(CrackTask.JOB_TEST);
         task.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
     }
     class CrackTask extends AsyncTask<Void, String, Boolean>{
-        int mode;
+        static final int JOB_CRACK = 0, JOB_TEST = 1;
+        int mode, job;
         String cmd, key;
-        int prevOptContainerHeight = -1;
-        ValueAnimator sizeAnimator;
+        int prevOptContainerHeight = -1, prevTestBtnWidth = -1;
+        long startTime = -1;
+        AnimatorSet animator;
+        CrackTask(int job){
+            this.job = job;
+        }
         @Override
         protected void onPreExecute(){
+            startTime = System.currentTimeMillis();
             progress.setIndeterminate(true);
             startBtn.setText(R.string.stop);
-            consoleView.append("\nRunning...\n");
+            publishProgress("\nRunning...");
             consoleScrollView.fullScroll(View.FOCUS_DOWN);
 
-            switch(securityRG.getCheckedRadioButtonId()){
-                case R.id.wpa_rb:
-                    //WPA
-                    mode = WPA;
+            switch(job){
+                case JOB_CRACK:
+                    switch(securityRG.getCheckedRadioButtonId()){
+                        case R.id.wpa_rb:
+                            //WPA
+                            mode = WPA;
+                            break;
+                        case R.id.wep_rb:
+                            //WEP
+                            mode = WEP;
+                            break;
+                    }
+                    //Create command
+                    cmd = "su -c " + aircrack_dir + " " + capfile + " -l " + path + "/aircrack-out.txt -a " + mode;
+                    if(wordlist!=null)
+                        cmd += " -w " + wordlist;
+                    if(mode==WEP){
+                        cmd += " -n ";
+                        switch(wepRG.getCheckedRadioButtonId()){
+                            case R.id.wep_64:
+                                cmd += "64";
+                                break;
+                            case R.id.wep_128:
+                                cmd += "128";
+                                break;
+                            case R.id.wep_152:
+                                cmd += "152";
+                                break;
+                            case R.id.wep_256:
+                                cmd += "256";
+                                break;
+                            case R.id.wep_512:
+                                cmd += "512";
+                                break;
+                        }
+                    }
                     break;
-                case R.id.wep_rb:
-                    //WEP
-                    mode = WEP;
+
+                case JOB_TEST:
+                    cmd = "su -c " + aircrack_dir + " -S";
                     break;
-            }
-            //Create command
-            cmd = "su -c " + aircrack_dir + " " + capfile + " -l " + path + "/aircrack-out.txt -a " + mode;
-            if(wordlist!=null) cmd += " -w " + wordlist;
-            if(mode==WEP){
-                cmd += " -n ";
-                switch(wepRG.getCheckedRadioButtonId()){
-                    case R.id.wep_64:
-                        cmd += "64";
-                        break;
-                    case R.id.wep_128:
-                        cmd += "128";
-                        break;
-                    case R.id.wep_152:
-                        cmd += "152";
-                        break;
-                    case R.id.wep_256:
-                        cmd += "256";
-                        break;
-                    case R.id.wep_512:
-                        cmd += "512";
-                        break;
-                }
+
+                default:
+                    Log.e("HIJACKER/CrackTask", "Unknown Job");
+                    this.cancel(true);
+                    return;
             }
             if(debug) Log.d("HIJACKER/CrackTask", cmd);
 
-            prevOptContainerHeight = optionsContainer.getHeight();
 
-            sizeAnimator = ValueAnimator.ofInt(optionsContainer.getHeight(), 0);
-            sizeAnimator.setTarget(optionsContainer);
-            sizeAnimator.addUpdateListener(new ValueAnimator.AnimatorUpdateListener(){
+
+            prevOptContainerHeight = optionsContainer.getHeight();
+            prevTestBtnWidth = speedTestBtn.getWidth();
+
+            ValueAnimator optionsAnimator = ValueAnimator.ofInt(optionsContainer.getHeight(), 0);
+            optionsAnimator.setTarget(optionsContainer);
+            optionsAnimator.addUpdateListener(new ValueAnimator.AnimatorUpdateListener(){
                 @Override
                 public void onAnimationUpdate(ValueAnimator animation){
                     ViewGroup.LayoutParams layoutParams = optionsContainer.getLayoutParams();
@@ -330,50 +378,92 @@ public class CrackFragment extends Fragment{
                     optionsContainer.setLayoutParams(layoutParams);
                 }
             });
-            sizeAnimator.setInterpolator(new AccelerateDecelerateInterpolator());
+
+            ValueAnimator testBtnAnimator = ValueAnimator.ofInt(speedTestBtn.getWidth(), 0);
+            testBtnAnimator.setTarget(speedTestBtn);
+            testBtnAnimator.addUpdateListener(new ValueAnimator.AnimatorUpdateListener(){
+                @Override
+                public void onAnimationUpdate(ValueAnimator animation){
+                    ViewGroup.LayoutParams layoutParams = speedTestBtn.getLayoutParams();
+                    layoutParams.width = (int)animation.getAnimatedValue();
+                    speedTestBtn.setLayoutParams(layoutParams);
+                }
+            });
+
+            animator = new AnimatorSet();
+            animator.playTogether(optionsAnimator, testBtnAnimator);
+            animator.setInterpolator(new AccelerateDecelerateInterpolator());
 
             if(optionsContainer!=null) {
-                sizeAnimator.start();
+                animator.start();
             }
         }
         @Override
         protected Boolean doInBackground(Void... params){
+            if(isCancelled()) return false;
             try{
                 //Run aircrack and wait to either finish or be cancelled
                 Process dc = Runtime.getRuntime().exec(cmd);
                 BufferedReader out = new BufferedReader(new InputStreamReader(dc.getInputStream()));
-                while(!isCancelled() && out.readLine()!=null){
-                    Thread.sleep(100);
+                switch(job){
+                    case JOB_CRACK:
+                        while(!isCancelled() && out.readLine()!=null);
+                        break;
+
+                    case JOB_TEST:
+                        String str = out.readLine();
+                        while(!isCancelled() && str!=null){
+                            publishProgress(str);
+                            str = out.readLine();
+                        }
+                        break;
                 }
-            }catch(IOException | InterruptedException e){
+            }catch(Exception e){
                 Log.e("HIJACKER/CrackTask", e.toString());
                 return false;
             }
 
-            if(new File(path + "/aircrack-out.txt").exists()){
-                Shell shell = Shell.getFreeShell();     //Using root shell because "new File(path + "/aircrack-out.txt");" throws FileNotFoundException (permission denied)
-                BufferedReader out = shell.getShell_out();
-                shell.run("cat " + path + "/aircrack-out.txt; echo ");              //No newline at the end of the file, readLine will hang
-                try{
-                    key = out.readLine();
-                }catch(IOException ignored){}
-                shell.run("rm " + path + "/aircrack-out.txt");
-                shell.done();
-                return true;
+            if(job==JOB_CRACK){
+                if(new File(path + "/aircrack-out.txt").exists()){
+                    Shell shell = Shell.getFreeShell();     //Using root shell because "new File(path + "/aircrack-out.txt");" throws FileNotFoundException (permission denied)
+                    BufferedReader out = shell.getShell_out();
+                    shell.run("cat " + path + "/aircrack-out.txt; echo ");              //No newline at the end of the file, readLine will hang
+                    try{
+                        key = out.readLine();
+                    }catch(IOException ignored){
+                    }
+                    shell.run("rm " + path + "/aircrack-out.txt");
+                    shell.done();
+                    return true;
+                }
             }
 
             return false;
         }
         @Override
+        protected void onProgressUpdate(String... progress){
+            progress[0] += '\n';
+            if(currentFragment==FRAGMENT_CRACK && !background){
+                consoleView.append(progress[0]);
+                consoleScrollView.fullScroll(View.FOCUS_DOWN);
+            }else{
+                console_text += progress[0];
+            }
+        }
+        @Override
         protected void onPostExecute(final Boolean success){
             done();
-            String str;
-            if(success){
-                str = "Key found: " + key + '\n';
-            }else{
-                str = "Key not found\n";
-                if(mode==WEP) str += "Try with different wep bit selection or more IVs\n";
+            String str = "";
+            if(job==JOB_CRACK){
+                if(success){
+                    str = "Key found: " + key + '\n';
+                }else{
+                    str = "Key not found\n";
+                    if(mode==WEP)
+                        str += "Try with different wep bit selection or more IVs\n";
+                }
             }
+            str += "Time: " + (System.currentTimeMillis() - startTime)/1000 + "s\n";
             if(currentFragment==FRAGMENT_CRACK && !background){
                 consoleScrollView.fullScroll(View.FOCUS_DOWN);
                 consoleView.append(str);
@@ -392,9 +482,9 @@ public class CrackFragment extends Fragment{
             startBtn.setText(R.string.start);
             progress.setIndeterminate(false);
 
-            sizeAnimator = ValueAnimator.ofInt(0, prevOptContainerHeight);
-            sizeAnimator.setTarget(optionsContainer);
-            sizeAnimator.addUpdateListener(new ValueAnimator.AnimatorUpdateListener(){
+            ValueAnimator optionsAnimator = ValueAnimator.ofInt(0, prevOptContainerHeight);
+            optionsAnimator.setTarget(optionsContainer);
+            optionsAnimator.addUpdateListener(new ValueAnimator.AnimatorUpdateListener(){
                 @Override
                 public void onAnimationUpdate(ValueAnimator animation){
                     ViewGroup.LayoutParams layoutparams = optionsContainer.getLayoutParams();
@@ -402,7 +492,21 @@ public class CrackFragment extends Fragment{
                     optionsContainer.setLayoutParams(layoutparams);
                 }
             });
-            sizeAnimator.addListener(new Animator.AnimatorListener() {
+
+            ValueAnimator testBtnAnimator = ValueAnimator.ofInt(0, prevTestBtnWidth);
+            testBtnAnimator.setTarget(speedTestBtn);
+            testBtnAnimator.addUpdateListener(new ValueAnimator.AnimatorUpdateListener(){
+                @Override
+                public void onAnimationUpdate(ValueAnimator animation){
+                    ViewGroup.LayoutParams layoutparams = speedTestBtn.getLayoutParams();
+                    layoutparams.width = (int)animation.getAnimatedValue();
+                    speedTestBtn.setLayoutParams(layoutparams);
+                }
+            });
+
+            animator = new AnimatorSet();
+            animator.playTogether(optionsAnimator, testBtnAnimator);
+            animator.addListener(new Animator.AnimatorListener() {
                 @Override
                 public void onAnimationStart(Animator animation) {}
                 @Override
@@ -414,10 +518,10 @@ public class CrackFragment extends Fragment{
                 @Override
                 public void onAnimationRepeat(Animator animation) {}
             });
-            sizeAnimator.setInterpolator(new AccelerateDecelerateInterpolator());
+            animator.setInterpolator(new AccelerateDecelerateInterpolator());
 
             if(optionsContainer!=null) {
-                sizeAnimator.start();
+                animator.start();
             }
         }
     }
