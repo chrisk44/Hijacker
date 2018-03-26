@@ -23,6 +23,8 @@
     <string name="settings">Settings</string>
     <string name="select">Select</string>
     <string name="download">Download</string>
+    <string name="size">Size</string>
+    <string name="no_internet">No internet connection</string>
     <string name="unknown_error">An unknown error occurred</string>
 
     <!-- Navigation Drawer -->
@@ -299,6 +301,13 @@
     <!-- UpdateConfirmDialog -->
     <string name="update_title">New update available</string>
     <string name="update_text">There is a new update available.</string>
+    <string name="latest_version">Latest Version</string>
+    <string name="current_version">Current Version</string>
+
+    <!-- WordlistDownloadDialog -->
+    <string name="wordlist_dialog_title">Select a wordlist to download</string>
+    <string name="cant_start_download">Can\'t start download</string>
+    <string name="no_permissions">No external storage or internet permission</string>
 
     <!-- Default Preferences -->
     <string name="iface" translatable="false">wlan0</string>

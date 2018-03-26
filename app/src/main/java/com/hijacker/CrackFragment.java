@@ -35,6 +35,7 @@ import android.view.inputmethod.EditorInfo;
 import android.widget.Button;
 import android.widget.CompoundButton;
 import android.widget.EditText;
+import android.widget.ImageButton;
 import android.widget.RadioButton;
 import android.widget.RadioGroup;
 import android.widget.ScrollView;
@@ -59,22 +60,25 @@ import static com.hijacker.MainActivity.path;
 import static com.hijacker.MainActivity.progress;
 import static com.hijacker.MainActivity.refreshDrawer;
 import static com.hijacker.MainActivity.stop;
+import static com.hijacker.MainActivity.wl_path;
 
 public class CrackFragment extends Fragment{
-    static final int WPA=2, WEP=1;
-    View fragmentView;
-    View optionsContainer;
-    Button speedTestBtn;
-    int normalOptHeight = -1, normalTestBtnWidth = -1;
+    static final int WPA = 2, WEP = 1;
+    static CrackTask task;
+
+    View fragmentView, optionsContainer;
+    Button startBtn, speedTestBtn, capFeBtn, wordlistFeBtn;
+    ImageButton wordlistDownloadBtn;
     TextView consoleView;
     EditText capfileView, wordlistView;
     RadioGroup wepRG, securityRG;
     RadioButton wepRB, wpaRB;
-    Button startBtn, capFeBtn, wordlistFeBtn;
     ScrollView consoleScrollView;
-    static CrackTask task;
-    //Saved settings
-    static String console_text = "", capfile_text=null, wordlist_text=null;
+
+    //Dimensions to restore animated views
+    int normalOptHeight = -1, normalTestBtnWidth = -1;
+    //User options
+    static String console_text = "", capfile_text = null, wordlist_text = null;
     static int securityChecked = -1, wepChecked = -1;
     @Override
     public View onCreateView(LayoutInflater inflater, final ViewGroup container, Bundle savedInstanceState){
@@ -87,6 +91,7 @@ public class CrackFragment extends Fragment{
         wordlistView = fragmentView.findViewById(R.id.wordlist);
         capFeBtn = fragmentView.findViewById(R.id.cap_fe_btn);
         wordlistFeBtn = fragmentView.findViewById(R.id.wordlist_fe_btn);
+        wordlistDownloadBtn = fragmentView.findViewById(R.id.wordlist_download_btn);
         wepRG = fragmentView.findViewById(R.id.wep_rg);
         securityRG = fragmentView.findViewById(R.id.radio_group);
         wepRB = fragmentView.findViewById(R.id.wep_rb);
@@ -170,6 +175,12 @@ public class CrackFragment extends Fragment{
                 dialog.show(getFragmentManager(), "FileExplorerDialog");
             }
         });
+        wordlistDownloadBtn.setOnClickListener(new View.OnClickListener(){
+            @Override
+            public void onClick(View view){
+                new WordlistDownloadDialog().show(getFragmentManager(), "WordlistDownloadDialog");
+            }
+        });
 
         if(capfile_text==null){
             //Retrieve the last captured handshake
@@ -180,6 +191,23 @@ public class CrackFragment extends Fragment{
                 capfileView.setText(tmp);
             }
             shell.done();
+        }
+
+        if(wordlist_text==null){
+            //Retrieve the last downloaded wordlist, if any
+            long latest = 0;
+            File result = null;
+
+            for(File f : new File(wl_path).listFiles()){
+                if(f.lastModified()>latest){
+                    latest = f.lastModified();
+                    result = f;
+                }
+            }
+
+            if(result!=null){
+                wordlistView.setText(result.getAbsolutePath());
+            }
         }
 
         return fragmentView;

@@ -22,6 +22,8 @@
       <w>textview</w>
       <w>textviews</w>
       <w>toolchains</w>
+      <w>wordlist</w>
+      <w>wordlists</w>
     </words>
   </dictionary>
 </component>

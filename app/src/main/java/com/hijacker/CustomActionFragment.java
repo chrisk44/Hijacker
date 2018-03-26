@@ -55,16 +55,19 @@ import static com.hijacker.Shell.runOne;
 
 public class CustomActionFragment extends Fragment{
     static CustomActionTask task;
-    static CustomAction selectedAction = null;
-    static Device targetDevice;
-    static String console_text = "";
 
     View fragmentView;
-    int normalOptHeight = -1;
     View optionsContainer;
     Button startBtn, targetBtn, actionBtn;
     TextView consoleView;
     ScrollView consoleScrollView;
+
+    //Dimensions to restore animated views
+    int normalOptHeight = -1;
+    //User options
+    static CustomAction selectedAction = null;
+    static Device targetDevice;
+    static String console_text = "";
     @SuppressLint("SetTextI18n")
     @Override
     public View onCreateView(LayoutInflater inflater, final ViewGroup container, Bundle savedInstanceState){

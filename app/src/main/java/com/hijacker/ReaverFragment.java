@@ -74,19 +74,22 @@ import static com.hijacker.MainActivity.runInHandler;
 import static com.hijacker.MainActivity.stop;
 
 public class ReaverFragment extends Fragment{
-    View fragmentView;
-    View optionsContainer;
+    static ReaverTask task;
+
+    View fragmentView, optionsContainer;
     Button start_button, select_button;
     TextView consoleView;
     EditText pinDelayView, lockedDelayView;
     CheckBox pixie_dust_cb, ignored_locked_cb, eap_fail_cb, small_dh_cb, no_nack_cb;
     ScrollView consoleScrollView;
-    int normalOptHeight = -1;
     boolean autostart = false;
-    static ReaverTask task;
+
+    //Dimensions to restore animated views
+    int normalOptHeight = -1;
+    //User options
     static String console_text = "", pin_delay="1", locked_delay="60", custom_mac=null;       //delays are always used as strings
     static boolean pixie_dust, pixie_dust_enabled, ignore_locked, eap_fail, small_dh, no_nack;
-    static AP ap=null;
+    static AP ap = null;
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState){
         fragmentView = inflater.inflate(R.layout.reaver_fragment, container, false);

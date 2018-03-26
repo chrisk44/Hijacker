@@ -63,6 +63,15 @@
 
             </android.support.design.widget.TextInputLayout>
 
+            <ImageButton
+                android:id="@+id/wordlist_download_btn"
+                style="?android:attr/buttonBarButtonStyle"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_vertical"
+                android:src="@android:drawable/stat_sys_download"
+                android:tint="@color/colorAccent" />
+
             <Button
                 android:id="@+id/wordlist_fe_btn"
                 style="?android:attr/buttonBarButtonStyle"
@@ -83,6 +92,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
+                android:checked="true"
                 android:text="WPA/WPA2" />
 
             <RadioButton

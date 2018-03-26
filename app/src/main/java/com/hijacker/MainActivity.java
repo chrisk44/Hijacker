@@ -53,6 +53,7 @@ import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
+import android.util.JsonReader;
 import android.util.Log;
 import android.util.SparseArray;
 import android.view.Gravity;
@@ -82,11 +83,12 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
-import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
+
+import javax.net.ssl.HttpsURLConnection;
 
 import static com.hijacker.AP.getAPByMac;
 import static com.hijacker.CustomAction.TYPE_ST;
@@ -99,6 +101,8 @@ import static com.hijacker.Shell.runOne;
 
 public class MainActivity extends AppCompatActivity{
     static final String NETHUNTER_BOOTKALI_BASH = "/data/data/com.offsec.nethunter/files/scripts/bootkali_bash";
+    static final String RELEASES_LINK = "https://api.github.com/repos/chrisk44/Hijacker/releases";
+    static final String WORDLISTS_LINK = "https://api.github.com/repos/chrisk44/Hijacker/contents/wordlists";
     static final int BUFFER_SIZE = 1048576;
     static final int AIREPLAY_DEAUTH = 1, AIREPLAY_WEP = 2;
     static final int BAND_2 = 1, BAND_5 = 2, BAND_BOTH = 3;
@@ -144,7 +148,7 @@ public class MainActivity extends AppCompatActivity{
     static NotificationCompat.Builder notif, error_notif, handshake_notif;
     static NotificationManager mNotificationManager;
     static FragmentManager mFragmentManager;
-    static String path, data_path, actions_path, firm_backup_file, manufDBFile, arch, busybox;             //path: App files path (ends with .../files)
+    static String path, data_path, actions_path, wl_path, firm_backup_file, manufDBFile, arch, busybox;             //path: App files path (ends with .../files)
     static File aliases_file;
     static FileWriter aliases_in;
     static final HashMap<String, String> aliases = new HashMap<>();
@@ -362,15 +366,17 @@ public class MainActivity extends AppCompatActivity{
             path = getFilesDir().getAbsolutePath();
             data_path = Environment.getExternalStorageDirectory() + "/Hijacker";
             actions_path = data_path + "/actions";
+            wl_path = data_path + "/wordlists";
             firm_backup_file = data_path + "/fw_bcmdhd.orig.bin";
             manufDBFile = path + "/manuf.db";
-            File data_dir = new File(data_path);
-            if(!data_dir.exists()){
-                //Create directory
-                data_dir.mkdir();
-
-                //Create 'actions' directory
-                new File(actions_path).mkdir();
+            ArrayList<File> dirs = new ArrayList<>();
+            dirs.add(new File(data_path));
+            dirs.add(new File(actions_path));
+            dirs.add(new File(wl_path));
+            for(File dir : dirs){
+                if(!dir.exists()){
+                    dir.mkdir();
+                }
             }
 
             //Initialize notifications
@@ -1586,24 +1592,55 @@ public class MainActivity extends AppCompatActivity{
         }
 
         try{
-            String url = "https://raw.githubusercontent.com/chrisk44/HijackerVersionCheck/master/version.txt";
-            HttpURLConnection connection = (HttpURLConnection) (new URL(url).openConnection());
+            HttpsURLConnection connection = (HttpsURLConnection) (new URL(RELEASES_LINK).openConnection());
             connection.setConnectTimeout(5000);
             connection.setReadTimeout(5000);
 
-            BufferedReader out = new BufferedReader(new InputStreamReader(connection.getInputStream(), "iso-8859-1"), 8);
+            JsonReader reader = new JsonReader(new InputStreamReader(connection.getInputStream()));
+            reader.beginArray();
+            if(!reader.hasNext()){
+                //No releases
+                Log.e("HIJACKER/UpdateCheck", "No releases found");
+                throw new Exception();
+            }
 
-            int latestCode = Integer.parseInt(out.readLine());
-            String latestName = out.readLine();
-            String latestLink = out.readLine();
+            String latestName = null, latestLink = null, latestBody = null;
 
-            out.close();
+            reader.beginObject();
+            //Run through all the names in the release array
+            while(reader.hasNext()){
+                String field = reader.nextName();
+                if(field.equals("tag_name")){
+                    latestName = reader.nextString();
+                }else if(field.equals("body")){
+                    latestBody = reader.nextString();
+                    if(latestBody.equals("")) latestBody = null;
+                }else if(field.equals("assets")){
+                    //assets is an array
+                    reader.beginArray();
+                    reader.beginObject();
+                    //Run through all the names in the 'assets' array
+                    while(reader.hasNext()){
+                        field = reader.nextName();
+                        if(field.equals("browser_download_url")){
+                            latestLink = reader.nextString();
+                        }else{
+                            reader.skipValue();
+                        }
+                    }
+                    reader.endObject();
+                    reader.endArray();
+                }else{
+                    reader.skipValue();
+                }
+            }
+            reader.close();
 
-            if(latestCode > versionCode){
+            if(!versionName.equals(latestName)){
                 final UpdateConfirmDialog dialog = new UpdateConfirmDialog();
-                dialog.newVersionCode = latestCode;
                 dialog.newVersionName = latestName;
                 dialog.link = latestLink;
+                dialog.message = latestBody;
                 runInHandler(new Runnable(){
                     @Override
                     public void run(){
@@ -1613,7 +1650,7 @@ public class MainActivity extends AppCompatActivity{
             }else{
                 if(showMessages) Snackbar.make(rootView, activity.getString(R.string.already_on_latest), Snackbar.LENGTH_SHORT).show();
             }
-        }catch(IOException | NumberFormatException e){
+        }catch(Exception e){
             Log.e("HIJACKER/update", e.toString());
             if(showMessages) Snackbar.make(rootView, activity.getString(R.string.unknown_error), Snackbar.LENGTH_SHORT).show();
         }finally{
