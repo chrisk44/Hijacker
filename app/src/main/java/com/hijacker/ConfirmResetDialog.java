@@ -37,7 +37,6 @@ public class ConfirmResetDialog extends DialogFragment {
             public void onClick(DialogInterface dialog, int id) {
                 pref_edit.putString("iface", getString(R.string.iface));
                 pref_edit.putString("prefix", getString(R.string.prefix));
-                pref_edit.putString("cap_dir", getString(R.string.cap_dir));
                 pref_edit.putString("enable_monMode", getString(R.string.enable_monMode));
                 pref_edit.putString("disable_monMode", getString(R.string.disable_monMode));
                 pref_edit.putBoolean("enable_on_airodump", Boolean.parseBoolean(getString(R.string.enable_on_airodump)));

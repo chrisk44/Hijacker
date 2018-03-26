@@ -17,7 +17,6 @@ package com.hijacker;
     along with this program.  If not, see <http://www.gnu.org/licenses/>
  */
 
-import android.app.Activity;
 import android.app.FragmentManager;
 import android.view.View;
 import android.widget.PopupMenu;

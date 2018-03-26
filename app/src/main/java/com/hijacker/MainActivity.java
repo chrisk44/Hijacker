@@ -148,7 +148,7 @@ public class MainActivity extends AppCompatActivity{
     static NotificationCompat.Builder notif, error_notif, handshake_notif;
     static NotificationManager mNotificationManager;
     static FragmentManager mFragmentManager;
-    static String path, data_path, actions_path, wl_path, firm_backup_file, manufDBFile, arch, busybox;             //path: App files path (ends with .../files)
+    static String path, data_path, actions_path, wl_path, cap_path, firm_backup_file, manufDBFile, arch, busybox;             //path: App files path (ends with .../files)
     static File aliases_file;
     static FileWriter aliases_in;
     static final HashMap<String, String> aliases = new HashMap<>();
@@ -161,7 +161,7 @@ public class MainActivity extends AppCompatActivity{
     static ActionBar actionBar;
     static String bootkali_init_bin = "bootkali_init";
     //Preferences - Defaults are in strings.xml
-    static String iface, prefix, airodump_dir, aireplay_dir, aircrack_dir, mdk3bf_dir, mdk3dos_dir, reaver_dir, cap_dir, chroot_dir,
+    static String iface, prefix, airodump_dir, aireplay_dir, aircrack_dir, mdk3bf_dir, mdk3dos_dir, reaver_dir, chroot_dir,
             enable_monMode, disable_monMode, custom_chroot_cmd;
     static int deauthWait, band;
     static boolean show_notif, show_details, airOnStartup, debug, delete_extra,
@@ -337,7 +337,6 @@ public class MainActivity extends AppCompatActivity{
             publishProgress(getString(R.string.loading_defaults));
             iface = getString(R.string.iface);
             prefix = getString(R.string.prefix);
-            cap_dir = getString(R.string.cap_dir);
             enable_monMode = getString(R.string.enable_monMode);
             disable_monMode = getString(R.string.disable_monMode);
             enable_on_airodump = Boolean.parseBoolean(getString(R.string.enable_on_airodump));
@@ -367,15 +366,41 @@ public class MainActivity extends AppCompatActivity{
             data_path = Environment.getExternalStorageDirectory() + "/Hijacker";
             actions_path = data_path + "/actions";
             wl_path = data_path + "/wordlists";
+            cap_path = data_path + "/capture_files";
             firm_backup_file = data_path + "/fw_bcmdhd.orig.bin";
             manufDBFile = path + "/manuf.db";
             ArrayList<File> dirs = new ArrayList<>();
             dirs.add(new File(data_path));
             dirs.add(new File(actions_path));
             dirs.add(new File(wl_path));
+            dirs.add(new File(cap_path));
             for(File dir : dirs){
                 if(!dir.exists()){
                     dir.mkdir();
+                }
+            }
+            //cap file directory used to be set by the user, so move everything to the new location
+            if(pref.contains("cap_dir")){
+                //Move capture files to new directory
+                String old_dir = pref.getString("cap_dir", null);
+                Toast.makeText(MainActivity.this, "Moving cap files from " + old_dir + " to " + cap_path, Toast.LENGTH_SHORT).show();
+                runOne(" mv " + old_dir + "/* " + cap_path + "/ && rmdir " + old_dir);
+
+                pref_edit.remove("cap_dir");
+                pref_edit.apply();
+            }else{
+                //cap directory was never changed so there may be files in /sdcard/cap/
+                File old_dir = new File("/sdcard/cap");
+                if(old_dir.exists() && old_dir.isDirectory()){
+                    File files[] = old_dir.listFiles();
+                    if(files!=null){
+                        Toast.makeText(MainActivity.this, "Moving cap files from " + old_dir.getAbsolutePath() + " to " + cap_path, Toast.LENGTH_LONG).show();
+                        for(File f : old_dir.listFiles()){
+                            //Move all the files to the new directory
+                            f.renameTo(new File(cap_path, f.getName()));
+                        }
+                    }
+                    old_dir.delete();
                 }
             }
 
@@ -860,7 +885,6 @@ public class MainActivity extends AppCompatActivity{
     }
     public void main(){
         runOne(enable_monMode);
-        runOne("mkdir " + cap_dir);
 
         stop(PROCESS_AIRODUMP);
         stop(PROCESS_AIREPLAY);
@@ -1079,7 +1103,6 @@ public class MainActivity extends AppCompatActivity{
         deauthWait = Integer.parseInt(pref.getString("deauthWait", Integer.toString(deauthWait)));
         chroot_dir = pref.getString("chroot_dir", chroot_dir);
         monstart = pref.getBoolean("monstart", monstart);
-        cap_dir = pref.getString("cap_dir", cap_dir);
         enable_monMode = pref.getString("enable_monMode", enable_monMode);
         disable_monMode = pref.getString("disable_monMode", disable_monMode);
         enable_on_airodump = pref.getBoolean("enable_on_airodump", enable_on_airodump);

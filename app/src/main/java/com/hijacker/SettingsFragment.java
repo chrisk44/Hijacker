@@ -23,7 +23,6 @@ import android.content.SharedPreferences;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
-import android.os.Environment;
 import android.os.Looper;
 import android.preference.Preference;
 import android.preference.PreferenceFragment;
@@ -98,24 +97,6 @@ public class SettingsFragment extends PreferenceFragment {
                 Intent intent = new Intent(Intent.ACTION_VIEW);
                 intent.setData(Uri.parse("https://github.com/chrisk44/Hijacker"));
                 startActivity(intent);
-                return false;
-            }
-        });
-        findPreference("cap_dir").setOnPreferenceClickListener(new Preference.OnPreferenceClickListener(){
-            @Override
-            public boolean onPreferenceClick(Preference preference){
-                final FileExplorerDialog dialog = new FileExplorerDialog();
-                dialog.setToSelect(FileExplorerDialog.SELECT_DIR);
-                dialog.setStartingDir(new RootFile(Environment.getExternalStorageDirectory().toString()));
-                dialog.setOnSelect(new Runnable(){
-                    @Override
-                    public void run(){
-                        pref_edit.putString("cap_dir", dialog.result.getAbsolutePath());
-                        pref_edit.commit();
-                        load();
-                    }
-                });
-                dialog.show(getFragmentManager(), "FileExplorerDialog");
                 return false;
             }
         });

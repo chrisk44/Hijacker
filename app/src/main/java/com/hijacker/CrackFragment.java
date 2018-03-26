@@ -23,7 +23,6 @@ import android.animation.ValueAnimator;
 import android.app.Fragment;
 import android.os.AsyncTask;
 import android.os.Bundle;
-import android.os.Environment;
 import android.support.design.widget.Snackbar;
 import android.util.Log;
 import android.view.KeyEvent;
@@ -43,6 +42,7 @@ import android.widget.TextView;
 
 import java.io.BufferedReader;
 import java.io.File;
+import java.io.FilenameFilter;
 import java.io.IOException;
 import java.io.InputStreamReader;
 
@@ -50,11 +50,9 @@ import static com.hijacker.MainActivity.FRAGMENT_CRACK;
 import static com.hijacker.MainActivity.PROCESS_AIRCRACK;
 import static com.hijacker.MainActivity.aircrack_dir;
 import static com.hijacker.MainActivity.background;
-import static com.hijacker.MainActivity.busybox;
-import static com.hijacker.MainActivity.cap_dir;
+import static com.hijacker.MainActivity.cap_path;
 import static com.hijacker.MainActivity.currentFragment;
 import static com.hijacker.MainActivity.debug;
-import static com.hijacker.MainActivity.getLastLine;
 import static com.hijacker.MainActivity.notification;
 import static com.hijacker.MainActivity.path;
 import static com.hijacker.MainActivity.progress;
@@ -147,7 +145,7 @@ public class CrackFragment extends Fragment{
             @Override
             public void onClick(View v){
                 final FileExplorerDialog dialog = new FileExplorerDialog();
-                dialog.setStartingDir(new RootFile(cap_dir));
+                dialog.setStartingDir(new RootFile(cap_path));
                 dialog.setToSelect(FileExplorerDialog.SELECT_EXISTING_FILE);
                 dialog.setOnSelect(new Runnable(){
                     @Override
@@ -163,7 +161,7 @@ public class CrackFragment extends Fragment{
             @Override
             public void onClick(View v){
                 final FileExplorerDialog dialog = new FileExplorerDialog();
-                dialog.setStartingDir(new RootFile(Environment.getExternalStorageDirectory().toString()));
+                dialog.setStartingDir(new RootFile(wl_path));
                 dialog.setToSelect(FileExplorerDialog.SELECT_EXISTING_FILE);
                 dialog.setOnSelect(new Runnable(){
                     @Override
@@ -184,13 +182,26 @@ public class CrackFragment extends Fragment{
 
         if(capfile_text==null){
             //Retrieve the last captured handshake
-            Shell shell = Shell.getFreeShell();
-            shell.run(busybox + " ls -1 " + cap_dir + "/handshake-*.cap; echo ENDOFLS");
-            String tmp = getLastLine(shell.getShell_out(), "ENDOFLS");
-            if(!tmp.equals("ENDOFLS") && tmp.charAt(0)!='l'){
-                capfileView.setText(tmp);
+            long latest = 0;
+            File result = null;
+
+            File files[] = new File(cap_path).listFiles(new FilenameFilter(){
+                @Override
+                public boolean accept(File file, String s){
+                    return s.startsWith("handshake-") && s.endsWith(".cap");
+                }
+            });
+
+            for(File f : files){
+                if(f.lastModified()>latest){
+                    latest = f.lastModified();
+                    result = f;
+                }
             }
-            shell.done();
+
+            if(result!=null){
+                capfileView.setText(result.getAbsolutePath());
+            }
         }
 
         if(wordlist_text==null){
@@ -248,7 +259,7 @@ public class CrackFragment extends Fragment{
             wepRG.getChildAt(i).setEnabled(wepRB.isChecked());
         }
         wordlistView.setEnabled(!wepRB.isChecked());
-        startBtn.setText(isRunning() ? getString(R.string.stop) : getString(R.string.stop));
+        startBtn.setText(isRunning() ? getString(R.string.stop) : getString(R.string.start));
 
         //Restore animated views
         if(task.getStatus()==AsyncTask.Status.RUNNING){

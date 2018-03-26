@@ -17,7 +17,6 @@ package com.hijacker;
     along with this program.  If not, see <http://www.gnu.org/licenses/>
  */
 
-import android.app.Activity;
 import android.app.FragmentManager;
 import android.app.FragmentTransaction;
 import android.util.Log;
@@ -50,7 +49,7 @@ import static com.hijacker.MainActivity.airodump_dir;
 import static com.hijacker.MainActivity.aliases;
 import static com.hijacker.MainActivity.aliases_file;
 import static com.hijacker.MainActivity.aliases_in;
-import static com.hijacker.MainActivity.cap_dir;
+import static com.hijacker.MainActivity.cap_path;
 import static com.hijacker.MainActivity.copy;
 import static com.hijacker.MainActivity.data_path;
 import static com.hijacker.MainActivity.debug;
@@ -419,8 +418,8 @@ class AP extends Device{
                                     case 5:
                                         //copy crack command
                                         String str;
-                                        if(AP.this.sec==WEP) str = prefix + " " + airodump_dir + " --channel " + AP.this.ch + " --bssid " + AP.this.mac + " --ivs -w " + cap_dir + "/wep_ivs " + iface;
-                                        else str = prefix + " " + airodump_dir + " --channel " + AP.this.ch + " --bssid " + AP.this.mac + " -w " + cap_dir + "/handshake " + iface;
+                                        if(AP.this.sec==WEP) str = prefix + " " + airodump_dir + " --channel " + AP.this.ch + " --bssid " + AP.this.mac + " --ivs -w " + cap_path + "/wep_ivs " + iface;
+                                        else str = prefix + " " + airodump_dir + " --channel " + AP.this.ch + " --bssid " + AP.this.mac + " -w " + cap_path + "/handshake " + iface;
 
                                         copy(str, v);
                                         break;

@@ -138,7 +138,8 @@
             android:paddingTop="5dp"
             android:textColor="@android:color/white"
             android:textSize="12sp"
-            android:typeface="monospace"/>
+            android:typeface="monospace"
+            android:focusable="true" />
     </LinearLayout>
 
 </LinearLayout>

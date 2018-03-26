@@ -40,12 +40,6 @@
             android:defaultValue="@string/airOnStartup"
             android:key="airOnStartup"
             android:title="@string/startup_title" />
-        <Preference
-            android:selectAllOnFocus="true"
-            android:singleLine="true"
-            android:title="@string/cap_title"
-            android:key="cap_dir"
-            android:summary="@string/cap_sum" />
         <SwitchPreference
             android:defaultValue="@string/delete_extra"
             android:title="@string/delete_extra_title"

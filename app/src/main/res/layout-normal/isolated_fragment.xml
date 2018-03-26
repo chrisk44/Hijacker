@@ -26,7 +26,8 @@
                 android:lines="1"
                 android:layout_gravity="center_vertical"
                 android:clickable="true"
-                android:onClick="onCopy"/>
+                android:onClick="onCopy"
+                android:focusable="true" />
 
             <TextView
                 android:text="00:11:22:33:44:55"
@@ -39,7 +40,8 @@
                 android:maxLines="2"
                 android:gravity="end"
                 android:clickable="true"
-                android:onClick="onCopy"/>
+                android:onClick="onCopy"
+                android:focusable="true" />
         </LinearLayout>
 
         <LinearLayout

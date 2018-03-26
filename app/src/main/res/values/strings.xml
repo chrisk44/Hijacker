@@ -170,12 +170,10 @@
     <string name="util_location_text">Management Utility:</string>
     <string name="firmware_not_found">Firmware (fw_bcmdhd.bin) not found</string>
     <string name="none_found">None found</string>
-    <string name="dir_notfound">Directory doesn\'t exist</string>
     <string name="backup_exists">A backup already exists</string>
     <string name="backup_created">Backup created</string>
     <string name="installed_firm_util">Installed firmware and utility</string>
     <string name="create_backup">Create Backup</string>
-    <string name="fw_not_compatible">Your device does not seem to be compatible with Nexmon (BCM4339 or BCM4358). Long click to override.</string>
     <string name="error_extracting_files">There was an error while extracting the files</string>
     <string name="field_required">This field is required</string>
     <string name="restore">Restore</string>
@@ -227,7 +225,6 @@
     <string name="setting_up_tools">Setting up tools…</string>
     <string name="init_rootFile">Initializing RootFile…</string>
     <string name="init_threads">Initializing threads…</string>
-    <string name="starting_threads">Starting threads…</string>
     <string name="starting_pers_service">Starting persistence service…</string>
     <string name="checking_permissions">Checking permissions…</string>
     <string name="loading_manuf_db">Loading manufacturer database…</string>
@@ -314,7 +311,6 @@
     <string name="prefix" translatable="false">LD_PRELOAD=/vendor/lib/libfakeioctl.so</string>
     <string name="chroot_dir" translatable="false">/data/local/nhsystem/kali-armhf</string>
     <string name="monstart" translatable="false">false</string>
-    <string name="cap_dir" translatable="false">/sdcard/cap</string>
     <string name="enable_monMode" translatable="false">nexutil -m true</string>
     <string name="disable_monMode" translatable="false">nexutil -m false</string>
     <string name="enable_on_airodump" translatable="false">true</string>
@@ -340,9 +336,6 @@
     <string name="prefix_title">Prefix</string>
     <string name="prefix_sum">Prefix for every command</string>
     <string name="prefix_desc">A prefix for every command that is run and needs monitor mode. (LD_PRELOAD)</string>
-
-    <string name="cap_title">Cap files directory</string>
-    <string name="cap_sum">Directory to save .cap files</string>
 
     <string name="delete_extra_title">Delete extra cap files</string>
     <string name="delete_extra_sum">Delete .csv and .netxml files created by airodump when saving to .cap file</string>

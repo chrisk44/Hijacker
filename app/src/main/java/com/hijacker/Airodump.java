@@ -32,7 +32,7 @@ import static com.hijacker.MainActivity.airodump_dir;
 import static com.hijacker.MainActivity.always_cap;
 import static com.hijacker.MainActivity.band;
 import static com.hijacker.MainActivity.busybox;
-import static com.hijacker.MainActivity.cap_dir;
+import static com.hijacker.MainActivity.cap_path;
 import static com.hijacker.MainActivity.debug;
 import static com.hijacker.MainActivity.delete_extra;
 import static com.hijacker.MainActivity.enable_monMode;
@@ -73,7 +73,7 @@ class Airodump{
                 else if(always_cap) file_prefix = "/cap";
                 else throw new IllegalStateException("Airodump is not supposed to be writing to a file");
 
-                shell.run("ls " + cap_dir + file_prefix + "*.cap; echo ENDOFLS");
+                shell.run("ls " + cap_path + file_prefix + "*.cap; echo ENDOFLS");
                 capFile = getLastLine(shell.getShell_out(), "ENDOFLS");
 
                 if(capFile.equals("ENDOFLS")){
@@ -169,9 +169,9 @@ class Airodump{
         if(band==BAND_2 || band==BAND_BOTH) cmd += "bg";
         cmd += " ";
 
-        if(forWPA) cmd += "-w " + cap_dir + "/handshake ";
-        else if(forWEP) cmd += "--ivs -w " + cap_dir + "/wep_ivs ";
-        else if(always_cap) cmd += "-w " + cap_dir + "/cap ";
+        if(forWPA) cmd += "-w " + cap_path + "/handshake ";
+        else if(forWEP) cmd += "--ivs -w " + cap_path + "/wep_ivs ";
+        else if(always_cap) cmd += "-w " + cap_path + "/cap ";
 
         if(channel!=0) cmd += "--channel " + channel + " ";
 

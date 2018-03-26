@@ -14,7 +14,8 @@
         android:id="@+id/floatingActionButton"
         android:layout_alignParentBottom="true"
         android:layout_alignParentEnd="true"
-        android:layout_margin="30dp" />
+        android:layout_margin="30dp"
+        android:focusable="true" />
 
     <ListView
         android:layout_width="match_parent"

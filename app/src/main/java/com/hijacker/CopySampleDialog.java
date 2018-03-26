@@ -27,7 +27,7 @@ import android.support.v7.app.AlertDialog;
 import static com.hijacker.MainActivity.aircrack_dir;
 import static com.hijacker.MainActivity.aireplay_dir;
 import static com.hijacker.MainActivity.airodump_dir;
-import static com.hijacker.MainActivity.cap_dir;
+import static com.hijacker.MainActivity.cap_path;
 import static com.hijacker.MainActivity.chroot_dir;
 import static com.hijacker.MainActivity.copy;
 import static com.hijacker.MainActivity.iface;
@@ -52,7 +52,7 @@ public class CopySampleDialog extends DialogFragment {
             public void onClick(DialogInterface dialog, int which) {
                 switch(which){
                     case 0:
-                        copy(aircrack_dir + " " + cap_dir + "/wpa.cap-01.cap", getView());
+                        copy(aircrack_dir + " " + cap_path + "/wpa.cap-01.cap", getView());
                         break;
                     case 1:
                         copy(prefix + " " + airodump_dir + " " + iface, getView());
