@@ -88,7 +88,7 @@ public class ReaverFragment extends Fragment{
     int normalOptHeight = -1;
     //User options
     static String console_text = "", pin_delay="1", locked_delay="60", custom_mac=null;       //delays are always used as strings
-    static boolean pixie_dust, pixie_dust_enabled, ignore_locked, eap_fail, small_dh, no_nack;
+    static boolean pixie_dust_enabled = true, pixie_dust, ignore_locked, eap_fail, small_dh, no_nack;
     static AP ap = null;
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState){
@@ -124,9 +124,13 @@ public class ReaverFragment extends Fragment{
         int chroot_check = checkChroot();
         if(chroot_check!=CHROOT_FOUND){
             pixie_dust_cb.setEnabled(false);
+            pixie_dust_enabled = false;
             if(chroot_check==CHROOT_DIR_MISSING) Toast.makeText(getActivity(), getString(R.string.chroot_notfound), LENGTH_SHORT).show();
             else if(chroot_check==CHROOT_BIN_MISSING) Toast.makeText(getActivity(), getString(R.string.kali_notfound), LENGTH_SHORT).show();
             else Toast.makeText(getActivity(), getString(R.string.chroot_both_notfound), LENGTH_SHORT).show();
+        }else{
+            pixie_dust_cb.setEnabled(true);
+            pixie_dust_enabled = true;
         }
 
         select_button.setOnClickListener(new View.OnClickListener(){
@@ -286,7 +290,6 @@ public class ReaverFragment extends Fragment{
             optionsContainer.post(new Runnable(){
                 @Override
                 public void run(){
-                    //normalOptHeight = optionsContainer.getHeight();
                     attemptStart();
                 }
             });
