@@ -192,15 +192,17 @@ public class CrackFragment extends Fragment{
                 }
             });
 
-            for(File f : files){
-                if(f.lastModified()>latest){
-                    latest = f.lastModified();
-                    result = f;
+            if(files!=null){    //Only if the directory is deleted while the app is running, apparently it happens
+                for(File f : files){
+                    if(f.lastModified()>latest){
+                        latest = f.lastModified();
+                        result = f;
+                    }
                 }
-            }
 
-            if(result!=null){
-                capfileView.setText(result.getAbsolutePath());
+                if(result!=null){
+                    capfileView.setText(result.getAbsolutePath());
+                }
             }
         }
 
@@ -209,10 +211,14 @@ public class CrackFragment extends Fragment{
             long latest = 0;
             File result = null;
 
-            for(File f : new File(wl_path).listFiles()){
-                if(f.lastModified()>latest){
-                    latest = f.lastModified();
-                    result = f;
+            File files[] = new File(wl_path).listFiles();
+
+            if(files!=null){    //Only if the directory is deleted while the app is running, apparently it happens
+                for(File f : files){
+                    if(f.lastModified()>latest){
+                        latest = f.lastModified();
+                        result = f;
+                    }
                 }
             }
 

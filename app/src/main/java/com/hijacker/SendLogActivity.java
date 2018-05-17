@@ -166,7 +166,7 @@ public class SendLogActivity extends AppCompatActivity{
     public void onUseEmail(View v){
         Intent intent = new Intent (Intent.ACTION_SEND);
         intent.setType("plain/text");
-        intent.putExtra(Intent.EXTRA_EMAIL, new String[] {"kiriakopoulos44@gmail.com"});
+        intent.putExtra(Intent.EXTRA_EMAIL, new String[] {"droid.hijacker@gmail.com"});
         intent.putExtra(Intent.EXTRA_SUBJECT, "Hijacker bug report");
         Uri attachment = FileProvider.getUriForFile(this, BuildConfig.APPLICATION_ID + ".provider", report);
         intent.putExtra(Intent.EXTRA_STREAM, attachment);
