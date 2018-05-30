@@ -28,6 +28,7 @@ import static com.hijacker.AP.getAPByMac;
 import static com.hijacker.MainActivity.BAND_2;
 import static com.hijacker.MainActivity.BAND_5;
 import static com.hijacker.MainActivity.BAND_BOTH;
+import static com.hijacker.MainActivity.MAX_READLINE_SIZE;
 import static com.hijacker.MainActivity.airodump_dir;
 import static com.hijacker.MainActivity.always_cap;
 import static com.hijacker.MainActivity.band;
@@ -192,9 +193,9 @@ class Airodump{
                     int mode = channel==0 ? 0 : 1;
                     Process process = Runtime.getRuntime().exec(final_cmd);
                     last_action = System.currentTimeMillis();
-                    BufferedReader in = new BufferedReader(new InputStreamReader(process.getErrorStream()));
+                    BoundedBufferedReader in = new BoundedBufferedReader(new InputStreamReader(process.getErrorStream()));
                     String buffer;
-                    while(Airodump.isRunning() && (buffer = in.readLine())!=null){
+                    while(Airodump.isRunning() && (buffer = in.readLine(MAX_READLINE_SIZE))!=null){
                         main(buffer, mode);
                     }
                 }catch(IOException e){ Log.e("HIJACKER/Exception", "Caught Exception in Airodump.start() read thread: " + e.toString()); }

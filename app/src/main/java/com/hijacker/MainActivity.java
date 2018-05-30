@@ -104,6 +104,7 @@ public class MainActivity extends AppCompatActivity{
     static final String RELEASES_LINK = "https://api.github.com/repos/chrisk44/Hijacker/releases";
     static final String WORDLISTS_LINK = "https://api.github.com/repos/chrisk44/Hijacker/contents/wordlists";
     static final int BUFFER_SIZE = 1048576;
+    static final int MAX_READLINE_SIZE = 10000;
     static final int AIREPLAY_DEAUTH = 1, AIREPLAY_WEP = 2;
     static final int BAND_2 = 1, BAND_5 = 2, BAND_BOTH = 3;
     static final int FRAGMENT_AIRODUMP = R.id.nav_airodump, FRAGMENT_MDK = R.id.nav_mdk3, FRAGMENT_CRACK = R.id.nav_crack,
