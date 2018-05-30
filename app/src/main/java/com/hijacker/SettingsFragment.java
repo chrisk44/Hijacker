@@ -39,6 +39,7 @@ import static com.hijacker.MainActivity.currentFragment;
 import static com.hijacker.MainActivity.load;
 
 public class SettingsFragment extends PreferenceFragment {
+    static boolean allow_prefix = false;
     int versionClicks = 0;
     long lastVersionClick = 0;
     SharedPreferences.OnSharedPreferenceChangeListener listener;
@@ -55,6 +56,7 @@ public class SettingsFragment extends PreferenceFragment {
 
             findPreference("prefix").setEnabled(true);
         }
+        if(allow_prefix) findPreference("prefix").setEnabled(true);
 
         findPreference("test_tools").setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
             @Override

@@ -544,7 +544,13 @@ public class MainActivity extends AppCompatActivity{
                     prefix += "libnexmon.so";
                 }else{
                     //Default (detected but not included)
-                    prefix += "libfakeioctl.so";
+                    SettingsFragment.allow_prefix = true;       //Allow user to change the prefix
+                    prefix = pref.getString("prefix", null);    //Use user-set prefix
+
+                    if(prefix==null){
+                        //No user-set prefix, use default
+                        prefix = "LD_PRELOAD=" + path + "/lib/libfakeioctl.so";
+                    }
                 }
 
                 airodump_dir = path + "/bin/airodump-ng";

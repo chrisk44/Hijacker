@@ -5,8 +5,8 @@ android {
         applicationId "com.hijacker"
         minSdkVersion 21
         targetSdkVersion 27
-        versionCode 30
-        versionName "v1.5-beta.6"
+        versionCode 31
+        versionName "v1.5-beta.7"
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
         externalNativeBuild {
             cmake {
