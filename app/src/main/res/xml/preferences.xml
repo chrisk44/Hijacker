@@ -65,6 +65,7 @@
             android:dialogTitle="@string/deauthWait_title"
             android:inputType="number"
             android:key="deauthWait"
+            android:maxLength="8"
             android:selectAllOnFocus="true"
             android:singleLine="true"
             android:summary="@string/deauthWait_sum"

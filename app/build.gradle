@@ -5,8 +5,8 @@ android {
         applicationId "com.hijacker"
         minSdkVersion 21
         targetSdkVersion 27
-        versionCode 31
-        versionName "v1.5-beta.7"
+        versionCode 32
+        versionName "v1.5-stable"
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
         externalNativeBuild {
             cmake {
@@ -36,7 +36,7 @@ dependencies {
     implementation 'com.android.support:design:27.1.1'
     testImplementation 'junit:junit:4.12'
     implementation 'com.android.support:cardview-v7:27.1.1'
-    implementation 'com.google.android.gms:play-services-appindexing:9.8.0'
+    implementation 'com.google.firebase:firebase-appindexing:16.0.1'
 
     implementation 'com.android.support:appcompat-v7:27.1.1'
     implementation 'com.android.support:design:27.1.1'
