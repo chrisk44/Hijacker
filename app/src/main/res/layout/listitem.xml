@@ -5,18 +5,35 @@
               android:layout_height="wrap_content"
               android:padding="3dp">
 
-    <ImageView
-        android:id="@+id/iv"
+    <RelativeLayout
         android:layout_width="wrap_content"
-        android:layout_height="match_parent"
-        android:adjustViewBounds="true"
-        android:maxHeight="100dp"
-        android:maxWidth="50dp"
-        android:paddingBottom="5dp"
-        android:paddingEnd="10dp"
-        android:paddingStart="5dp"
-        android:paddingTop="5dp"
-        app:srcCompat="@drawable/ap2"/>
+        android:layout_height="wrap_content">
+
+        <ImageView
+            android:id="@+id/iv"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:adjustViewBounds="true"
+            android:maxHeight="100dp"
+            android:maxWidth="50dp"
+            android:paddingBottom="5dp"
+            android:paddingEnd="10dp"
+            android:paddingStart="5dp"
+            android:paddingTop="5dp"
+            app:srcCompat="@drawable/ap2" />
+
+        <TextView
+            android:id="@+id/icon_count_view"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignBottom="@+id/iv"
+            android:layout_alignEnd="@+id/iv"
+            android:layout_marginBottom="2dp"
+            android:layout_marginEnd="10dp"
+            android:text="100"
+            android:textColor="@android:color/white"
+            android:textSize="12sp" />
+    </RelativeLayout>
 
     <RelativeLayout
         android:layout_width="match_parent"
@@ -53,6 +70,7 @@
         </LinearLayout>
 
         <LinearLayout
+            android:id="@+id/ll2"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_below="@+id/ll1"
@@ -65,7 +83,7 @@
                 android:layout_gravity="center_vertical"
                 android:gravity="center_vertical"
                 android:maxLines="1"
-                android:text="00:11:22:33:44:55"/>
+                android:text="00:11:22:33:44:55" />
 
             <TextView
                 android:id="@+id/lowerRight"
@@ -75,8 +93,8 @@
                 android:layout_weight="1"
                 android:gravity="end|center_vertical"
                 android:maxLines="1"
-                android:text="dsadfasdfasdfas"
-                android:paddingStart="4dp"/>
+                android:paddingStart="4dp"
+                android:text="dsadfasdfasdfas" />
         </LinearLayout>
     </RelativeLayout>
 </LinearLayout>

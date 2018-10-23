@@ -165,7 +165,7 @@ public class MainActivity extends AppCompatActivity{
     static String iface, prefix, airodump_dir, aireplay_dir, aircrack_dir, mdk3bf_dir, mdk3dos_dir, reaver_dir, chroot_dir,
             enable_monMode, disable_monMode, custom_chroot_cmd;
     static int deauthWait, band;
-    static boolean show_notif, show_details, airOnStartup, debug, delete_extra,
+    static boolean show_notif, show_details, airOnStartup, debug, delete_extra, show_client_count,
             monstart, always_cap, cont_on_fail, watchdog, target_deauth, enable_on_airodump, update_on_startup;
 
     private GoogleApiClient client;
@@ -356,6 +356,7 @@ public class MainActivity extends AppCompatActivity{
             target_deauth = Boolean.parseBoolean(getString(R.string.target_deauth));
             update_on_startup = Boolean.parseBoolean(getString(R.string.auto_update));
             band = Integer.parseInt(getString(R.string.band));
+            show_client_count = Boolean.parseBoolean(getString(R.string.show_client_count));
 
             //Load preferences
             publishProgress(getString(R.string.loading_preferences));
@@ -1130,6 +1131,7 @@ public class MainActivity extends AppCompatActivity{
         cont_on_fail = pref.getBoolean("cont_on_fail", cont_on_fail);
         update_on_startup = pref.getBoolean("update_on_startup", update_on_startup);
         band = Integer.parseInt(pref.getString("band", Integer.toString(band)));
+        show_client_count = pref.getBoolean("show_client_count", show_client_count);
 
         progress.setMax(deauthWait);
         progress.setProgress(deauthWait);
@@ -1337,13 +1339,23 @@ public class MainActivity extends AppCompatActivity{
             TextView upperRight = itemview.findViewById(R.id.upperRight);
             upperRight.setText(current.device.upperRight);
 
-            //Image
+            //Image and count views
             ImageView iv = itemview.findViewById(R.id.iv);
+            TextView icon_count_view = itemview.findViewById(R.id.icon_count_view);
             if(current.device instanceof AP){
                 if(((AP)current.device).isHidden) iv.setImageResource(R.drawable.ap_hidden);
                 else iv.setImageResource(R.drawable.ap2);
+
+                if(show_client_count){
+                    icon_count_view.setText(Integer.toString(((AP) (current.device)).clients.size()));
+                    icon_count_view.setVisibility(View.VISIBLE);
+                }else{
+                    icon_count_view.setVisibility(View.GONE);
+                }
             }else{
                 iv.setImageResource(R.drawable.st2);
+
+                icon_count_view.setVisibility(View.GONE);
             }
 
             return itemview;

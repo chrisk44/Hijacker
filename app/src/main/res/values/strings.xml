@@ -326,6 +326,7 @@
     <string name="target_deauth" translatable="false">false</string>
     <string name="auto_update" translatable="false">true</string>
     <string name="band" translatable="false">1</string>
+    <string name="show_client_count" translatable="false">true</string>
 
     <!-- Settings -->
 
@@ -352,6 +353,8 @@
 
     <string name="notif_details_title">Show details</string>
     <string name="notif_details_sum">Show additional details about running processes in notification</string>
+
+    <string name="show_client_count_title">Show AP\'s client count</string>
 
     <string name="debug_title">Logcat Messages</string>
     <string name="debug_sum">Print debugging messages to logcat. Messages about exceptions will be printed anyway.</string>
