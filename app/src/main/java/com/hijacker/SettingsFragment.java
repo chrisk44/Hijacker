@@ -1,7 +1,7 @@
 package com.hijacker;
 
 /*
-    Copyright (C) 2016  Christos Kyriakopoylos
+    Copyright (C) 2019  Christos Kyriakopoulos
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -136,6 +136,10 @@ public class SettingsFragment extends PreferenceFragment {
             }
         });
         findPreference("version").setSummary(versionName);
+        /*
+         * Disable DevOptionsFragment because people are sending bug reports
+         * after clicking the "CRASH_THE_APP" button.
+
         findPreference("version").setOnPreferenceClickListener(new Preference.OnPreferenceClickListener(){
             @Override
             public boolean onPreferenceClick(Preference preference){
@@ -156,6 +160,7 @@ public class SettingsFragment extends PreferenceFragment {
                 return false;
             }
         });
+        */
     }
     @Override
     public void onResume() {
