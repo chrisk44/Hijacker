@@ -9,7 +9,7 @@
     android:paddingStart="5dp">
 
     <ListView
-        android:id="@+id/android:list"
+        android:id="@id/android:list"
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:layout_weight="1"

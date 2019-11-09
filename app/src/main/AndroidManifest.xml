@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-          package="com.hijacker">
+    xmlns:tools="http://schemas.android.com/tools"
+    package="com.hijacker">
 
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"/>
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
@@ -16,7 +17,8 @@
         android:persistent="true"
         android:extractNativeLibs="false"
         android:supportsRtl="true"
-        android:theme="@style/ThemeAppCompatNoActionBarHoloBlue">
+        android:theme="@style/ThemeAppCompatNoActionBarHoloBlue"
+        tools:ignore="GoogleAppIndexingWarning">
         <provider
             android:name="android.support.v4.content.FileProvider"
             android:authorities="${applicationId}.provider"
@@ -45,13 +47,6 @@
             android:name=".StopReceiver"
             android:exported="false">
         </receiver>
-        <!--
- ATTENTION: This was auto-generated to add Google Play services to your project for
-     App Indexing.  See https://g.co/AppIndexing/AndroidStudio for more information.
-        -->
-        <meta-data
-            android:name="com.google.android.gms.version"
-            android:value="@integer/google_play_services_version"/>
 
         <activity
             android:name=".SendLogActivity"
@@ -66,7 +61,7 @@
         <service
             android:name=".PersistenceService"
             android:enabled="true"
-            android:exported="true">
+            android:exported="false">
         </service>
     </application>
 
