@@ -1,0 +1,3 @@
+C:/Users/Chris/Desktop/AndroidStudioProjects/Hijacker/app/.cxx/cmake/debug/x86/CMakeFiles/native-lib.dir
+C:/Users/Chris/Desktop/AndroidStudioProjects/Hijacker/app/.cxx/cmake/debug/x86/CMakeFiles/edit_cache.dir
+C:/Users/Chris/Desktop/AndroidStudioProjects/Hijacker/app/.cxx/cmake/debug/x86/CMakeFiles/rebuild_cache.dir

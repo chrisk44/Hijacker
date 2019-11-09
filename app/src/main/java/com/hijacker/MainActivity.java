@@ -171,26 +171,26 @@ public class MainActivity extends AppCompatActivity{
     @Override
     protected void onCreate(Bundle savedInstanceState){
         super.onCreate(savedInstanceState);
-//        Thread.setDefaultUncaughtExceptionHandler(new Thread.UncaughtExceptionHandler(){
-//            @Override
-//            public void uncaughtException(Thread thread, Throwable throwable){
-//                throwable.printStackTrace();
-//                String stackTrace = "";
-//                stackTrace += throwable.getMessage() + '\n';
-//                for(int i=0;i<throwable.getStackTrace().length;i++){
-//                    stackTrace += throwable.getStackTrace()[i].toString() + '\n';
-//                }
-//
-//                Intent intent = new Intent();
-//                intent.setAction("com.hijacker.SendLogActivity");
-//                intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-//                intent.putExtra("exception", stackTrace);
-//                startActivity(intent);
-//
-//                finish();
-//                System.exit(1);
-//            }
-//        });
+        Thread.setDefaultUncaughtExceptionHandler(new Thread.UncaughtExceptionHandler(){
+            @Override
+            public void uncaughtException(Thread thread, Throwable throwable){
+                throwable.printStackTrace();
+                String stackTrace = "";
+                stackTrace += throwable.getMessage() + '\n';
+                for(int i=0;i<throwable.getStackTrace().length;i++){
+                    stackTrace += throwable.getStackTrace()[i].toString() + '\n';
+                }
+
+                Intent intent = new Intent();
+                intent.setAction("com.hijacker.SendLogActivity");
+                intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                intent.putExtra("exception", stackTrace);
+                startActivity(intent);
+
+                finish();
+                System.exit(1);
+            }
+        });
         adapter = new MyListAdapter();              //ALWAYS BEFORE setContentView AND setup(), can't stress it enough...
         adapter.setNotifyOnChange(true);
         custom_action_adapter = new CustomActionAdapter();

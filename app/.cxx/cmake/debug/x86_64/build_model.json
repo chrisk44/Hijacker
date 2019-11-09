@@ -1,0 +1,72 @@
+{
+  "variant": {
+    "module": {
+      "rootBuildGradleFolder": "C:\\Users\\Chris\\Desktop\\AndroidStudioProjects\\Hijacker",
+      "sdkFolder": "C:\\Users\\Chris\\AppData\\Local\\Android\\Sdk",
+      "isNativeCompilerSettingsCacheEnabled": false,
+      "isBuildOnlyTargetAbiEnabled": true,
+      "splitsAbiFilterSet": [],
+      "intermediatesFolder": "C:\\Users\\Chris\\Desktop\\AndroidStudioProjects\\Hijacker\\app\\build\\intermediates",
+      "gradleModulePathName": ":app",
+      "moduleRootFolder": "C:\\Users\\Chris\\Desktop\\AndroidStudioProjects\\Hijacker\\app",
+      "makeFile": "C:\\Users\\Chris\\Desktop\\AndroidStudioProjects\\Hijacker\\app\\CMakeLists.txt",
+      "buildSystem": "CMAKE",
+      "compilerSettingsCacheFolder": "C:\\Users\\Chris\\Desktop\\AndroidStudioProjects\\Hijacker\\.cxx",
+      "cxxFolder": "C:\\Users\\Chris\\Desktop\\AndroidStudioProjects\\Hijacker\\app\\.cxx",
+      "ndkFolder": "C:\\Users\\Chris\\AppData\\Local\\Android\\Sdk\\ndk-bundle",
+      "ndkVersion": "20.1.5948944",
+      "ndkSupportedAbiList": [
+        "ARMEABI_V7A",
+        "ARM64_V8A",
+        "X86",
+        "X86_64"
+      ],
+      "ndkDefaultAbiList": [
+        "ARMEABI_V7A",
+        "ARM64_V8A",
+        "X86",
+        "X86_64"
+      ],
+      "cmakeToolchainFile": "."
+    },
+    "buildSystemArgumentList": [],
+    "cFlagList": [],
+    "cppFlagsList": [
+      ""
+    ],
+    "variantName": "debug",
+    "soFolder": "C:\\Users\\Chris\\Desktop\\AndroidStudioProjects\\Hijacker\\app\\build\\intermediates\\cmake\\debug\\lib",
+    "objFolder": "C:\\Users\\Chris\\Desktop\\AndroidStudioProjects\\Hijacker\\app\\build\\intermediates\\cmake\\debug\\obj",
+    "jsonFolder": "C:\\Users\\Chris\\Desktop\\AndroidStudioProjects\\Hijacker\\app\\.cxx\\cmake\\debug",
+    "gradleBuildOutputFolder": "C:\\Users\\Chris\\Desktop\\AndroidStudioProjects\\Hijacker\\app\\.cxx\\cxx\\debug",
+    "isDebuggableEnabled": true,
+    "validAbiList": [
+      "ARMEABI_V7A",
+      "ARM64_V8A",
+      "X86",
+      "X86_64"
+    ],
+    "buildTargetSet": []
+  },
+  "abi": "X86_64",
+  "abiPlatformVersion": 21,
+  "cxxBuildFolder": "C:\\Users\\Chris\\Desktop\\AndroidStudioProjects\\Hijacker\\app\\.cxx\\cmake\\debug\\x86_64",
+  "jsonFile": "C:\\Users\\Chris\\Desktop\\AndroidStudioProjects\\Hijacker\\app\\.cxx\\cmake\\debug\\x86_64\\android_gradle_build.json",
+  "gradleBuildOutputFolder": "C:\\Users\\Chris\\Desktop\\AndroidStudioProjects\\Hijacker\\app\\.cxx\\cxx\\debug\\x86_64",
+  "objFolder": "C:\\Users\\Chris\\Desktop\\AndroidStudioProjects\\Hijacker\\app\\build\\intermediates\\cmake\\debug\\obj\\x86_64",
+  "buildCommandFile": "C:\\Users\\Chris\\Desktop\\AndroidStudioProjects\\Hijacker\\app\\.cxx\\cmake\\debug\\x86_64\\build_command.txt",
+  "buildOutputFile": "C:\\Users\\Chris\\Desktop\\AndroidStudioProjects\\Hijacker\\app\\.cxx\\cmake\\debug\\x86_64\\build_output.txt",
+  "modelOutputFile": "C:\\Users\\Chris\\Desktop\\AndroidStudioProjects\\Hijacker\\app\\.cxx\\cmake\\debug\\x86_64\\build_model.json",
+  "cmake": {
+    "cmakeListsWrapperFile": "C:\\Users\\Chris\\Desktop\\AndroidStudioProjects\\Hijacker\\app\\.cxx\\cxx\\debug\\x86_64\\CMakeLists.txt",
+    "toolchainWrapperFile": "C:\\Users\\Chris\\Desktop\\AndroidStudioProjects\\Hijacker\\app\\.cxx\\cxx\\debug\\x86_64\\android_gradle_build.toolchain.cmake",
+    "buildGenerationStateFile": "C:\\Users\\Chris\\Desktop\\AndroidStudioProjects\\Hijacker\\app\\.cxx\\cxx\\debug\\x86_64\\build_generation_state.json",
+    "cacheKeyFile": "C:\\Users\\Chris\\Desktop\\AndroidStudioProjects\\Hijacker\\app\\.cxx\\cxx\\debug\\x86_64\\compiler_cache_key.json",
+    "compilerCacheUseFile": "C:\\Users\\Chris\\Desktop\\AndroidStudioProjects\\Hijacker\\app\\.cxx\\cxx\\debug\\x86_64\\compiler_cache_use.json",
+    "compilerCacheWriteFile": "C:\\Users\\Chris\\Desktop\\AndroidStudioProjects\\Hijacker\\app\\.cxx\\cxx\\debug\\x86_64\\compiler_cache_write.json",
+    "toolchainSettingsFromCacheFile": "C:\\Users\\Chris\\Desktop\\AndroidStudioProjects\\Hijacker\\app\\.cxx\\cxx\\debug\\x86_64\\compiler_settings_cache.cmake",
+    "cmakeWrappingBaseFolder": "."
+  },
+  "jsonGenerationLoggingRecordFile": "C:\\Users\\Chris\\Desktop\\AndroidStudioProjects\\Hijacker\\app\\.cxx\\cmake\\debug\\x86_64\\json_generation_record.json",
+  "compileCommandsJsonFile": "C:\\Users\\Chris\\Desktop\\AndroidStudioProjects\\Hijacker\\app\\.cxx\\cmake\\debug\\x86_64\\compile_commands.json"
+}

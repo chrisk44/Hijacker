@@ -271,6 +271,7 @@
     <string name="unexpected_error_message">An unexpected error has occurred. A bug report has been generated in your external storage directory. It may contain sensitive information such as MAC addresses, aliases and device information. Check the file below before sending it.</string>
     <string name="restart_hijacker">Restart</string>
     <string name="cant_create_report">Can\'t create report (external storage write access denied)</string>
+    <string name="cant_open_shell">Can\'t open shell to generate the bug report</string>
     <string name="report_not_created">Report was not created</string>
     <string name="prompt_additional_details">Add some details about the error, such as what exactly you where doing when the app crashed.</string>
 

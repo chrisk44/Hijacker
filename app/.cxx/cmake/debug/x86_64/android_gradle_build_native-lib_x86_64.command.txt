@@ -1,0 +1,8 @@
+Executable : C:\Users\Chris\AppData\Local\Android\Sdk\cmake\3.6.4111459\bin\cmake.exe
+arguments : 
+--build
+C:\Users\Chris\Desktop\AndroidStudioProjects\Hijacker\app\.cxx\cmake\debug\x86_64
+--target
+native-lib
+jvmArgs : 
+

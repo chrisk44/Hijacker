@@ -97,7 +97,10 @@ public class SendLogActivity extends AppCompatActivity{
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String permissions[], @NonNull int[] grantResults){
         boolean writeGranted = grantResults.length>0 && grantResults[0]==PackageManager.PERMISSION_GRANTED;
-        if(writeGranted){
+        if(shell==null){
+            progressBar.setVisibility(View.GONE);
+            console.setText(getString(R.string.cant_open_shell));
+        }else if(writeGranted){
             new ReportTask().executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
         }else{
             progressBar.setVisibility(View.GONE);
@@ -110,14 +113,14 @@ public class SendLogActivity extends AppCompatActivity{
             //Start su shell
             try{
                 shell = Runtime.getRuntime().exec("su");
+                shell_in = new PrintWriter(shell.getOutputStream());
+                shell_out = new BufferedReader(new InputStreamReader(shell.getInputStream()));
+
+                stopAll();
             }catch(IOException e){
                 Log.e("HIJACKER/onCreate", "Caught Exception in shell start: " + e.toString());
                 Snackbar.make(rootView, "Couldn't start su shell to stop any remaining processes", Snackbar.LENGTH_LONG).show();
             }
-            shell_in = new PrintWriter(shell.getOutputStream());
-            shell_out = new BufferedReader(new InputStreamReader(shell.getInputStream()));
-
-            stopAll();
 
             ActivityCompat.requestPermissions(SendLogActivity.this, new String[]{
                     Manifest.permission.WRITE_EXTERNAL_STORAGE,
