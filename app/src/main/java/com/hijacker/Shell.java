@@ -56,7 +56,9 @@ class Shell{
             shell_in = new PrintWriter(shell.getOutputStream());
             shell_out = new BufferedReader(new InputStreamReader(shell.getInputStream()));
         }catch(IOException e){
+            valid = false;
             Log.e("HIJACKER/Shell", "Error opening shell");
+            e.printStackTrace();
         }
         if(debug) Log.d("HIJACKER/Shell", "New shell: total=" + total + " free:" + free.size());
         if(free.size()>5) exitAll();

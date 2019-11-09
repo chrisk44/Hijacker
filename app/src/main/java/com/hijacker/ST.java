@@ -125,8 +125,6 @@ class ST extends Device{
         if(!toSort && sort!=SORT_NOSORT){
             switch(sort){
                 case SORT_BEACONS_FRAMES:
-                    toSort = this.frames!=frames;
-                    break;
                 case SORT_DATA_FRAMES:
                     toSort = this.frames!=frames;
                     break;
@@ -172,9 +170,7 @@ class ST extends Device{
         Tile.filter();
     }
     void unmark(){
-        if(marked.contains(this)){
-            marked.remove(this);
-        }
+        marked.remove(this);
         this.isMarked = false;
         Tile.filter();
     }

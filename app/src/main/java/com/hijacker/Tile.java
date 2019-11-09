@@ -86,7 +86,7 @@ class Tile {
         if(is_ap==null) {
             if(device instanceof AP){
                 AP ap = (AP)device;
-                boolean channel = (ap.ch<0 || ap.ch>14) ? true : (show_ch[0] || show_ch[ap.ch]);    //Channel might be -1 or over 14 (5ghz) so avoid OutOfRangeException in array access
+                boolean channel = (ap.ch<0 || ap.ch>14) || (show_ch[0] || show_ch[ap.ch]);    //Channel might be -1 or over 14 (5ghz) so avoid OutOfRangeException in array access
                 this.show = show_ap && channel && ap.pwr>=pwr_filter*(-1) &&
                         ((wpa && (ap.sec == WPA || ap.sec == WPA2)) || (wep && ap.sec == WEP) ||
                                 (opn && ap.sec == OPN) || ap.sec==UNKNOWN) && ap.manuf.contains(manuf_filter);
@@ -239,14 +239,12 @@ class Tile {
     }
     static Comparator<Tile> getComparatorForST(){
         switch(sort){
-            case SORT_ESSID:
-                return null;
             case SORT_BEACONS_FRAMES:
-                return ST_FRAMES;
             case SORT_DATA_FRAMES:
                 return ST_FRAMES;
             case SORT_PWR:
                 return AP_ST_PWR;
+            case SORT_ESSID:
             default:
                 return null;
         }

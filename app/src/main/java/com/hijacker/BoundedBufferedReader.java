@@ -4,16 +4,6 @@ package com.hijacker;
  * From https://zerocredibility.wordpress.com/2015/11/20/bufferedreader-readline-and-outofmemoryerror/
  */
 
-/**
- * This class is a copy of java.io.BufferedReader that can bound maximum line length when read using readLine(int).
- *
- * If the line length exceeds the passed length, the line up to the length is returned.
- * Subsequent readLine(int) calls will return the next line with the same restrictions.
- *
- * This class also provides a skipLines(int) method that will skip past the given number of lines, or less
- * if stream contains fewer lines.
- */
-
 /*
  *  Licensed to the Apache Software Foundation (ASF) under one or more
  *  contributor license agreements.  See the NOTICE file distributed with
@@ -435,7 +425,6 @@ public class BoundedBufferedReader extends Reader {
      * @throws IOException if this reader is closed or some other I/O error occurs.
      * @see #read()
      * @see #read(char[], int, int)
-     * @see #readLine()
      */
     @Override
     public boolean ready() throws IOException {

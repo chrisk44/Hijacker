@@ -34,7 +34,6 @@ import android.content.pm.PackageManager;
 import android.graphics.drawable.Drawable;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
-import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
@@ -69,11 +68,6 @@ import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.google.android.gms.appindexing.Action;
-import com.google.android.gms.appindexing.AppIndex;
-import com.google.android.gms.appindexing.Thing;
-import com.google.android.gms.common.api.GoogleApiClient;
-
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileOutputStream;
@@ -87,6 +81,7 @@ import java.net.URL;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.concurrent.Semaphore;
 
 import javax.net.ssl.HttpsURLConnection;
 
@@ -168,7 +163,6 @@ public class MainActivity extends AppCompatActivity{
     static boolean show_notif, show_details, airOnStartup, debug, delete_extra, show_client_count,
             monstart, always_cap, cont_on_fail, watchdog, target_deauth, enable_on_airodump, update_on_startup;
 
-    private GoogleApiClient client;
     WatchdogTask watchdogTask;
 
     ReaverFragment reaverFragment = new ReaverFragment();
@@ -177,26 +171,26 @@ public class MainActivity extends AppCompatActivity{
     @Override
     protected void onCreate(Bundle savedInstanceState){
         super.onCreate(savedInstanceState);
-        Thread.setDefaultUncaughtExceptionHandler(new Thread.UncaughtExceptionHandler(){
-            @Override
-            public void uncaughtException(Thread thread, Throwable throwable){
-                throwable.printStackTrace();
-                String stackTrace = "";
-                stackTrace += throwable.getMessage() + '\n';
-                for(int i=0;i<throwable.getStackTrace().length;i++){
-                    stackTrace += throwable.getStackTrace()[i].toString() + '\n';
-                }
-
-                Intent intent = new Intent();
-                intent.setAction("com.hijacker.SendLogActivity");
-                intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-                intent.putExtra("exception", stackTrace);
-                startActivity(intent);
-
-                finish();
-                System.exit(1);
-            }
-        });
+//        Thread.setDefaultUncaughtExceptionHandler(new Thread.UncaughtExceptionHandler(){
+//            @Override
+//            public void uncaughtException(Thread thread, Throwable throwable){
+//                throwable.printStackTrace();
+//                String stackTrace = "";
+//                stackTrace += throwable.getMessage() + '\n';
+//                for(int i=0;i<throwable.getStackTrace().length;i++){
+//                    stackTrace += throwable.getStackTrace()[i].toString() + '\n';
+//                }
+//
+//                Intent intent = new Intent();
+//                intent.setAction("com.hijacker.SendLogActivity");
+//                intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+//                intent.putExtra("exception", stackTrace);
+//                startActivity(intent);
+//
+//                finish();
+//                System.exit(1);
+//            }
+//        });
         adapter = new MyListAdapter();              //ALWAYS BEFORE setContentView AND setup(), can't stress it enough...
         adapter.setNotifyOnChange(true);
         custom_action_adapter = new CustomActionAdapter();
@@ -205,13 +199,12 @@ public class MainActivity extends AppCompatActivity{
         file_explorer_adapter.setNotifyOnChange(true);
         setContentView(R.layout.activity_main);
 
-        //Google AppIndex
-        client = new GoogleApiClient.Builder(MainActivity.this).addApi(AppIndex.API).build();
-
         new SetupTask().executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
     }
     private class SetupTask extends AsyncTask<Void, String, Boolean>{
         LoadingDialog loadingDialog;
+        Semaphore sem = new Semaphore(0);
+        @SuppressLint("CommitPrefEdits")
         @Override
         protected void onPreExecute(){
             pref = PreferenceManager.getDefaultSharedPreferences(MainActivity.this);
@@ -219,13 +212,6 @@ public class MainActivity extends AppCompatActivity{
             if(!pref.getBoolean("disclaimerAccepted", false)){
                 //First start
                 new DisclaimerDialog().show(getFragmentManager(), "Disclaimer");
-                //Check for SuperSU
-                if(!new File("/su").exists()){
-                    ErrorDialog dialog = new ErrorDialog();
-                    dialog.setTitle(getString(R.string.su_notfound_title));
-                    dialog.setMessage(getString(R.string.su_notfound));
-                    dialog.show(getFragmentManager(), "ErrorDialog");
-                }
             }
 
             loadingDialog = new LoadingDialog();
@@ -295,6 +281,26 @@ public class MainActivity extends AppCompatActivity{
         @Override
         protected Boolean doInBackground(Void... params){
             Looper.prepare();
+
+            //Check for SuperSU
+            if(!new File("/su").exists()){
+                Semaphore sem = new Semaphore(0);
+
+                ErrorDialog dialog = new ErrorDialog();
+                dialog.setTitle(getString(R.string.su_notfound_title));
+                dialog.setMessage(getString(R.string.su_notfound));
+                dialog.setSemaphore(sem);
+                dialog.show(getFragmentManager(), "ErrorDialog");
+
+                // Wait for user to click OK
+                try{
+                    sem.acquire();
+                }catch(InterruptedException e){
+                    e.printStackTrace();
+                    return false;
+                }
+            }
+
             //Initialize managers
             publishProgress(getString(R.string.init_managers));
             clipboard = (ClipboardManager)getSystemService(CLIPBOARD_SERVICE);
@@ -463,12 +469,14 @@ public class MainActivity extends AppCompatActivity{
                 if(!bin.exists()){
                     if(!bin.mkdir()){
                         publishProgress(null, getString(R.string.bin_not_created));
+                        waitSem();
                         return false;
                     }
                 }
                 if(!lib.exists()){
                     if(!lib.mkdir()){
                         publishProgress(null, getString(R.string.lib_not_created));
+                        waitSem();
                         return false;
                     }
                 }
@@ -565,6 +573,7 @@ public class MainActivity extends AppCompatActivity{
                 Log.e("HIJACKER/onCreate", "Device not armv7l or aarch64, can't install tools");
                 busybox = "busybox";
                 publishProgress(null, getString(R.string.not_armv7l));
+                waitSem();
 
                 prefix = pref.getString("prefix", prefix);
                 airodump_dir = "airodump-ng";
@@ -842,12 +851,17 @@ public class MainActivity extends AppCompatActivity{
                 //Show error message with progress[1]
                 ErrorDialog dialog = new ErrorDialog();
                 dialog.setMessage(progress[1]);
+                dialog.setSemaphore(sem);
                 dialog.show(getFragmentManager(), "ErrorDialog");
+
+                // The sem.acquire will be called from doInBackground to run on a separate thread
             }
         }
         @Override
         protected void onPostExecute(final Boolean success){
-            if(!success) return;
+            if(!success){
+                System.exit(1);
+            }
             loadingDialog.setText(getString(R.string.starting_hijacker));
 
             if(watchdog){
@@ -867,6 +881,14 @@ public class MainActivity extends AppCompatActivity{
 
             //Start
             if(pref.getBoolean("disclaimerAccepted", false)) main();
+        }
+
+        void waitSem(){
+            try{
+                sem.acquire();
+            }catch(InterruptedException e){
+                e.printStackTrace();
+            }
         }
     }
 
@@ -1216,12 +1238,6 @@ public class MainActivity extends AppCompatActivity{
     }
     // See https://g.co/AppIndexing/AndroidStudio for more information.
     @Override
-    public void onStart(){
-        super.onStart();
-        client.connect();
-        AppIndex.AppIndexApi.start(client, getIndexApiAction());
-    }
-    @Override
     protected void onResume(){
         super.onResume();
         notif_on = false;
@@ -1236,8 +1252,6 @@ public class MainActivity extends AppCompatActivity{
     @Override
     protected void onStop(){
         super.onStop();
-        AppIndex.AppIndexApi.end(client, getIndexApiAction());
-        client.disconnect();
         if(show_notif){
             notif_on = true;
             notification();
@@ -1301,12 +1315,6 @@ public class MainActivity extends AppCompatActivity{
     @Override
     protected void onSaveInstanceState(Bundle outState){
         //No call for super(), avoid IllegalStateException on FragmentManagerImpl.checkStateLoss.
-    }
-
-    public Action getIndexApiAction(){
-        Thing object = new Thing.Builder().setName("Hijacker")
-                .setUrl(Uri.parse("https://github.com/chrisk44/Hijacker")).build();
-        return new Action.Builder(Action.TYPE_VIEW).setObject(object).setActionStatus(Action.STATUS_TYPE_COMPLETED).build();
     }
 
     class MyListAdapter extends ArrayAdapter<Tile>{
@@ -1394,6 +1402,9 @@ public class MainActivity extends AppCompatActivity{
 
             TextView upperRight = itemview.findViewById(R.id.upperRight);
             upperRight.setText("");
+
+            TextView icon_count_view = itemview.findViewById(R.id.icon_count_view);
+            icon_count_view.setVisibility(View.GONE);
 
             //Image
             ImageView iv = itemview.findViewById(R.id.iv);
@@ -1652,28 +1663,34 @@ public class MainActivity extends AppCompatActivity{
             //Run through all the names in the release array
             while(reader.hasNext()){
                 String field = reader.nextName();
-                if(field.equals("tag_name")){
-                    latestName = reader.nextString();
-                }else if(field.equals("body")){
-                    latestBody = reader.nextString();
-                    if(latestBody.equals("")) latestBody = null;
-                }else if(field.equals("assets")){
-                    //assets is an array
-                    reader.beginArray();
-                    reader.beginObject();
-                    //Run through all the names in the 'assets' array
-                    while(reader.hasNext()){
-                        field = reader.nextName();
-                        if(field.equals("browser_download_url")){
-                            latestLink = reader.nextString();
-                        }else{
-                            reader.skipValue();
+                switch(field){
+                    case "tag_name":
+                        latestName = reader.nextString();
+                        break;
+                    case "body":
+                        latestBody = reader.nextString();
+                        if(latestBody.equals(""))
+                            latestBody = null;
+                        break;
+                    case "assets":
+                        //assets is an array
+                        reader.beginArray();
+                        reader.beginObject();
+                        //Run through all the names in the 'assets' array
+                        while(reader.hasNext()){
+                            field = reader.nextName();
+                            if(field.equals("browser_download_url")){
+                                latestLink = reader.nextString();
+                            }else{
+                                reader.skipValue();
+                            }
                         }
-                    }
-                    reader.endObject();
-                    reader.endArray();
-                }else{
-                    reader.skipValue();
+                        reader.endObject();
+                        reader.endArray();
+                        break;
+                    default:
+                        reader.skipValue();
+                        break;
                 }
             }
             reader.close();
@@ -1770,38 +1787,46 @@ public class MainActivity extends AppCompatActivity{
             shell = getFreeShell();
         }
 
-        String dirs[] = {
+        String[] dirs = {
                 "/system",
-                "/vendor"
+                "/vendor",
+                "/system/etc"
         };
+        String[] fw_names = {
+                "fw_bcmdhd.bin",
+                "fw_bcmdhd_sta.bin"
+        };
+
         String firmware = null;
         int i = 0;
         while(firmware==null && i<dirs.length){
-            firmware = checkDirectoryForFirmware(shell, dirs[i]);
+
+            for(String fw_name : fw_names){
+                shell.run(busybox + " find " + dirs[i] + " -type f -name \"" + fw_name + "\"; echo ENDOFFIND");
+                BufferedReader out = shell.getShell_out();
+                try{
+                    String result = out.readLine();
+                    while(result!=null){
+                        if(result.equals("ENDOFFIND"))
+                            break;
+                        if(!result.contains("/bac/") && !result.contains("backup"))
+                            firmware = result;
+
+                        result = out.readLine();
+                    }
+                }catch(IOException e){
+                    e.printStackTrace();
+                }
+
+                if(firmware!=null) break;
+            }
+
             i++;
         }
 
         if(flag){
             //Release the shell only if it was obtained by this function
             shell.done();
-        }
-
-        return firmware;
-    }
-    static String checkDirectoryForFirmware(Shell shell, String directory){
-        String firmware = null;
-        shell.run(busybox + " find " + directory + " -type f -name \"fw_bcmdhd.bin\"; echo ENDOFFIND");
-        BufferedReader out = shell.getShell_out();
-        try{
-            String result = out.readLine();
-            while(result!=null){
-                if(result.equals("ENDOFFIND")) break;
-                if(!result.contains("/bac/") && !result.contains("backup")) firmware = result;
-
-                result = out.readLine();
-            }
-        }catch(IOException e){
-            e.printStackTrace();
         }
 
         return firmware;

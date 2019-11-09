@@ -5,8 +5,8 @@ android {
         applicationId "com.hijacker"
         minSdkVersion 21
         targetSdkVersion 28
-        versionCode 32
-        versionName "v1.5-beta.8"
+        versionCode 33
+        versionName "v1.5-beta.9"
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
         externalNativeBuild {
             cmake {
@@ -28,7 +28,7 @@ android {
 }
 dependencies {
     implementation fileTree(include: ['*.jar'], dir: 'libs')
-    androidTestImplementation('com.android.support.test.espresso:espresso-core:2.2.2', {
+    androidTestImplementation('com.android.support.test.espresso:espresso-core:3.0.2', {
         exclude group: 'com.android.support', module: 'support-annotations'
     })
     implementation 'com.android.support:appcompat-v7:28.0.0'
@@ -36,9 +36,7 @@ dependencies {
     implementation 'com.android.support:design:28.0.0'
     testImplementation 'junit:junit:4.12'
     implementation 'com.android.support:cardview-v7:28.0.0'
-    implementation 'com.google.firebase:firebase-appindexing:17.1.0'
 
-    implementation 'com.android.support:appcompat-v7:28.0.0'
     implementation 'com.android.support:design:28.0.0'
 }
 

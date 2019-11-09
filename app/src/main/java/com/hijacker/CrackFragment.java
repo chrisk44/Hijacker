@@ -20,6 +20,7 @@ package com.hijacker;
 import android.animation.Animator;
 import android.animation.AnimatorSet;
 import android.animation.ValueAnimator;
+import android.annotation.SuppressLint;
 import android.app.Fragment;
 import android.os.AsyncTask;
 import android.os.Bundle;
@@ -382,6 +383,7 @@ public class CrackFragment extends Fragment{
             this.capfile = capfile;
             this.wordlist = wordlist;
         }
+        @SuppressLint("WrongThread")
         @Override
         protected void onPreExecute(){
             startTime = System.currentTimeMillis();

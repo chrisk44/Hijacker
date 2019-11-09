@@ -309,9 +309,7 @@ class AP extends Device{
         Tile.filter();
     }
     void unmark(){
-        if(marked.contains(this)){
-            marked.remove(this);
-        }
+        marked.remove(this);
         this.isMarked = false;
         Tile.filter();
     }

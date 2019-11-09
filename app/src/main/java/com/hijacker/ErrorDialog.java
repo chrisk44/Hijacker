@@ -24,19 +24,24 @@ import android.content.DialogInterface;
 import android.os.Bundle;
 import android.support.v7.app.AlertDialog;
 
+import java.util.concurrent.Semaphore;
+
 import static com.hijacker.MainActivity.mNotificationManager;
 import static com.hijacker.MainActivity.error_notif;
 import static com.hijacker.MainActivity.background;
 
 public class ErrorDialog extends DialogFragment {
     String message;
-    String title=null;
+    String title;
+    Semaphore sem;
     @Override
     public Dialog onCreateDialog(Bundle savedInstanceState) {
         if(title==null) title = getString(R.string.error);
         AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
         builder.setPositiveButton(R.string.ok, new DialogInterface.OnClickListener() {
-            public void onClick(DialogInterface dialog, int id) {}
+            public void onClick(DialogInterface dialog, int id) {
+                if(sem != null) sem.release();
+            }
         });
         builder.setNeutralButton(R.string.exit, new DialogInterface.OnClickListener() {
             @Override
@@ -55,6 +60,7 @@ public class ErrorDialog extends DialogFragment {
     }
     public void setMessage(String msg){ this.message = msg; }
     public void setTitle(String title){ this.title = title; }
+    public void setSemaphore(Semaphore sem){ this.sem = sem; }
     @Override
     public void show(FragmentManager fragmentManager, String tag){
         if(!background) super.show(fragmentManager, tag);

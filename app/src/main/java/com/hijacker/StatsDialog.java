@@ -54,7 +54,7 @@ public class StatsDialog extends DialogFragment {
                 wep_count.setText(Integer.toString(AP.wep));
                 opn_count.setText(Integer.toString(AP.opn));
                 hidden_count.setText(Integer.toString(AP.hidden));
-                connected_count.setText(Integer.toString(ST.connected) + '/' + Integer.toString(ST.STs.size()));
+                connected_count.setText(Integer.toString(ST.connected) + '/' + ST.STs.size());
             }
         };
         runnable.run();

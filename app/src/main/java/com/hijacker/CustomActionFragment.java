@@ -273,6 +273,7 @@ public class CustomActionFragment extends Fragment{
     class CustomActionTask extends AsyncTask<Void, String, Boolean>{
         Shell shell;
         ValueAnimator sizeAnimator;
+        @SuppressLint("WrongThread")
         @Override
         protected void onPreExecute(){
             startBtn.setText(R.string.stop);

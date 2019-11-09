@@ -24,7 +24,7 @@ void logd(char* str){
     __android_log_write(ANDROID_LOG_INFO, "CPP", str);
 }
 
-extern "C" jint Java_com_hijacker_Airodump_main(JNIEnv* env, jobject obj, jstring str, jint off){
+extern "C" jint Java_com_hijacker_Airodump_main(JNIEnv* env, jclass obj, jstring str, jint off){
     int i, j;
     char *buffer = (char*)malloc(512);
     const char *nativeString = env->GetStringUTFChars(str, 0);

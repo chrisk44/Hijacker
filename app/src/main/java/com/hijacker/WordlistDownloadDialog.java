@@ -143,14 +143,19 @@ public class WordlistDownloadDialog extends DialogFragment{
                     //Run through all the names in the 'file' object
                     while(reader.hasNext()){
                         String field = reader.nextName();
-                        if(field.equals("name")){
-                            filename = reader.nextString();
-                        }else if(field.equals("size")){
-                            size = reader.nextInt();
-                        }else if(field.equals("download_url")){
-                            download_url = reader.nextString();
-                        }else{
-                            reader.skipValue();
+                        switch(field){
+                            case "name":
+                                filename = reader.nextString();
+                                break;
+                            case "size":
+                                size = reader.nextInt();
+                                break;
+                            case "download_url":
+                                download_url = reader.nextString();
+                                break;
+                            default:
+                                reader.skipValue();
+                                break;
                         }
                     }
                     reader.endObject();
