@@ -1,0 +1,109 @@
+<?xml version="1.0" encoding="utf-8"?>
+<android.support.v4.widget.DrawerLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/drawer_layout"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <!-- The main content view -->
+    <RelativeLayout
+        xmlns:android="http://schemas.android.com/apk/res/android"
+        xmlns:app="http://schemas.android.com/apk/res-auto"
+        xmlns:tools="http://schemas.android.com/tools"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        tools:context="com.hijacker.MainActivity"
+        android:animateLayoutChanges="true">
+
+
+        <android.support.v7.widget.Toolbar
+            android:id="@+id/my_toolbar"
+            android:layout_width="match_parent"
+            android:layout_height="?attr/actionBarSize"
+            android:background="?attr/colorPrimary"
+            android:elevation="4dp"
+            android:theme="@style/ThemeOverlay.AppCompat.ActionBar"
+            app:popupTheme="@style/ThemeOverlay.AppCompat.Light">
+
+            <ImageView
+                android:layout_height="@android:dimen/app_icon_size"
+                app:srcCompat="@drawable/ap_drawable"
+                android:adjustViewBounds="false"
+                android:layout_width="48dip"
+                android:paddingStart="20dp"
+                android:paddingBottom="10dp"
+                android:paddingTop="10dp"
+                android:paddingEnd="5dp"
+                android:clickable="true"
+                android:onClick="onAPStats"
+                android:focusable="true" />
+
+            <TextView
+                android:text="0"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:id="@+id/ap_count"
+                android:textColor="@android:color/white"
+                android:textSize="18sp"
+                android:clickable="true"
+                android:onClick="onAPStats"
+                android:focusable="true" />
+
+            <ImageView
+                android:layout_height="@android:dimen/app_icon_size"
+                app:srcCompat="@drawable/st_drawable"
+                android:adjustViewBounds="false"
+                android:layout_width="48dip"
+                android:paddingStart="20dp"
+                android:paddingBottom="10dp"
+                android:paddingTop="10dp"
+                android:paddingEnd="5dp"
+                android:clickable="true"
+                android:onClick="onAPStats"
+                android:focusable="true" />
+
+            <TextView
+                android:text="0"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:id="@+id/st_count"
+                android:textColor="@android:color/white"
+                android:textSize="18sp"
+                android:clickable="true"
+                android:onClick="onAPStats"
+                android:focusable="true" />
+
+        </android.support.v7.widget.Toolbar>
+
+        <ProgressBar
+            style="?android:attr/progressBarStyleHorizontal"
+            android:id="@+id/progressBar"
+            android:layout_width="match_parent"
+            android:progressDrawable="@drawable/progress_horizontal_holo_blue_dark"
+            android:layout_height="wrap_content"
+            android:minHeight="5dp"
+            android:minWidth="0dp"
+            android:layout_below="@+id/my_toolbar"
+            android:maxHeight="5dp" />
+
+        <FrameLayout
+            android:id="@+id/fragment1"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_below="@+id/progressBar"
+            android:layout_marginTop="3dp" />
+
+    </RelativeLayout>
+
+    <!-- Container for contents of drawer - use NavigationView to make configuration easier -->
+    <android.support.design.widget.NavigationView
+        android:id="@+id/nav_view"
+        android:layout_width="wrap_content"
+        android:layout_height="match_parent"
+        android:layout_gravity="start"
+        android:fitsSystemWindows="true"
+        app:headerLayout="@layout/nav_header"
+        app:itemTextColor="@color/drawer_selector"
+        app:menu="@menu/drawer_view" />
+</android.support.v4.widget.DrawerLayout>
