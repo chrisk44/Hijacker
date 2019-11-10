@@ -95,7 +95,7 @@ public class SendLogActivity extends AppCompatActivity{
         new SetupTask().executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
     }
     @Override
-    public void onRequestPermissionsResult(int requestCode, @NonNull String permissions[], @NonNull int[] grantResults){
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults){
         boolean writeGranted = grantResults.length>0 && grantResults[0]==PackageManager.PERMISSION_GRANTED;
         if(shell==null){
             progressBar.setVisibility(View.GONE);
@@ -133,7 +133,7 @@ public class SendLogActivity extends AppCompatActivity{
         }
     }
     private class ReportTask extends AsyncTask<Void, String, Boolean>{
-        String bugReport = "";
+        StringBuilder bugReport = new StringBuilder();
         @Override
         protected Boolean doInBackground(Void... params){
             report = new File(Environment.getExternalStorageDirectory() + "/report.txt");
@@ -143,7 +143,8 @@ public class SendLogActivity extends AppCompatActivity{
                     BufferedReader br = new BufferedReader(new FileReader(report));
                     String buffer;
                     while((buffer = br.readLine())!=null){
-                        bugReport += buffer + '\n';
+                        bugReport.append(buffer);
+                        bugReport.append('\n');
                     }
                 }catch(IOException ignored){
                     return false;
@@ -183,7 +184,7 @@ public class SendLogActivity extends AppCompatActivity{
     }
     public void stopAll(){
         ArrayList<Integer> pids = new ArrayList<>();
-        String processes[] = {
+        String[] processes = {
                 "airodump-ng",
                 "aireplay-ng",
                 "aircrack-ng",
@@ -191,11 +192,11 @@ public class SendLogActivity extends AppCompatActivity{
                 "reaver",
                 "reaver-wash"
         };
-        String cmd = busybox + " pidof";
+        StringBuilder cmd = new StringBuilder(busybox + " pidof");
         for(String process_name : processes){
-            cmd += ' ' + process_name;
+            cmd.append(' ').append(process_name);
         }
-        cmd += "; echo ENDOFPIDOF\n";
+        cmd.append("; echo ENDOFPIDOF\n");
         shell_in.print(cmd);
         shell_in.flush();
         String buffer = null;

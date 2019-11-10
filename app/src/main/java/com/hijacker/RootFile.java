@@ -82,7 +82,7 @@ class RootFile{
 
         exists = true;
 
-        String temp[] = buffer.split(" ");
+        String[] temp = buffer.split(" ");
         //0: type & permissions, 4: size, 5,6,7: last edited date, rest is name
         if(temp[0].length()!=10){
             throw new IllegalFormatFlagsException(temp[0] + " is not how it should be\nbuffer: " + buffer + "\nbuffer before: " + before);
@@ -189,17 +189,17 @@ class RootFile{
                     buffer = buffer.replace("  ", " ");
                 }
                 //Separate by ' ' to get the name
-                String temp[] = buffer.split(" ");
+                String[] temp = buffer.split(" ");
                 if(temp.length>8){
                     //Reconstruct the full_name (it may contain spaces, so it's many arguments)
-                    String full_name = "";
+                    StringBuilder full_name = new StringBuilder();
                     for(int i = 8; i<temp.length; i++){
-                        full_name += temp[i] + ' ';
+                        full_name.append(temp[i]).append(' ');
                     }
                     if(full_name.charAt(full_name.length() - 1)==' '){
-                        full_name = full_name.substring(0, full_name.length() - 1);
+                        full_name = new StringBuilder(full_name.substring(0, full_name.length() - 1));
                     }
-                    if(!full_name.contains(" -> ")){
+                    if(!full_name.toString().contains(" -> ")){
                         result.add(new RootFile(absolutePath + (absolutePath.length()==1 ? "" : '/') + full_name));
                     }
                 }

@@ -130,7 +130,7 @@ class Tile {
             when we gave up on searching.
         */
         if(list.size()==0) return 0;
-        Tile array[] = list.toArray(new Tile[list.size()]);
+        Tile[] array = list.toArray(new Tile[0]);
         int L = 0, R = list.size()-1, M = 0;
         while(L<=R){
             M = (L + R)/2;

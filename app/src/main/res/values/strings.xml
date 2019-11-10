@@ -1,5 +1,6 @@
 ﻿<resources>
     <string name="app_name" translatable="false">Hijacker</string>
+    <string name="DEFAULT_CHANNEL_ID" translatable="false">Hijacker_Notification_Channel</string>
 
     <!-- Toolbar -->
     <string name="stop_aireplay">Stop Aireplay</string>
@@ -297,8 +298,8 @@
     <string name="done">Done</string>
 
     <!-- UpdateConfirmDialog -->
-    <string name="update_title">New update available</string>
-    <string name="update_text">There is a new update available.</string>
+    <string name="update_title">Update available</string>
+    <string name="update_text">There is an update available.</string>
     <string name="latest_version">Latest Version</string>
     <string name="current_version">Current Version</string>
 

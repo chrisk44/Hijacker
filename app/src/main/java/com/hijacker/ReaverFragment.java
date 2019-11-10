@@ -329,13 +329,13 @@ public class ReaverFragment extends Fragment{
                 "SHLVL=1",
                 "YOU_KNOW_WHAT=THIS_IS_KALI_LINUX_NETHUNER_FROM_JAVA_BINKY"
         };
-        String ENV_OUT = "";
+        StringBuilder ENV_OUT = new StringBuilder();
         for (String aENV : ENV) {
-            ENV_OUT = ENV_OUT + "export " + aENV + " && ";
+            ENV_OUT.append("export ").append(aENV).append(" && ");
         }
         if(monstart){
-            ENV_OUT += "source monstart-nh";
-            ENV_OUT += cont_on_fail ? "; " : " && ";
+            ENV_OUT.append("source monstart-nh");
+            ENV_OUT.append(cont_on_fail ? "; " : " && ");
         }
         if(!custom_chroot_cmd.equals("")){
             if(custom_chroot_cmd.contains("'") && activity!=null){
@@ -346,11 +346,11 @@ public class ReaverFragment extends Fragment{
                     }
                 });
             }else{
-                ENV_OUT += custom_chroot_cmd;
-                ENV_OUT += cont_on_fail ? "; " : " && ";
+                ENV_OUT.append(custom_chroot_cmd);
+                ENV_OUT.append(cont_on_fail ? "; " : " && ");
             }
         }
-        return ENV_OUT;
+        return ENV_OUT.toString();
     }
     class ReaverTask extends AsyncTask<Void, String, Boolean>{
         String pinDelay, lockedDelay;

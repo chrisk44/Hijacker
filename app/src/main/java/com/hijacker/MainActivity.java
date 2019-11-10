@@ -22,6 +22,7 @@ import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.app.FragmentManager;
 import android.app.FragmentTransaction;
+import android.app.NotificationChannel;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.content.ClipData;
@@ -113,7 +114,7 @@ public class MainActivity extends AppCompatActivity{
     static int aireplay_running = 0, currentFragment = FRAGMENT_AIRODUMP;         //Set currentFragment in onResume of each Fragment
     //Filters
     static boolean show_ap = true, show_st = true, show_na_st = true, wpa = true, wep = true, opn = true;
-    static boolean show_ch[] = {true, false, false, false, false, false, false, false, false, false, false, false, false, false, false};
+    static boolean[] show_ch = {true, false, false, false, false, false, false, false, false, false, false, false, false, false, false};
     static int pwr_filter = 120;
     static String manuf_filter = "";
     //Airodump list sort 
@@ -128,8 +129,8 @@ public class MainActivity extends AppCompatActivity{
     static DrawerLayout mDrawerLayout;
     static NavigationView navigationView;
     static SparseArray<String> navTitlesMap = new SparseArray<>();             //SparseArray to map fragment IDs to their respective navigation titles
-    static Drawable overflow[] = {null, null, null, null, null, null, null, null};      //Drawables to use for overflow button icon
-    static ImageView status[] = {null, null, null, null, null};                         //Icons in TestDialog, set in TestDialog class
+    static Drawable[] overflow = {null, null, null, null, null, null, null, null};      //Drawables to use for overflow button icon
+    static ImageView[] status = {null, null, null, null, null};                         //Icons in TestDialog, set in TestDialog class
     static int progress_int;
     static long last_action;                        //Timestamp for the last action. Used in watchdog to avoid false positives
     static Thread wpa_thread;
@@ -175,16 +176,16 @@ public class MainActivity extends AppCompatActivity{
             @Override
             public void uncaughtException(Thread thread, Throwable throwable){
                 throwable.printStackTrace();
-                String stackTrace = "";
-                stackTrace += throwable.getMessage() + '\n';
+                StringBuilder stackTrace = new StringBuilder();
+                stackTrace.append(throwable.getMessage()).append('\n');
                 for(int i=0;i<throwable.getStackTrace().length;i++){
-                    stackTrace += throwable.getStackTrace()[i].toString() + '\n';
+                    stackTrace.append(throwable.getStackTrace()[i].toString()).append('\n');
                 }
 
                 Intent intent = new Intent();
                 intent.setAction("com.hijacker.SendLogActivity");
                 intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-                intent.putExtra("exception", stackTrace);
+                intent.putExtra("exception", stackTrace.toString());
                 startActivity(intent);
 
                 finish();
@@ -381,7 +382,7 @@ public class MainActivity extends AppCompatActivity{
                 //cap directory was never changed so there may be files in /sdcard/cap/
                 File old_dir = new File("/sdcard/cap");
                 if(old_dir.exists() && old_dir.isDirectory()){
-                    File files[] = old_dir.listFiles();
+                    File[] files = old_dir.listFiles();
                     if(files!=null){
                         Toast.makeText(MainActivity.this, "Moving cap files from " + old_dir.getAbsolutePath() + " to " + cap_path, Toast.LENGTH_LONG).show();
                         for(File f : old_dir.listFiles()){
@@ -395,15 +396,23 @@ public class MainActivity extends AppCompatActivity{
 
             //Initialize notifications
             publishProgress(getString(R.string.init_notifications));
-            //Create intents
+                //Create intents
             Intent cancel_intent = new Intent(MainActivity.this, DismissReceiver.class);
             Intent stop_intent = new Intent(MainActivity.this, StopReceiver.class);
             Intent notificationIntent = new Intent(MainActivity.this, MainActivity.class);
             notificationIntent.setFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT);
             PendingIntent click_intent = PendingIntent.getActivity(MainActivity.this, 0, notificationIntent, 0);
 
-            //Create 'running' notification
-            notif = new NotificationCompat.Builder(MainActivity.this);
+                // Get a channel ID
+            String channelID;
+            if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.O){
+                channelID = NotificationChannel.DEFAULT_CHANNEL_ID;
+            }else{
+                channelID = getString(R.string.DEFAULT_CHANNEL_ID);
+            }
+
+                //Create 'running' notification
+            notif = new NotificationCompat.Builder(MainActivity.this, channelID);
             notif.setContentTitle(getString(R.string.notification_title));
             notif.setContentText(" ");
             notif.setSmallIcon(R.drawable.ic_notification);
@@ -414,8 +423,8 @@ public class MainActivity extends AppCompatActivity{
             notif.addAction(R.drawable.stop_drawable, getString(R.string.stop_attacks), PendingIntent.getBroadcast(MainActivity.this.getApplicationContext(), 0, stop_intent, 0));
             notif.setContentIntent(click_intent);
 
-            //Create 'error' notification (used by watchdog)
-            error_notif = new NotificationCompat.Builder(MainActivity.this);
+                //Create 'error' notification (used by watchdog)
+            error_notif = new NotificationCompat.Builder(MainActivity.this, channelID);
             error_notif.setSmallIcon(R.drawable.ic_notification);
             if(Build.VERSION.SDK_INT>=Build.VERSION_CODES.M){
                 error_notif.setColor(getColor(android.R.color.holo_red_dark));
@@ -423,8 +432,8 @@ public class MainActivity extends AppCompatActivity{
             error_notif.setContentIntent(click_intent);
             error_notif.setVibrate(new long[]{500, 500});
 
-            //Create 'handshake captured' notification (used by wpa_thread)
-            handshake_notif = new NotificationCompat.Builder(MainActivity.this);
+                //Create 'handshake captured' notification (used by wpa_thread)
+            handshake_notif = new NotificationCompat.Builder(MainActivity.this, channelID);
             handshake_notif.setContentTitle(getString(R.string.handshake_captured));
             if(Build.VERSION.SDK_INT>=Build.VERSION_CODES.M){
                 handshake_notif.setColor(getColor(android.R.color.holo_green_dark));
@@ -1229,7 +1238,6 @@ public class MainActivity extends AppCompatActivity{
                 return super.onOptionsItemSelected(item);
         }
     }
-    // See https://g.co/AppIndexing/AndroidStudio for more information.
     @Override
     protected void onResume(){
         super.onResume();
@@ -1299,7 +1307,7 @@ public class MainActivity extends AppCompatActivity{
         return true;
     }
     @Override
-    public void onRequestPermissionsResult(int requestCode, @NonNull String permissions[], @NonNull int[] grantResults) {
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
         if(requestCode==0){
             //The one and only request this app sends
             if (grantResults.length > 0 && grantResults[2]==PackageManager.PERMISSION_GRANTED) {
@@ -1595,9 +1603,9 @@ public class MainActivity extends AppCompatActivity{
         if(text.length() > size){
             text = text.substring(0, size);
         }
-        String str = "";
+        StringBuilder str = new StringBuilder();
         for(int i=0;i < size-text.length();i++){
-            str += " ";
+            str.append(" ");
         }
         return str + text;
     }
@@ -1608,7 +1616,7 @@ public class MainActivity extends AppCompatActivity{
         shell.run("echo $PATH; echo ENDOFPATH");
         String path = getLastLine(shell.getShell_out(), "ENDOFPATH");
         shell.done();
-        String paths[] = path.split(":");
+        String[] paths = path.split(":");
         for(String temp : paths){
             if(new RootFile(temp + "/bootkali_init").exists()){
                 bin = true;
