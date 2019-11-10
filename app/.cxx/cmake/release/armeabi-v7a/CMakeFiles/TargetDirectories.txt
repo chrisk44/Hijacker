@@ -1,3 +1,0 @@
-C:/Users/Chris/Desktop/AndroidStudioProjects/Hijacker/app/.cxx/cmake/release/armeabi-v7a/CMakeFiles/native-lib.dir
-C:/Users/Chris/Desktop/AndroidStudioProjects/Hijacker/app/.cxx/cmake/release/armeabi-v7a/CMakeFiles/edit_cache.dir
-C:/Users/Chris/Desktop/AndroidStudioProjects/Hijacker/app/.cxx/cmake/release/armeabi-v7a/CMakeFiles/rebuild_cache.dir

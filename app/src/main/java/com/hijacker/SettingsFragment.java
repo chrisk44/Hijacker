@@ -29,6 +29,7 @@ import android.preference.PreferenceFragment;
 import static com.hijacker.MainActivity.FRAGMENT_SETTINGS;
 import static com.hijacker.MainActivity.arch;
 import static com.hijacker.MainActivity.checkForUpdate;
+import static com.hijacker.MainActivity.isArchValid;
 import static com.hijacker.MainActivity.mFragmentManager;
 import static com.hijacker.MainActivity.pref_edit;
 import static com.hijacker.MainActivity.refreshDrawer;
@@ -48,7 +49,7 @@ public class SettingsFragment extends PreferenceFragment {
         // Load the preferences from an XML resource
         addPreferencesFromResource(R.xml.preferences);
 
-        if(!arch.equals("armv7l") && !arch.equals("aarch64")){
+        if(!isArchValid()){
             Preference pref = findPreference("install_nexmon");
             pref.setSummary(getString(R.string.incorrect_arch) + ' ' + arch);
             pref.setEnabled(false);

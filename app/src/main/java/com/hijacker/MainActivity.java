@@ -282,25 +282,6 @@ public class MainActivity extends AppCompatActivity{
         protected Boolean doInBackground(Void... params){
             Looper.prepare();
 
-            //Check for SuperSU
-            if(!new File("/su").exists()){
-                Semaphore sem = new Semaphore(0);
-
-                ErrorDialog dialog = new ErrorDialog();
-                dialog.setTitle(getString(R.string.su_notfound_title));
-                dialog.setMessage(getString(R.string.su_notfound));
-                dialog.setSemaphore(sem);
-                dialog.show(getFragmentManager(), "ErrorDialog");
-
-                // Wait for user to click OK
-                try{
-                    sem.acquire();
-                }catch(InterruptedException e){
-                    e.printStackTrace();
-                    return false;
-                }
-            }
-
             //Initialize managers
             publishProgress(getString(R.string.init_managers));
             clipboard = (ClipboardManager)getSystemService(CLIPBOARD_SERVICE);
@@ -572,7 +553,7 @@ public class MainActivity extends AppCompatActivity{
             }else{
                 Log.e("HIJACKER/onCreate", "Device not armv7l or aarch64, can't install tools");
                 busybox = "busybox";
-                publishProgress(null, getString(R.string.not_armv7l));
+                publishProgress(null, getString(R.string.not_arm));
                 waitSem();
 
                 prefix = pref.getString("prefix", prefix);
@@ -839,6 +820,18 @@ public class MainActivity extends AppCompatActivity{
             publishProgress(getString(R.string.deleting_bug_report));
             File report = new File(Environment.getExternalStorageDirectory() + "/report.txt");
             if(report.exists()) report.delete();
+
+            //Check for SuperSU
+            if(!new File("/su").exists()){
+                ErrorDialog dialog = new ErrorDialog();
+                dialog.setTitle(getString(R.string.su_notfound_title));
+                dialog.setMessage(getString(R.string.su_notfound));
+                dialog.setSemaphore(sem);
+                dialog.show(getFragmentManager(), "ErrorDialog");
+
+                // Wait for user to click OK
+                waitSem();
+            }
 
             return true;
         }
@@ -1114,7 +1107,7 @@ public class MainActivity extends AppCompatActivity{
     }
     public static void stopWPA(){
         wpacheckcont = false;
-        wpa_thread.interrupt();
+        if(wpa_thread!=null) wpa_thread.interrupt();
     }
 
     public static Handler handler = new Handler();
@@ -1127,7 +1120,7 @@ public class MainActivity extends AppCompatActivity{
         Log.d("HIJACKER/load", "Loading preferences...");
 
         iface = pref.getString("iface", iface);
-        if(!(arch.equals("armv7l") || arch.equals("aarch64"))){
+        if(!isArchValid()){
             prefix = pref.getString("prefix", prefix);
         }
         deauthWait = Integer.parseInt(pref.getString("deauthWait", Integer.toString(deauthWait)));
@@ -1262,14 +1255,18 @@ public class MainActivity extends AppCompatActivity{
         notif_on = false;
         mNotificationManager.cancelAll();
         CustomAction.save();
-        watchdogTask.cancel(true);
-        stop(PROCESS_AIRODUMP);
-        stop(PROCESS_AIREPLAY);
-        stop(PROCESS_MDK_BF);
-        stop(PROCESS_MDK_DOS);
-        stop(PROCESS_AIRCRACK);
-        stop(PROCESS_REAVER);
-        runOne(disable_monMode);
+        if(watchdogTask!=null) watchdogTask.cancel(true);
+        try{
+            stop(PROCESS_AIRODUMP);
+            stop(PROCESS_AIREPLAY);
+            stop(PROCESS_MDK_BF);
+            stop(PROCESS_MDK_DOS);
+            stop(PROCESS_AIRCRACK);
+            stop(PROCESS_REAVER);
+            runOne(disable_monMode);
+        }catch(Exception e){
+            e.printStackTrace();
+        }
         RootFile.finish();
         Shell.exitAll();
         stopService(new Intent(this, PersistenceService.class));
@@ -1830,6 +1827,9 @@ public class MainActivity extends AppCompatActivity{
         }
 
         return firmware;
+    }
+    static boolean isArchValid(){
+        return arch.matches("(.*)arm(.*)") || arch.matches("aarch64");
     }
 
     static{

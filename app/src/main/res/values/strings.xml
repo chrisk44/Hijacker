@@ -5,7 +5,7 @@
     <string name="stop_aireplay">Stop Aireplay</string>
 
     <!-- Generic text -->
-    <string name="incorrect_arch">Available only on armv7l and aarch64, this is</string>
+    <string name="incorrect_arch">Available only on ARM architectures, this is</string>
     <string name="close">Close</string>
     <string name="cancel">Cancel</string>
     <string name="back">Back</string>
@@ -160,15 +160,15 @@
         You need to use a custom firmware (bcmon, Nexmon) so that your wireless adapter can be used in Monitor Mode. External adapters can also be used.
         You can configure your interface\'s name in Settings. This app requires root privileges to run the tools.
         If you don\'t grant them, it will hang. Don\'t ask me why…\nYou can install the Nexmon firmware now, or you can go to the Home Screen.</string>
-    <string name="not_armv7l_firm">The nexmon firmware included in this app is not compatible with your device (not armv7l architecture).
-        You will have to download and install it manually to use this app.</string>
+    <string name="not_arm_firm">The nexmon firmware included in this app is not compatible with your device (not a known ARM architecture).
+        You will have to download and install it manually.</string>
     <string name="install_firmware">Install Nexmon</string>
 
     <!-- InstallFirmwareDialog -->
     <string name="firmware_location">Firmware Location:</string>
     <string name="device_chipset">Device Chipset:</string>
     <string name="util_location_text">Management Utility:</string>
-    <string name="firmware_not_found">Firmware (fw_bcmdhd.bin) not found</string>
+    <string name="firmware_not_found">Firmware file not found</string>
     <string name="none_found">None found</string>
     <string name="backup_exists">A backup already exists</string>
     <string name="backup_created">Backup created</string>
@@ -200,7 +200,7 @@
         You can continue if you believe that your root solution will work. Please don\'t report bugs.</string>
     <string name="bin_not_created">Directory \'bin\' could not be created</string>
     <string name="lib_not_created">Directory \'lib\' could not be created</string>
-    <string name="not_armv7l">This device is not armv7l or aarch64 architecture. The included tools cannot be used.
+    <string name="not_arm">The architecture of this device is not ARM. The included tools cannot be used.
         You will have to install the tools manually in a PATH accessible directory: aircrack-ng suite, busybox, mdk3, reaver, wireless-tools and libfakeioctl.so, and adjust the prefix for the library.</string>
         <!-- Notification -->
         <string name="notification_title">Hijacker is running in the background</string>

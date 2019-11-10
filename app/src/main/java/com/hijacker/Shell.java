@@ -67,11 +67,12 @@ class Shell{
     Process getShell(){ return this.shell; }
     void run(String cmd){
         if(!valid){
-            throw new IllegalStateException("Shell has been registered as free");
+            throw new IllegalStateException("Shell is not valid");
         }
         this.shell_in.print(cmd + '\n');
         this.shell_in.flush();
     }
+    boolean isValid(){ return this.valid; }
     void done(){
         if(!valid){
             throw new IllegalStateException("Shell has already been registered as free");
@@ -95,8 +96,12 @@ class Shell{
     }
     static void runOne(String cmd){
         Shell shell = getFreeShell();
-        shell.run(cmd);
-        shell.done();
+        if(shell.isValid()){
+            shell.run(cmd);
+            shell.done();
+        }else{
+            Log.e("HIJACKER/Shell", "runOne failed with invalid shell");
+        }
     }
     static void exitAll(){
         total -= free.size();

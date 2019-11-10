@@ -220,6 +220,8 @@ class RootFile{
         out = shell.getShell_out();
     }
     static void finish(){
-        shell.done();
+        if(shell!=null)
+            if(shell.isValid())
+                shell.done();
     }
 }

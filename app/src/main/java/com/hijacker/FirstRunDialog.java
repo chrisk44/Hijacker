@@ -25,7 +25,7 @@ import android.os.Bundle;
 import android.support.v4.view.GravityCompat;
 import android.support.v7.app.AlertDialog;
 
-import static com.hijacker.MainActivity.arch;
+import static com.hijacker.MainActivity.isArchValid;
 import static com.hijacker.MainActivity.mDrawerLayout;
 import static com.hijacker.MainActivity.mFragmentManager;
 import static com.hijacker.MainActivity.background;
@@ -39,13 +39,13 @@ public class FirstRunDialog extends DialogFragment {
         builder.setTitle(R.string.first_run_title);
         builder.setPositiveButton(R.string.install_firmware, new DialogInterface.OnClickListener() {
             public void onClick(DialogInterface dialog, int id) {
-                if(arch.equals("armv7l")){
+                if(isArchValid()){
                     MainActivity.init = true;
                     new InstallFirmwareDialog().show(mFragmentManager, "InstallFirmwareDialog");
                 }else{
                     mDrawerLayout.openDrawer(GravityCompat.START);
                     ErrorDialog errdialog = new ErrorDialog();
-                    errdialog.setMessage(getString(R.string.not_armv7l_firm));
+                    errdialog.setMessage(getString(R.string.not_arm_firm));
                     errdialog.show(mFragmentManager, "ErrorDialog");
                 }
             }
