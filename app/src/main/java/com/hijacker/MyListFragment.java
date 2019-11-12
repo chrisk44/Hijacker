@@ -25,7 +25,6 @@ import android.view.ViewGroup;
 import android.widget.ListView;
 import static com.hijacker.MainActivity.FRAGMENT_AIRODUMP;
 import static com.hijacker.MainActivity.currentFragment;
-import static com.hijacker.MainActivity.refreshDrawer;
 
 public class MyListFragment extends ListFragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -42,6 +41,6 @@ public class MyListFragment extends ListFragment {
     public void onResume(){
         super.onResume();
         currentFragment = FRAGMENT_AIRODUMP;
-        refreshDrawer();
+        ((MainActivity)getActivity()).refreshDrawer();
     }
 }

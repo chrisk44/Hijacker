@@ -32,7 +32,6 @@ import static com.hijacker.MainActivity.FRAGMENT_CUSTOM;
 import static com.hijacker.MainActivity.currentFragment;
 import static com.hijacker.MainActivity.custom_action_adapter;
 import static com.hijacker.MainActivity.mFragmentManager;
-import static com.hijacker.MainActivity.refreshDrawer;
 
 public class CustomActionManagerFragment extends Fragment{
     @Override
@@ -98,6 +97,6 @@ public class CustomActionManagerFragment extends Fragment{
     public void onResume(){
         super.onResume();
         currentFragment = FRAGMENT_CUSTOM;
-        refreshDrawer();
+        ((MainActivity)getActivity()).refreshDrawer();
     }
 }

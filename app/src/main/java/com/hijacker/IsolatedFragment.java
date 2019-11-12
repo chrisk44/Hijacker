@@ -35,7 +35,6 @@ import static com.hijacker.MainActivity.currentFragment;
 import static com.hijacker.MainActivity.isolate;
 import static com.hijacker.MainActivity.mFragmentManager;
 import static com.hijacker.MainActivity.menu;
-import static com.hijacker.MainActivity.refreshDrawer;
 import static com.hijacker.MainActivity.runInHandler;
 import static com.hijacker.MainActivity.wpa_thread;
 
@@ -100,7 +99,7 @@ public class IsolatedFragment extends Fragment{
     public void onResume() {
         super.onResume();
         currentFragment = FRAGMENT_AIRODUMP;
-        refreshDrawer();
+        ((MainActivity)getActivity()).refreshDrawer();
         thread = new Thread(runnable);
         thread.start();
         ((Button)fragmentView.findViewById(R.id.crack)).setText(wpa_thread.isAlive() ? R.string.stop : R.string.crack);

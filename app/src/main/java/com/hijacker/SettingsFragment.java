@@ -32,7 +32,6 @@ import static com.hijacker.MainActivity.checkForUpdate;
 import static com.hijacker.MainActivity.isArchValid;
 import static com.hijacker.MainActivity.mFragmentManager;
 import static com.hijacker.MainActivity.pref_edit;
-import static com.hijacker.MainActivity.refreshDrawer;
 import static com.hijacker.MainActivity.versionName;
 import static com.hijacker.MainActivity.watchdog;
 import static com.hijacker.MainActivity.currentFragment;
@@ -166,7 +165,7 @@ public class SettingsFragment extends PreferenceFragment {
     public void onResume() {
         super.onResume();
         currentFragment = FRAGMENT_SETTINGS;
-        refreshDrawer();
+        ((MainActivity)getActivity()).refreshDrawer();
         listener = new SharedPreferences.OnSharedPreferenceChangeListener() {
             @Override
             public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key) {

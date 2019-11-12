@@ -36,7 +36,6 @@ import static com.hijacker.MainActivity.PROCESS_MDK_BF;
 import static com.hijacker.MainActivity.PROCESS_MDK_DOS;
 import static com.hijacker.MainActivity.currentFragment;
 import static com.hijacker.MainActivity.mFragmentManager;
-import static com.hijacker.MainActivity.refreshDrawer;
 import static com.hijacker.MainActivity.runInHandler;
 import static com.hijacker.MainActivity.startAdos;
 import static com.hijacker.MainActivity.startBeaconFlooding;
@@ -138,7 +137,7 @@ public class MDKFragment extends Fragment{
         tkip_cb.setOnCheckedChangeListener(listener);
         aes_cb.setChecked(aes);
         aes_cb.setOnCheckedChangeListener(listener);
-        refreshDrawer();
+        ((MainActivity)getActivity()).refreshDrawer();
     }
     @Override
     public void onPause(){

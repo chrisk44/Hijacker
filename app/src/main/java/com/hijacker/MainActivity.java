@@ -82,7 +82,6 @@ import java.net.URL;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
-import java.util.concurrent.Semaphore;
 
 import javax.net.ssl.HttpsURLConnection;
 
@@ -126,8 +125,6 @@ public class MainActivity extends AppCompatActivity{
     static ProgressBar progress;
     static Toolbar toolbar;
     static View rootView;
-    static DrawerLayout mDrawerLayout;
-    static NavigationView navigationView;
     static SparseArray<String> navTitlesMap = new SparseArray<>();             //SparseArray to map fragment IDs to their respective navigation titles
     static Drawable[] overflow = {null, null, null, null, null, null, null, null};      //Drawables to use for overflow button icon
     static ImageView[] status = {null, null, null, null, null};                         //Icons in TestDialog, set in TestDialog class
@@ -168,6 +165,8 @@ public class MainActivity extends AppCompatActivity{
     ReaverFragment reaverFragment = new ReaverFragment();
     CrackFragment crackFragment = new CrackFragment();
     CustomActionFragment customActionFragment = new CustomActionFragment();
+    DrawerLayout mDrawerLayout;
+    NavigationView navigationView;
     @Override
     protected void onCreate(Bundle savedInstanceState){
         super.onCreate(savedInstanceState);
@@ -1589,7 +1588,7 @@ public class MainActivity extends AppCompatActivity{
             progress.setProgress(deauthWait);
         }
     }
-    static void refreshDrawer(){
+    void refreshDrawer(){
         navigationView.getMenu().findItem(currentFragment).setChecked(true);
         actionBar.setTitle(navTitlesMap.get(currentFragment));
     }

@@ -31,7 +31,6 @@ import static com.hijacker.AP.getAPByMac;
 import static com.hijacker.MainActivity.FRAGMENT_SETTINGS;
 import static com.hijacker.MainActivity.NETHUNTER_BOOTKALI_BASH;
 import static com.hijacker.MainActivity.bootkali_init_bin;
-import static com.hijacker.MainActivity.refreshDrawer;
 import static com.hijacker.MainActivity.currentFragment;
 import static com.hijacker.ReaverFragment.get_chroot_env;
 
@@ -89,7 +88,7 @@ public class DevOptionsFragment extends PreferenceFragment{
     public void onResume() {
         super.onResume();
         currentFragment = FRAGMENT_SETTINGS;
-        refreshDrawer();
+        ((MainActivity)getActivity()).refreshDrawer();
         fragmentView = getView();
     }
 }

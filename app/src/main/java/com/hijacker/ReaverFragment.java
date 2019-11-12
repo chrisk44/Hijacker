@@ -69,7 +69,6 @@ import static com.hijacker.MainActivity.notification;
 import static com.hijacker.MainActivity.prefix;
 import static com.hijacker.MainActivity.progress;
 import static com.hijacker.MainActivity.reaver_dir;
-import static com.hijacker.MainActivity.refreshDrawer;
 import static com.hijacker.MainActivity.runInHandler;
 import static com.hijacker.MainActivity.stop;
 
@@ -234,7 +233,7 @@ public class ReaverFragment extends Fragment{
     public void onResume() {
         super.onResume();
         currentFragment = FRAGMENT_REAVER;
-        refreshDrawer();
+        ((MainActivity)getActivity()).refreshDrawer();
 
         //Console text is saved/restored on pause/resume
         consoleView.setText(console_text);

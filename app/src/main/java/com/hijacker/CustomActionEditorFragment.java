@@ -40,7 +40,6 @@ import static com.hijacker.MainActivity.FRAGMENT_CUSTOM;
 import static com.hijacker.MainActivity.actions_path;
 import static com.hijacker.MainActivity.currentFragment;
 import static com.hijacker.MainActivity.mFragmentManager;
-import static com.hijacker.MainActivity.refreshDrawer;
 
 public class CustomActionEditorFragment extends Fragment{
     View fragmentView;
@@ -194,6 +193,6 @@ public class CustomActionEditorFragment extends Fragment{
             save_btn.setEnabled(true);
         }
 
-        refreshDrawer();
+        ((MainActivity)getActivity()).refreshDrawer();
     }
 }

@@ -50,7 +50,6 @@ import static com.hijacker.MainActivity.getPIDs;
 import static com.hijacker.MainActivity.mFragmentManager;
 import static com.hijacker.MainActivity.notification;
 import static com.hijacker.MainActivity.progress;
-import static com.hijacker.MainActivity.refreshDrawer;
 import static com.hijacker.Shell.runOne;
 
 public class CustomActionFragment extends Fragment{
@@ -115,7 +114,7 @@ public class CustomActionFragment extends Fragment{
     public void onResume(){
         super.onResume();
         currentFragment = FRAGMENT_CUSTOM;
-        refreshDrawer();
+        ((MainActivity)getActivity()).refreshDrawer();
 
         //Console text is saved/restored on pause/resume
         consoleView.setText(console_text);
