@@ -196,9 +196,9 @@
     <string name="aireplay_not_running">Aireplay is not running!</string>
     <string name="mdk_still_running">MDK3 is still running!</string>
     <string name="mdk_not_running">MDK3 is not running!</string>
-    <string name="su_notfound_title">SuperSU not found!</string>
-    <string name="su_notfound">You might be rooted, but at the moment, this application requires SuperSU to function properly.
-        You can continue if you believe that your root solution will work. Please don\'t report bugs.</string>
+    <string name="su_notfound_title">su binary not found!</string>
+    <string name="su_notfound">Hijacker was not able to detect a su binary in a PATH accessible directory.
+        If your device is rooted you can try to continue. Please don\'t report bugs.</string>
     <string name="bin_not_created">Directory \'bin\' could not be created</string>
     <string name="lib_not_created">Directory \'lib\' could not be created</string>
     <string name="not_arm">The architecture of this device is not ARM. The included tools cannot be used.
@@ -232,6 +232,7 @@
     <string name="building_manuf_db">Building manufacturer database…</string>
     <string name="deleting_bug_report">Deleting old bug report…</string>
     <string name="checking_for_updates">Checking for updates…</string>
+    <string name="checking_su">Checking su…</string>
     <string name="starting_hijacker">Starting Hijacker…</string>
 
     <!-- MDKFragment -->

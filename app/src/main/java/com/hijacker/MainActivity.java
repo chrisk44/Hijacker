@@ -164,6 +164,7 @@ public class MainActivity extends AppCompatActivity{
     static boolean show_notif, show_details, airOnStartup, debug, delete_extra, show_client_count,
             monstart, always_cap, cont_on_fail, watchdog, target_deauth, enable_on_airodump, update_on_startup;
 
+    Semaphore startupSem;
     WatchdogTask watchdogTask;
 
     ReaverFragment reaverFragment = new ReaverFragment();
@@ -204,7 +205,7 @@ public class MainActivity extends AppCompatActivity{
     }
     private class SetupTask extends AsyncTask<Void, String, Boolean>{
         LoadingDialog loadingDialog;
-        Semaphore sem = new Semaphore(0);
+        ErrorDialog errorDialog;
         @SuppressLint("CommitPrefEdits")
         @Override
         protected void onPreExecute(){
@@ -215,6 +216,8 @@ public class MainActivity extends AppCompatActivity{
                 new DisclaimerDialog().show(getFragmentManager(), "Disclaimer");
             }
 
+            startupSem = new Semaphore(0);
+            errorDialog = new ErrorDialog();
             loadingDialog = new LoadingDialog();
             loadingDialog.setInitText(getString(R.string.starting_hijacker));
             loadingDialog.show(getFragmentManager(), "LoadingDialog");
@@ -459,14 +462,14 @@ public class MainActivity extends AppCompatActivity{
                 if(!bin.exists()){
                     if(!bin.mkdir()){
                         publishProgress(null, getString(R.string.bin_not_created));
-                        waitSem();
+                        errorDialog._wait();
                         return false;
                     }
                 }
                 if(!lib.exists()){
                     if(!lib.mkdir()){
                         publishProgress(null, getString(R.string.lib_not_created));
-                        waitSem();
+                        errorDialog._wait();
                         return false;
                     }
                 }
@@ -563,7 +566,7 @@ public class MainActivity extends AppCompatActivity{
                 Log.e("HIJACKER/onCreate", "Device not armv7l or aarch64, can't install tools");
                 busybox = "busybox";
                 publishProgress(null, getString(R.string.not_arm));
-                waitSem();
+                errorDialog._wait();
 
                 prefix = pref.getString("prefix", prefix);
                 airodump_dir = "airodump-ng";
@@ -782,17 +785,7 @@ public class MainActivity extends AppCompatActivity{
             navTitlesMap.put(R.id.nav_custom_actions, getString(R.string.nav_custom_actions));
             navTitlesMap.put(R.id.nav_settings, getString(R.string.nav_settings));
 
-            if(ContextCompat.checkSelfPermission(MainActivity.this, Manifest.permission.READ_EXTERNAL_STORAGE)==PackageManager.PERMISSION_GRANTED){
-                //Load custom actions
-                publishProgress(getString(R.string.loading_custom_actions));
-                CustomAction.load();
-
-                //Create or read aliases file
-                publishProgress(getString(R.string.loading_aliases));
-                loadAliases();
-            }
-
-            //Checking permissions
+            //Check permissions
             publishProgress(getString(R.string.checking_permissions));
             ActivityCompat.requestPermissions(MainActivity.this, new String[]{
                     Manifest.permission.CHANGE_WIFI_STATE,
@@ -802,6 +795,19 @@ public class MainActivity extends AppCompatActivity{
                     Manifest.permission.ACCESS_NETWORK_STATE,
                     Manifest.permission.INTERNET
             }, 0);
+            //Wait for permission request to be completed
+            try{
+                startupSem.acquire();
+            }catch(InterruptedException ignored){}
+
+            //Load custom actions and aliases
+            if(ContextCompat.checkSelfPermission(MainActivity.this, Manifest.permission.READ_EXTERNAL_STORAGE)==PackageManager.PERMISSION_GRANTED){
+                publishProgress(getString(R.string.loading_custom_actions));
+                CustomAction.load();
+
+                publishProgress(getString(R.string.loading_aliases));
+                loadAliases();
+            }
 
             //Check for updates
             if(update_on_startup){
@@ -830,16 +836,20 @@ public class MainActivity extends AppCompatActivity{
             File report = new File(Environment.getExternalStorageDirectory() + "/report.txt");
             if(report.exists()) report.delete();
 
-            //Check for SuperSU
-            if(!new File("/su").exists()){
-                ErrorDialog dialog = new ErrorDialog();
-                dialog.setTitle(getString(R.string.su_notfound_title));
-                dialog.setMessage(getString(R.string.su_notfound));
-                dialog.setSemaphore(sem);
-                dialog.show(getFragmentManager(), "ErrorDialog");
-
-                // Wait for user to click OK
-                waitSem();
+            //Check for su
+            publishProgress(getString(R.string.checking_su));
+            int exitCode = 1;
+            try{
+                Process su_proc = Runtime.getRuntime().exec("which su");
+                su_proc.waitFor();
+                exitCode = su_proc.exitValue();
+            }catch(IOException | InterruptedException e){
+                e.printStackTrace();
+            }
+            if(exitCode != 0){
+                Log.e("HIJACKER/Setup", "which su failed with code " + exitCode);
+                publishProgress(null, getString(R.string.su_notfound), getString(R.string.su_notfound_title));
+                errorDialog._wait();
             }
 
             return true;
@@ -851,12 +861,11 @@ public class MainActivity extends AppCompatActivity{
                 loadingDialog.setText(progress[0]);
             }else if(progress[1]!=null){
                 //Show error message with progress[1]
-                ErrorDialog dialog = new ErrorDialog();
-                dialog.setMessage(progress[1]);
-                dialog.setSemaphore(sem);
-                dialog.show(getFragmentManager(), "ErrorDialog");
+                errorDialog.setMessage(progress[1]);
+                errorDialog.setTitle(progress.length == 3 ? progress[2] : null);
+                errorDialog.show(getFragmentManager(), "ErrorDialog");
 
-                // The sem.acquire will be called from doInBackground to run on a separate thread
+                // The wait call will be done from doInBackground to run on a separate thread
             }
         }
         @Override
@@ -883,14 +892,6 @@ public class MainActivity extends AppCompatActivity{
 
             //Start
             if(pref.getBoolean("disclaimerAccepted", false)) main();
-        }
-
-        void waitSem(){
-            try{
-                sem.acquire();
-            }catch(InterruptedException e){
-                e.printStackTrace();
-            }
         }
     }
 
@@ -1310,10 +1311,7 @@ public class MainActivity extends AppCompatActivity{
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
         if(requestCode==0){
             //The one and only request this app sends
-            if (grantResults.length > 0 && grantResults[2]==PackageManager.PERMISSION_GRANTED) {
-                CustomAction.load();
-                loadAliases();
-            }
+            startupSem.release();
         }
     }
     @SuppressLint("MissingSuperCall")
