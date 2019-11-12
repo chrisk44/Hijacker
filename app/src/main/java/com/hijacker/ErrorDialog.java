@@ -39,11 +39,7 @@ public class ErrorDialog extends DialogFragment {
 
         AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
         builder.setPositiveButton(R.string.ok, new DialogInterface.OnClickListener() {
-            public void onClick(DialogInterface dialog, int id) {
-                synchronized(ErrorDialog.this){
-                    ErrorDialog.this.notify();
-                }
-            }
+            public void onClick(DialogInterface dialog, int id) {}
         });
         builder.setNeutralButton(R.string.exit, new DialogInterface.OnClickListener() {
             @Override
@@ -76,6 +72,14 @@ public class ErrorDialog extends DialogFragment {
             error_notif.setContentTitle(title);
             error_notif.setContentText(message);
             mNotificationManager.notify(1, error_notif.build());
+        }
+    }
+    @Override
+    public void onDismiss(DialogInterface dialogInterface){
+        super.onDismiss(dialogInterface);
+
+        synchronized(this){
+            notify();
         }
     }
 }

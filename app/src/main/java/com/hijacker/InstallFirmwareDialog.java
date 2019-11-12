@@ -52,8 +52,6 @@ import static com.hijacker.MainActivity.devChipset;
 import static com.hijacker.MainActivity.findFirmwarePath;
 import static com.hijacker.MainActivity.firm_backup_file;
 import static com.hijacker.MainActivity.background;
-import static com.hijacker.MainActivity.init;
-import static com.hijacker.MainActivity.mDrawerLayout;
 import static com.hijacker.MainActivity.path;
 import static com.hijacker.MainActivity.stop;
 
@@ -129,11 +127,6 @@ public class InstallFirmwareDialog extends DialogFragment {
     public void onDismiss(final DialogInterface dialog) {
         super.onDismiss(dialog);
         if(shell!=null) shell.done();
-        if(init){
-            init = false;
-            mDrawerLayout.openDrawer(GravityCompat.START);
-            ((MainActivity)getActivity()).main();
-        }
     }
     @Override
     public void show(FragmentManager fragmentManager, String tag){
@@ -285,7 +278,9 @@ public class InstallFirmwareDialog extends DialogFragment {
             }
 
             //Update backup checkbox
-            backup_cb.setChecked(!backupExists);
+            if(!backupExists){
+                backup_cb.setChecked(true);
+            }
 
             //Update paths spinner
             if(paths.length==0){

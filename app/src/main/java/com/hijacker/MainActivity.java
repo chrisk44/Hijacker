@@ -154,7 +154,6 @@ public class MainActivity extends AppCompatActivity{
     static String versionName, deviceModel;
     static int versionCode;
     static String devChipset = "";
-    static boolean init = false;      //True on first run to swap the dialogs for initialization
     static ActionBar actionBar;
     static String bootkali_init_bin = "bootkali_init";
     //Preferences - Defaults are in strings.xml
@@ -205,20 +204,23 @@ public class MainActivity extends AppCompatActivity{
     private class SetupTask extends AsyncTask<Void, String, Boolean>{
         LoadingDialog loadingDialog;
         ErrorDialog errorDialog;
+        DisclaimerDialog disclaimerDialog;
         @SuppressLint("CommitPrefEdits")
         @Override
         protected void onPreExecute(){
             pref = PreferenceManager.getDefaultSharedPreferences(MainActivity.this);
             pref_edit = pref.edit();
-            if(!pref.getBoolean("disclaimerAccepted", false)){
-                //First start
-                new DisclaimerDialog().show(getFragmentManager(), "Disclaimer");
-            }
 
             errorDialog = new ErrorDialog();
             loadingDialog = new LoadingDialog();
             loadingDialog.setInitText(getString(R.string.starting_hijacker));
             loadingDialog.show(getFragmentManager(), "LoadingDialog");
+
+            if(!pref.getBoolean("disclaimerAccepted", false)){
+                //First start
+                disclaimerDialog = new DisclaimerDialog();
+                disclaimerDialog.show(getFragmentManager(), "Disclaimer");
+            }
 
             //Initialize the drawer
             mDrawerLayout = findViewById(R.id.drawer_layout);
@@ -283,6 +285,11 @@ public class MainActivity extends AppCompatActivity{
         @Override
         protected Boolean doInBackground(Void... params){
             Looper.prepare();
+
+            //Wait for disclaimer to be accepted
+            if(disclaimerDialog!=null){
+                disclaimerDialog._wait();
+            }
 
             //Initialize managers
             publishProgress(getString(R.string.init_managers));
@@ -448,7 +455,58 @@ public class MainActivity extends AppCompatActivity{
             ST.not_connected = getString(R.string.not_connected);
             ST.paired = getString(R.string.paired) + ' ';
 
-            //Setup tools
+            //Check permissions
+            publishProgress(getString(R.string.checking_permissions));
+            ActivityCompat.requestPermissions(MainActivity.this, new String[]{
+                    Manifest.permission.CHANGE_WIFI_STATE,
+                    Manifest.permission.ACCESS_WIFI_STATE,
+                    Manifest.permission.WRITE_EXTERNAL_STORAGE,
+                    Manifest.permission.READ_EXTERNAL_STORAGE,
+                    Manifest.permission.ACCESS_NETWORK_STATE,
+                    Manifest.permission.INTERNET
+            }, 0);
+            //Wait for permission request to be completed
+            try{
+                synchronized(MainActivity.this){
+                    MainActivity.this.wait();
+                }
+            }catch(InterruptedException ignored){}
+
+            //Check for su
+            publishProgress(getString(R.string.checking_su));
+            int exitCode = 1;
+            try{
+                Process su_proc = Runtime.getRuntime().exec("which su");
+                su_proc.waitFor();
+                exitCode = su_proc.exitValue();
+            }catch(IOException | InterruptedException e){
+                e.printStackTrace();
+            }
+            if(exitCode != 0){
+                Log.e("HIJACKER/Setup", "'which su' failed with code " + exitCode);
+                publishProgress(null, getString(R.string.su_notfound), getString(R.string.su_notfound_title));
+                errorDialog._wait();
+                return false;
+            }
+
+            //Check for root access
+            publishProgress(getString(R.string.requesting_root_access));
+            exitCode = 1;
+            try{
+                Process su_proc = Runtime.getRuntime().exec("su -c id");
+                su_proc.waitFor();
+                exitCode = su_proc.exitValue();
+            }catch(IOException | InterruptedException e){
+                e.printStackTrace();
+            }
+            if(exitCode != 0){
+                Log.e("HIJACKER/Setup", "'su -c id' failed with code " + exitCode);
+                publishProgress(null, getString(R.string.no_root_access), getString(R.string.no_root_access_title));
+                errorDialog._wait();
+                return false;
+            }
+
+            //Setup tools (requires root)
             publishProgress(getString(R.string.setting_up_tools));
             if(arch.equals("armv7l") || arch.equals("aarch64")) {
                 String tools_location = path + "/bin/";
@@ -575,7 +633,7 @@ public class MainActivity extends AppCompatActivity{
                 reaver_dir = "reaver";
             }
 
-            //Initialize RootFile
+            //Initialize RootFile (requires root)
             publishProgress(getString(R.string.init_rootFile));
             RootFile.init();
 
@@ -783,24 +841,7 @@ public class MainActivity extends AppCompatActivity{
             navTitlesMap.put(R.id.nav_custom_actions, getString(R.string.nav_custom_actions));
             navTitlesMap.put(R.id.nav_settings, getString(R.string.nav_settings));
 
-            //Check permissions
-            publishProgress(getString(R.string.checking_permissions));
-            ActivityCompat.requestPermissions(MainActivity.this, new String[]{
-                    Manifest.permission.CHANGE_WIFI_STATE,
-                    Manifest.permission.ACCESS_WIFI_STATE,
-                    Manifest.permission.WRITE_EXTERNAL_STORAGE,
-                    Manifest.permission.READ_EXTERNAL_STORAGE,
-                    Manifest.permission.ACCESS_NETWORK_STATE,
-                    Manifest.permission.INTERNET
-            }, 0);
-            //Wait for permission request to be completed
-            try{
-                synchronized(MainActivity.this){
-                    MainActivity.this.wait();
-                }
-            }catch(InterruptedException ignored){}
-
-            //Load custom actions and aliases
+            //Load custom actions and aliases (requires storage access)
             if(ContextCompat.checkSelfPermission(MainActivity.this, Manifest.permission.READ_EXTERNAL_STORAGE)==PackageManager.PERMISSION_GRANTED){
                 publishProgress(getString(R.string.loading_custom_actions));
                 CustomAction.load();
@@ -831,25 +872,16 @@ public class MainActivity extends AppCompatActivity{
                 }
             }
 
-            //Delete old report, it's not needed if no exception is thrown up to this point
+            //Delete old report, it's not needed if no exception is thrown up to this point (requires storage access)
             publishProgress(getString(R.string.deleting_bug_report));
             File report = new File(Environment.getExternalStorageDirectory() + "/report.txt");
             if(report.exists()) report.delete();
 
-            //Check for su
-            publishProgress(getString(R.string.checking_su));
-            int exitCode = 1;
-            try{
-                Process su_proc = Runtime.getRuntime().exec("which su");
-                su_proc.waitFor();
-                exitCode = su_proc.exitValue();
-            }catch(IOException | InterruptedException e){
-                e.printStackTrace();
-            }
-            if(exitCode != 0){
-                Log.e("HIJACKER/Setup", "which su failed with code " + exitCode);
-                publishProgress(null, getString(R.string.su_notfound), getString(R.string.su_notfound_title));
-                errorDialog._wait();
+            //Show FirstRunDialog
+            if(disclaimerDialog!=null){
+                FirstRunDialog frDialog = new FirstRunDialog();
+                frDialog.show(getFragmentManager(), "FirstRunDialog");
+                frDialog._wait();
             }
 
             return true;
@@ -865,12 +897,13 @@ public class MainActivity extends AppCompatActivity{
                 errorDialog.setTitle(progress.length == 3 ? progress[2] : null);
                 errorDialog.show(getFragmentManager(), "ErrorDialog");
 
-                // The wait call will be done from doInBackground to run on a separate thread
+                // The _wait call will be done from doInBackground to run on a separate thread
             }
         }
         @Override
         protected void onPostExecute(final Boolean success){
             if(!success){
+                // Initialization incomplete, can't continue!!!
                 System.exit(1);
             }
             loadingDialog.setText(getString(R.string.starting_hijacker));
@@ -890,8 +923,11 @@ public class MainActivity extends AppCompatActivity{
 
             loadingDialog.dismissAllowingStateLoss();
 
+            if(disclaimerDialog!=null)
+                mDrawerLayout.openDrawer(GravityCompat.START);
+
             //Start
-            if(pref.getBoolean("disclaimerAccepted", false)) main();
+            main();
         }
     }
 

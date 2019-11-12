@@ -116,7 +116,7 @@
     <string name="not_agree">I don\'t agree</string>
 
     <!-- ExitDialog -->
-    <string name="exit_dialog_title">Exit?</string>
+    <string name="exit_dialog_title">Exit</string>
     <string name="exit_dialog_message">Airodump, aireplay and mdk will stop. Are you sure?</string>
 
     <!-- ExportDialog -->
@@ -160,9 +160,7 @@
         Only some android devices support this but none of them natively.
         You need to use a custom firmware (bcmon, Nexmon) so that your wireless adapter can be used in Monitor Mode. External adapters can also be used.
         You can configure your interface\'s name in Settings. This app requires root privileges to run the tools.
-        If you don\'t grant them, it will hang. Don\'t ask me why…\nYou can install the Nexmon firmware now, or you can go to the Home Screen.</string>
-    <string name="not_arm_firm">The nexmon firmware included in this app is not compatible with your device (not a known ARM architecture).
-        You will have to download and install it manually.</string>
+        \nYou can install the Nexmon firmware now, or you can go to the Home Screen.</string>
     <string name="install_firmware">Install Nexmon</string>
 
     <!-- InstallFirmwareDialog -->
@@ -196,9 +194,10 @@
     <string name="aireplay_not_running">Aireplay is not running!</string>
     <string name="mdk_still_running">MDK3 is still running!</string>
     <string name="mdk_not_running">MDK3 is not running!</string>
-    <string name="su_notfound_title">su binary not found!</string>
-    <string name="su_notfound">Hijacker was not able to detect a su binary in a PATH accessible directory.
-        If your device is rooted you can try to continue. Please don\'t report bugs.</string>
+    <string name="su_notfound_title">SU binary not found!</string>
+    <string name="su_notfound">Hijacker could not detect a SU binary in a PATH accessible directory.\n\nThe app will exit.</string>
+    <string name="no_root_access_title">No root access</string>
+    <string name="no_root_access">Hijacker could not start SU with root privileges. Please make sure your device is rooted and you have granted Hijacker root access, and try again.</string>
     <string name="bin_not_created">Directory \'bin\' could not be created</string>
     <string name="lib_not_created">Directory \'lib\' could not be created</string>
     <string name="not_arm">The architecture of this device is not ARM. The included tools cannot be used.
@@ -233,6 +232,7 @@
     <string name="deleting_bug_report">Deleting old bug report…</string>
     <string name="checking_for_updates">Checking for updates…</string>
     <string name="checking_su">Checking su…</string>
+    <string name="requesting_root_access">Requesting root access…</string>
     <string name="starting_hijacker">Starting Hijacker…</string>
 
     <!-- MDKFragment -->

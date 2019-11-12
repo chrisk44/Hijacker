@@ -22,12 +22,11 @@ import android.app.DialogFragment;
 import android.app.FragmentManager;
 import android.content.DialogInterface;
 import android.os.Bundle;
-import android.support.v4.view.GravityCompat;
 import android.support.v7.app.AlertDialog;
+import android.view.View;
+import android.widget.Button;
 
 import static com.hijacker.MainActivity.isArchValid;
-import static com.hijacker.MainActivity.mDrawerLayout;
-import static com.hijacker.MainActivity.mFragmentManager;
 import static com.hijacker.MainActivity.background;
 
 public class FirstRunDialog extends DialogFragment {
@@ -38,24 +37,12 @@ public class FirstRunDialog extends DialogFragment {
         builder.setMessage(R.string.first_run);
         builder.setTitle(R.string.first_run_title);
         builder.setPositiveButton(R.string.install_firmware, new DialogInterface.OnClickListener() {
-            public void onClick(DialogInterface dialog, int id) {
-                if(isArchValid()){
-                    MainActivity.init = true;
-                    new InstallFirmwareDialog().show(mFragmentManager, "InstallFirmwareDialog");
-                }else{
-                    mDrawerLayout.openDrawer(GravityCompat.START);
-                    ErrorDialog errdialog = new ErrorDialog();
-                    errdialog.setMessage(getString(R.string.not_arm_firm));
-                    errdialog.show(mFragmentManager, "ErrorDialog");
-                }
-            }
+            public void onClick(DialogInterface dialog, int id) {}
         });
         builder.setNegativeButton(R.string.home, new DialogInterface.OnClickListener() {
             public void onClick(DialogInterface dialog, int id) {
-                //return
+                // Go to Home
                 dismissAllowingStateLoss();
-                mDrawerLayout.openDrawer(GravityCompat.START);
-                ((MainActivity)getActivity()).main();
             }
         });
         builder.setNeutralButton(R.string.exit, new DialogInterface.OnClickListener() {
@@ -69,5 +56,41 @@ public class FirstRunDialog extends DialogFragment {
     @Override
     public void show(FragmentManager fragmentManager, String tag){
         if(!background) super.show(fragmentManager, tag);
+    }
+    @Override
+    public void onStart(){
+        super.onStart();
+        // Disable "Install Nexmon" button if arch is not valid
+        AlertDialog d = (AlertDialog) getDialog();
+        if(d==null) return;
+
+        Button positiveButton = d.getButton(Dialog.BUTTON_POSITIVE);
+        if(!isArchValid()){
+            positiveButton.setEnabled(false);
+        }else{
+            positiveButton.setOnClickListener(new View.OnClickListener(){
+                @Override
+                public void onClick(View v){
+                    // Open InstallFirmwareDialog to install Nexmon
+                    new InstallFirmwareDialog().show(getFragmentManager(), "InstallFirmwareDialog");
+                }
+            });
+        }
+    }
+    @Override
+    public void onDismiss(DialogInterface dialogInterface){
+        super.onDismiss(dialogInterface);
+
+        synchronized(this){
+            notify();
+        }
+    }
+
+    public void _wait(){
+        try{
+            synchronized(this){
+                wait();
+            }
+        }catch(InterruptedException ignored){}
     }
 }

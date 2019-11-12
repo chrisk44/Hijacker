@@ -25,7 +25,6 @@ import android.os.Bundle;
 import android.support.v7.app.AlertDialog;
 
 import static com.hijacker.MainActivity.background;
-import static com.hijacker.MainActivity.mFragmentManager;
 import static com.hijacker.MainActivity.pref_edit;
 
 public class DisclaimerDialog extends DialogFragment {
@@ -39,13 +38,12 @@ public class DisclaimerDialog extends DialogFragment {
             public void onClick(DialogInterface dialog, int id) {
                 pref_edit.putBoolean("disclaimerAccepted", true);
                 pref_edit.commit();
-                new FirstRunDialog().show(mFragmentManager, "FirstRunDialog");
                 dismissAllowingStateLoss();
             }
         });
         builder.setNegativeButton(R.string.not_agree, new DialogInterface.OnClickListener() {
             public void onClick(DialogInterface dialog, int id) {
-                //return
+                // Exit
                 getActivity().finish();
             }
         });
@@ -54,5 +52,21 @@ public class DisclaimerDialog extends DialogFragment {
     @Override
     public void show(FragmentManager fragmentManager, String tag){
         if(!background) super.show(fragmentManager, tag);
+    }
+    @Override
+    public void onDismiss(DialogInterface dialogInterface){
+        super.onDismiss(dialogInterface);
+
+        synchronized(this){
+            notify();
+        }
+    }
+
+    public void _wait(){
+        try{
+            synchronized(this){
+                wait();
+            }
+        }catch(InterruptedException ignored){}
     }
 }
