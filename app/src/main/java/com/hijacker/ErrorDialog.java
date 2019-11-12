@@ -33,7 +33,6 @@ import static com.hijacker.MainActivity.background;
 public class ErrorDialog extends DialogFragment {
     String message;
     String title;
-    Semaphore sem = new Semaphore(0);
     @Override
     public Dialog onCreateDialog(Bundle savedInstanceState) {
         if(title==null) title = getString(R.string.error);
@@ -41,7 +40,9 @@ public class ErrorDialog extends DialogFragment {
         AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
         builder.setPositiveButton(R.string.ok, new DialogInterface.OnClickListener() {
             public void onClick(DialogInterface dialog, int id) {
-                sem.release();
+                synchronized(ErrorDialog.this){
+                    ErrorDialog.this.notify();
+                }
             }
         });
         builder.setNeutralButton(R.string.exit, new DialogInterface.OnClickListener() {
@@ -63,7 +64,9 @@ public class ErrorDialog extends DialogFragment {
     public void setTitle(String title){ this.title = title; }
     public void _wait(){
         try{
-            sem.acquire();
+            synchronized(this){
+                this.wait();
+            }
         }catch(InterruptedException ignored){}
     }
     @Override

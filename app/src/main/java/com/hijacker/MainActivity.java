@@ -164,7 +164,6 @@ public class MainActivity extends AppCompatActivity{
     static boolean show_notif, show_details, airOnStartup, debug, delete_extra, show_client_count,
             monstart, always_cap, cont_on_fail, watchdog, target_deauth, enable_on_airodump, update_on_startup;
 
-    Semaphore startupSem;
     WatchdogTask watchdogTask;
 
     ReaverFragment reaverFragment = new ReaverFragment();
@@ -216,7 +215,6 @@ public class MainActivity extends AppCompatActivity{
                 new DisclaimerDialog().show(getFragmentManager(), "Disclaimer");
             }
 
-            startupSem = new Semaphore(0);
             errorDialog = new ErrorDialog();
             loadingDialog = new LoadingDialog();
             loadingDialog.setInitText(getString(R.string.starting_hijacker));
@@ -797,7 +795,9 @@ public class MainActivity extends AppCompatActivity{
             }, 0);
             //Wait for permission request to be completed
             try{
-                startupSem.acquire();
+                synchronized(MainActivity.this){
+                    MainActivity.this.wait();
+                }
             }catch(InterruptedException ignored){}
 
             //Load custom actions and aliases
@@ -1311,7 +1311,9 @@ public class MainActivity extends AppCompatActivity{
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
         if(requestCode==0){
             //The one and only request this app sends
-            startupSem.release();
+            synchronized(this){
+                this.notify();
+            }
         }
     }
     @SuppressLint("MissingSuperCall")
