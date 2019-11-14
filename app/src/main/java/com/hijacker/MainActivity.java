@@ -1894,7 +1894,7 @@ public class MainActivity extends AppCompatActivity{
         };
         String[] fw_names = {
                 "fw_bcmdhd.bin",
-                "fw_bcmdhd_sta.bin"
+                "bcmdhd_sta.bin"
         };
 
         String firmware = null;
