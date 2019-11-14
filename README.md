@@ -6,7 +6,8 @@ This application requires an **ARM** android device with an internal wireless ad
 
 An alternative would be to use an external adapter that supports **monitor mode** in Android with an OTG cable.
 
-The required tools are included for **armv7l** and **aarch64** devices as of version 1.1. The Nexmon driver and management utility for **BCM4339** and **BCM4358** are also included.
+The required tools are included for **ARM** devices.
+The Nexmon firmware and management utility for **BCM4339** and **BCM4358** are also included.
 
 Root access is also necessary, as these tools need root to work.
 
@@ -46,32 +47,66 @@ Root access is also necessary, as these tools need root to work.
 ## Installation
 Make sure:
 * you are on Android 5+
-* you are rooted ([SuperSU](http://www.supersu.com/download) is required, if you are on CM/LineageOS install SuperSU)
+* you are rooted
 * you have a firmware to support Monitor Mode on your wireless interface
 
 #### Download the latest version [here](https://github.com/chrisk44/Hijacker/releases).
 
-When you run Hijacker for the first time, you will be asked whether you want to install the nexmon firmware or go to home screen. If you have installed your firmware or use an external adapter, you can just go to the home screen. Otherwise, and if your device is supported, click 'Install Nexmon' and then 'Install'. Afterwards you will land on the home screen and airodump will start. Make sure you have enabled your WiFi and it's in monitor mode.
+When you run Hijacker for the first time, you will be asked whether you want to install the nexmon firmware or go to home screen. If you have installed your firmware or use an external adapter, you can just go to the home screen. Otherwise, and if your device is supported, click 'Install Nexmon' to install the Nexmon firmware. When you're done, you will land on the home screen and airodump will start. Make sure you have enabled your WiFi and it's in monitor mode.
 
 ##### Note: On some devices, changing files in `/system` might trigger an Android security feature and your system partition will be restored when you reboot.
 
 ## Troubleshooting
-This app is designed and tested for ARM devices. All the binaries included are compiled for that architecture and will not work on anything else. You can check whether your device is compatible by going to Settings: if you have the option to install Nexmon, then you are on the correct architecture, otherwise you will have to install all the tools manually ([busybox](https://play.google.com/store/apps/details?id=stericson.busybox&hl=el), aircrack-ng suite, mdk3, reaver, [wireless tools](https://hewlettpackard.github.io/wireless-tools/Tools.html), [libfakeioctl.so](https://github.com/seemoo-lab/nexmon/tree/master/utilities/libfakeioctl) library) in a `PATH` accessible directory and set the 'Prefix' option for the tools to preload the library they need: `LD_PRELOAD=/path/to/libfakeioctl.so`.
 
-In settings, there is an option to test the tools. If something fails, you can click 'Copy test command' and select the tool that fails. This will copy a test command to your clipboard, which you can manually run in a **root** shell and see what's wrong. If all the tests pass and you still have a problem, feel free to open an issue here to fix it, or use the 'Send feedback' option in the app's settings.
+#### SU binary not found!
 
-If the app happens to crash, a new activity will start which will generate a bug report in your external storage and give you the option to submit it by email. The report is shown in the activity so you can see exactly what will be sent.
+Hijacker needs root access to run. It expects a `su` binary file, which is a shell executed with root privileges. On startup, the app runs a `which su` command. If you are getting this message, then this command has failed. Either you are not rooted, or your root solution did not provide a `su` binary in a PATH accessible directory.
+
+#### No root access
+
+Hijacker needs root access to run. It runs all its commands through `su`. When `su` is called, some app on your device (which manages the root access, e.g. SuperSU, Superuser) should ask you if you want to grant root access to Hijacker. If access is denied, you get this message. Make sure that Hijacker is authorized to run root commands.
+
+#### Directory 'bin/lib' could not be created
+
+This means that the app failed to create the 'bin' or 'lib' directories in its own directory within the system. If you see this, something is wrong with your OS, Hijacker can't do anything about this.
+
+#### The architecture of this device is not ARM.
+
+This app is designed and tested for ARM devices. All the included binaries and libraries are compiled for that architecture and will not work on anything else. If you get this message, you have to install them manually ([busybox](https://play.google.com/store/apps/details?id=stericson.busybox&hl=el), aircrack-ng suite, mdk3, reaver, [wireless tools](https://hewlettpackard.github.io/wireless-tools/Tools.html), [libfakeioctl.so](https://github.com/seemoo-lab/nexmon/tree/master/utilities/libfakeioctl) library) **in a PATH accessible directory** and set the 'Prefix' option for the tools to preload the library they need: `LD_PRELOAD=/path/to/libfakeioctl.so`.
+
+#### Hijacker watchdog detected a problem
+
+Hijacker runs a background service to make sure that the tools that are supposed to be running, are actually running, and the tools that are supposed to be stopped, are stopped. In the event one of these checks fails, you will get a warning.
+
+*Something is not running*: This could be caused by a tool stopping unexpectedly, which could be a sign of bad parameters, tool working differently that the app expects, other software on the device killing it, wifi turned off or not in monitor mode, or even a broken tool (if you compiled it manually).
+
+*Something is still running*: This could be caused by a failed 'stop' operation by the app or the tool running on its own (if you have left the app open in the background and you run the tool by yourself). A failed 'stop' operation could be caused by denied root access, or starting the app after it crashed and didn't get a change to run the 'stop' operations (although this shouldn't happen).
+  
+#### Can't open shell to generate the bug report
+
+The app crashed, a new activity came up, and it says it can't open a shell to generate the bug report. This means exactly what it says. It can't open a root shell; it executed `su` and failed. No/denied or improperly configured root access.
+Hijacker needs root access to generate the bug report because it needs to get the device's logfiles, attempt to run the tools to make sure they are installed correctly, read the WiFi firmware, etc.
+
+#### Can\'t create report (external storage write access denied)
+
+Self explanatory.
+
+### Miscellaneous
+
+In settings, there is an option to test the tools. If something goes wrong, you can click 'Copy test command' and select the tool that fails. This will copy a test command to your clipboard, which you can manually run in a **root** shell and see what's wrong. If all the tests pass and you still have a problem, feel free to open an issue here to fix it, or use the 'Send feedback' option in the app's settings.
+
+If the app happens to crash, a new activity will come up with the option to submit a bug report via email. You can see exactly what the report contains, it's a simple text file. This will be very helpful for the development of Hijacker, but keep in mind that the app contains *filtered* device logs, which may contain information like MAC addresses, SSIDs, device details etc.
+
+Keep in mind that Hijacker is just a GUI for these tools. The way it runs the tools is fairly simple, and if all the tests pass and you are in monitor mode, you should be getting the results you want. Also keep in mind that these are **auditing** tools. This means that they are used to **test** the integrity of your network, so there is a chance (and you should hope for it) that the attacks don't work on your network. However, if an attack works when you type a command in a terminal, but not with the app, feel free to post here to resolve the issue. This app is still under development so bugs are to be expected.
 
 #### Do not report bugs for devices that are not supported or when you are using an outdated version.
 
-Keep in mind that Hijacker is just a GUI for these tools. The way it runs the tools is fairly simple, and if all the tests pass and you are in monitor mode, you should be getting the results you want. Also keep in mind that these are **auditing** tools. This means that they are used to **test** the integrity of your network, so there is a chance (and you should hope for it) that the attacks don't work on your network. It's not the app's fault, it's actually something to be happy about (given that this means that your network is safe). However, if an attack works when you type a command in a terminal, but not with the app, feel free to post here to resolve the issue. This app is still under development so bugs are to be expected.
-
 ## Warning
 ### Legal
-It is highly illegal to use this application against networks for which you don't have permission. You can use it only on YOUR network or a network that you are authorized to. Using software that uses a network adapter in promiscuous mode may be considered illegal even without actively using it against someone. I am not responsible for how you use this application and any damages you may cause.
+It is illegal to use this application against networks for which you don't have permission. You can use it only on **your** network or a network that you are authorized to. Using software that uses a network adapter in promiscuous mode may be considered illegal even without actively using it against someone. I am not responsible for how you use this application and any damages you may cause.
 
 ### Device
-The app gives you the option to install the Nexmon firmware on your device. Even though the app performs a chipset check, mistakes happen. The app currently includes the Nexmon firmware for BCM4339 and BCM4358 *only*. Installing the wrong firmware on a device may damage it (and I mean hardware, not something that is fixable with factory reset). I am not responsible for any damage caused to your device by this software.
+The app gives you the option to install the Nexmon firmware on your device. Even though the app performs a chipset check, mistakes happen. The app currently includes the Nexmon firmware for BCM4339 and BCM4358 *only*. Installing the wrong firmware on a device may damage it (and I mean hardware, not something that is fixable with factory reset). I am not responsible for any damage caused to you, your device, your house, your cat, or anyne and anything else, by this software.
 
 #### Consider yourself warned.
 
