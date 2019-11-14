@@ -19,6 +19,7 @@ package com.hijacker;
 
 import android.app.FragmentManager;
 import android.app.FragmentTransaction;
+import android.support.annotation.NonNull;
 import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
@@ -269,10 +270,10 @@ class AP extends Device{
     }
 
     void showInfo(FragmentManager fragmentManager){
-        APDialog dialog = new APDialog();
-        dialog.info_ap = this;
-        dialog.show(fragmentManager, "APDialog");
+        new APDialog().setAP(this).show(fragmentManager, "APDialog");
     }
+    @NonNull
+    @Override
     public String toString(){
         return this.essid + (this.alias==null ? "" : " (" + this.alias + ')') + " (" + this.mac + ')';
     }

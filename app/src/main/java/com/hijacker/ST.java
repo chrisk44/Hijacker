@@ -18,6 +18,7 @@ package com.hijacker;
  */
 
 import android.app.FragmentManager;
+import android.support.annotation.NonNull;
 import android.util.Log;
 import android.view.View;
 import android.widget.PopupMenu;
@@ -191,10 +192,10 @@ class ST extends Device{
     }
 
     void showInfo(FragmentManager fragmentManager){
-        STDialog dialog = new STDialog();
-        dialog.info_st = this;
-        dialog.show(fragmentManager, "STDialog");
+        new STDialog().setST(this).show(fragmentManager, "STDialog");
     }
+    @NonNull
+    @Override
     public String toString(){
         return this.mac + (this.alias==null ? "" : " (" + this.alias + ')') + ((this.bssid==null) ? "" : " (" + getAPByMac(this.bssid).essid + ')');
     }
