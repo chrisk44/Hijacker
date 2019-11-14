@@ -56,7 +56,6 @@
     <string name="probes">Probes:</string>
 
     <!-- ConfirmResetDialog -->
-    <string name="reset_dialog_title">Reset Preferences?</string>
 
     <!-- CrackFragment -->
     <string name="path_to_cap">.cap file</string>
@@ -73,8 +72,8 @@
     <string name="select_action">Select action</string>
     <string name="select_target">Select target</string>
     <string name="delete">Delete</string>
-    <string name="delete_title">Delete Action?</string>
-    <string name="delete_message">This action will be permanently deleted. Are you sure?</string>
+    <string name="action_delete_title">Delete Action?</string>
+    <string name="action_delete_message">This action will be permanently deleted. Are you sure?</string>
     <string name="manage_actions">Manage actions…</string>
     <string name="edit">Edit…</string>
 
@@ -107,7 +106,7 @@
     <string name="kill_process_on_stop">Has process to kill when implicitly stopping the action</string>
     <string name="process_name">Process name</string>
 
-    <!-- DisclaimerDialog -->
+    <!-- Disclaimer -->
     <string name="disclaimer_title">Disclaimer</string>
     <string name="disclaimer">It is extremely illegal to use this application against networks for which you don\'t have permission.
         You can use it only on YOUR network or a network that you are authorized to.
@@ -115,7 +114,7 @@
     <string name="agree">I agree</string>
     <string name="not_agree">I don\'t agree</string>
 
-    <!-- ExitDialog -->
+    <!-- Exit -->
     <string name="exit_dialog_title">Exit</string>
     <string name="exit_dialog_message">Airodump, aireplay and mdk will stop. Are you sure?</string>
 
@@ -298,7 +297,7 @@
     <string name="checking_chroot">Checking chroot…</string>
     <string name="done">Done</string>
 
-    <!-- UpdateConfirmDialog -->
+    <!-- UpdateDialog -->
     <string name="update_title">Update available</string>
     <string name="update_text">There is an update available.</string>
     <string name="latest_version">Latest Version</string>
@@ -368,6 +367,9 @@
 
     <string name="target_deauth_title">Targeted deauthentication</string>
     <string name="target_deauth_sum">Spawn many targeted deauthentication processes instead of one when disconnecting everyone from a network</string>
+
+    <string name="reset_dialog_title">Reset Preferences</string>
+    <string name="reset_dialog_message">This will reset all your preferences, the prefix, the interface name, and any custom commands regarding monitor mode or chroot.</string>
 
     <!-- Interface -->
     <string name="iface_title">Interface</string>

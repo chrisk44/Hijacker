@@ -20,6 +20,7 @@ package com.hijacker;
 import android.Manifest;
 import android.annotation.SuppressLint;
 import android.app.Activity;
+import android.app.DownloadManager;
 import android.app.FragmentManager;
 import android.app.FragmentTransaction;
 import android.app.NotificationChannel;
@@ -35,6 +36,7 @@ import android.content.pm.PackageManager;
 import android.graphics.drawable.Drawable;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
+import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
@@ -203,7 +205,7 @@ public class MainActivity extends AppCompatActivity{
     private class SetupTask extends AsyncTask<Void, String, Boolean>{
         LoadingDialog loadingDialog;
         ErrorDialog errorDialog;
-        DisclaimerDialog disclaimerDialog;
+        CustomDialog customDialog;
         @SuppressLint("CommitPrefEdits")
         @Override
         protected void onPreExecute(){
@@ -217,8 +219,26 @@ public class MainActivity extends AppCompatActivity{
 
             if(!pref.getBoolean("disclaimerAccepted", false)){
                 //First start
-                disclaimerDialog = new DisclaimerDialog();
-                disclaimerDialog.show(getFragmentManager(), "Disclaimer");
+                customDialog = new CustomDialog();
+                customDialog.setCancelable(false);
+                customDialog.setTitle(getString(R.string.disclaimer_title));
+                customDialog.setMessage(getString(R.string.disclaimer));
+                customDialog.setPositiveButton(getString(R.string.agree), new Runnable(){
+                    @Override
+                    public void run(){
+                        pref_edit.putBoolean("disclaimerAccepted", true);
+                        pref_edit.apply();
+                    }
+                });
+                customDialog.setNeutralButton(getString(R.string.not_agree), new Runnable(){
+                    @Override
+                    public void run(){
+                        // Exit
+                        MainActivity.this.finish();
+                    }
+                });
+
+                customDialog.show(getFragmentManager(), "CustomDialog for disclaimer");
             }
 
             //Initialize the drawer
@@ -286,8 +306,8 @@ public class MainActivity extends AppCompatActivity{
             Looper.prepare();
 
             //Wait for disclaimer to be accepted
-            if(disclaimerDialog!=null){
-                disclaimerDialog._wait();
+            if(customDialog!=null){
+                customDialog._wait();
             }
 
             //Initialize managers
@@ -853,7 +873,7 @@ public class MainActivity extends AppCompatActivity{
             if(update_on_startup){
                 if(internetAvailable(MainActivity.this)){
                     publishProgress(getString(R.string.checking_for_updates));
-                    checkForUpdate(MainActivity.this, false);
+                    checkForUpdate(false);
                 }else{
                     //Spawn new thread to wait for internet connection
                     //This should be changed to a broadcast receiver
@@ -864,7 +884,7 @@ public class MainActivity extends AppCompatActivity{
                                 while(!internetAvailable(MainActivity.this)){
                                     Thread.sleep(1000);
                                 }
-                                checkForUpdate(MainActivity.this, false);
+                                checkForUpdate(false);
                             }catch(InterruptedException ignored){}
                         }
                     }).start();
@@ -877,7 +897,7 @@ public class MainActivity extends AppCompatActivity{
             if(report.exists()) report.delete();
 
             //Show FirstRunDialog
-            if(disclaimerDialog!=null){
+            if(customDialog!=null){
                 FirstRunDialog frDialog = new FirstRunDialog();
                 frDialog.show(getFragmentManager(), "FirstRunDialog");
                 frDialog._wait();
@@ -922,7 +942,7 @@ public class MainActivity extends AppCompatActivity{
 
             loadingDialog.dismissAllowingStateLoss();
 
-            if(disclaimerDialog!=null)
+            if(customDialog!=null)
                 mDrawerLayout.openDrawer(GravityCompat.START);
 
             //Start
@@ -1325,7 +1345,18 @@ public class MainActivity extends AppCompatActivity{
             }else if(mFragmentManager.getBackStackEntryCount()>1){
                 mFragmentManager.popBackStackImmediate();
             }else{
-                new ExitDialog().show(mFragmentManager, "ExitDialog");
+                CustomDialog customDialog = new CustomDialog();
+                customDialog.setTitle(getString(R.string.exit_dialog_title));
+                customDialog.setMessage(getString(R.string.exit_dialog_message));
+                customDialog.setPositiveButton(getString(R.string.exit), new Runnable(){
+                    @Override
+                    public void run(){
+                        show_notif = false;
+                        finish();
+                    }
+                });
+                customDialog.setNegativeButton(getString(R.string.cancel), null);
+                customDialog.show(getFragmentManager(), "CustomDialog for exit");
             }
             return true;
         }
@@ -1673,7 +1704,7 @@ public class MainActivity extends AppCompatActivity{
         else if(dir) return CHROOT_BIN_MISSING;
         else return CHROOT_DIR_MISSING;
     }
-    static void checkForUpdate(final Activity activity, final boolean showMessages){
+    void checkForUpdate(final boolean showMessages){
         //Can be called from any thread, blocks until the job is finished
         if(showMessages){
             runInHandler(new Runnable(){
@@ -1735,23 +1766,52 @@ public class MainActivity extends AppCompatActivity{
             }
             reader.close();
 
-            if(!versionName.equals(latestName)){
-                final UpdateConfirmDialog dialog = new UpdateConfirmDialog();
-                dialog.newVersionName = latestName;
-                dialog.link = latestLink;
-                dialog.message = latestBody;
+            if(!versionName.equals(latestName) && latestLink!=null){
+//                final UpdateConfirmDialog dialog = new UpdateConfirmDialog();
+//                dialog.newVersionName = latestName;
+//                dialog.link = latestLink;
+//                dialog.message = latestBody;
+
+                String text = getString(R.string.update_text) + "\n\n";
+                text += getString(R.string.latest_version) + " " + latestName + "\n";
+                text += getString(R.string.current_version) + " " + versionName + "\n";
+                if(latestBody!=null){
+                    text += "\nExtra Information:\n" + latestBody;
+                }
+                final String link = latestLink;
+
+                final CustomDialog customDialog = new CustomDialog();
+                customDialog.setTitle(getString(R.string.update_title));
+                customDialog.setMessage(text);
+                customDialog.setPositiveButton(getString(R.string.download), new Runnable(){
+                    @Override
+                    public void run(){
+                        String filename = link.substring(link.lastIndexOf('/') + 1);
+
+                        DownloadManager.Request request = new DownloadManager.Request(Uri.parse(link));
+                        request.setTitle(filename);
+                        request.allowScanningByMediaScanner();
+                        request.setNotificationVisibility(DownloadManager.Request.VISIBILITY_VISIBLE_NOTIFY_COMPLETED);
+                        request.setDestinationInExternalPublicDir(Environment.DIRECTORY_DOWNLOADS, filename);
+
+                        DownloadManager manager = (DownloadManager) getSystemService(Context.DOWNLOAD_SERVICE);
+                        if(manager!=null) manager.enqueue(request);
+                    }
+                });
+                customDialog.setNeutralButton(getString(R.string.cancel), null);
+
                 runInHandler(new Runnable(){
                     @Override
                     public void run(){
-                        dialog.show(activity.getFragmentManager(), "UpdateConfirmDialog");
+                        customDialog.show(getFragmentManager(), "CustomDialog for update");
                     }
                 });
             }else{
-                if(showMessages) Snackbar.make(rootView, activity.getString(R.string.already_on_latest), Snackbar.LENGTH_SHORT).show();
+                if(showMessages) Snackbar.make(rootView, getString(R.string.already_on_latest), Snackbar.LENGTH_SHORT).show();
             }
         }catch(Exception e){
             Log.e("HIJACKER/update", e.toString());
-            if(showMessages) Snackbar.make(rootView, activity.getString(R.string.unknown_error), Snackbar.LENGTH_SHORT).show();
+            if(showMessages) Snackbar.make(rootView, getString(R.string.unknown_error), Snackbar.LENGTH_SHORT).show();
         }finally{
             if(showMessages) runInHandler(new Runnable(){
                 @Override

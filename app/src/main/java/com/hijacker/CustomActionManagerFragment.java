@@ -28,7 +28,11 @@ import android.widget.AdapterView;
 import android.widget.ListView;
 import android.widget.PopupMenu;
 
+import java.io.File;
+
+import static com.hijacker.CustomAction.cmds;
 import static com.hijacker.MainActivity.FRAGMENT_CUSTOM;
+import static com.hijacker.MainActivity.actions_path;
 import static com.hijacker.MainActivity.currentFragment;
 import static com.hijacker.MainActivity.custom_action_adapter;
 import static com.hijacker.MainActivity.mFragmentManager;
@@ -65,10 +69,20 @@ public class CustomActionManagerFragment extends Fragment{
                                 ft.commitAllowingStateLoss();
                                 break;
                             case 1:
-                                //delete
-                                ActionDeleteDialog dialog = new ActionDeleteDialog();
-                                dialog.index = index;
-                                dialog.show(mFragmentManager, "ActionDeleteDialog");
+                                //Delete action
+                                CustomDialog dialog = new CustomDialog();
+                                dialog.setTitle(getString(R.string.action_delete_title));
+                                dialog.setMessage(getString(R.string.action_delete_message));
+                                dialog.setPositiveButton(getString(R.string.delete), new Runnable(){
+                                    @Override
+                                    public void run(){
+                                        new File(actions_path + "/" + cmds.get(index).getTitle() + ".action").delete();
+                                        cmds.remove(index);
+                                        custom_action_adapter.notifyDataSetChanged();
+                                    }
+                                });
+                                dialog.setNegativeButton(getString(R.string.cancel), null);
+                                dialog.show(getFragmentManager(), "CustomDialog for action delete");
                                 break;
                         }
                         return true;

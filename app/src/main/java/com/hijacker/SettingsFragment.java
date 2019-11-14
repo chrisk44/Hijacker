@@ -28,7 +28,6 @@ import android.preference.PreferenceFragment;
 
 import static com.hijacker.MainActivity.FRAGMENT_SETTINGS;
 import static com.hijacker.MainActivity.arch;
-import static com.hijacker.MainActivity.checkForUpdate;
 import static com.hijacker.MainActivity.isArchValid;
 import static com.hijacker.MainActivity.mFragmentManager;
 import static com.hijacker.MainActivity.pref_edit;
@@ -67,7 +66,37 @@ public class SettingsFragment extends PreferenceFragment {
         findPreference("reset_pref").setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
             @Override
             public boolean onPreferenceClick(Preference preference) {
-                new ConfirmResetDialog().show(mFragmentManager, "ConfirmResetDialog");
+                CustomDialog dialog = new CustomDialog();
+                dialog.setTitle(getString(R.string.reset_dialog_title));
+                dialog.setMessage(getString(R.string.reset_dialog_message));
+                dialog.setPositiveButton(getString(R.string.yes), new Runnable(){
+                    @Override
+                    public void run(){
+                        pref_edit.putString("iface", getString(R.string.iface));
+                        pref_edit.putString("prefix", getString(R.string.prefix));
+                        pref_edit.putString("enable_monMode", getString(R.string.enable_monMode));
+                        pref_edit.putString("disable_monMode", getString(R.string.disable_monMode));
+                        pref_edit.putBoolean("enable_on_airodump", Boolean.parseBoolean(getString(R.string.enable_on_airodump)));
+                        pref_edit.putString("deauthWait", getString(R.string.deauthWait));
+                        pref_edit.putBoolean("show_notif", Boolean.parseBoolean(getString(R.string.show_notif)));
+                        pref_edit.putBoolean("show_details", Boolean.parseBoolean(getString(R.string.show_details)));
+                        pref_edit.putBoolean("airOnStartup", Boolean.parseBoolean(getString(R.string.airOnStartup)));
+                        pref_edit.putBoolean("debug", Boolean.parseBoolean(getString(R.string.debug)));
+                        pref_edit.putBoolean("delete_extra", Boolean.parseBoolean(getString(R.string.delete_extra)));
+                        pref_edit.putBoolean("always_cap", Boolean.parseBoolean(getString(R.string.always_cap)));
+                        pref_edit.putString("chroot_dir", getString(R.string.chroot_dir));
+                        pref_edit.putBoolean("monstart", Boolean.parseBoolean(getString(R.string.monstart)));
+                        pref_edit.putString("custom_chroot_cmd", "");
+                        pref_edit.putBoolean("cont_on_fail", Boolean.parseBoolean(getString(R.string.cont_on_fail)));
+                        pref_edit.putBoolean("watchdog", Boolean.parseBoolean(getString(R.string.watchdog)));
+                        pref_edit.putBoolean("target_deauth", Boolean.parseBoolean(getString(R.string.target_deauth)));
+                        pref_edit.putBoolean("update_on_startup", Boolean.parseBoolean(getString(R.string.auto_update)));
+                        pref_edit.apply();
+                        load();
+                    }
+                });
+                dialog.setNegativeButton(getString(R.string.cancel), null);
+                dialog.show(getFragmentManager(), "CustomDialog for reset confirmation");
                 return false;
             }
         });
@@ -127,7 +156,7 @@ public class SettingsFragment extends PreferenceFragment {
                         @Override
                         public void run(){
                             Looper.prepare();
-                            checkForUpdate(SettingsFragment.this.getActivity(), true);
+                            ((MainActivity)getActivity()).checkForUpdate(true);
                         }
                     }).start();
                 }
