@@ -389,7 +389,7 @@ public class ReaverFragment extends Fragment{
             stop(PROCESS_AIRODUMP);            //Can't have channels changing from anywhere else
             try{
                 BufferedReader out;
-                String args = "-i " + iface + " -vv";
+                String args = "-i " + iface + " -vv -s " + Environment.getExternalStorageDirectory() + "/Hijacker" + ap.mac.replaceAll("[:]","") + ".wpc";
                 args += ap==null ? " -b " + custom_mac : " -b " + ap.mac + " --channel " + ap.ch;
                 args += " -d " + pinDelay;
                 args += " -l " + lockedDelay;
