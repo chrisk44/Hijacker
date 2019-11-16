@@ -2,7 +2,6 @@
 #include <string.h>
 #include <stdlib.h>
 #include <android/log.h>
-#include <cstring>
 
 /*
     Copyright (C) 2019  Christos Kyriakopoulos
