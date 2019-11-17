@@ -19,20 +19,19 @@ package com.hijacker;
 
 import android.app.Dialog;
 import android.app.DialogFragment;
-import android.app.FragmentManager;
 import android.content.DialogInterface;
 import android.os.Bundle;
 import android.support.v7.app.AlertDialog;
 import android.view.View;
 import android.widget.TextView;
 
+import java.util.Locale;
+
 import static com.hijacker.MainActivity.getLastSeen;
-import static com.hijacker.MainActivity.background;
-import static com.hijacker.MainActivity.runInHandler;
 
 public class STDialog extends DialogFragment {
     ST st;
-    TextView views[] = {null, null, null, null, null, null, null, null};
+    TextView[] views = {null, null, null, null, null, null, null, null};
     @Override
     public Dialog onCreateDialog(Bundle savedInstanceState) {
         AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
@@ -67,9 +66,9 @@ public class STDialog extends DialogFragment {
         if(st.connectedTo==null) views[1].setText(R.string.not_connected);
         else views[1].setText(st.connectedTo.mac + " (" + st.connectedTo.essid + ")");
 
-        views[2].setText(Integer.toString(st.pwr));
-        views[3].setText(Integer.toString(st.getFrames()));
-        views[4].setText(Integer.toString(st.getLost()));
+        views[2].setText(String.format(Locale.getDefault(), "%d", st.pwr));
+        views[3].setText(String.format(Locale.getDefault(), "%d", st.getFrames()));
+        views[4].setText(String.format(Locale.getDefault(), "%d", st.getLost()));
         views[5].setText(st.manuf);
         views[6].setText(getLastSeen(st.lastseen));
         views[7].setText(st.probes);

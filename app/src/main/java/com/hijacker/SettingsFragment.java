@@ -29,12 +29,12 @@ import android.preference.PreferenceFragment;
 import static com.hijacker.MainActivity.FRAGMENT_SETTINGS;
 import static com.hijacker.MainActivity.arch;
 import static com.hijacker.MainActivity.isArchValid;
+import static com.hijacker.MainActivity.loadPreferences;
 import static com.hijacker.MainActivity.mFragmentManager;
 import static com.hijacker.MainActivity.pref_edit;
 import static com.hijacker.MainActivity.versionName;
 import static com.hijacker.MainActivity.watchdog;
 import static com.hijacker.MainActivity.currentFragment;
-import static com.hijacker.MainActivity.load;
 
 public class SettingsFragment extends PreferenceFragment {
     static boolean allow_prefix = false;
@@ -92,7 +92,7 @@ public class SettingsFragment extends PreferenceFragment {
                         pref_edit.putBoolean("target_deauth", Boolean.parseBoolean(getString(R.string.target_deauth)));
                         pref_edit.putBoolean("update_on_startup", Boolean.parseBoolean(getString(R.string.auto_update)));
                         pref_edit.apply();
-                        load();
+                        loadPreferences();
                     }
                 });
                 dialog.setNegativeButton(getString(R.string.cancel), null);
@@ -140,8 +140,8 @@ public class SettingsFragment extends PreferenceFragment {
                     @Override
                     public void run(){
                         pref_edit.putString("chroot_dir", dialog.result.getAbsolutePath());
-                        pref_edit.commit();
-                        load();
+                        pref_edit.apply();
+                        loadPreferences();
                     }
                 });
                 dialog.show(getFragmentManager(), "FileExplorerDialog");
@@ -194,19 +194,20 @@ public class SettingsFragment extends PreferenceFragment {
     public void onResume() {
         super.onResume();
         currentFragment = FRAGMENT_SETTINGS;
-        ((MainActivity)getActivity()).refreshDrawer();
+        final MainActivity mainActivity = (MainActivity)getActivity();
+        mainActivity.refreshDrawer();
         listener = new SharedPreferences.OnSharedPreferenceChangeListener() {
             @Override
             public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key) {
-                load();
-                boolean running = ((MainActivity)getActivity()).watchdogTask.isRunning();
+                loadPreferences();
+                boolean running = mainActivity.watchdogTask.isRunning();
                 if(watchdog && !running){
                     //Turned off
-                    ((MainActivity)getActivity()).watchdogTask = new WatchdogTask(getActivity());
-                    ((MainActivity)getActivity()).watchdogTask.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
+                    mainActivity.watchdogTask = new WatchdogTask(getActivity());
+                    mainActivity.watchdogTask.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
                 }else if(!watchdog && running){
                     //Turned on
-                    ((MainActivity)getActivity()).watchdogTask.cancel(true);
+                    mainActivity.watchdogTask.cancel(true);
                 }
             }
         };

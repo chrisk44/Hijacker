@@ -25,8 +25,6 @@ import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.v7.app.AlertDialog;
 
-import java.util.Objects;
-
 import static com.hijacker.MainActivity.background;
 
 public class CustomDialog extends DialogFragment {

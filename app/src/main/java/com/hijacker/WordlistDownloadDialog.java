@@ -52,7 +52,6 @@ import java.util.ArrayList;
 import javax.net.ssl.HttpsURLConnection;
 
 import static com.hijacker.MainActivity.WORDLISTS_LINK;
-import static com.hijacker.MainActivity.internetAvailable;
 import static com.hijacker.MainActivity.wl_path;
 
 public class WordlistDownloadDialog extends DialogFragment{
@@ -117,8 +116,6 @@ public class WordlistDownloadDialog extends DialogFragment{
     }
 
     class LoadTask extends AsyncTask<Void, String, Boolean>{
-        @Override
-        protected void onPreExecute(){}
         @Override
         protected Boolean doInBackground(Void... params){
             try{
@@ -190,15 +187,13 @@ public class WordlistDownloadDialog extends DialogFragment{
 
             adapter.notifyDataSetChanged();
             if(!success){
-                if(internetAvailable(getActivity())){
+                if(((MainActivity)getActivity()).internetAvailable()){
                     Toast.makeText(getActivity(), getString(R.string.unknown_error), Toast.LENGTH_SHORT).show();
                 }else{
                     Toast.makeText(getActivity(), getString(R.string.no_internet), Toast.LENGTH_SHORT).show();
                 }
             }
         }
-        @Override
-        protected void onCancelled(){}
     }
     class WordlistAdapter extends ArrayAdapter<Tile>{
         WordlistAdapter(){

@@ -19,7 +19,6 @@ package com.hijacker;
 
 import android.Manifest;
 import android.annotation.SuppressLint;
-import android.app.Activity;
 import android.app.DownloadManager;
 import android.app.FragmentManager;
 import android.app.FragmentTransaction;
@@ -144,7 +143,7 @@ public class MainActivity extends AppCompatActivity{
     static NotificationCompat.Builder notif, error_notif, handshake_notif;
     static NotificationManager mNotificationManager;
     static FragmentManager mFragmentManager;
-    static String path, data_path, actions_path, wl_path, cap_path, firm_backup_file, manufDBFile, arch, busybox;             //path: App files path (ends with .../files)
+    static String path, data_path, actions_path, wl_path, cap_path, reaver_sess_path, firm_backup_file, manufDBFile, arch, busybox;             //path: App files path (ends with .../files)
     static File aliases_file;
     static FileWriter aliases_in;
     static final HashMap<String, String> aliases = new HashMap<>();
@@ -375,7 +374,7 @@ public class MainActivity extends AppCompatActivity{
 
             //Load preferences
             publishProgress(getString(R.string.loading_preferences));
-            load();
+            loadPreferences();
 
             //Initialize paths
             publishProgress(getString(R.string.init_files));
@@ -384,6 +383,7 @@ public class MainActivity extends AppCompatActivity{
             actions_path = data_path + "/actions";
             wl_path = data_path + "/wordlists";
             cap_path = data_path + "/capture_files";
+            reaver_sess_path = data_path + "/reaver_sessions";
             firm_backup_file = data_path + "/fw_bcmdhd.orig.bin";
             manufDBFile = path + "/manuf.db";
             ArrayList<File> dirs = new ArrayList<>();
@@ -391,6 +391,7 @@ public class MainActivity extends AppCompatActivity{
             dirs.add(new File(actions_path));
             dirs.add(new File(wl_path));
             dirs.add(new File(cap_path));
+            dirs.add(new File(reaver_sess_path));
             for(File dir : dirs){
                 if(!dir.exists()){
                     dir.mkdir();
@@ -871,7 +872,7 @@ public class MainActivity extends AppCompatActivity{
 
             //Check for updates
             if(update_on_startup){
-                if(internetAvailable(MainActivity.this)){
+                if(internetAvailable()){
                     publishProgress(getString(R.string.checking_for_updates));
                     checkForUpdate(false);
                 }else{
@@ -881,7 +882,7 @@ public class MainActivity extends AppCompatActivity{
                         @Override
                         public void run(){
                             try{
-                                while(!internetAvailable(MainActivity.this)){
+                                while(!internetAvailable()){
                                     Thread.sleep(1000);
                                 }
                                 checkForUpdate(false);
@@ -1180,7 +1181,7 @@ public class MainActivity extends AppCompatActivity{
         handler.post(runnable);
     }
 
-    static void load(){
+    static void loadPreferences(){
         //Load Preferences
         Log.d("HIJACKER/load", "Loading preferences...");
 
@@ -1205,7 +1206,7 @@ public class MainActivity extends AppCompatActivity{
             always_cap = pref.getBoolean("always_cap", always_cap);
         }catch(ClassCastException e){
             pref_edit.putBoolean("always_cap", false);
-            pref_edit.commit();
+            pref_edit.apply();
         }
         custom_chroot_cmd = pref.getString("custom_chroot_cmd", custom_chroot_cmd);
         cont_on_fail = pref.getBoolean("cont_on_fail", cont_on_fail);
@@ -1567,7 +1568,7 @@ public class MainActivity extends AppCompatActivity{
         if(view!=null) Snackbar.make(view, "\"" + str + "\" copied to clipboard", Snackbar.LENGTH_SHORT).show();
     }
     static void notification(){
-        if(notif_on && show_notif){
+        if(notif_on && show_notif && notif!=null){
             if(show_details){
                 String str;
                 if(is_ap==null) str = "APs: " + Tile.i + " | STs: " + (Tile.tiles.size() - Tile.i);
@@ -1821,8 +1822,8 @@ public class MainActivity extends AppCompatActivity{
             });
         }
     }
-    static boolean internetAvailable(Context context){
-        ConnectivityManager connectivityManager = (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
+    boolean internetAvailable(){
+        ConnectivityManager connectivityManager = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
         return connectivityManager.getNetworkInfo(1).getState()==NetworkInfo.State.CONNECTED || connectivityManager.getNetworkInfo(0).getState()==NetworkInfo.State.CONNECTED;
     }
     static boolean createReport(File out, String filesDir, String stackTrace, Process shell){

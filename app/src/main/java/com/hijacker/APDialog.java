@@ -18,18 +18,15 @@ package com.hijacker;
  */
 
 import android.app.Dialog;
-import android.app.DialogFragment;
-import android.app.FragmentManager;
 import android.content.DialogInterface;
-import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v7.app.AlertDialog;
 import android.view.View;
 import android.widget.TextView;
 
+import java.util.Locale;
+
 import static com.hijacker.MainActivity.getLastSeen;
-import static com.hijacker.MainActivity.background;
-import static com.hijacker.MainActivity.runInHandler;
 
 public class APDialog extends DeviceDialog {
     AP ap;
@@ -68,15 +65,15 @@ public class APDialog extends DeviceDialog {
     void onRefresh(){
         views[0].setText(ap.essid);
         views[1].setText(ap.mac);
-        views[2].setText(Integer.toString(ap.ch));
-        views[3].setText(Integer.toString(ap.pwr));
+        views[2].setText(String.format(Locale.getDefault(), "%d", ap.ch));
+        views[3].setText(String.format(Locale.getDefault(), "%d", ap.pwr));
         views[4].setText(ap.enc);
         views[5].setText(ap.auth);
         views[6].setText(ap.cipher);
-        views[7].setText(Integer.toString(ap.getBeacons()));
-        views[8].setText(Integer.toString(ap.getData()));
-        views[9].setText(Integer.toString(ap.getIvs()));
-        views[10].setText(Integer.toString(ap.clients.size()));
+        views[7].setText(String.format(Locale.getDefault(), "%d", ap.getBeacons()));
+        views[8].setText(String.format(Locale.getDefault(), "%d", ap.getData()));
+        views[9].setText(String.format(Locale.getDefault(), "%d", ap.getIvs()));
+        views[10].setText(String.format(Locale.getDefault(), "%d", ap.clients.size()));
         views[11].setText(ap.manuf);
         views[12].setText(getLastSeen(ap.lastseen));
     }

@@ -24,8 +24,6 @@ import android.content.DialogInterface;
 import android.os.Bundle;
 import android.support.v7.app.AlertDialog;
 
-import java.util.concurrent.Semaphore;
-
 import static com.hijacker.MainActivity.mNotificationManager;
 import static com.hijacker.MainActivity.error_notif;
 import static com.hijacker.MainActivity.background;

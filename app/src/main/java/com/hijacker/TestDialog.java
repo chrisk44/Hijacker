@@ -41,6 +41,7 @@ import static com.hijacker.MainActivity.PROCESS_REAVER;
 import static com.hijacker.MainActivity.checkChroot;
 import static com.hijacker.MainActivity.iface;
 import static com.hijacker.MainActivity.last_action;
+import static com.hijacker.MainActivity.loadPreferences;
 import static com.hijacker.MainActivity.mdk3bf_dir;
 import static com.hijacker.MainActivity.notif_on;
 import static com.hijacker.MainActivity.prefix;
@@ -49,7 +50,6 @@ import static com.hijacker.MainActivity.aireplay_dir;
 import static com.hijacker.MainActivity.reaver_dir;
 import static com.hijacker.MainActivity.enable_monMode;
 import static com.hijacker.MainActivity.getPIDs;
-import static com.hijacker.MainActivity.load;
 import static com.hijacker.MainActivity.runInHandler;
 import static com.hijacker.MainActivity.status;
 import static com.hijacker.MainActivity.stop;
@@ -223,7 +223,7 @@ public class TestDialog extends DialogFragment {
         }
     };
     public Dialog onCreateDialog(Bundle savedInstanceState){
-        load();
+        loadPreferences();
         dialogView = getActivity().getLayoutInflater().inflate(R.layout.test, null);
 
         test_progress = dialogView.findViewById(R.id.test_progress);
