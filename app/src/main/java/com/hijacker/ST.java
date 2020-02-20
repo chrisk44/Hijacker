@@ -18,7 +18,7 @@ package com.hijacker;
  */
 
 import android.app.FragmentManager;
-import android.support.annotation.NonNull;
+import androidx.annotation.NonNull;
 import android.util.Log;
 import android.view.View;
 import android.widget.PopupMenu;

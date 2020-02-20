@@ -172,7 +172,10 @@
     <string name="backup_created">Backup created</string>
     <string name="installed_firm_util">Installed firmware and utility</string>
     <string name="create_backup">Create Backup</string>
-    <string name="error_extracting_files">There was an error while extracting the files</string>
+    <string name="error_extracting_firmware">There was an error while extracting the firmware in </string>
+    <string name="error_extracting_utility">There was an error extracting nexutil in </string>
+    <string name="error_reading_mounts">Can\'t read /proc/mounts file to determine system mounting point</string>
+    <string name="error_remounting_system">Can\'t remount the / or /system as read-write</string>
     <string name="field_required">This field is required</string>
     <string name="restore">Restore</string>
     <string name="restored">Backup restored</string>

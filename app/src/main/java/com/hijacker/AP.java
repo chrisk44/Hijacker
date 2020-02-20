@@ -19,7 +19,7 @@ package com.hijacker;
 
 import android.app.FragmentManager;
 import android.app.FragmentTransaction;
-import android.support.annotation.NonNull;
+import androidx.annotation.NonNull;
 import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
