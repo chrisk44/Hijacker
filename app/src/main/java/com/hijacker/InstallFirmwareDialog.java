@@ -1,7 +1,7 @@
 package com.hijacker;
 
 /*
-    Copyright (C) 2019  Christos Kyriakopoulos
+    Copyright (C) 2020  Christos Kyriakopoulos
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -25,8 +25,8 @@ import android.content.DialogInterface;
 import android.net.wifi.WifiManager;
 import android.os.AsyncTask;
 import android.os.Bundle;
-import android.support.design.widget.Snackbar;
-import android.support.v7.app.AlertDialog;
+import com.google.android.material.snackbar.Snackbar;
+import androidx.appcompat.app.AlertDialog;
 import android.util.Log;
 import android.view.View;
 import android.widget.AdapterView;
@@ -42,6 +42,7 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.Objects;
 
 import static com.hijacker.MainActivity.BUFFER_SIZE;
 import static com.hijacker.MainActivity.PROCESS_AIRODUMP;
@@ -55,6 +56,7 @@ import static com.hijacker.MainActivity.path;
 import static com.hijacker.MainActivity.stop;
 
 public class InstallFirmwareDialog extends DialogFragment {
+    private static final String TAG = "HIJACKER/InstFirmware";
     static final String DEFAULT_UTIL_INSTALL_PATH = "/su/xbin";
     View dialogView;
     Shell shell;
@@ -65,6 +67,8 @@ public class InstallFirmwareDialog extends DialogFragment {
     CheckBox backup_cb;
 
     String selectedUtilPath = null;
+
+    String fs = null;
     @Override
     public Dialog onCreateDialog(Bundle savedInstanceState) {
         AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
@@ -145,6 +149,85 @@ public class InstallFirmwareDialog extends DialogFragment {
         restore(firm_location);
     }
 
+    boolean determineFS(){
+        // Determine whether we are running on a system-as-root device by examining /proc/mounts
+        if(fs!=null) return true;
+
+        shell.clearOutput();
+        shell.run("cat /proc/mounts");
+
+        try{
+            String str = shell.getShell_out().readLine();
+            while(str!=null){
+
+                if(str.split(" ")[1].equals("/system")){
+                    fs = "/system";
+                    return true;
+                }
+
+                str = shell.getShell_out().readLine();
+            }
+
+            // If the loop finished, '/system' was not found in /proc/mounts, so fs must be /
+            fs = "/";
+            return true;
+
+        }catch(IOException e){
+            Log.e(TAG, "Exception while reading from /proc/mounts", e);
+            Snackbar.make(dialogView, R.string.error_reading_mounts, Snackbar.LENGTH_LONG).show();
+        }
+
+        return false;
+    }
+    boolean verifyRW(){
+        // Make sure the filesystem has been remounted correctly
+        if(fs==null){
+            Log.e(TAG, "checkRW called but fs is null");
+            return false;
+        }
+
+        shell.clearOutput();
+        shell.run("cat /proc/mounts");
+
+        try{
+            String str = shell.getShell_out().readLine();
+            while(str!=null){
+
+                // str format: dev dest type properties
+                String[] split = str.split(" ");
+
+                if(split[1].equals(fs)){
+                    // split[3] is various properties separated by comma, first is ro/rw
+                    String[] props = split[3].split(",");
+
+                    // props[0] is either rw or ro
+                    if(props[0].equals("ro")){
+                        // fs is still mounted as read-only
+                        Log.e(TAG, fs + " appears to still be read-only: " + str);
+                        Snackbar.make(dialogView, R.string.error_remounting_system, Snackbar.LENGTH_LONG).show();
+                        return false;
+                    }else if(props[0].equals("rw")){
+                        return true;
+                    }else{
+                        Log.e(TAG, "Encountered unknown property while checking for fs rw/ro: " + props[0]);
+                        break;
+                    }
+                }
+
+                str = shell.getShell_out().readLine();
+            }
+
+            // Should never reach here
+            Log.e(TAG, "Unknown error occurred while checking for rw remount");
+            Snackbar.make(dialogView, R.string.unknown_error, Snackbar.LENGTH_LONG).show();
+        }catch(IOException e){
+            Log.e(TAG, "Exception while reading from /proc/mounts", e);
+            Snackbar.make(dialogView, R.string.error_reading_mounts, Snackbar.LENGTH_LONG).show();
+        }
+
+        return false;
+    }
+
     void install(String firm_location, String util_location){
         boolean start_airodump = false;
         if(Airodump.isRunning()){
@@ -162,10 +245,6 @@ public class InstallFirmwareDialog extends DialogFragment {
                 Toast.makeText(getActivity(), R.string.backup_created, Toast.LENGTH_SHORT).show();
             }
         }
-        shell.done();                   //clear any existing output
-        shell = Shell.getFreeShell();
-
-        shell.run(busybox + " mount -o rw,remount,rw /system");
 
         String fw_filename;
         if(devChipset.startsWith("4339")) {
@@ -173,32 +252,64 @@ public class InstallFirmwareDialog extends DialogFragment {
         }else if(devChipset.startsWith("4358")){
             fw_filename = "fw_bcmdhd_4358.bin";
         }else{
-            Log.e("HIJACKER/InstFirmware", "devChipset is " + devChipset + ", shouldn't be here");
+            Log.e(TAG, "devChipset is " + devChipset + ", shouldn't be here");
             return;
         }
+
+        // Determine whether we should remount / or /system
+        if(!determineFS()) return;
+
+        Log.d(TAG, "Remounting " + fs + " as rw...");
+
+        // Remount fs as rw
+        shell.run(busybox + " mount -o rw,remount " + fs);
+
+        // Verify that fs has been remounted successfully
+        if(!verifyRW()) return;
+
+        Log.d(TAG, fs + " has been remounted as rw successfully");
+
+        // Extract the files
         if(!extract(fw_filename, firm_location)){
-            Snackbar.make(dialogView, R.string.error_extracting_files, Snackbar.LENGTH_LONG).show();
+            Log.e(TAG, "Error extracting fw file in " + firm_location);
+            Snackbar.make(dialogView, R.string.error_extracting_firmware, Snackbar.LENGTH_LONG).show();
         }
         if(!extract("nexutil", util_location + "/nexutil")){
-            Snackbar.make(dialogView, R.string.error_extracting_files, Snackbar.LENGTH_LONG).show();
+            Log.e(TAG, "Error extracting nexutil in " + util_location);
+            Snackbar.make(dialogView, R.string.error_extracting_utility, Snackbar.LENGTH_LONG).show();
         }
-        shell.run(busybox + " mount -o ro,remount,ro /system");
+
+        // Remount fs as ro
+        shell.run(busybox + " mount -o ro,remount " + fs);
 
         Toast.makeText(getActivity(), R.string.installed_firm_util, Toast.LENGTH_SHORT).show();
         if(wifiManager!=null) wifiManager.setWifiEnabled(true);
 
         if(start_airodump) Airodump.startClean();
 
+        Log.d(TAG, "Firmware and utility successfully installed");
         dismissAllowingStateLoss();
     }
     void restore(String firm_location){
         WifiManager wifiManager = (WifiManager) getActivity().getApplicationContext().getSystemService(Context.WIFI_SERVICE);
         if(wifiManager!=null) wifiManager.setWifiEnabled(false);
 
-        shell.run(busybox + " mount -o rw,remount,rw /system");
-        shell.run("cp " + firm_backup_file + " " + firm_location);
-        shell.run(busybox + " mount -o ro,remount,ro /system");
+        // Determine whether we should remount / or /system
+        if(!determineFS()) return;
 
+        // Remount fs as rw
+        shell.run(busybox + " mount -o rw,remount " + fs);
+
+        // Verify that fs has been remounted successfully
+        if(!verifyRW()) return;
+
+        // Replace the firmware with the backup file
+        shell.run("cp " + firm_backup_file + " " + firm_location);
+
+        // Remount fs as ro
+        shell.run(busybox + " mount -o ro,remount " + fs);
+
+        Log.d(TAG, "Firmware successfully restored");
         Toast.makeText(getActivity(), R.string.restored, Toast.LENGTH_SHORT).show();
         if(wifiManager!=null) wifiManager.setWifiEnabled(true);
         dismissAllowingStateLoss();
@@ -229,7 +340,7 @@ public class InstallFirmwareDialog extends DialogFragment {
 
     class InitTask extends AsyncTask<Void, Void, Void>{
         String firmwarePath;
-        String paths[];
+        String[] paths;
         boolean backupExists;
         int defaultIndex = 0;
         @Override
@@ -244,7 +355,7 @@ public class InstallFirmwareDialog extends DialogFragment {
             firmwarePath = findFirmwarePath(shell);
 
             //Find paths to install nexutil
-            paths = System.getenv("PATH").split(":");
+            paths = Objects.requireNonNull(System.getenv("PATH")).split(":");
             for(int i=0;i<paths.length;i++){
                 if(paths[i].equals(DEFAULT_UTIL_INSTALL_PATH)){
                     //Default option is DEFAULT_UTIL_INSTALL_PATH

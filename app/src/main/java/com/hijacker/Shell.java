@@ -37,6 +37,7 @@ import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Random;
 
 import static com.hijacker.MainActivity.debug;
 
@@ -77,13 +78,19 @@ class Shell{
         if(!valid){
             throw new IllegalStateException("Shell has already been registered as free");
         }
-        String term_str = "ENDOFCLEAR" + System.currentTimeMillis();    //Use unique string
-        run("echo; echo " + term_str);
-        MainActivity.getLastLine(shell_out, term_str);      //This will read up to the last line and stop, effectively clearing shell_out
+        clearOutput();
         synchronized(free){
             if(!free.contains(this)) free.add(this);
             valid = false;
         }
+    }
+    void clearOutput(){
+        // Print a unique string
+        String term_str = "ENDOFCLEAR" + System.currentTimeMillis() + "-" + new Random().nextInt();
+        run("echo; echo " + term_str);
+
+        // Read up to the last known line
+        MainActivity.getLastLine(shell_out, term_str);
     }
     static synchronized Shell getFreeShell(){
         if(free.isEmpty()) return new Shell();
