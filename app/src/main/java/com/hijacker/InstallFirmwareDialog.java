@@ -154,21 +154,24 @@ public class InstallFirmwareDialog extends DialogFragment {
         if(fs!=null) return true;
 
         shell.clearOutput();
-        shell.run("cat /proc/mounts");
+        shell.run("cat /proc/mounts; echo; echo ENDOFCAT");
 
         try{
             String str = shell.getShell_out().readLine();
-            while(str!=null){
+            while(!str.equals("ENDOFCAT")){
+                String[] split = str.split(" ");
 
-                if(str.split(" ")[1].equals("/system")){
-                    fs = "/system";
-                    return true;
+                if(split.length >= 2){
+                    if(str.split(" ")[1].equals("/system")){
+                        fs = "/system";
+                        return true;
+                    }
                 }
 
                 str = shell.getShell_out().readLine();
             }
 
-            // If the loop finished, '/system' was not found in /proc/mounts, so fs must be /
+            // If the loop finished, '/system' was not found in /proc/mounts so fs must be /
             fs = "/";
             return true;
 
@@ -187,30 +190,31 @@ public class InstallFirmwareDialog extends DialogFragment {
         }
 
         shell.clearOutput();
-        shell.run("cat /proc/mounts");
+        shell.run("cat /proc/mounts; echo; echo ENDOFCAT");
 
         try{
             String str = shell.getShell_out().readLine();
-            while(str!=null){
-
-                // str format: dev dest type properties
+            while(!str.equals("ENDOFCAT")){
+                // str format: dev mount_point fs_type properties
                 String[] split = str.split(" ");
 
-                if(split[1].equals(fs)){
-                    // split[3] is various properties separated by comma, first is ro/rw
-                    String[] props = split[3].split(",");
+                if(split.length >= 4){
+                    if(split[1].equals(fs) && !str.startsWith("rootfs")){   // rootfs will always be mounted in / but that's not what we are looking for
+                        // split[3] is various properties separated by comma, first is ro/rw
+                        String[] props = split[3].split(",");
 
-                    // props[0] is either rw or ro
-                    if(props[0].equals("ro")){
-                        // fs is still mounted as read-only
-                        Log.e(TAG, fs + " appears to still be read-only: " + str);
-                        Snackbar.make(dialogView, R.string.error_remounting_system, Snackbar.LENGTH_LONG).show();
-                        return false;
-                    }else if(props[0].equals("rw")){
-                        return true;
-                    }else{
-                        Log.e(TAG, "Encountered unknown property while checking for fs rw/ro: " + props[0]);
-                        break;
+                        // props[0] is either rw or ro
+                        if(props[0].equals("ro")){
+                            // fs is still mounted as read-only
+                            Log.e(TAG, fs + " appears to still be read-only: " + str);
+                            Snackbar.make(dialogView, R.string.error_remounting_system, Snackbar.LENGTH_LONG).show();
+                            return false;
+                        }else if(props[0].equals("rw")){
+                            return true;
+                        }else{
+                            Log.e(TAG, "Encountered unknown property while checking for fs rw/ro: " + props[0]);
+                            break;
+                        }
                     }
                 }
 
@@ -218,7 +222,7 @@ public class InstallFirmwareDialog extends DialogFragment {
             }
 
             // Should never reach here
-            Log.e(TAG, "Unknown error occurred while checking for rw remount");
+            Log.e(TAG, "Did not find fs while verifying rw");
             Snackbar.make(dialogView, R.string.unknown_error, Snackbar.LENGTH_LONG).show();
         }catch(IOException e){
             Log.e(TAG, "Exception while reading from /proc/mounts", e);

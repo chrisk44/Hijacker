@@ -19,6 +19,8 @@
       <w>libnative</w>
       <w>manuf</w>
       <w>nexmon</w>
+      <w>nexutil</w>
+      <w>rootfs</w>
       <w>subthread</w>
       <w>sysroot</w>
       <w>textview</w>
