@@ -47,7 +47,7 @@ class Shell{
     private BufferedReader shell_out;
     private static final List<Shell> free = new ArrayList<>();
     private static int total=0;
-    private boolean valid = true;
+    private boolean valid = true, log = false;
     Shell(){
         total++;
         try{
@@ -72,6 +72,8 @@ class Shell{
         }
         this.shell_in.print(cmd + '\n');
         this.shell_in.flush();
+
+        if(log) Log.d("HIJACKER/ShellLog", cmd);
     }
     boolean isValid(){ return this.valid; }
     void done(){
@@ -79,6 +81,7 @@ class Shell{
             throw new IllegalStateException("Shell has already been registered as free");
         }
         clearOutput();
+        setLog(false);
         synchronized(free){
             if(!free.contains(this)) free.add(this);
             valid = false;
@@ -86,12 +89,13 @@ class Shell{
     }
     void clearOutput(){
         // Print a unique string
-        String term_str = "ENDOFCLEAR" + System.currentTimeMillis() + "-" + new Random().nextInt();
+        String term_str = "SHELL_OUTPUT_CLEAR-" + System.currentTimeMillis() + "-" + new Random().nextInt();
         run("echo; echo " + term_str);
 
         // Read up to the last known line
         MainActivity.getLastLine(shell_out, term_str);
     }
+    void setLog(boolean log){ this.log = log; }
     static synchronized Shell getFreeShell(){
         if(free.isEmpty()) return new Shell();
         else{

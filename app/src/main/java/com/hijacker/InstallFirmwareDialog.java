@@ -52,6 +52,7 @@ import static com.hijacker.MainActivity.devChipset;
 import static com.hijacker.MainActivity.findFirmwarePath;
 import static com.hijacker.MainActivity.firm_backup_file;
 import static com.hijacker.MainActivity.background;
+import static com.hijacker.MainActivity.iface;
 import static com.hijacker.MainActivity.path;
 import static com.hijacker.MainActivity.stop;
 
@@ -139,7 +140,7 @@ public class InstallFirmwareDialog extends DialogFragment {
     void attemptInstall(){
         String firm_location = firmwareView.getText().toString();
 
-        if(debug) Log.d("HIJACKER/InstFirm", "Installing firmware in " + firm_location + " and utility in " + selectedUtilPath);
+        if(debug) Log.d(TAG, "Installing firmware in " + firm_location + " and utility in " + selectedUtilPath);
         install(firm_location, selectedUtilPath);
     }
     void attemptRestore(){
@@ -239,8 +240,6 @@ public class InstallFirmwareDialog extends DialogFragment {
             stop(PROCESS_AIRODUMP);
         }
 
-        WifiManager wifiManager = (WifiManager) getActivity().getApplicationContext().getSystemService(Context.WIFI_SERVICE);
-        if(wifiManager!=null) wifiManager.setWifiEnabled(false);
         if(backup_cb.isChecked()){
             if(new File(firm_backup_file).exists()){
                 Toast.makeText(getActivity(), R.string.backup_exists, Toast.LENGTH_SHORT).show();
@@ -273,21 +272,32 @@ public class InstallFirmwareDialog extends DialogFragment {
 
         Log.d(TAG, fs + " has been remounted as rw successfully");
 
-        // Extract the files
-        if(!extract(fw_filename, firm_location)){
+        // Extract the files in 'path'
+        if(!extract(fw_filename, path)){
             Log.e(TAG, "Error extracting fw file in " + firm_location);
             Snackbar.make(dialogView, R.string.error_extracting_firmware, Snackbar.LENGTH_LONG).show();
         }
-        if(!extract("nexutil", util_location + "/nexutil")){
+        if(!extract("nexutil", path)){
             Log.e(TAG, "Error extracting nexutil in " + util_location);
             Snackbar.make(dialogView, R.string.error_extracting_utility, Snackbar.LENGTH_LONG).show();
         }
 
+        // Move the extracted files to their locations
+        shell.run("mv " + path + '/' + fw_filename + " " + firm_location);
+        shell.run("mv " + path + "/nexutil " + util_location + "/nexutil");
+
+        // chmod the firmware and nexutil
+        shell.run(busybox + " chmod 644 " + firm_location);
+        shell.run(busybox + " chmod 755 " + util_location + "/nexutil");
+
         // Remount fs as ro
         shell.run(busybox + " mount -o ro,remount " + fs);
 
+        // Reset WiFi
+        shell.run(busybox + " ifconfig " + iface + " down");
+        shell.run(busybox + " ifconfig " + iface + " up");
+
         Toast.makeText(getActivity(), R.string.installed_firm_util, Toast.LENGTH_SHORT).show();
-        if(wifiManager!=null) wifiManager.setWifiEnabled(true);
 
         if(start_airodump) Airodump.startClean();
 
@@ -307,8 +317,9 @@ public class InstallFirmwareDialog extends DialogFragment {
         // Verify that fs has been remounted successfully
         if(!verifyRW()) return;
 
-        // Replace the firmware with the backup file
+        // Replace the firmware with the backup file and chmod to 644
         shell.run("cp " + firm_backup_file + " " + firm_location);
+        shell.run(busybox + " chmod 644 " + firm_location);
 
         // Remount fs as ro
         shell.run(busybox + " mount -o ro,remount " + fs);
@@ -319,8 +330,8 @@ public class InstallFirmwareDialog extends DialogFragment {
         dismissAllowingStateLoss();
     }
 
-    boolean extract(String filename, String dest){
-        File f = new File(path, filename);      //no permissions to write at dest so extract at local directory and then move to target
+    boolean extract(String filename, String dir){
+        File f = new File(dir, filename);
         if(!f.exists()){
             try{
                 InputStream in = getResources().getAssets().open(filename);
@@ -332,8 +343,6 @@ public class InstallFirmwareDialog extends DialogFragment {
                 }
                 in.close();
                 out.close();
-                shell.run("mv " + path + '/' + filename + " " + dest);
-                shell.run("chmod 755 " + dest);
             }catch(IOException e){
                 Log.e("HIJACKER/InstFirm", "Exception copying from assets", e);
                 return false;
@@ -354,6 +363,7 @@ public class InstallFirmwareDialog extends DialogFragment {
         @Override
         protected Void doInBackground(Void... voids){
             shell = Shell.getFreeShell();
+            shell.setLog(true);
 
             //Find firmware path
             firmwarePath = findFirmwarePath(shell);
