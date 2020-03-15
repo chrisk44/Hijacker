@@ -148,7 +148,7 @@ class ST extends Device{
 
         upperLeft = this.mac + (this.alias==null ? "" : " (" + alias + ')');
         if(connectedTo!=null){
-            lowerLeft = paired + connectedTo.mac + " (" + connectedTo.essid + ")";
+            lowerLeft = paired + connectedTo.mac + " (" + connectedTo.getESSID() + ")";
         }else lowerLeft = not_connected;
         lowerRight = "PWR: " + this.pwr + " | Frames: " + this.getFrames();
         runInHandler(new Runnable(){
@@ -197,7 +197,9 @@ class ST extends Device{
     @NonNull
     @Override
     public String toString(){
-        return this.mac + (this.alias==null ? "" : " (" + this.alias + ')') + ((this.bssid==null) ? "" : " (" + getAPByMac(this.bssid).essid + ')');
+        return this.mac +
+                (this.alias==null ? "" : " (" + this.alias + ')') +
+                (this.bssid==null ? "" : " (" + getAPByMac(this.bssid).getESSID() + ')');
     }
     public String getExported(){
         //MAC                BSSID               PWR  Frames    Lost  Manufacturer - Probes

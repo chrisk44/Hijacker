@@ -4,6 +4,11 @@
 
     <!-- Toolbar -->
     <string name="stop_aireplay">Stop Aireplay</string>
+    <string name="copy_last_airodump_title">Copy last Airodump command</string>
+    <string name="copy_last_aireplay_title">Copy last Aireplay command</string>
+    <string name="copy_last_mdk_title">Copy last MDK command</string>
+    <string name="copy_last_reaver_title">Copy last Reaver command</string>
+    <string name="no_last_command_available">No last command available</string>
 
     <!-- Generic text -->
     <string name="incorrect_arch">Available only on ARM architectures, this is</string>
@@ -27,6 +32,7 @@
     <string name="size">Size</string>
     <string name="no_internet">No internet connection</string>
     <string name="unknown_error">An unknown error occurred</string>
+    <string name="copied_to_clipboard">Copied to clipboard</string>
 
     <!-- Navigation Drawer -->
     <string name="nav_airodump">Airodump</string>
@@ -225,7 +231,7 @@
     <string name="loading_custom_actions">Loading custom actions…</string>
     <string name="detecting_device_chipset">Detecting device chipset…</string>
     <string name="setting_up_tools">Setting up tools…</string>
-    <string name="init_rootFile">Initializing RootFile…</string>
+    <string name="init_rootFile_airodump">Initializing RootFile and Airodump…</string>
     <string name="init_threads">Initializing threads…</string>
     <string name="starting_pers_service">Starting persistence service…</string>
     <string name="checking_permissions">Checking permissions…</string>
@@ -324,7 +330,6 @@
     <string name="show_details" translatable="false">true</string>
     <string name="airOnStartup" translatable="false">true</string>
     <string name="debug" translatable="false">true</string>
-    <string name="delete_extra" translatable="false">true</string>
     <string name="always_cap" translatable="false">false</string>
     <string name="cont_on_fail" translatable="false">false</string>
     <string name="watchdog" translatable="false">true</string>
@@ -342,9 +347,6 @@
     <string name="prefix_title">Prefix</string>
     <string name="prefix_sum">Prefix for every command</string>
     <string name="prefix_desc">A prefix for every command that is run and needs monitor mode. (LD_PRELOAD)</string>
-
-    <string name="delete_extra_title">Delete extra cap files</string>
-    <string name="delete_extra_sum">Delete .csv and .netxml files created by airodump when saving to .cap file</string>
 
     <string name="always_cap_title">Save all packets</string>
     <string name="always_cap_sum">Create a .cap file every time airodump-ng starts</string>

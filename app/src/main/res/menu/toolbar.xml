@@ -28,6 +28,22 @@
           android:title="@string/export_title"
           app:showAsAction="never" />
 
+    <item android:id="@+id/copy_airodump"
+        android:title="@string/copy_last_airodump_title"
+        app:showAsAction="never" />
+
+    <item android:id="@+id/copy_aireplay"
+        android:title="@string/copy_last_aireplay_title"
+        app:showAsAction="never" />
+
+    <item android:id="@+id/copy_mdk"
+        android:title="@string/copy_last_mdk_title"
+        app:showAsAction="never" />
+
+    <item android:id="@+id/copy_reaver"
+        android:title="@string/copy_last_reaver_title"
+        app:showAsAction="never" />
+
     <item android:id="@+id/settings"
         android:title="@string/settings"
         app:showAsAction="never" />

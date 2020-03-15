@@ -86,7 +86,7 @@ public class IsolatedFragment extends Fragment{
         @Override
         public void run(){
             if(cont && is_ap !=null){
-                essid.setText(is_ap.essid);
+                essid.setText(is_ap.getESSID());
                 manuf.setText(is_ap.manuf);
                 mac.setText(is_ap.mac);
                 sec1.setText("Enc: " + is_ap.enc + " | Auth: " + is_ap.auth + " | Cipher: " + is_ap.cipher);

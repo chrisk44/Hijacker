@@ -40,6 +40,7 @@ import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
+import android.os.FileObserver;
 import android.os.Handler;
 import android.os.Looper;
 import android.preference.PreferenceManager;
@@ -57,7 +58,6 @@ import androidx.appcompat.widget.Toolbar;
 import android.util.JsonReader;
 import android.util.Log;
 import android.util.SparseArray;
-import android.view.Gravity;
 import android.view.KeyEvent;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -112,6 +112,7 @@ public class MainActivity extends AppCompatActivity{
     static boolean wpacheckcont = false;
     static boolean notif_on = false, background = false;    //notif_on: notification should be shown, background: the app is running in the background
     static int aireplay_running = 0, currentFragment = FRAGMENT_AIRODUMP;         //Set currentFragment in onResume of each Fragment
+    static String last_airodump = null, last_aireplay = null, last_mdk = null, last_reaver = null;
     //Filters
     static boolean show_ap = true, show_st = true, show_na_st = true, wpa = true, wep = true, opn = true;
     static boolean[] show_ch = {true, false, false, false, false, false, false, false, false, false, false, false, false, false, false};
@@ -143,7 +144,7 @@ public class MainActivity extends AppCompatActivity{
     static NotificationCompat.Builder notif, error_notif, handshake_notif;
     static NotificationManager mNotificationManager;
     static FragmentManager mFragmentManager;
-    static String path, data_path, actions_path, wl_path, cap_path, reaver_sess_path, firm_backup_file, manufDBFile, arch, busybox;             //path: App files path (ends with .../files)
+    static String path, cap_tmp_path, data_path, actions_path, wl_path, cap_path, reaver_sess_path, firm_backup_file, manufDBFile, arch, busybox;             //path: App files path (ends with .../files)
     static File aliases_file;
     static FileWriter aliases_in;
     static final HashMap<String, String> aliases = new HashMap<>();
@@ -158,7 +159,7 @@ public class MainActivity extends AppCompatActivity{
     static String iface, prefix, airodump_dir, aireplay_dir, aircrack_dir, mdk3bf_dir, mdk3dos_dir, reaver_dir, chroot_dir,
             enable_monMode, disable_monMode, custom_chroot_cmd;
     static int deauthWait, band;
-    static boolean show_notif, show_details, airOnStartup, debug, delete_extra, show_client_count,
+    static boolean show_notif, show_details, airOnStartup, debug, show_client_count,
             monstart, always_cap, cont_on_fail, watchdog, target_deauth, enable_on_airodump, update_on_startup;
 
     WatchdogTask watchdogTask;
@@ -360,7 +361,6 @@ public class MainActivity extends AppCompatActivity{
             show_details = Boolean.parseBoolean(getString(R.string.show_details));
             airOnStartup = Boolean.parseBoolean(getString(R.string.airOnStartup));
             debug = Boolean.parseBoolean(getString(R.string.debug));
-            delete_extra = Boolean.parseBoolean(getString(R.string.delete_extra));
             always_cap = Boolean.parseBoolean(getString(R.string.always_cap));
             chroot_dir = getString(R.string.chroot_dir);
             monstart = Boolean.parseBoolean(getString(R.string.monstart));
@@ -379,6 +379,7 @@ public class MainActivity extends AppCompatActivity{
             //Initialize paths
             publishProgress(getString(R.string.init_files));
             path = getFilesDir().getAbsolutePath();
+            cap_tmp_path = path + "/cap_tmp";
             data_path = Environment.getExternalStorageDirectory() + "/Hijacker";
             actions_path = data_path + "/actions";
             wl_path = data_path + "/wordlists";
@@ -387,6 +388,7 @@ public class MainActivity extends AppCompatActivity{
             firm_backup_file = data_path + "/fw_bcmdhd.orig.bin";
             manufDBFile = path + "/manuf.db";
             ArrayList<File> dirs = new ArrayList<>();
+            dirs.add(new File(cap_tmp_path));
             dirs.add(new File(data_path));
             dirs.add(new File(actions_path));
             dirs.add(new File(wl_path));
@@ -653,9 +655,10 @@ public class MainActivity extends AppCompatActivity{
                 reaver_dir = "reaver";
             }
 
-            //Initialize RootFile (requires root)
-            publishProgress(getString(R.string.init_rootFile));
+            //Initialize RootFile (requires root) and Airodump
+            publishProgress(getString(R.string.init_rootFile_airodump));
             RootFile.init();
+            Airodump.capFileObserver = new Airodump.CapFileObserver(cap_tmp_path, FileObserver.CREATE | FileObserver.MODIFY);
 
             //Initialize threads
             publishProgress(getString(R.string.init_threads));
@@ -947,7 +950,14 @@ public class MainActivity extends AppCompatActivity{
                 mDrawerLayout.openDrawer(GravityCompat.START);
 
             //Start
-            main();
+            runOne(enable_monMode);
+            stop(PROCESS_AIRODUMP);
+            stop(PROCESS_AIREPLAY);
+            stop(PROCESS_MDK_BF);
+            stop(PROCESS_MDK_DOS);
+            stop(PROCESS_AIRCRACK);
+            stop(PROCESS_REAVER);
+            if(airOnStartup) Airodump.startClean();
         }
     }
 
@@ -971,17 +981,6 @@ public class MainActivity extends AppCompatActivity{
         }catch(IOException e){
             Log.e("HIJACKER/FileProvider", "Exception copying from assets", e);
         }
-    }
-    public void main(){
-        runOne(enable_monMode);
-
-        stop(PROCESS_AIRODUMP);
-        stop(PROCESS_AIREPLAY);
-        stop(PROCESS_MDK_BF);
-        stop(PROCESS_MDK_DOS);
-        stop(PROCESS_AIRCRACK);
-        stop(PROCESS_REAVER);
-        if(airOnStartup) Airodump.startClean();
     }
 
     public static void _startAireplay(final String str){
@@ -1013,7 +1012,7 @@ public class MainActivity extends AppCompatActivity{
     public static void startAireplayWEP(AP ap){
         //Increase IV generation from ap mac to crack a wep network
         aireplay_running = AIREPLAY_WEP;
-        _startAireplay("--fakeauth 0 -a " + ap.mac + " -e " + ap.essid);
+        _startAireplay("--fakeauth 0 -a " + ap.mac + (ap.isHidden() ? "" : " -e " + ap.getESSID()));
         //_startAireplay("--arpreplay -b " + ap.mac);       //Aireplay tries to open a file at a read-only system
         //_startAireplay("--caffe-latte -b " + ap.mac);     //don't know where
     }
@@ -1024,6 +1023,7 @@ public class MainActivity extends AppCompatActivity{
             String cmd = "su -c " + prefix + " " + mdk3bf_dir + " " + iface + " b -m ";
             if(str!=null) cmd += str;
             if(debug) Log.d("HIJACKER/MDK3", cmd);
+            last_mdk = cmd;
             Runtime.getRuntime().exec(cmd);
         }catch(IOException e){ Log.e("HIJACKER/startBF", e.toString()); }
         last_action = System.currentTimeMillis();
@@ -1042,6 +1042,7 @@ public class MainActivity extends AppCompatActivity{
             String cmd = "su -c " + prefix + " " + mdk3dos_dir + " " + iface + " a -m";
             cmd += str==null ? "" : " -i " + str;
             if(debug) Log.d("HIJACKER/MDK3", cmd);
+            last_mdk = cmd;
             Runtime.getRuntime().exec(cmd);
         }catch(IOException e){ Log.e("HIJACKER/startAdos", e.toString()); }
         last_action = System.currentTimeMillis();
@@ -1201,7 +1202,6 @@ public class MainActivity extends AppCompatActivity{
         debug = pref.getBoolean("debug", debug);
         watchdog = pref.getBoolean("watchdog", watchdog);
         target_deauth = pref.getBoolean("target_deauth", target_deauth);
-        delete_extra = pref.getBoolean("delete_extra", delete_extra);
         try{
             always_cap = pref.getBoolean("always_cap", always_cap);
         }catch(ClassCastException e){
@@ -1258,10 +1258,11 @@ public class MainActivity extends AppCompatActivity{
                 return true;
 
             case R.id.reset:
-                stop(PROCESS_AIRODUMP);
+                boolean flag = Airodump.isRunning();
+                if(flag) stop(PROCESS_AIRODUMP);
                 Tile.clear();
                 Tile.onCountsChanged();
-                Airodump.startClean();
+                if(flag) Airodump.start();
                 return true;
 
             case R.id.stop_run:
@@ -1290,6 +1291,13 @@ public class MainActivity extends AppCompatActivity{
             case R.id.export:
                 new ExportDialog().show(mFragmentManager, "ExportDialog");
                 return true;
+
+            case R.id.copy_airodump:
+                if(last_airodump==null){
+                    Toast.makeText(this, getString(R.string.no_last_command_available), Toast.LENGTH_SHORT).show();
+                }else{
+                    copy(last_airodump, rootView);
+                }
 
             default:
                 return super.onOptionsItemSelected(item);
@@ -1341,7 +1349,7 @@ public class MainActivity extends AppCompatActivity{
     @Override
     public boolean onKeyDown(int keyCode, KeyEvent event){
         if(keyCode==KeyEvent.KEYCODE_BACK){
-            if(mDrawerLayout.isDrawerOpen(Gravity.START)){
+            if(mDrawerLayout.isDrawerOpen(GravityCompat.START)){
                 mDrawerLayout.closeDrawers();
             }else if(mFragmentManager.getBackStackEntryCount()>1){
                 mFragmentManager.popBackStackImmediate();
@@ -1565,14 +1573,15 @@ public class MainActivity extends AppCompatActivity{
     }
     static void copy(String str, View view){
         clipboard.setPrimaryClip(ClipData.newPlainText("label", str));
-        if(view!=null) Snackbar.make(view, "\"" + str + "\" copied to clipboard", Snackbar.LENGTH_SHORT).show();
+        if(view!=null)
+            Toast.makeText(view.getContext(), view.getContext().getString(R.string.copied_to_clipboard), Toast.LENGTH_SHORT).show();
     }
     static void notification(){
         if(notif_on && show_notif && notif!=null){
             if(show_details){
                 String str;
                 if(is_ap==null) str = "APs: " + Tile.i + " | STs: " + (Tile.tiles.size() - Tile.i);
-                else str = is_ap.essid + " | STs: " + (Tile.tiles.size() - Tile.i);
+                else str = is_ap.getESSID() + " | STs: " + (Tile.tiles.size() - Tile.i);
 
                 if(aireplay_running==AIREPLAY_DEAUTH) str += " | Aireplay deauthenticating...";
                 else if(aireplay_running==AIREPLAY_WEP) str += " | Aireplay replaying for wep...";
@@ -1768,11 +1777,6 @@ public class MainActivity extends AppCompatActivity{
             reader.close();
 
             if(!versionName.equals(latestName) && latestLink!=null){
-//                final UpdateConfirmDialog dialog = new UpdateConfirmDialog();
-//                dialog.newVersionName = latestName;
-//                dialog.link = latestLink;
-//                dialog.message = latestBody;
-
                 String text = getString(R.string.update_text) + "\n\n";
                 text += getString(R.string.latest_version) + " " + latestName + "\n";
                 text += getString(R.string.current_version) + " " + versionName + "\n";

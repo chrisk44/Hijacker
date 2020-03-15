@@ -63,6 +63,7 @@ import static com.hijacker.MainActivity.custom_chroot_cmd;
 import static com.hijacker.MainActivity.debug;
 import static com.hijacker.MainActivity.iface;
 import static com.hijacker.MainActivity.last_action;
+import static com.hijacker.MainActivity.last_reaver;
 import static com.hijacker.MainActivity.mFragmentManager;
 import static com.hijacker.MainActivity.monstart;
 import static com.hijacker.MainActivity.notification;
@@ -421,6 +422,7 @@ public class ReaverFragment extends Fragment{
                     out = new BufferedReader(new InputStreamReader(dc.getInputStream()));
                 }
                 if(debug) Log.d("HIJACKER/ReaverFragment", cmd);
+                last_reaver = cmd;
 
                 String buffer;
                 while(!isCancelled() && (buffer = out.readLine())!=null){

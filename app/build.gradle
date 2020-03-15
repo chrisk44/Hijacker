@@ -25,6 +25,7 @@ android {
             path "CMakeLists.txt"
         }
     }
+    ndkVersion = '21.0.6113669'
 }
 dependencies {
     implementation fileTree(include: ['*.jar'], dir: 'libs')

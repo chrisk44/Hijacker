@@ -191,8 +191,8 @@ class Tile {
     static Comparator<Tile> AP_ESSID = new Comparator<Tile>(){
         @Override
         public int compare(Tile o1, Tile o2){
-            if(sort_reverse) return ((AP)o2.device).essid.compareToIgnoreCase(((AP)o1.device).essid);
-            else return ((AP)o1.device).essid.compareToIgnoreCase(((AP)o2.device).essid);
+            if(sort_reverse) return ((AP)o2.device).getESSID().compareToIgnoreCase(((AP)o1.device).getESSID());
+            else return ((AP)o1.device).getESSID().compareToIgnoreCase(((AP)o2.device).getESSID());
         }
     };
     static Comparator<Tile> AP_BEACONS = new Comparator<Tile>(){

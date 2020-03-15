@@ -20,6 +20,8 @@ package com.hijacker;
 import android.app.FragmentManager;
 import android.app.FragmentTransaction;
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+
 import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
@@ -81,7 +83,8 @@ class AP extends Device{
     boolean isHidden = false;
     int ch, id, sec=UNKNOWN;
     private int beacons, data, ivs, total_beacons=0, total_data=0, total_ivs=0;
-    String essid, enc, cipher, auth;
+    private String essid;
+    String enc, cipher, auth;
     final ArrayList<ST> clients = new ArrayList<>();
     AP(String essid, String mac, String enc, String cipher, String auth,
        int pwr, int beacons, int data, int ivs, int ch) {
@@ -106,8 +109,8 @@ class AP extends Device{
         //For refresh
         this.update(this.essid, this.enc, this.cipher, this.auth, this.pwr, this.beacons, this.data, this.ivs, this.ch);
     }
-    void update(String essid, String enc, String cipher, String auth,
-                              int pwr, int beacons, int data, int ivs, int ch){
+    void update(@Nullable String essid, String enc, String cipher, String auth,
+                int pwr, int beacons, int data, int ivs, int ch){
 
         if(!toSort && sort!=SORT_NOSORT){
             switch(sort){
@@ -128,10 +131,13 @@ class AP extends Device{
             }
         }
 
-        this.essid = essid;
-        if(essid.equals("<hidden>") && !isHidden){
-            isHidden = true;
-            hidden++;
+        if(essid==null){
+            if(this.essid==null && !isHidden){
+                isHidden = true;
+                hidden++;
+            }
+        }else if(!essid.equals(this.essid)){
+                this.essid = essid;
         }
 
         if(beacons!=this.beacons || data!=this.data || ivs!=this.ivs || this.lastseen==0){
@@ -172,8 +178,11 @@ class AP extends Device{
                     break;
             }
         }
-        upperLeft = this.essid + (this.alias==null ? "" : " (" + alias + ')');
-        lowerRight = "PWR: " + this.pwr + " | SEC: " + this.enc + " | CH: " + this.ch + " | B:" + this.getBeacons() + " | D:" + this.getData();
+        upperLeft = this.getESSID() + (this.alias==null ? "" : " (" + alias + ')');
+        lowerRight = "PWR: " + this.pwr +
+                (this.enc.length()==0 ? "" : " | SEC: " + this.enc) +
+                (this.ch==-1 ? "" : " | CH: " + this.ch) +
+                " | B:" + this.getBeacons() + " | D:" + this.getData();
         runInHandler(new Runnable(){
             @Override
             public void run(){
@@ -200,7 +209,7 @@ class AP extends Device{
             Airodump.setAP(this);
             Airodump.setForWEP(true);
             Airodump.start();
-            if(!this.essid.equals("<hidden>")) startAireplayWEP(this);
+            if(essid!=null) startAireplayWEP(this);
             progress.setIndeterminate(true);
         }else if(this.sec == WPA || this.sec == WPA2){
             //wpa/wpa2
@@ -246,6 +255,8 @@ class AP extends Device{
         }
     }
 
+    String getESSID(){ return essid==null ? "<hidden>" : essid; }
+    boolean isHidden(){ return isHidden; }
     int getBeacons(){ return total_beacons + beacons; }
     int getData(){ return total_data + data; }
     int getIvs(){ return total_ivs + ivs; }
@@ -275,7 +286,7 @@ class AP extends Device{
     @NonNull
     @Override
     public String toString(){
-        return this.essid + (this.alias==null ? "" : " (" + this.alias + ')') + " (" + this.mac + ')';
+        return getESSID() + (alias==null ? "" : " (" + alias + ')') + " (" + mac + ')';
     }
     String getExported(){
         //MAC                 PWR  CH  Beacons    Data      #s   ENC  AUTH  CIPHER  Hidden  ESSID - Manufacturer
@@ -290,7 +301,7 @@ class AP extends Device{
         str += getFixed(auth, 6);
         str += getFixed(cipher, 8);
         str += getFixed(isHidden ? "Yes" : "No", 8);
-        str += "  " + essid  + (alias==null ? "" : " (" + alias + ')') + " - " + manuf;
+        str += "  " + getESSID()  + (alias==null ? "" : " (" + alias + ')') + " - " + manuf;
 
         return str;
     }

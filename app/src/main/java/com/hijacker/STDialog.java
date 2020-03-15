@@ -18,7 +18,6 @@ package com.hijacker;
  */
 
 import android.app.Dialog;
-import android.app.DialogFragment;
 import android.content.DialogInterface;
 import android.os.Bundle;
 import androidx.appcompat.app.AlertDialog;
@@ -29,7 +28,7 @@ import java.util.Locale;
 
 import static com.hijacker.MainActivity.getLastSeen;
 
-public class STDialog extends DialogFragment {
+public class STDialog extends DeviceDialog {
     ST st;
     TextView[] views = {null, null, null, null, null, null, null, null};
     @Override
@@ -64,7 +63,7 @@ public class STDialog extends DialogFragment {
         views[0].setText(st.mac);
 
         if(st.connectedTo==null) views[1].setText(R.string.not_connected);
-        else views[1].setText(st.connectedTo.mac + " (" + st.connectedTo.essid + ")");
+        else views[1].setText(st.connectedTo.mac + " (" + st.connectedTo.getESSID() + ")");
 
         views[2].setText(String.format(Locale.getDefault(), "%d", st.pwr));
         views[3].setText(String.format(Locale.getDefault(), "%d", st.getFrames()));

@@ -51,7 +51,7 @@ public class APDialog extends DeviceDialog {
         views[12] = view.findViewById(R.id.lastseen);
 
         builder.setView(view);
-        builder.setTitle(ap.essid);
+        builder.setTitle(ap.getESSID());
         builder.setNegativeButton(R.string.close, new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int which) {}
@@ -63,7 +63,7 @@ public class APDialog extends DeviceDialog {
         return this;
     }
     void onRefresh(){
-        views[0].setText(ap.essid);
+        views[0].setText(ap.getESSID());
         views[1].setText(ap.mac);
         views[2].setText(String.format(Locale.getDefault(), "%d", ap.ch));
         views[3].setText(String.format(Locale.getDefault(), "%d", ap.pwr));

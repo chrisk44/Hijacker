@@ -82,7 +82,6 @@ public class SettingsFragment extends PreferenceFragment {
                         pref_edit.putBoolean("show_details", Boolean.parseBoolean(getString(R.string.show_details)));
                         pref_edit.putBoolean("airOnStartup", Boolean.parseBoolean(getString(R.string.airOnStartup)));
                         pref_edit.putBoolean("debug", Boolean.parseBoolean(getString(R.string.debug)));
-                        pref_edit.putBoolean("delete_extra", Boolean.parseBoolean(getString(R.string.delete_extra)));
                         pref_edit.putBoolean("always_cap", Boolean.parseBoolean(getString(R.string.always_cap)));
                         pref_edit.putString("chroot_dir", getString(R.string.chroot_dir));
                         pref_edit.putBoolean("monstart", Boolean.parseBoolean(getString(R.string.monstart)));
