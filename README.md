@@ -11,6 +11,10 @@ The Nexmon firmware and management utility for **BCM4339** and **BCM4358** are a
 
 Root access is also necessary, as these tools need root to work.
 
+## Discontinued
+The app has been discontinued since a completely new iteration is currently under development. Since the new version will not be available for a long time, this repo remains open for recommendations and feature requests which will be implemented in the new version. Critical changes may still be provided, along with help for building, maintaining, and updating the code (though I wouldn't recomment it). Bug reports are also welcome as long as they come from the latest released version, since some of this code might be used in the new project. 
+
+
 ## Features
 ### Information Gathering
 * View a list of access points and stations (clients) around you (even hidden ones)
